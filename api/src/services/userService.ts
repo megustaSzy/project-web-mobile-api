@@ -10,6 +10,16 @@ export const userService = {
                 id: 'asc'
             }
         });
-    }
+    },
+
+    async getUserById(id: number) {
+        return prisma.tb_user.findUnique({
+            where: {
+                id
+            }
+        });
+    },
+
+    
 
 }
