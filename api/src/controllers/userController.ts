@@ -2,7 +2,7 @@ import { userService } from "../services/userService"
 import { Request, Response, NextFunction } from "express";
 import { createError } from "../utils/createError";
 
-export const getAllUsers = {
+export const userController = {
     
     async getAllUsers(req: Request, res: Response, next: NextFunction) {
         try {
