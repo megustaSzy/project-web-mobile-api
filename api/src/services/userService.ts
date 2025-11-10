@@ -21,6 +21,7 @@ export const userService = {
         });
     },
 
+    // GET by ID
     async getUserById(id: number) {
         return prisma.tb_user.findUnique({
             where: {
@@ -29,6 +30,7 @@ export const userService = {
         });
     },
 
+    // update user by ID
     async updateUserById(id: number, data: UserData) {
         
         const user = await prisma.tb_user.findUnique({
@@ -37,13 +39,29 @@ export const userService = {
             }
         });
 
-        if(!user) createError("user tidak ditemukan", 404);
+        if(!user) createError("id tidak ditemukan", 404);
 
         return prisma.tb_user.update({
             where: {
                 id
             },
             data
+        })
+    },
+
+    async deleteUserById(id: number) {
+        const user = await prisma.tb_user.delete({
+            where: {
+                id
+            }
+        });
+
+        if(!user) createError("id tidak ditemukan", 404);
+
+        return prisma.tb_user.delete({
+            where: {
+                id
+            }
         })
     }
 
