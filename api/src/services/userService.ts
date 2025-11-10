@@ -1,4 +1,5 @@
 import prisma from "../lib/prisma";
+import bcrypt from "bcryptjs";
 import { createError } from "../utils/createError";
 
 
@@ -41,12 +42,16 @@ export const userService = {
 
         if(!user) createError("id tidak ditemukan", 404);
 
+        if(data.password) {
+            data.password = await bcrypt.hash(data.password, 10);
+        }
+
         return prisma.tb_user.update({
             where: {
                 id
             },
             data
-        })
+        });
     },
 
     async deleteUserById(id: number) {
