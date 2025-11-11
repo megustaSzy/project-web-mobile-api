@@ -1,5 +1,6 @@
 import prisma from "../lib/prisma";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken"
 
 
 interface UserData {
@@ -35,6 +36,35 @@ export const authService = {
                 notelp: data.notelp || ""
             }
         });
+    },
+
+    async loginUser(email: string, password: string) {
+
+        const user = await prisma.tb_user.findUnique({
+            where: { email }
+        });
+
+        if (!user) {
+            throw new Error("email tidak ditemukan");
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            throw new Error("password salah");
+        }
+
+        const token = jwt.sign({
+            id: user.id,
+            email: user.email,
+            role: user.role,
+        },
+        process.env.JWT_SECRET!,
+        { expiresIn: "7d" }
+        );
+
+        const { password: _, ...safeUser } = user;
+
+        return { user: safeUser, token };
     },
 
 }
