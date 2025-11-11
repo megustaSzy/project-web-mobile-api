@@ -44,7 +44,7 @@ export default function NavBar() {
         {/* Tombol kanan (Log In / Sign In) */}
         <div className="hidden md:flex gap-3 ml-auto">
           <Link
-          href="/auth/log in"
+          href="/login"
           className={`px-4 py-2 rounded-full border transition-colors duration-300 ${
             scrolled
               ? "border-gray-700 text-gray-700 hover:bg-blue-600 hover:text-white hover:border-blue-600"
