@@ -13,7 +13,7 @@ export default function ChooseUs() {
       "
     >
       {/* Overlay transparan — di bawah konten */}
-      <div className="absolute inset-0 bg-white/90 z-0"></div>
+      <div className="absolute inset-0 bg-gradient-to-b from-[#f2f6f9] to-[#ffffff]/90 z-0"></div>
 
       {/* Ornamen titik-titik latar belakang */}
       <div className="absolute inset-0 flex justify-center items-center pointer-events-none opacity-20 z-0">

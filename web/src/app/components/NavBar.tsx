@@ -45,7 +45,7 @@ export default function NavBar() {
         <div className="hidden md:flex gap-3 ml-auto">
           <Link
           href="/auth/log in"
-          className={`px-6 py-2 rounded-full border transition-colors duration-300 ${
+          className={`px-4 py-2 rounded-full border transition-colors duration-300 ${
             scrolled
               ? "border-gray-700 text-gray-700 hover:bg-blue-600 hover:text-white hover:border-blue-600"
               : "border-white text-white hover:bg-blue-600 hover:text-white hover:border-blue-600"
@@ -56,7 +56,7 @@ export default function NavBar() {
 
         <Link
           href="/auth/register"
-          className={`px-6 py-2 rounded-full border transition-colors duration-300 ${
+          className={`px-4 py-2 rounded-full border transition-colors duration-300 ${
             scrolled
               ? "border-gray-700 text-gray-700 hover:bg-blue-600 hover:text-white hover:border-blue-600"
               : "border-white text-white hover:bg-blue-600 hover:text-white hover:border-blue-600"

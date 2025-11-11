@@ -5,6 +5,7 @@ import Footer from "./components/Footer";
 import Destination from "./components/Destination";
 import ChooseUs from "./components/ChooseUs";
 import Testimoni from "./components/Testimoni";
+import InputTestimoni from "./components/InputTestimoni";
 
 export default function Home() {
   return (
@@ -29,12 +30,14 @@ export default function Home() {
         <Testimoni />
       </section>
 
+      <section>
+        <InputTestimoni />
+      </section>
+
       {/* Search Card */}
       <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20">
         {/* <SearchCard /> */}
       </section>
-
-
 
       {/* Footer */}
       <Footer />

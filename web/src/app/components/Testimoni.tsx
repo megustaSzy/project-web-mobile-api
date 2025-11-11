@@ -27,7 +27,7 @@ export default function TestimoniSection({ user }) {
   ];
 
   return (
-    <section className="relative py-2 bg-white">
+    <section className="relative py-20 bg-gradient-to-b from-[#Ffffff] to-[#dbe7f9]">
       <div className="max-w-7xl mx-auto px-6 text-center">
         <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-12">
           Testimoni
@@ -37,7 +37,7 @@ export default function TestimoniSection({ user }) {
           {testimonials.map((item) => (
             <div
               key={item.id}
-              className="bg-gray-50 shadow-sm rounded-2xl p-6 text-left border border-gray-100 hover:shadow-md transition-all"
+              className="bg-white/90 shadow-md rounded-2xl p-6 text-left border border-gray-100 hover:shadow-lg transition-all backdrop-blur-sm"
             >
               {/* Icon kutipan */}
               <Quote className="text-gray-300 mb-2" size={28} />
