@@ -43,7 +43,7 @@ export default function DestinasiSection() {
     <section
       className="w-full py-24 bg-[url('/images/bgatas.png')] bg-cover bg-center bg-no-repeat"
     >
-      <div className="max-w-6xl mx-auto px-4 text-center bg-gradient-to-b from-blue-50/70 to-white/80 backdrop-blur-sm rounded-3xl p-8">
+      <div className="max-w-6xl mx-auto px-4 text-center p-8">
         <h2 className="text-3xl md:text-4xl font-extrabold mb-8 text-gray-800">
           Tujuan Wisata Favorit
         </h2>
