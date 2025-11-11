@@ -62,4 +62,24 @@ export const userController = {
             next(error)
         }
     },
+
+    async deleteUser(req: Request, res: Response, next: NextFunction) {
+        try {
+            const id = Number(req.params.id);
+
+            if(isNaN(id)) createError("id tidak valid", 400);
+
+            const currentUser = (req as any).user
+            if(currentUser.role !== "Admin") createError("akses ditolak", 403);
+
+            await userService.deleteUserById(id);
+
+            return res.status(200).json({
+                success: true,
+                message: "user berhasil dihapus"
+            })
+        } catch (error) {
+            next(error)
+        }
+    }
 }

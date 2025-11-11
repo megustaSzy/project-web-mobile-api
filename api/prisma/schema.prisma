@@ -19,7 +19,7 @@ model tb_user {
   email       String      @unique
   password    String    
   notelp      String
-  role        Role
+  role        Role        @default(User)
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt       
 }
