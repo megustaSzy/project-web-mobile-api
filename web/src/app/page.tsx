@@ -4,6 +4,7 @@ import Hero from "./components/Hero";
 import Footer from "./components/Footer";
 import Destination from "./components/Destination";
 import ChooseUs from "./components/ChooseUs";
+import Testimoni from "./components/Testimoni";
 
 export default function Home() {
   return (
@@ -24,10 +25,16 @@ export default function Home() {
         <ChooseUs />
       </section>
 
+      <section>
+        <Testimoni />
+      </section>
+
       {/* Search Card */}
       <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20">
         {/* <SearchCard /> */}
       </section>
+
+
 
       {/* Footer */}
       <Footer />
