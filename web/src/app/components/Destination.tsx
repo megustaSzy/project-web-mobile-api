@@ -49,18 +49,18 @@ export default function DestinasiSection() {
         </h2>
 
         {/* Kategori Filter */}
-        <div className="flex justify-center flex-wrap gap-3 mb-12">
+        <div className="flex justify-center flex-wrap gap-8 mb-12">
           {categories.map((cat) => {
             const isActive = activeCategory === cat;
             return (
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
-                className={`px-5 py-2 rounded-full border text-sm font-medium transition-all duration-300
+                className={`px-10 py-2 rounded-full border text-sm font-medium transition-all duration-300
                   ${
                     isActive
-                      ? "bg-blue-600 border-blue-600 text-white shadow-md scale-105"
-                      : "bg-white border-gray-300 text-gray-700 hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50"
+                      ? "bg-white border-gray-300 text-gray-700 hover:border-blue-500 hover:text-blue-50 hover:bg-blue-500 shadow-md scale-105"
+                      : "bg-white border-gray-300 text-gray-700 hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50 shadow-md scale-105"
                   }`}
               >
                 {cat}
