@@ -6,7 +6,6 @@ import userRoutes from "./routes/userRoute"
 import authRoutes from "./routes/authRoutes"
 import { errorHandler } from "./middlewares/errorHandler";
 
-
 const app = express();
 app.use(express.json());
 
