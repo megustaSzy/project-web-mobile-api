@@ -82,6 +82,7 @@ export default function TestimoniSection({ user }) {
           ))}
         </div>
       </div>
+      
     </section>
   );
 }
