@@ -11,7 +11,7 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
             success: false,
         });
     }
-
+    
     const token = bearerToken.split(" ")[1];
 
     try {
