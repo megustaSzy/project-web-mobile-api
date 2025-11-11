@@ -68,6 +68,6 @@ export const userService = {
                 id
             }
         })
-    }
+    },
 
 }
