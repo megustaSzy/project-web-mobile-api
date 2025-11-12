@@ -8,6 +8,14 @@ export const destinationService = {
                 id: 'asc'
             }
         });
+    },
+
+    async getDestinationById(id: number) {
+        return prisma.tb_destinations.findUnique({
+            where: {
+                id
+            }
+        });
     }
 
 }

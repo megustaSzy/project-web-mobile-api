@@ -1,9 +1,10 @@
 import { NextFunction, Request, Response } from "express"
 import { destinationService } from "../services/destinationService";
+import { createError } from "../utils/createError";
 
 
 export const destinationController = {
-    async getDestination(req: Request, res: Response, next: NextFunction) {
+    async getDestinations(req: Request, res: Response, next: NextFunction) {
         try {
             const destination = await destinationService.getAllDestinations();
             return res.status(200).json({
@@ -13,6 +14,26 @@ export const destinationController = {
 
         } catch (error) {
             next(error);
+        }
+    },
+
+    async getDestinationById(req: Request, res: Response, next: NextFunction) {
+        
+        try {
+            const id = Number(req.params.id);
+
+            if(isNaN(id)) createError("id tidak valid", 400);
+
+            const destination = await destinationService.getDestinationById(id);
+            if(!destination) createError("user tidak ditemukan", 400);
+
+            return res.status(200).json({
+                success: true,
+                destination
+            })
+
+        } catch (error) {
+            next(error)
         }
     }
 }
