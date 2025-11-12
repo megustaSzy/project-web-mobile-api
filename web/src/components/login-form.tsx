@@ -12,14 +12,34 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
 import Link from "next/link";
-
+import { useRouter } from "next/navigation"; // ✅ tambahkan import router
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const router = useRouter(); // ✅ inisialisasi router
+
+  // Fungsi ketika tombol login diklik
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Ambil nilai input (untuk simulasi dulu)
+    const email = (document.getElementById("email") as HTMLInputElement)?.value;
+    const password = (document.getElementById("password") as HTMLInputElement)
+      ?.value;
+
+    // Validasi sederhana
+    if (!email || !password) {
+      alert("Masukkan email dan password!");
+      return;
+    }
+
+    // ✅ Arahkan user ke halaman Hero Section (ubah '/' sesuai lokasi Hero kamu)
+    router.push("/");
+  };
+
   return (
     <section
       className={cn(
@@ -31,17 +51,15 @@ export function LoginForm({
       {/* Card Form */}
       <Card className="w-full max-w-md shadow-lg border border-gray-100 rounded-2xl bg-white/80 backdrop-blur">
         <CardHeader className="text-center pb-2 flex flex-col items-center">
-          {/* Logo di dalam card */}
-         <Image
-          src="/images/logo.png"
-          alt="Logo"
-          width={61}
-          height={61}
-          className="w-16 h-16 object-contain mb-3"
-        />
-        
+          <Image
+            src="/images/logo.png"
+            alt="Logo"
+            width={61}
+            height={61}
+            className="w-16 h-16 object-contain mb-3"
+          />
           <CardTitle className="text-2xl font-bold text-gray-800">
-           Login Akun
+            Login Akun
           </CardTitle>
           <CardDescription className="text-gray-500">
             Masuk ke akun kamu untuk melanjutkan
@@ -49,7 +67,7 @@ export function LoginForm({
         </CardHeader>
 
         <CardContent>
-          <form className="space-y-5">
+          <form onSubmit={handleLogin} className="space-y-5">
             {/* Email */}
             <div>
               <label
@@ -76,7 +94,10 @@ export function LoginForm({
                 >
                   Password
                 </label>
-                <Link href="/forgot-password" className="text-sm text-blue-600 hover:underline">
+                <Link
+                  href="/forgot-password"
+                  className="text-sm text-blue-600 hover:underline"
+                >
                   Forgot?
                 </Link>
               </div>
@@ -118,7 +139,10 @@ export function LoginForm({
             {/* Signup link */}
             <p className="text-center text-sm text-gray-500 pt-2">
               Don’t have an account?{" "}
-              <a href="/signup" className="text-blue-600 hover:underline font-medium">
+              <a
+                href="/signup"
+                className="text-blue-600 hover:underline font-medium"
+              >
                 Sign up
               </a>
             </p>
