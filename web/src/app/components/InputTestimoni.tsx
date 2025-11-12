@@ -63,8 +63,8 @@ export default function CeritaPage() {
           <Image
             src="/images/test.png"
             alt="Traveler"
-            width={400}
-            height={400}
+            width={700}
+            height={700}
             className="object-contain"
           />
         </div>
