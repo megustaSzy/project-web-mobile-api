@@ -81,7 +81,7 @@ export default function ForgotPasswordForm() {
                 kami telah mengirimkan link untuk mereset password.
               </p>
               <a
-                href="/login"
+                href="/reset-password"
                 className="text-blue-600 text-sm hover:underline font-medium"
               >
                 Kembali ke Login
