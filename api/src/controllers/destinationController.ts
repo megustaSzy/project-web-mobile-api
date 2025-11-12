@@ -39,6 +39,7 @@ export const destinationController = {
 
     async addDestination(req: Request, res: Response, next: NextFunction) {
         try {
+
             const destination = await destinationService.addDestination(req.body);
 
             return res.status(201).json({
@@ -50,5 +51,9 @@ export const destinationController = {
         } catch (error) {
             next(error)
         }
+    },
+
+    async updateDestination(req: Request, res: Response, next: NextFunction) {
+        
     }
 }

@@ -1,4 +1,5 @@
 import prisma from "../lib/prisma";
+import { createError } from "../utils/createError";
 
 interface DestinationData{
     name: string,
@@ -49,6 +50,22 @@ export const destinationService = {
         });
     },
 
+    async editDestination(id: number, data: DestinationData) {
+        const destination = await prisma.tb_destinations.findUnique({
+            where: {
+                id
+            }
+        });
 
+        if(!destination) createError("id tidak ditemukan", 404);
+
+        return prisma.tb_destinations.update({
+            where: {
+                id
+            },
+            data
+        })
+
+    }
 
 }

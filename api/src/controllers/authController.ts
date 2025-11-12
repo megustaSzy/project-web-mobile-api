@@ -21,7 +21,6 @@ export const authController = {
         }
     },
 
-
     async login(req: Request, res: Response) {
         try {
             const { email, password } = req.body;
@@ -59,7 +58,6 @@ export const authController = {
         }
     },
 
-
     async refreshToken(req: Request, res: Response) {
         try {
             const token = req.cookies.refreshToken;
@@ -85,7 +83,6 @@ export const authController = {
             });
         }
     },
-
 
     async logout(req: Request, res: Response) {
         try {
