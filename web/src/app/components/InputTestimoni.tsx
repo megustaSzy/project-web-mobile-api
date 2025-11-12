@@ -3,7 +3,7 @@ import Image from "next/image";
 
 export default function CeritaPage() {
   return (
-    <section className="relative flex flex-col items-center justify-center min-h-screen overflow-hidden">
+    <section className="relative flex flex-col items-center justify-center min-h-screen overflow-hidden pb-32">
       {/* Background gradasi */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-100 via-blue-200 to-blue-300"></div>
 
@@ -18,7 +18,7 @@ export default function CeritaPage() {
       </div>
 
       {/* Judul & deskripsi di tengah atas */}
-      <div className="relative z-10 text-center mb-10 px-6">
+      <div className="relative z-10 text-center mb-10 px-6 pt-28">
         <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900">
           Ceritakan Momen Serumumu
         </h2>
