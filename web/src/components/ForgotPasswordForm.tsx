@@ -11,20 +11,32 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import Image from "next/image";
-
+import { useRouter } from "next/navigation"; // ✅ untuk navigasi antar halaman
 
 export default function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
-  const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // 🔹 Simulasi database user yang terdaftar
+  const registeredEmails = ["test@example.com", "faiz@gmail.com", "user123@mail.com"];
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email) return alert("Masukkan email Anda!");
+    setLoading(true);
 
-    // simulasi validasi email
-    if (email === "") return alert("Masukkan email Anda!");
-    setSubmitted(true);
-
-    // nanti di backend, kamu bisa cek apakah email ini terdaftar di database
+    // 🔹 Simulasi pengecekan ke database
+    setTimeout(() => {
+      if (registeredEmails.includes(email.trim().toLowerCase())) {
+        // ✅ Jika email terdaftar → arahkan ke halaman reset password
+        router.push("/reset-password");
+      } else {
+        // ❌ Jika tidak terdaftar → tampilkan pesan error
+        alert("Email tidak valid atau belum terdaftar.");
+      }
+      setLoading(false);
+    }, 1000);
   };
 
   return (
@@ -47,47 +59,33 @@ export default function ForgotPasswordForm() {
         </CardHeader>
 
         <CardContent>
-          {!submitted ? (
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Email
-                </label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  className="w-full"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-
-              <Button
-                type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition-all duration-200"
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Kirim Link Reset
-              </Button>
-            </form>
-          ) : (
-            <div className="text-center space-y-4 py-6">
-              <p className="text-gray-600 text-sm">
-                Jika email <span className="font-semibold">{email}</span> terdaftar,
-                kami telah mengirimkan link untuk mereset password.
-              </p>
-              <a
-                href="/reset-password"
-                className="text-blue-600 text-sm hover:underline font-medium"
-              >
-                Kembali ke Login
-              </a>
+                Email
+              </label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                className="w-full"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
             </div>
-          )}
+
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition-all duration-200"
+            >
+              {loading ? "Memeriksa..." : "Kirim Link Reset"}
+            </Button>
+          </form>
         </CardContent>
       </Card>
     </section>
