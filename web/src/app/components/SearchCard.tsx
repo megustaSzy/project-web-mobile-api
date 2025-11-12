@@ -139,6 +139,7 @@ export default function SearchCard() {
             <input
               type="number"
               min="1"
+              max="16"
               value={people}
               onChange={(e) => setPeople(Number(e.target.value))}
               className="text-gray-700 text-sm bg-transparent outline-none w-full"
