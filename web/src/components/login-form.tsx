@@ -32,8 +32,8 @@ export function LoginForm({
          <Image
           src="/images/logo.png"
           alt="Logo"
-          width={60}
-          height={60}
+          width={61}
+          height={61}
           className="w-16 h-16 object-contain mb-3"
         />
           <CardTitle className="text-2xl font-bold text-gray-800">
