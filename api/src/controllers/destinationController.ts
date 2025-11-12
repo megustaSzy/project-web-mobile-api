@@ -35,5 +35,20 @@ export const destinationController = {
         } catch (error) {
             next(error)
         }
+    },
+
+    async addDestination(req: Request, res: Response, next: NextFunction) {
+        try {
+            const destination = await destinationService.addDestination(req.body);
+
+            return res.status(201).json({
+                message: "berhasil menambahkan pantai",
+                success: true,
+                destination
+            })
+
+        } catch (error) {
+            next(error)
+        }
     }
 }

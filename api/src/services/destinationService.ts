@@ -28,13 +28,14 @@ export const destinationService = {
     },
 
     async addDestination(data: DestinationData) {
+
         const existingDestination = await prisma.tb_destinations.findFirst({
             where: {
                 name: data.name
             }
         });
 
-        if(!existingDestination) throw new Error("nama pantai sudah ada");
+        if(existingDestination) throw new Error("nama pantai sudah ada");
 
         return prisma.tb_destinations.create({
             data: {
@@ -46,6 +47,8 @@ export const destinationService = {
                 category: data.category
             }
         });
-    }
+    },
+
+
 
 }

@@ -12,6 +12,7 @@ export const authController = {
                 success: true,
                 user
             });
+            
         } catch (error: any) {
             return res.status(400).json({
                 message: error.message,
