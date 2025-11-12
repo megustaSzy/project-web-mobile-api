@@ -60,21 +60,21 @@ export default function Footer() {
           <h3 className="font-semibold mb-4 text-white">Contact Info</h3>
           <ul className="space-y-3 text-slate-300 text-sm">
             <li className="flex items-start gap-3">
-              <img src="/icons/whatsapp.svg" alt="WhatsApp" className="w-5 h-5 mt-0.5" />
+              <img src="/images/8.png" alt="WhatsApp" className="w-5 h-5 mt-0.5" />
               <div>
                 <p>Whatsapp</p>
                 <p className="font-semibold text-white">+62851 0088 9876</p>
               </div>
             </li>
             <li className="flex items-start gap-3">
-              <img src="/icons/email.svg" alt="Email" className="w-5 h-5 mt-0.5" />
+              <img src="/images/9.png" alt="Email" className="w-5 h-5 mt-0.5" />
               <div>
                 <p>Email</p>
                 <p className="font-semibold text-white">LamiGoLampung.com</p>
               </div>
             </li>
             <li className="flex items-start gap-3">
-              <img src="/icons/phone.svg" alt="Telpon" className="w-5 h-5 mt-0.5" />
+              <img src="/images/10.png" alt="Telpon" className="w-5 h-5 mt-0.5" />
               <div>
                 <p>Telpon</p>
                 <p className="font-semibold text-white">0876 8800 9876</p>
