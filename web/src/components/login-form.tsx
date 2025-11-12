@@ -13,6 +13,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+import Link from "next/link";
+
+
 export function LoginForm({
   className,
   ...props
@@ -73,12 +76,9 @@ export function LoginForm({
                 >
                   Password
                 </label>
-                <a
-                  href="#"
-                  className="text-sm text-blue-600 hover:underline"
-                >
+                <Link href="/forgot-password" className="text-sm text-blue-600 hover:underline">
                   Forgot?
-                </a>
+                </Link>
               </div>
               <Input
                 id="password"
