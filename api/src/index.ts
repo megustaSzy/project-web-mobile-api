@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import cors from "cors";
+import cookieParser from "cookie-parser"; // ✅ tambahkan ini
 
 dotenv.config();
 
@@ -9,15 +10,17 @@ import authRoutes from "./routes/authRoutes";
 import { errorHandler } from "./middlewares/errorHandler";
 
 const app = express();
+
 app.use(express.json());
+app.use(cors({
+  origin: "http://localhost:5173",   // sesuaikan dengan frontend-mu
+  credentials: true,                 // ✅ agar cookie bisa dikirim
+}));
 
-app.use(cors());
-
+app.use(cookieParser()); // ✅ daftarkan middleware cookie-parser
 
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
-
-
 
 app.use(errorHandler);
 
