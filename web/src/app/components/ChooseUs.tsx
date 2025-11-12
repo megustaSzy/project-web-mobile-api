@@ -63,22 +63,34 @@ export default function ChooseUs() {
                 value: "89%",
                 desc: "Rating — Tunjukkan rating bahagiamu dari pengalaman seru",
               },
-            ].map((item, i) => (
-              <div
-                key={i}
-                className="flex items-center bg-white rounded-2xl shadow-sm p-4 border border-gray-100"
-              >
-                <img
-                  src={item.img}
-                  alt={item.desc}
-                  className="w-12 h-12 mr-4"
-                />
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900">{item.value}</h3>
-                  <p className="text-gray-800 text-sm leading-tight">{item.desc}</p>
+            ].map((item, i) => {
+              // Pisahkan title dan deskripsi dengan "—"
+              const [title, description] = item.desc.split("—");
+
+              return (
+                <div
+                  key={i}
+                  className="flex items-center bg-white rounded-2xl shadow-sm p-4 border border-gray-100"
+                >
+                  <img
+                    src={item.img}
+                    alt={title.trim()}
+                    className="w-12 h-12 mr-4"
+                  />
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900">
+                      {item.value}
+                    </h3>
+                    <p className="text-gray-800 text-sm leading-tight">
+                      <span className="font-semibold block">
+                        {title.trim()}
+                      </span>
+                      <span>{description.trim()}</span>
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>

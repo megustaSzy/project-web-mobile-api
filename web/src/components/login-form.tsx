@@ -1,9 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FcGoogle } from "react-icons/fc"
+import { FcGoogle } from "react-icons/fc";
 import {
   Card,
   CardContent,
@@ -19,33 +20,33 @@ export function LoginForm({
   return (
     <section
       className={cn(
+        "flex flex-col items-center justify-center min-h-screen px-4 to-white",
         className
       )}
       {...props}
     >
-      {/* Judul Halaman */}
-      <div className="text-center mb-10">
-        <h1 className="text-4xl font-bold text-gray-800 mb-2">
-          Welcome Back 
-        </h1>
-        <p className="text-gray-500">
-          Silakan login untuk melanjutkan ke dashboard kamu
-        </p>
-      </div>
-
       {/* Card Form */}
-      <Card className="w-full max-w-lg shadow-md border border-gray-200 rounded-2xl bg-white">
-        <CardHeader className="text-center pb-2">
-          <CardTitle className="text-2xl font-semibold text-gray-800">
-            Login to Your Account
+      <Card className="w-full max-w-md shadow-lg border border-gray-100 rounded-2xl bg-white/80 backdrop-blur">
+        <CardHeader className="text-center pb-2 flex flex-col items-center">
+          {/* Logo di dalam card */}
+         <Image
+          src="/images/logo.png"
+          alt="Logo"
+          width={61}
+          height={61}
+          className="w-16 h-16 object-contain mb-3"
+        />
+          <CardTitle className="text-2xl font-bold text-gray-800">
+            Welcome Back
           </CardTitle>
           <CardDescription className="text-gray-500">
-            Please enter your email and password below
+            Masuk ke akun kamu untuk melanjutkan
           </CardDescription>
         </CardHeader>
 
         <CardContent>
-          <form className="space-y-6">
+          <form className="space-y-5">
+            {/* Email */}
             <div>
               <label
                 htmlFor="email"
@@ -62,6 +63,7 @@ export function LoginForm({
               />
             </div>
 
+            {/* Password */}
             <div>
               <div className="flex justify-between items-center mb-1">
                 <label
@@ -86,25 +88,36 @@ export function LoginForm({
               />
             </div>
 
+            {/* Tombol Login */}
             <Button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition-all duration-200"
             >
               Login
             </Button>
 
+            {/* Divider */}
+            <div className="relative">
+              <hr className="border-gray-200" />
+              <span className="absolute left-1/2 -translate-x-1/2 -top-2 bg-white px-2 text-gray-400 text-sm">
+                or
+              </span>
+            </div>
+
+            {/* Tombol Google */}
             <Button
               variant="outline"
               type="button"
-              className="w-full border-gray-300 hover:bg-gray-100 py-2 rounded-lg"
+              className="w-full border-gray-300 hover:bg-gray-50 py-2 rounded-lg flex items-center justify-center gap-2"
             >
               <FcGoogle size={20} />
-                Sign up with Google
+              Sign in with Google
             </Button>
 
+            {/* Signup link */}
             <p className="text-center text-sm text-gray-500 pt-2">
               Don’t have an account?{" "}
-              <a href="/signup" className="text-blue-600 hover:underline">
+              <a href="/signup" className="text-blue-600 hover:underline font-medium">
                 Sign up
               </a>
             </p>
