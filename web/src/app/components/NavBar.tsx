@@ -55,7 +55,7 @@ export default function NavBar() {
         </Link>
 
         <Link
-          href="/auth/register"
+          href="/signup"
           className={`px-4 py-2 rounded-full border transition-colors duration-300 ${
             scrolled
               ? "border-gray-700 text-gray-700 hover:bg-blue-600 hover:text-white hover:border-blue-600"

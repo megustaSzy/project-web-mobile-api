@@ -3,6 +3,7 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { FcGoogle } from "react-icons/fc"
 import {
   Card,
   CardContent,
@@ -97,12 +98,13 @@ export function LoginForm({
               type="button"
               className="w-full border-gray-300 hover:bg-gray-100 py-2 rounded-lg"
             >
-              Continue with Google
+              <FcGoogle size={20} />
+                Sign up with Google
             </Button>
 
             <p className="text-center text-sm text-gray-500 pt-2">
               Don’t have an account?{" "}
-              <a href="#" className="text-blue-600 hover:underline">
+              <a href="/signup" className="text-blue-600 hover:underline">
                 Sign up
               </a>
             </p>
