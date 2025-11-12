@@ -29,13 +29,14 @@ export function LoginForm({
       <Card className="w-full max-w-md shadow-lg border border-gray-100 rounded-2xl bg-white/80 backdrop-blur">
         <CardHeader className="text-center pb-2 flex flex-col items-center">
           {/* Logo di dalam card */}
-          <Image
-            src="/images/logo.png"
-            alt="Logo"
-            width={60}
-            height={60}
-            className="w-16 h-16 object-contain mb-3"
-          />
+         <Image
+          src="/images/logo.png"
+          alt="Logo"
+          width={61}
+          height={61}
+          className="w-16 h-16 object-contain mb-3"
+        />
+        
           <CardTitle className="text-2xl font-bold text-gray-800">
            Login Akun
           </CardTitle>
