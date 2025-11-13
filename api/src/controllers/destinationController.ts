@@ -53,7 +53,26 @@ export const destinationController = {
         }
     },
 
-    async updateDestination(req: Request, res: Response, next: NextFunction) {
-        
-    }
+    // async updateDestination(req: Request, res: Response, next: NextFunction) {
+    //     try {
+    //       const id = Number(req.params.id);
+          
+    //       if(isNaN(id)) createError("id tidak valid", 400);
+
+    //       const 
+
+    //     } catch (error) {
+    //         next(error)
+    //     }
+    // }
+
+    // async deleteDestination(req: Request, res: Response, next: NextFunction) {
+    //     try {
+    //         const id = Number(req.params.id);
+
+
+    //     } catch (error) {
+            
+    //     }
+    // }
 }

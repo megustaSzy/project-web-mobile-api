@@ -66,6 +66,22 @@ export const destinationService = {
             data
         })
 
+    },
+
+    async deleteDestinationById(id: number) {
+        const destinationId = await prisma.tb_destinations.findFirst({
+            where: {
+                id
+            }
+        });
+
+        if(!destinationId) createError("id tidak ditemukan", 404);
+
+        return prisma.tb_destinations.delete({
+            where: {
+                id
+            }
+        })
     }
 
 }
