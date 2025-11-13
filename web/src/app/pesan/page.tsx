@@ -56,7 +56,7 @@ export default function PesanPage() {
   return (
     <section className="relative w-full min-h-screen bg-gradient-to-b from-blue-100 via-white to-blue-50 flex items-center justify-center py-20 px-4">
       {/* Background pattern */}
-      <div className="absolute inset-0 bg-[url('/images/destinasi.svg')] bg-cover bg-center opacity-10" />
+      <div className="absolute inset-0 bg-[url('/images/destinasi.svg')] bg-cover bg-center opacity-3" />
 
       <div className="relative z-10 w-full max-w-xl bg-white/70 backdrop-blur-xl border border-white/30 shadow-lg rounded-3xl p-8 md:p-10">
         {selectedDest ? (
