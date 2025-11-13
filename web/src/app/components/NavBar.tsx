@@ -16,30 +16,20 @@ export default function NavBar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // 🔹 Cek token di localStorage dan ambil profil user dari API
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) return;
 
     setIsLoggedIn(true);
 
-    // 🔹 Ambil data profil user
-    fetch("http://10.93.86.50:3001/api/auth/me", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+    fetch("http://10.93.86.50:3001/api/auth/login", {
+      headers: { Authorization: `Bearer ${token}` },
     })
       .then(async (res) => {
-        if (!res.ok) {
-          const text = await res.text();
-          throw new Error(text || "Gagal mengambil data profil");
-        }
+        if (!res.ok) throw new Error(await res.text());
         return res.json();
       })
       .then((data) => {
-        // 🔹 Pastikan path avatar benar
         const avatarUrl = data.avatar
           ? data.avatar.startsWith("http")
             ? data.avatar
@@ -51,13 +41,9 @@ export default function NavBar() {
           avatar: avatarUrl,
         });
       })
-      .catch((err) => {
-        console.error("Gagal ambil profil:", err);
-        setUserData({ name: "User", avatar: "/images/profile.jpg" });
-      });
+      .catch(() => setUserData({ name: "User", avatar: "/images/profile.jpg" }));
   }, []);
 
-  // 🔹 Fungsi Logout
   const handleLogout = () => {
     localStorage.removeItem("token");
     setIsLoggedIn(false);
@@ -73,39 +59,28 @@ export default function NavBar() {
       }`}
     >
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center h-16">
-        {/* Logo Kiri */}
+        {/* Logo */}
         <div className="flex items-center gap-2">
           <Image src="/images/logo.png" alt="Logo" width={40} height={40} />
         </div>
 
-        {/* Navigation Tengah */}
+        {/* Menu tengah */}
         <nav
           className={`hidden md:flex absolute left-1/2 transform -translate-x-1/2 gap-8 transition-colors duration-300 ${
             scrolled ? "text-gray-800" : "text-white"
           }`}
         >
-          <Link href="/" className="hover:text-blue-500 transition">
-            Home
-          </Link>
-          <Link href="#about" className="hover:text-blue-500 transition">
-            About Us
-          </Link>
-          <Link href="#tours" className="hover:text-blue-500 transition">
-            Tour List
-          </Link>
-          <Link href="#tickets" className="hover:text-blue-500 transition">
-            My Ticket
-          </Link>
-          <Link href="#contact" className="hover:text-blue-500 transition">
-            Contact
-          </Link>
+          <Link href="/" className="hover:text-blue-500">Home</Link>
+          <Link href="#about" className="hover:text-blue-500">About Us</Link>
+          <Link href="#tours" className="hover:text-blue-500">Tour List</Link>
+          <Link href="#tickets" className="hover:text-blue-500">My Ticket</Link>
+          <Link href="#contact" className="hover:text-blue-500">Contact</Link>
         </nav>
 
-        {/* Tombol kanan */}
+        {/* Profil & Login */}
         <div className="hidden md:flex gap-3 ml-auto items-center relative">
           {isLoggedIn ? (
             <div className="flex items-center gap-2 group relative cursor-pointer">
-              {/* 🔹 Gambar Profil */}
               <Image
                 src={userData.avatar || "/images/profile.jpg"}
                 alt="Profile"
@@ -113,7 +88,6 @@ export default function NavBar() {
                 height={35}
                 className="rounded-full border border-gray-300"
               />
-              {/* 🔹 Nama User */}
               <span
                 className={`text-sm font-medium ${
                   scrolled ? "text-gray-800" : "text-white"
@@ -122,7 +96,7 @@ export default function NavBar() {
                 {userData.name || "User"}
               </span>
 
-              {/* 🔹 Dropdown Profile */}
+              {/* Dropdown */}
               <div className="absolute right-0 top-10 w-40 bg-white rounded-lg shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-200">
                 <Link
                   href="/profil"
@@ -143,8 +117,8 @@ export default function NavBar() {
               href="/login"
               className={`px-3 py-1 text-sm rounded-full border transition-colors duration-300 ${
                 scrolled
-                  ? "border-gray-700 text-gray-700 hover:bg-blue-600 hover:text-white hover:border-blue-600"
-                  : "border-white text-white hover:bg-blue-600 hover:text-white hover:border-blue-600"
+                  ? "border-gray-700 text-gray-700 hover:bg-blue-600 hover:text-white"
+                  : "border-white text-white hover:bg-blue-600 hover:text-white"
               }`}
             >
               Login
@@ -152,7 +126,7 @@ export default function NavBar() {
           )}
         </div>
 
-        {/* Tombol Mobile Menu */}
+        {/* Mobile Button */}
         <button onClick={() => setOpen(!open)} className="md:hidden ml-auto p-2">
           {open ? (
             <X className={scrolled ? "text-gray-800" : "text-white"} />
@@ -177,10 +151,11 @@ export default function NavBar() {
             <Link href="#tours">Tour List</Link>
             <Link href="#tickets">My Ticket</Link>
             <Link href="#contact">Contact</Link>
+
             <div className="pt-2 flex flex-col gap-2">
               {isLoggedIn ? (
                 <>
-                  <Link href="/Profile">Edit Profil</Link>
+                  <Link href="/profil">Edit Profil</Link>
                   <button onClick={handleLogout}>Logout</button>
                 </>
               ) : (
