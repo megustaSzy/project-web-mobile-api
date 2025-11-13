@@ -1,4 +1,5 @@
 "use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
@@ -7,12 +8,61 @@ import { Menu, X } from "lucide-react";
 export default function NavBar() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userData, setUserData] = useState<{ name?: string; avatar?: string }>({
+    name: "User",
+    avatar: "/images/profile.jpg",
+  });
 
+  // 🔹 Efek scroll (ubah warna navbar)
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // 🔹 Ambil profil dari localStorage
+  const loadLocalProfile = () => {
+    const token = localStorage.getItem("token");
+    const storedProfile = localStorage.getItem("profile");
+
+    if (token) setIsLoggedIn(true);
+    else setIsLoggedIn(false);
+
+    if (storedProfile) {
+      try {
+        const parsed = JSON.parse(storedProfile);
+        setUserData({
+          name: parsed.name || "User",
+          avatar: parsed.avatar || "/images/profile.jpg",
+        });
+      } catch {
+        console.warn("Data profil lokal rusak");
+      }
+    } else {
+      // default
+      setUserData({ name: "User", avatar: "/images/profile.jpg" });
+    }
+  };
+
+  useEffect(() => {
+    loadLocalProfile();
+
+    // 🔄 Dengarkan perubahan localStorage agar navbar ikut update realtime
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "profile") loadLocalProfile();
+    };
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
+  // 🔹 Logout
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setIsLoggedIn(false);
+    setUserData({ name: "User", avatar: "/images/profile.jpg" });
+  };
 
   return (
     <header
@@ -23,41 +73,84 @@ export default function NavBar() {
       }`}
     >
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center h-16">
-        {/* Logo (Kiri) */}
+        {/* 🔹 Logo */}
         <div className="flex items-center gap-2">
           <Image src="/images/logo.png" alt="Logo" width={40} height={40} />
         </div>
 
-        {/* Navigation (Tengah) */}
+        {/* 🔹 Menu Tengah */}
         <nav
           className={`hidden md:flex absolute left-1/2 transform -translate-x-1/2 gap-8 transition-colors duration-300 ${
             scrolled ? "text-gray-800" : "text-white"
           }`}
         >
-          <Link href="/" className="hover:text-blue-500 transition">Home</Link>
-          <Link href="#about" className="hover:text-blue-500 transition">About Us</Link>
-          <Link href="#tours" className="hover:text-blue-500 transition">Tour List</Link>
-          <Link href="#tickets" className="hover:text-blue-500 transition">My Ticket</Link>
-          <Link href="#contact" className="hover:text-blue-500 transition">Contact</Link>
+          <Link href="/" className="hover:text-blue-500">
+            Home
+          </Link>
+          <Link href="#about" className="hover:text-blue-500">
+            About Us
+          </Link>
+          <Link href="#tours" className="hover:text-blue-500">
+            Tour List
+          </Link>
+          <Link href="#tickets" className="hover:text-blue-500">
+            My Ticket
+          </Link>
+          <Link href="#contact" className="hover:text-blue-500">
+            Contact
+          </Link>
         </nav>
 
-        {/* Tombol kanan (Log In / Sign In) */}
-        <div className="hidden md:flex gap-3 ml-auto">
+        {/* 🔹 Profil atau Login */}
+        <div className="hidden md:flex gap-3 ml-auto items-center relative">
+          {isLoggedIn ? (
+            <div className="flex items-center gap-2 group relative cursor-pointer">
+              <Image
+                src={userData.avatar || "/images/profile.jpg"}
+                alt="Profile"
+                width={35}
+                height={35}
+                className="rounded-full border border-gray-300 object-cover"
+              />
+              <span
+                className={`text-sm font-medium ${
+                  scrolled ? "text-gray-800" : "text-white"
+                }`}
+              >
+                {userData.name || "User"}
+              </span>
+
+              {/* 🔹 Dropdown */}
+              <div className="absolute right-0 top-10 w-40 bg-white rounded-lg shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-200">
+                <Link
+                  href="/profil"
+                  className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                >
+                  Edit Profil
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-red-100 hover:text-red-600"
+                >
+                  Logout
+                </button>
+              </div>
+            </div>
+          ) : (
             <Link
-  href="/login"
-  className={`px-3 py-1 text-sm rounded-full border transition-colors duration-300 ${
-    scrolled
-      ? "border-gray-700 text-gray-700 hover:bg-blue-600 hover:text-white hover:border-blue-600"
-      : "border-white text-white hover:bg-blue-600 hover:text-white hover:border-blue-600"
-  }`}
->
-  Login
-</Link>
-
-
+              href="/login"
+              className={`px-3 py-1 text-sm rounded-full border transition-colors duration-300 ${
+                scrolled
+                  ? "border-gray-700 text-gray-700 hover:bg-blue-600 hover:text-white"
+                  : "border-white text-white hover:bg-blue-600 hover:text-white"
+              }`}
+            >
+              Login
+            </Link>
+          )}
         </div>
 
-        {/* Mobile Menu Button */}
+        {/* 🔹 Tombol Mobile Menu */}
         <button onClick={() => setOpen(!open)} className="md:hidden ml-auto p-2">
           {open ? (
             <X className={scrolled ? "text-gray-800" : "text-white"} />
@@ -67,7 +160,7 @@ export default function NavBar() {
         </button>
       </div>
 
-      {/* Mobile Menu */}
+      {/* 🔹 Mobile Menu */}
       {open && (
         <div
           className={`md:hidden border-t px-4 py-3 transition-all duration-300 ${
@@ -82,9 +175,19 @@ export default function NavBar() {
             <Link href="#tours">Tour List</Link>
             <Link href="#tickets">My Ticket</Link>
             <Link href="#contact">Contact</Link>
+
             <div className="pt-2 flex flex-col gap-2">
-              <Link href="/auth/login">Log In</Link>
-              <Link href="/auth/register">Sign In</Link>
+              {isLoggedIn ? (
+                <>
+                  <Link href="/profil">Edit Profil</Link>
+                  <button onClick={handleLogout}>Logout</button>
+                </>
+              ) : (
+                <>
+                  <Link href="/login">Log In</Link>
+                  <Link href="/register">Sign In</Link>
+                </>
+              )}
             </div>
           </nav>
         </div>

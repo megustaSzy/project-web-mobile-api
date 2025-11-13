@@ -8,6 +8,7 @@ import Testimoni from "./components/Testimoni";
 import InputTestimoni from "./components/InputTestimoni";
 
 export default function Home() {
+  
   return (
     <main className="flex flex-col min-h-screen bg-white dark:bg-black">
       {/* Navbar */}
@@ -27,7 +28,7 @@ export default function Home() {
       </section>
 
       <section>
-        <Testimoni />
+       <Testimoni/>
       </section>
 
       <section>
