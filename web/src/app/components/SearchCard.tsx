@@ -1,16 +1,18 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { MapPin, Calendar, Clock, Users } from "lucide-react";
 
 export default function SearchCard() {
   const [location, setLocation] = useState("Mendeteksi lokasi...");
   const [destination, setDestination] = useState("");
   const [date, setDate] = useState("");
+  const [displayDate, setDisplayDate] = useState("Pilih tanggal");
   const [time, setTime] = useState("");
   const [people, setPeople] = useState(1);
+  const dateInputRef = useRef<HTMLInputElement | null>(null);
 
-  // 🔹 Deteksi lokasi otomatis pakai Geolocation API
+  // 🔹 Deteksi lokasi otomatis
   useEffect(() => {
     if (typeof window !== "undefined" && "geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
@@ -28,39 +30,50 @@ export default function SearchCard() {
               "Lokasi tidak diketahui";
             const state = data.address?.state || "";
             setLocation(`${city}, ${state}`);
-          } catch (err) {
-            console.error("Gagal ambil lokasi:", err);
+          } catch {
             setLocation("Gagal mendeteksi lokasi");
           }
         },
-        (err) => {
-          console.error("Izin lokasi ditolak:", err);
-          setLocation("Izin lokasi ditolak");
-        }
+        () => setLocation("Izin lokasi ditolak")
       );
     } else {
       setLocation("Perangkat tidak mendukung geolokasi");
     }
   }, []);
 
-  // 🔹 Fungsi tombol Search
-  const handleSearch = () => {
-    console.log({
-      lokasi: location,
-      tujuan: destination,
-      tanggal: date,
-      waktu: time,
-      orang: people,
+  // 🔹 Format tanggal gaya Indonesia
+  const formatDate = (value: string) => {
+    if (!value) return "Pilih tanggal";
+    const dateObj = new Date(value);
+    const formatted = dateObj.toLocaleDateString("id-ID", {
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+      year: "numeric",
     });
-    alert(
-      `Mencari tiket ke ${destination || "?"} pada ${date || "-"} (${time ||
-        "-"}) untuk ${people} orang.`
-    );
+    return formatted.replaceAll(".", "");
   };
 
-  // 🔹 Fungsi tombol Histori
-  const handleHistory = () => {
-    alert("Fitur histori pencarian belum dihubungkan ke backend.");
+  // 🔹 Klik area kalender
+  const handleCalendarClick = () => {
+    if (dateInputRef.current) {
+      dateInputRef.current.showPicker?.(); // Buka date picker
+    }
+  };
+
+  // 🔹 Saat pilih tanggal
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setDate(value);
+    setDisplayDate(formatDate(value));
+  };
+
+  // 🔹 Tombol Search
+  const handleSearch = () => {
+    alert(
+      `Mencari tiket ke ${destination || "?"} pada ${displayDate} (${time ||
+        "-"}) untuk ${people} orang.`
+    );
   };
 
   return (
@@ -71,10 +84,7 @@ export default function SearchCard() {
           <p className="text-sm text-gray-400">Lokasi Kamu</p>
           <h2 className="text-lg font-semibold text-gray-800">{location}</h2>
         </div>
-        <button
-          onClick={handleHistory}
-          className="text-sm text-gray-500 hover:text-blue-600 transition"
-        >
+        <button className="text-sm text-gray-500 hover:text-blue-600 transition">
           Cari Histori &gt;
         </button>
       </div>
@@ -99,16 +109,23 @@ export default function SearchCard() {
           </div>
         </div>
 
-        {/* Tanggal */}
-        <div className="flex flex-col w-full md:w-auto">
+        {/* 🔹 Input tanggal bergaya bubble */}
+        <div className="flex flex-col w-full md:w-auto relative">
           <label className="text-xs text-gray-400 mb-1">Tanggal</label>
-          <div className="flex items-center gap-2 border rounded-full px-4 py-2">
-            <Calendar className="text-gray-500 w-4 h-4" />
+          <div
+            onClick={handleCalendarClick}
+            className="flex items-center gap-2 border rounded-full px-4 py-2  transition relative"
+          >
+            <Calendar className="text-gray-500 w-3 h-3" />
+            <span className="text-gray-700 text-sm select-none">{displayDate}</span>
+
+            {/* Input date tersembunyi tapi tetap bisa klik di posisi yang benar */}
             <input
+              ref={dateInputRef}
               type="date"
               value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="text-gray-700 text-sm bg-transparent outline-none w-full"
+              onChange={handleDateChange}
+              className="absolute inset-0 opacity-0 cursor-pointer"
             />
           </div>
         </div>

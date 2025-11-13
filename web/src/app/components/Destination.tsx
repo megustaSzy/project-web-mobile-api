@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { MapPin } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const categories = ["Pantai", "Pulau", "Gunung", "Air Terjun", "Bukit"];
 
@@ -37,7 +38,7 @@ const destinations = [
 
 export default function DestinasiSection() {
   const [activeCategory, setActiveCategory] = useState("Pantai");
-  const [clickedId, setClickedId] = useState(null);
+  const router = useRouter(); // ✅ Tambahkan router
 
   return (
     <section className="relative w-full bg-gradient-to-b from-[#a7c8e7] to-[#f2f6f9] overflow-hidden">
@@ -45,7 +46,7 @@ export default function DestinasiSection() {
       <img
         src="/images/destinasi.svg"
         alt="Destinasi Background"
-        className="absolute inset-0 w-full h-full object-cover opacity-1"
+        className="absolute inset-0 w-full h-full object-cover opacity-2"
       />
 
       {/* Konten Utama */}
@@ -107,14 +108,8 @@ export default function DestinasiSection() {
 
                   <div className="flex justify-between items-center">
                     <button
-                      onClick={() =>
-                        setClickedId(clickedId === d.id ? null : d.id)
-                      }
-                      className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
-                        clickedId === d.id
-                          ? "bg-black text-white hover:bg-gray-900 scale-105"
-                          : "bg-blue-600 text-white hover:bg-blue-700"
-                      }`}
+                      onClick={() => router.push(`/pesan?id=${d.id}`)} // ✅ Arahkan ke halaman /pesan
+                      className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-all duration-300"
                     >
                       Pesan Sekarang
                     </button>
