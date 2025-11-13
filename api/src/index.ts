@@ -7,7 +7,7 @@ dotenv.config();
 import express from "express";
 import userRoutes from "./routes/userRoute";
 import authRoutes from "./routes/authRoutes";
-// import destinationRoutes from "./routes/destinationRoutes";
+import destinationRoutes from "./routes/destinationRoutes";
 import { errorHandler } from "./middlewares/errorHandler";
 
 const app = express();
@@ -23,7 +23,7 @@ app.use(cookieParser()); // ✅ daftarkan middleware cookie-parser
 
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
-// app.use("/api/destinations", destinationRoutes);
+app.use("/api/destinations", destinationRoutes);
 
 app.use(errorHandler);
 

@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express"
 import { destinationService } from "../services/destinationService";
 import { createError } from "../utils/createError";
+import prisma from "../lib/prisma";
 
 
 export const destinationController = {
@@ -53,26 +54,44 @@ export const destinationController = {
         }
     },
 
-    // async updateDestination(req: Request, res: Response, next: NextFunction) {
-    //     try {
-    //       const id = Number(req.params.id);
+    async updateDestination(req: Request, res: Response, next: NextFunction) {
+        try {
+          const id = Number(req.params.id);
           
-    //       if(isNaN(id)) createError("id tidak valid", 400);
+          if(isNaN(id)) createError("id tidak valid", 400);
 
-    //       const 
+          const existingDestination = await destinationService.editDestination(id, req.body);
 
-    //     } catch (error) {
-    //         next(error)
-    //     }
-    // }
+          return res.status(200).json({
+            success: true,
+            message: "destinasi berhasil diperbarui",
+            data: existingDestination
+          })
 
-    // async deleteDestination(req: Request, res: Response, next: NextFunction) {
-    //     try {
-    //         const id = Number(req.params.id);
+        } catch (error) {
+            next(error)
+        }
+    },
 
+    async deleteDestination(req: Request, res: Response, next: NextFunction) {
+        try {
+            const id = Number(req.params.id);
 
-    //     } catch (error) {
-            
-    //     }
-    // }
+            if(isNaN(id)) createError("id tidak valid", 400);
+
+            const currentDestination = (req as any).destination
+
+            if(currentDestination.role !== "Admin") createError("akses ditolak", 403);
+
+            await destinationService.deleteDestinationById(id);
+
+            return res.status(200).json({
+                success: true,
+                message: "destinasi berhasil dihapus"
+            })
+
+        } catch (error) {
+            next(error)
+        }
+    }
 }

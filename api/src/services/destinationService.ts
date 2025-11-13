@@ -51,6 +51,7 @@ export const destinationService = {
     },
 
     async editDestination(id: number, data: DestinationData) {
+        
         const destination = await prisma.tb_destinations.findUnique({
             where: {
                 id

@@ -50,9 +50,7 @@ export const userController = {
             }
 
             const updateUser = await userService.updateUserById(id, req.body);
-
-            if(!updateUser) createError("id tidak ditemukan", 404);
-
+            
             return res.status(200).json({
                 success: true,
                 message: "user berhasil diperbarui",
