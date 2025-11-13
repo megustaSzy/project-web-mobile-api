@@ -40,28 +40,34 @@ export default function DestinasiSection() {
   const [clickedId, setClickedId] = useState(null);
 
   return (
-    <section
-      className="w-full py-24 bg-[url('/images/bgatas.png')] bg-cover bg-center bg-no-repeat"
-    >
-      <div className="max-w-6xl mx-auto px-4 text-center p-8">
+    <section className="relative w-full bg-gradient-to-b from-[#a7c8e7] to-[#fdfffe] overflow-hidden">
+      {/* Background Gambar SVG */}
+      <img
+        src="/images/destinasi.svg"
+        alt="Destinasi Background"
+        className="absolute inset-0 w-full h-full object-cover opacity-3"
+      />
+
+      {/* Konten Utama */}
+      <div className="relative z-10 max-w-6xl mx-auto px-4 py-40 text-center">
+        {/* Judul */}
         <h2 className="text-3xl md:text-4xl font-extrabold mb-8 text-gray-800">
           Tujuan Wisata Favorit
         </h2>
 
         {/* Kategori Filter */}
-        <div className="flex justify-center flex-wrap gap-8 mb-12">
+        <div className="flex justify-center flex-wrap gap-4 md:gap-8 mb-12">
           {categories.map((cat) => {
             const isActive = activeCategory === cat;
             return (
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
-                className={`px-10 py-2 rounded-full border text-sm font-medium transition-all duration-300
-                  ${
-                    isActive
-                      ? "bg-white border-gray-300 text-gray-700 hover:border-blue-500 hover:text-blue-50 hover:bg-blue-500 shadow-md scale-105"
-                      : "bg-white border-gray-300 text-gray-700 hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50 shadow-md scale-105"
-                  }`}
+                className={`px-8 py-2 rounded-full border text-sm font-medium transition-all duration-300 ${
+                  isActive
+                    ? "bg-blue-500 border-blue-500 text-white shadow-md scale-105"
+                    : "bg-white border-gray-300 text-gray-700 hover:bg-blue-100 hover:border-blue-400 hover:text-blue-600"
+                }`}
               >
                 {cat}
               </button>
@@ -69,8 +75,8 @@ export default function DestinasiSection() {
           })}
         </div>
 
-        {/* Daftar Kartu */}
-        <div className="grid gap-6 md:grid-cols-3">
+        {/* Grid Kartu Destinasi */}
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {destinations
             .filter((d) => d.category === activeCategory)
             .map((d) => (
@@ -78,12 +84,21 @@ export default function DestinasiSection() {
                 key={d.id}
                 className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all overflow-hidden"
               >
+                {/* Gambar */}
                 <div className="relative w-full h-48">
-                  <Image src={d.image} alt={d.name} fill className="object-cover" />
+                  <Image
+                    src={d.image}
+                    alt={d.name}
+                    fill
+                    className="object-cover"
+                  />
                 </div>
 
+                {/* Isi Kartu */}
                 <div className="p-5 text-left">
-                  <h3 className="text-lg font-semibold text-black mb-1">{d.name}</h3>
+                  <h3 className="text-lg font-semibold text-black mb-1">
+                    {d.name}
+                  </h3>
                   <div className="flex items-center gap-1 text-gray-500 text-sm mb-2">
                     <MapPin size={14} />
                     <span>{d.location}</span>
