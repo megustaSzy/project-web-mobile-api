@@ -73,12 +73,12 @@ export default function SignupForm({ ...props }: React.ComponentProps<typeof Car
 
           <Field>
             <FieldLabel htmlFor="confirm-password">
-              Confirm Password
+              No Handphone
             </FieldLabel>
             <Input
               id="confirm-password"
               type="password"
-              placeholder="••••••••"
+              placeholder="000-0000-0000"
               className="focus-visible:ring-2 focus-visible:ring-primary"
               required
             />

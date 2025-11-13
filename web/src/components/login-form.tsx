@@ -13,31 +13,65 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import Link from "next/link";
-import { useRouter } from "next/navigation"; // ✅ tambahkan import router
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const router = useRouter(); // ✅ inisialisasi router
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
 
-  // Fungsi ketika tombol login diklik
-  const handleLogin = (e: React.FormEvent) => {
+  // ✅ Fungsi ketika tombol login diklik
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Ambil nilai input (untuk simulasi dulu)
     const email = (document.getElementById("email") as HTMLInputElement)?.value;
     const password = (document.getElementById("password") as HTMLInputElement)
       ?.value;
 
-    // Validasi sederhana
     if (!email || !password) {
-      alert("Masukkan email dan password!");
+      setMessage("Masukkan email dan password!");
       return;
     }
 
-    // ✅ Arahkan user ke halaman Hero Section (ubah '/' sesuai lokasi Hero kamu)
-    router.push("/");
+    try {
+      setLoading(true);
+      setMessage("");
+
+      const response = await fetch("http://10.93.86.50:3001/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // ✅ Login sukses
+        setMessage("Login berhasil!");
+        console.log("Data user:", data);
+
+        // Simpan token (jika API mengembalikan token)
+        if (data.token) {
+          localStorage.setItem("token", data.token);
+        }
+
+        // Redirect ke halaman utama / dashboard
+        router.push("/");
+      } else {
+        setMessage(data.message || "Login gagal, periksa email atau password.");
+      }
+    } catch (error) {
+      console.error(error);
+      setMessage("Tidak dapat terhubung ke server.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -48,7 +82,6 @@ export function LoginForm({
       )}
       {...props}
     >
-      {/* Card Form */}
       <Card className="w-full max-w-md shadow-lg border border-gray-100 rounded-2xl bg-white/80 backdrop-blur">
         <CardHeader className="text-center pb-2 flex flex-col items-center">
           <Image
@@ -114,9 +147,15 @@ export function LoginForm({
             <Button
               type="submit"
               className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition-all duration-200"
+              disabled={loading}
             >
-              Login
+              {loading ? "Sedang masuk..." : "Login"}
             </Button>
+
+            {/* Pesan login */}
+            {message && (
+              <p className="text-center text-sm text-gray-600 mt-2">{message}</p>
+            )}
 
             {/* Divider */}
             <div className="relative">
