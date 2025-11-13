@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express"
 import { destinationService } from "../services/destinationService";
 import { createError } from "../utils/createError";
+import prisma from "../lib/prisma";
 
 
 export const destinationController = {
@@ -54,6 +55,43 @@ export const destinationController = {
     },
 
     async updateDestination(req: Request, res: Response, next: NextFunction) {
-        
+        try {
+          const id = Number(req.params.id);
+          
+          if(isNaN(id)) createError("id tidak valid", 400);
+
+          const existingDestination = await destinationService.editDestination(id, req.body);
+
+          return res.status(200).json({
+            success: true,
+            message: "destinasi berhasil diperbarui",
+            data: existingDestination
+          })
+
+        } catch (error) {
+            next(error)
+        }
+    },
+
+    async deleteDestination(req: Request, res: Response, next: NextFunction) {
+        try {
+            const id = Number(req.params.id);
+
+            if(isNaN(id)) createError("id tidak valid", 400);
+
+            const currentDestination = (req as any).destination
+
+            if(currentDestination.role !== "Admin") createError("akses ditolak", 403);
+
+            await destinationService.deleteDestinationById(id);
+
+            return res.status(200).json({
+                success: true,
+                message: "destinasi berhasil dihapus"
+            })
+
+        } catch (error) {
+            next(error)
+        }
     }
 }

@@ -55,7 +55,8 @@ export const userService = {
     },
 
     async deleteUserById(id: number) {
-        const user = await prisma.tb_user.delete({
+        
+        const user = await prisma.tb_user.findUnique({
             where: {
                 id
             }

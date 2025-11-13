@@ -36,7 +36,6 @@ export const authService = {
         });
     },
 
-
     async loginUser(email: string, password: string) {
 
         const user = await prisma.tb_user.findUnique({ where: { email } });
@@ -61,7 +60,7 @@ export const authService = {
                 role: user.role
             },
             JWT_SECRET,
-            { expiresIn: "15s" } // sengaja pendek untuk testing auto refresh
+            { expiresIn: "10m" } // sengaja pendek untuk testing auto refresh
         );
 
         // ==== REFRESH TOKEN (plain string, disimpan ke DB) ====
@@ -79,7 +78,6 @@ export const authService = {
         const { password: _, ...safeUser } = user;
         return { user: safeUser, token, refreshToken };
     },
-    // ...registerUser(), loginUser() tetap
 
     async refreshAccessToken(refreshToken: string) {
 

@@ -7,6 +7,7 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
     const bearerToken = req.headers.authorization;
 
     if (!bearerToken || !bearerToken.startsWith("Bearer ")) {
+        
         return res.status(401).json({
             message: "token tidak ditemukan",
             success: false,
