@@ -57,7 +57,7 @@ export default function ProfilePage() {
       return;
     }
 
-    fetch("http://10.93.86.50:3001/api/auth/me", {
+    fetch("http://10.93.86.50:3001/api/users", {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(async (res) => {
