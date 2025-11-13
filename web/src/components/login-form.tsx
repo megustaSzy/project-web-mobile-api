@@ -16,96 +16,52 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle, XCircle, X } from "lucide-react";
+import { CheckCircle, XCircle } from "lucide-react";
 
-/**
- * Self-contained modal (no external dialog component needed).
- * Props:
- *  - open: boolean
- *  - onClose: () => void
- *  - status: "success" | "error"
- *  - message: string
- */
+/* ✅ Komponen popup animasi */
 function AuthModal({
   open,
-  onClose,
   status,
   message,
 }: {
   open: boolean;
-  onClose: () => void;
   status: "success" | "error" | null;
   message: string;
 }) {
   return (
     <AnimatePresence>
       {open && (
-        // Backdrop
         <motion.div
-          key="backdrop"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center"
+          key="modal"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.4 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
         >
-          <div
-            className="absolute inset-0 bg-black/40"
-            onClick={onClose}
-            aria-hidden
-          />
-
-          {/* Modal card */}
           <motion.div
-            key="modal"
-            initial={{ y: 20, opacity: 0, scale: 0.96 }}
-            animate={{ y: 0, opacity: 1, scale: 1 }}
-            exit={{ y: 10, opacity: 0, scale: 0.98 }}
-            transition={{ duration: 0.22 }}
-            className="relative z-10 w-[90%] max-w-md bg-white dark:bg-zinc-900 rounded-2xl shadow-xl p-6"
-            role="dialog"
-            aria-modal="true"
+            initial={{ scale: 0.9 }}
+            animate={{ scale: 1 }}
+            exit={{ scale: 0.9 }}
+            className={`rounded-2xl shadow-xl p-6 text-center w-[90%] max-w-sm ${
+              status === "success" ? "bg-green-50" : "bg-red-50"
+            }`}
           >
-            {/* Close icon */}
-            <button
-              onClick={onClose}
-              className="absolute right-3 top-3 p-1 rounded-md text-gray-500 hover:bg-gray-100"
-              aria-label="Tutup"
+            {status === "success" ? (
+              <CheckCircle className="w-12 h-12 mx-auto text-green-600 mb-3" />
+            ) : (
+              <XCircle className="w-12 h-12 mx-auto text-red-600 mb-3" />
+            )}
+
+            <h3
+              className={`text-lg font-semibold mb-1 ${
+                status === "success" ? "text-green-700" : "text-red-700"
+              }`}
             >
-              <X className="w-5 h-5" />
-            </button>
+              {status === "success" ? "Berhasil!" : "Gagal!"}
+            </h3>
 
-            <div className="flex flex-col items-center gap-3 text-center">
-              <div className="p-3 rounded-full bg-green-50/70">
-                {status === "success" ? (
-                  <CheckCircle className="w-14 h-14 text-green-600" />
-                ) : (
-                  <XCircle className="w-14 h-14 text-red-600" />
-                )}
-              </div>
-
-              <h3
-                className={`text-lg font-semibold ${
-                  status === "success" ? "text-green-700" : "text-red-600"
-                }`}
-              >
-                {status === "success" ? "Berhasil!" : "Gagal"}
-              </h3>
-
-              <p className="text-sm text-gray-600">{message}</p>
-
-              <div className="w-full mt-3">
-                <Button
-                  onClick={onClose}
-                  className={`w-full ${
-                    status === "success"
-                      ? "bg-green-600 hover:bg-green-700"
-                      : "bg-red-600 hover:bg-red-700"
-                  }`}
-                >
-                  Tutup
-                </Button>
-              </div>
-            </div>
+            <p className="text-gray-600 text-sm">{message}</p>
           </motion.div>
         </motion.div>
       )}
@@ -113,13 +69,19 @@ function AuthModal({
   );
 }
 
-export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
+export function LoginForm({
+  className,
+  ...props
+}: React.ComponentProps<"div">) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  const [modalStatus, setModalStatus] = useState<"success" | "error" | null>(null);
+  const [modalStatus, setModalStatus] = useState<"success" | "error" | null>(
+    null
+  );
   const [modalMessage, setModalMessage] = useState("");
 
+  // ✅ Fungsi Login
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -131,12 +93,12 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
       setModalStatus("error");
       setModalMessage("Masukkan email dan password terlebih dahulu!");
       setModalOpen(true);
+      setTimeout(() => setModalOpen(false), 1800);
       return;
     }
 
     try {
       setLoading(true);
-
       const response = await fetch("http://10.93.86.50:3001/api/auth/login", {
         method: "POST",
         headers: {
@@ -146,29 +108,39 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
       });
 
       const data = await response.json();
+      console.log("Respon API:", data);
 
       if (response.ok) {
+        // ✅ Simpan token dari API (pastikan nama field benar)
+        const token = data.accessToken || data.token;
+
+        if (token) {
+          localStorage.setItem("token", token);
+          console.log("Token disimpan:", token);
+        }
+
+        // ✅ Tampilkan popup sukses
         setModalStatus("success");
         setModalMessage("Login berhasil! Selamat datang kembali 👋");
         setModalOpen(true);
 
-        if (data.token) localStorage.setItem("token", data.token);
-
-        // redirect after a short delay so user sees the modal
+        // Tutup otomatis + redirect
         setTimeout(() => {
           setModalOpen(false);
           router.push("/");
-        }, 1400);
+        }, 1500);
       } else {
         setModalStatus("error");
-        setModalMessage(data.message || "Login gagal. Periksa email dan password.");
+        setModalMessage(data.message || "Email atau password salah.");
         setModalOpen(true);
+        setTimeout(() => setModalOpen(false), 1800);
       }
     } catch (error) {
-      console.error(error);
+      console.error("Login error:", error);
       setModalStatus("error");
-      setModalMessage("Tidak dapat terhubung ke server. Coba lagi nanti.");
+      setModalMessage("Tidak dapat terhubung ke server.");
       setModalOpen(true);
+      setTimeout(() => setModalOpen(false), 1800);
     } finally {
       setLoading(false);
     }
@@ -178,7 +150,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
     <>
       <section
         className={cn(
-          "flex flex-col items-center justify-center min-h-screen px-4 to-white",
+          "flex flex-col items-center justify-center min-h-screen px-4",
           className
         )}
         {...props}
@@ -202,7 +174,6 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
 
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-5">
-              {/* Email */}
               <div>
                 <label
                   htmlFor="email"
@@ -219,22 +190,13 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                 />
               </div>
 
-              {/* Password */}
               <div>
-                <div className="flex justify-between items-center mb-1">
-                  <label
-                    htmlFor="password"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Password
-                  </label>
-                  <Link
-                    href="/forgot-password"
-                    className="text-sm text-blue-600 hover:underline"
-                  >
-                    Lupa?
-                  </Link>
-                </div>
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Password
+                </label>
                 <Input
                   id="password"
                   type="password"
@@ -244,7 +206,6 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                 />
               </div>
 
-              {/* Button */}
               <Button
                 type="submit"
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition-all duration-200"
@@ -253,7 +214,6 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                 {loading ? "Sedang masuk..." : "Login"}
               </Button>
 
-              {/* Divider */}
               <div className="relative">
                 <hr className="border-gray-200" />
                 <span className="absolute left-1/2 -translate-x-1/2 -top-2 bg-white px-2 text-gray-400 text-sm">
@@ -284,10 +244,9 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
         </Card>
       </section>
 
-      {/* Modal */}
+      {/* ✅ Popup otomatis */}
       <AuthModal
         open={modalOpen}
-        onClose={() => setModalOpen(false)}
         status={modalStatus}
         message={modalMessage}
       />
