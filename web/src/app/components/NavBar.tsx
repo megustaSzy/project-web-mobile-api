@@ -2,7 +2,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { Menu, X, User } from "lucide-react";
+import { Menu, X } from "lucide-react";
 
 export default function NavBar() {
   const [open, setOpen] = useState(false);
@@ -17,47 +17,45 @@ export default function NavBar() {
   }, []);
 
   // 🔹 Cek token di localStorage dan ambil profil user dari API
-useEffect(() => {
-  const token = localStorage.getItem("token");
-  if (!token) return;
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
 
-  setIsLoggedIn(true);
+    setIsLoggedIn(true);
 
-  // 🔹 Ambil data profil user
-  fetch("http://10.93.86.50:3001/api/auth/login", {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  })
-    .then(async (res) => {
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || "Gagal mengambil data profil");
-      }
-      return res.json();
+    // 🔹 Ambil data profil user
+    fetch("http://10.93.86.50:3001/api/auth/me", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
     })
-    .then((data) => {
-      // 🔹 Pastikan path avatar benar
-      const avatarUrl = data.avatar
-        ? data.avatar.startsWith("http")
-          ? data.avatar
-          : `http://10.93.86.50:3001/uploads/${data.avatar}`
-        : "/images/profile.jpg";
+      .then(async (res) => {
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(text || "Gagal mengambil data profil");
+        }
+        return res.json();
+      })
+      .then((data) => {
+        // 🔹 Pastikan path avatar benar
+        const avatarUrl = data.avatar
+          ? data.avatar.startsWith("http")
+            ? data.avatar
+            : `http://10.93.86.50:3001/uploads/${data.avatar}`
+          : "/images/profile.jpg";
 
-      setUserData({
-        name: data.name || "User",
-        avatar: avatarUrl,
+        setUserData({
+          name: data.name || "User",
+          avatar: avatarUrl,
+        });
+      })
+      .catch((err) => {
+        console.error("Gagal ambil profil:", err);
+        setUserData({ name: "User", avatar: "/images/profile.jpg" });
       });
-    })
-    .catch((err) => {
-      console.error("Gagal ambil profil:", err);
-      setUserData({ name: "User", avatar: "/images/profile.jpg" });
-    });
-}, []);
-
-
+  }, []);
 
   // 🔹 Fungsi Logout
   const handleLogout = () => {
@@ -86,31 +84,51 @@ useEffect(() => {
             scrolled ? "text-gray-800" : "text-white"
           }`}
         >
-          <Link href="/" className="hover:text-blue-500 transition">Home</Link>
-          <Link href="#about" className="hover:text-blue-500 transition">About Us</Link>
-          <Link href="#tours" className="hover:text-blue-500 transition">Tour List</Link>
-          <Link href="#tickets" className="hover:text-blue-500 transition">My Ticket</Link>
-          <Link href="#contact" className="hover:text-blue-500 transition">Contact</Link>
+          <Link href="/" className="hover:text-blue-500 transition">
+            Home
+          </Link>
+          <Link href="#about" className="hover:text-blue-500 transition">
+            About Us
+          </Link>
+          <Link href="#tours" className="hover:text-blue-500 transition">
+            Tour List
+          </Link>
+          <Link href="#tickets" className="hover:text-blue-500 transition">
+            My Ticket
+          </Link>
+          <Link href="#contact" className="hover:text-blue-500 transition">
+            Contact
+          </Link>
         </nav>
 
         {/* Tombol kanan */}
         <div className="hidden md:flex gap-3 ml-auto items-center relative">
           {isLoggedIn ? (
-            <div className="relative group">
+            <div className="flex items-center gap-2 group relative cursor-pointer">
+              {/* 🔹 Gambar Profil */}
               <Image
                 src={userData.avatar || "/images/profile.jpg"}
                 alt="Profile"
                 width={35}
                 height={35}
-                className="rounded-full border border-gray-300 cursor-pointer"
+                className="rounded-full border border-gray-300"
               />
-              {/* Dropdown Profile */}
-              <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-200">
+              {/* 🔹 Nama User */}
+              <span
+                className={`text-sm font-medium ${
+                  scrolled ? "text-gray-800" : "text-white"
+                }`}
+              >
+                {userData.name || "User"}
+              </span>
+
+              {/* 🔹 Dropdown Profile */}
+              <div className="absolute right-0 top-10 w-40 bg-white rounded-lg shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-200">
                 <Link
                   href="/Profile"
                   className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
                 >
-                  Profil Saya
+                  Edit Profil
                 </Link>
                 <button
                   onClick={handleLogout}
@@ -162,7 +180,7 @@ useEffect(() => {
             <div className="pt-2 flex flex-col gap-2">
               {isLoggedIn ? (
                 <>
-                  <Link href="/Profile">Profile</Link>
+                  <Link href="/Profile">Edit Profil</Link>
                   <button onClick={handleLogout}>Logout</button>
                 </>
               ) : (
