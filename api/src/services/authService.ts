@@ -110,10 +110,11 @@ export const authService = {
         return newAccessToken;
     },
 
-    async logoutUser(userId: number) {
+    async logoutUser(refreshToken: string) {
+        // hapus token
         await prisma.tb_refreshToken.deleteMany({
             where: { 
-                 userId
+                token: refreshToken
             }
         });
     }

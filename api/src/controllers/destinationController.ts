@@ -79,10 +79,6 @@ export const destinationController = {
 
             if(isNaN(id)) createError("id tidak valid", 400);
 
-            const currentDestination = (req as any).destination
-
-            if(currentDestination.role !== "Admin") createError("akses ditolak", 403);
-
             await destinationService.deleteDestinationById(id);
 
             return res.status(200).json({
