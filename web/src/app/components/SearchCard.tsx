@@ -83,7 +83,7 @@ export default function SearchCard() {
       <div className="mt-4 flex flex-col md:flex-row items-center justify-between gap-3">
         {/* Lokasi Tujuan */}
         <div className="flex flex-col w-full md:w-auto">
-          <label className="text-xs text-gray-400 mb-1">Lokasi</label>
+          <label className="text-xs text-gray-400 mb-1">Lokasi Penjemputan</label>
           <div className="flex items-center gap-2 border rounded-full px-4 py-2">
             <MapPin className="text-gray-500 w-4 h-4" />
             <select
@@ -92,12 +92,9 @@ export default function SearchCard() {
               className="text-gray-700 text-sm bg-transparent outline-none w-full"
             >
               <option value="">Pilih Tujuan</option>
-              <option value="Kalianda">Kalianda</option>
-              <option value="Metro">Metro</option>
-              <option value="Pringsewu">Pringsewu</option>
-              <option value="Liwa">Liwa</option>
-              <option value="Krui">Krui</option>
-              <option value="Kotabumi">Kotabumi</option>
+              <option value="Terminal Rajabasa">Terminal Rajabasa</option>
+              <option value="Terminal Kemiling">Terminal Kemiling</option>
+              <option value="Stasiun Tanjung Karang">Stasiun Tanjung Karang</option>
             </select>
           </div>
         </div>
