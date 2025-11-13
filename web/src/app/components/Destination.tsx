@@ -40,12 +40,12 @@ export default function DestinasiSection() {
   const [clickedId, setClickedId] = useState(null);
 
   return (
-    <section className="relative w-full bg-gradient-to-b from-[#a7c8e7] to-[#fdfffe] overflow-hidden">
+    <section className="relative w-full bg-gradient-to-b from-[#a7c8e7] to-[#f2f6f9] overflow-hidden">
       {/* Background Gambar SVG */}
       <img
         src="/images/destinasi.svg"
         alt="Destinasi Background"
-        className="absolute inset-0 w-full h-full object-cover opacity-3"
+        className="absolute inset-0 w-full h-full object-cover opacity-1"
       />
 
       {/* Konten Utama */}
