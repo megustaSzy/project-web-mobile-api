@@ -46,7 +46,7 @@ export default function DestinasiSection() {
       <img
         src="/images/destinasi.svg"
         alt="Destinasi Background"
-        className="absolute inset-0 w-full h-full object-cover opacity-20"
+        className="absolute inset-0 w-full h-full object-cover opacity-2"
       />
 
       {/* Konten Utama */}

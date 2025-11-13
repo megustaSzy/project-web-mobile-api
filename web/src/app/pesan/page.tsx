@@ -89,7 +89,7 @@ export default function PesanPage() {
       <img
         src="/images/destinasi.svg"
         alt="Destinasi Background"
-        className="absolute inset-0 w-full h-full object-cover opacity-20"
+        className="absolute inset-0 w-full h-full object-cover opacity-2"
       />
 
       <div className="relative z-10 bg-white/80 backdrop-blur-md rounded-2xl shadow-lg p-8 w-full max-w-2xl">
