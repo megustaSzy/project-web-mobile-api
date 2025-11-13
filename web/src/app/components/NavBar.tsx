@@ -125,7 +125,7 @@ export default function NavBar() {
               {/* 🔹 Dropdown Profile */}
               <div className="absolute right-0 top-10 w-40 bg-white rounded-lg shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-200">
                 <Link
-                  href="/Profile"
+                  href="/profil"
                   className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
                 >
                   Edit Profil
