@@ -12,7 +12,7 @@ export default function ProfilePage() {
     if (!token) return;
 
     // Ambil data user dari API
-    fetch("http://10.93.86.50:3001/api/auth/me", {
+    fetch("http://10.93.86.50:3001/api/auth/login", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
