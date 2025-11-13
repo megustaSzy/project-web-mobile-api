@@ -1,4 +1,5 @@
 "use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
@@ -8,46 +9,59 @@ export default function NavBar() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userData, setUserData] = useState<{ name?: string; avatar?: string }>({});
+  const [userData, setUserData] = useState<{ name?: string; avatar?: string }>({
+    name: "User",
+    avatar: "/images/profile.jpg",
+  });
 
+  // 🔹 Efek scroll (ubah warna navbar)
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  useEffect(() => {
+  // 🔹 Ambil profil dari localStorage
+  const loadLocalProfile = () => {
     const token = localStorage.getItem("token");
-    if (!token) return;
+    const storedProfile = localStorage.getItem("profile");
 
-    setIsLoggedIn(true);
+    if (token) setIsLoggedIn(true);
+    else setIsLoggedIn(false);
 
-    fetch("http://10.93.86.50:3001/api/auth/login", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(async (res) => {
-        if (!res.ok) throw new Error(await res.text());
-        return res.json();
-      })
-      .then((data) => {
-        const avatarUrl = data.avatar
-          ? data.avatar.startsWith("http")
-            ? data.avatar
-            : `http://10.93.86.50:3001/uploads/${data.avatar}`
-          : "/images/profile.jpg";
-
+    if (storedProfile) {
+      try {
+        const parsed = JSON.parse(storedProfile);
         setUserData({
-          name: data.name || "User",
-          avatar: avatarUrl,
+          name: parsed.name || "User",
+          avatar: parsed.avatar || "/images/profile.jpg",
         });
-      })
-      .catch(() => setUserData({ name: "User", avatar: "/images/profile.jpg" }));
+      } catch {
+        console.warn("Data profil lokal rusak");
+      }
+    } else {
+      // default
+      setUserData({ name: "User", avatar: "/images/profile.jpg" });
+    }
+  };
+
+  useEffect(() => {
+    loadLocalProfile();
+
+    // 🔄 Dengarkan perubahan localStorage agar navbar ikut update realtime
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "profile") loadLocalProfile();
+    };
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
+  // 🔹 Logout
   const handleLogout = () => {
     localStorage.removeItem("token");
     setIsLoggedIn(false);
-    setUserData({});
+    setUserData({ name: "User", avatar: "/images/profile.jpg" });
   };
 
   return (
@@ -59,25 +73,35 @@ export default function NavBar() {
       }`}
     >
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center h-16">
-        {/* Logo */}
+        {/* 🔹 Logo */}
         <div className="flex items-center gap-2">
           <Image src="/images/logo.png" alt="Logo" width={40} height={40} />
         </div>
 
-        {/* Menu tengah */}
+        {/* 🔹 Menu Tengah */}
         <nav
           className={`hidden md:flex absolute left-1/2 transform -translate-x-1/2 gap-8 transition-colors duration-300 ${
             scrolled ? "text-gray-800" : "text-white"
           }`}
         >
-          <Link href="/" className="hover:text-blue-500">Home</Link>
-          <Link href="#about" className="hover:text-blue-500">About Us</Link>
-          <Link href="#tours" className="hover:text-blue-500">Tour List</Link>
-          <Link href="#tickets" className="hover:text-blue-500">My Ticket</Link>
-          <Link href="#contact" className="hover:text-blue-500">Contact</Link>
+          <Link href="/" className="hover:text-blue-500">
+            Home
+          </Link>
+          <Link href="#about" className="hover:text-blue-500">
+            About Us
+          </Link>
+          <Link href="#tours" className="hover:text-blue-500">
+            Tour List
+          </Link>
+          <Link href="#tickets" className="hover:text-blue-500">
+            My Ticket
+          </Link>
+          <Link href="#contact" className="hover:text-blue-500">
+            Contact
+          </Link>
         </nav>
 
-        {/* Profil & Login */}
+        {/* 🔹 Profil atau Login */}
         <div className="hidden md:flex gap-3 ml-auto items-center relative">
           {isLoggedIn ? (
             <div className="flex items-center gap-2 group relative cursor-pointer">
@@ -86,7 +110,7 @@ export default function NavBar() {
                 alt="Profile"
                 width={35}
                 height={35}
-                className="rounded-full border border-gray-300"
+                className="rounded-full border border-gray-300 object-cover"
               />
               <span
                 className={`text-sm font-medium ${
@@ -96,7 +120,7 @@ export default function NavBar() {
                 {userData.name || "User"}
               </span>
 
-              {/* Dropdown */}
+              {/* 🔹 Dropdown */}
               <div className="absolute right-0 top-10 w-40 bg-white rounded-lg shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-200">
                 <Link
                   href="/profil"
@@ -126,7 +150,7 @@ export default function NavBar() {
           )}
         </div>
 
-        {/* Mobile Button */}
+        {/* 🔹 Tombol Mobile Menu */}
         <button onClick={() => setOpen(!open)} className="md:hidden ml-auto p-2">
           {open ? (
             <X className={scrolled ? "text-gray-800" : "text-white"} />
@@ -136,7 +160,7 @@ export default function NavBar() {
         </button>
       </div>
 
-      {/* Mobile Menu */}
+      {/* 🔹 Mobile Menu */}
       {open && (
         <div
           className={`md:hidden border-t px-4 py-3 transition-all duration-300 ${
