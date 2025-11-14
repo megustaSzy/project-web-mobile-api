@@ -1,5 +1,6 @@
 
 import prisma from "../lib/prisma"
+import { createError } from "../utils/createError";
 
 export interface ScheduleData{
     pickupLocationId: number,
@@ -37,14 +38,27 @@ export const scheduleService = {
     },
 
     async createSchedule(data: ScheduleData) {
+        const existingSchedule = await prisma.tb_schedules.findFirst({
+            where: {
+                pickupLocationId: data.pickupLocationId,
+                destinationId: data.destinationId,
+                time: data.time,
+                date: new Date(data.date)
+            }
+        });
+
+        if(existingSchedule) {
+            throw new Error("schedule sudah ada, tidak boleh duplikat")
+        }
+
         return prisma.tb_schedules.create({
             data: {
                 pickupLocationId: data.pickupLocationId,
                 destinationId: data.destinationId,
                 time: data.time,
-                date: data.date
+                date: new Date(data.date)
             }
-        });
+        })
     },
 
     async updateSchedule(id: number, data: ScheduleData) {
@@ -62,6 +76,14 @@ export const scheduleService = {
     },
 
     async deleteSchedule (id: number) {
+        const deleteId = await prisma.tb_schedules.findUnique({
+            where: {
+                id
+            }
+        })
+
+        if(!deleteId) createError("id tidak ditemukan", 404)
+
         return prisma.tb_schedules.delete({
             where: {
                 id

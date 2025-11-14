@@ -37,16 +37,33 @@ export const scheduleController = {
     // controller POST
     async createSchedule(req: Request, res: Response, next: NextFunction) {
         try {
-            
-            const schedule = await scheduleService.createSchedule(req.body);
-    
-            return res.status(201).json({
-                success: true,
-                message: "schedule berhasil dibuat",
+            const { pickupLocationId, destinationId, time, date } = req.body;
+
+    // VALIDATION DULU
+        if (!pickupLocationId || !destinationId || !time || !date) {
+            return res.status(400).json({
+                success: false,
+                message: "pickupLocationId, destinationId, time, dan date wajib diisi"
             });
-        } catch (error) {
-            next(error)
         }
+        const data = {
+          pickupLocationId: Number(pickupLocationId),
+          destinationId: Number(destinationId),
+          time: String(time),
+          date: String(date)
+        };
+
+        const schedule = await scheduleService.createSchedule(data);
+    
+        return res.status(201).json({
+          success: true,
+          message: "schedule berhasil dibuat",
+          data: schedule
+        });
+    
+      } catch (error) {
+        next(error);
+      }
     },
 
     async editScheduleById(req: Request, res: Response, next: NextFunction) {

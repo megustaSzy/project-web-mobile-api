@@ -7,6 +7,13 @@ router.get("/", scheduleController.getAllSchedules);
 
 router.get("/:id", scheduleController.getScheduleById);
 
+router.post("/", scheduleController.createSchedule);
+
+router.put("/:id", scheduleController.editScheduleById);
+
+router.delete("/:id", scheduleController.deleteScheduleById);
+
+router.get("/search/filter", scheduleController.searchSchedule);
 
 
 
