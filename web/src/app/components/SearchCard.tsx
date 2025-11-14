@@ -195,11 +195,15 @@ const timeInputRef = useRef(null);
   <label className="text-xs text-gray-400 mb-1">Waktu</label>
 
   <div
-    onClick={() => timeInputRef.current?.showPicker()} 
+    onClick={() => (timeInputRef.current as any)?.showPicker?.()}
+
     className="flex items-center gap-2 border rounded-full px-4 py-2 bg-white w-full relative cursor-pointer"
   >
     <Clock className="text-gray-500 w-4 h-4" />
-    <span className="text-gray-700 text-sm select-none">{displayTime}</span>
+
+    <span className="text-gray-700 text-sm select-none flex-1 text-left">
+      {displayTime}
+    </span>
 
     <input
       ref={timeInputRef}
@@ -208,10 +212,11 @@ const timeInputRef = useRef(null);
       min="07:00"
       max="16:00"
       onChange={(e) => setTime(e.target.value)}
-      className="absolute inset-0 opacity-0"
+      className="absolute inset-0 opacity-0 cursor-pointer"
     />
   </div>
 </div>
+
 
 
   {/* Jumlah Tiket menjadi Search Bar */}
