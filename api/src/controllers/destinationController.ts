@@ -46,7 +46,6 @@ export const destinationController = {
             return res.status(201).json({
                 message: "berhasil menambahkan pantai",
                 success: true,
-                destination
             })
 
         } catch (error) {
@@ -65,7 +64,6 @@ export const destinationController = {
           return res.status(200).json({
             success: true,
             message: "destinasi berhasil diperbarui",
-            data: existingDestination
           })
 
         } catch (error) {
@@ -78,10 +76,6 @@ export const destinationController = {
             const id = Number(req.params.id);
 
             if(isNaN(id)) createError("id tidak valid", 400);
-
-            const currentDestination = (req as any).destination
-
-            if(currentDestination.role !== "Admin") createError("akses ditolak", 403);
 
             await destinationService.deleteDestinationById(id);
 

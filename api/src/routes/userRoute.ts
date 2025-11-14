@@ -6,10 +6,15 @@ import { asyncHandler } from "../middlewares/asyncHandler";
 
 const router = Router();
 
-router.get("/profile", authMiddleware, asyncHandler(userController.getProfile));
-router.get("/", authMiddleware, authorizeRoles("Admin"), asyncHandler(userController.getAllUsers));
-router.get("/:id", authMiddleware, asyncHandler(userController.getUserById));
-router.put("/:id", authMiddleware, asyncHandler(userController.editUser));
-router.delete("/:id", authMiddleware, authorizeRoles("Admin"), asyncHandler(userController.deleteUser));
+router.get("/profile", authMiddleware, userController.getProfile);
+
+router.get("/", authMiddleware, authorizeRoles("Admin"),userController.getAllUsers);
+
+router.get("/:id", authMiddleware, userController.getUserById);
+
+router.put("/:id", authMiddleware, userController.editUser);
+
+router.delete("/:id", authMiddleware, authorizeRoles("Admin"), userController.deleteUser);
+
 
 export default router;
