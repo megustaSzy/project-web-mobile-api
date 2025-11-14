@@ -3,7 +3,7 @@ import Image from "next/image";
 
 export default function CeritaPage() {
   return (
-    <section className="relative flex flex-col items-center justify-center min-h-screen overflow-hidden pb-32">
+    <section className="relative flex flex-col items-center justify-center overflow-hidden py-20">
       {/* Background gradasi */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-100 via-blue-200 to-blue-300"></div>
 
