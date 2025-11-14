@@ -3,7 +3,10 @@ import { scheduleController } from "../controllers/scheduleController";
 
 const router = Router();
 
-router.get("/", scheduleController.getAllSchedules)
+router.get("/", scheduleController.getAllSchedules);
+
+router.get("/:id", scheduleController.getScheduleById);
+
 
 
 

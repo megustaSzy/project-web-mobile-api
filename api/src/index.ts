@@ -27,7 +27,7 @@ app.use("/api/users", userRoute);
 app.use("/api/auth", authRoute);
 app.use("/api/destinations", destinationRoute);
 app.use("/api/pickup-locations", pickupLocationRoute);
-app.use("/api/schedule", scheduleRoute);
+app.use("/api/schedules", scheduleRoute);
 
 app.use(errorHandler);
 

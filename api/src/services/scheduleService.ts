@@ -1,7 +1,7 @@
 
 import prisma from "../lib/prisma"
 
-interface ScheduleData{
+export interface ScheduleData{
     pickupLocationId: number,
     destinationId: number,
     time: string,
@@ -71,23 +71,22 @@ export const scheduleService = {
 
     async searchSchedule(filters: ScheduleData) {
 
-        const { pickupLocationId, destinationId, time, date } = filters
+        const { pickupLocationId, destinationId, time, date } = filters;
 
         return prisma.tb_schedules.findMany({
             where: {
-                pickupLocationId: pickupLocationId || undefined,
-                destinationId: destinationId || undefined,
-                date: date || undefined,
-                time: time || undefined
+                pickupLocationId: pickupLocationId ? Number(pickupLocationId) : undefined,
+                destinationId: destinationId ? Number(destinationId) : undefined,
+                date: date ? new Date(date) : undefined,
+                time: time || undefined,
             },
             include: {
                 pickupLocation: true,
-                destination: true
+                destination: true,
             },
             orderBy: {
-                id: 'asc'
-            }
-        })
+                id: 'asc',
+            },
+        });
     }
-
 }
