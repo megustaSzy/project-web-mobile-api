@@ -1,3 +1,4 @@
+
 import prisma from "../lib/prisma"
 
 interface ScheduleData{
@@ -44,6 +45,49 @@ export const scheduleService = {
                 date: data.date
             }
         });
+    },
+
+    async updateSchedule(id: number, data: ScheduleData) {
+        return prisma.tb_schedules.update({
+            where: {
+                id
+            },
+            data: {
+                pickupLocationId: data.pickupLocationId,
+                destinationId: data.destinationId,
+                time: data.time,
+                date: data.date
+            }
+        });
+    },
+
+    async deleteSchedule (id: number) {
+        return prisma.tb_schedules.delete({
+            where: {
+                id
+            }
+        })
+    },
+
+    async searchSchedule(filters: ScheduleData) {
+
+        const { pickupLocationId, destinationId, time, date } = filters
+
+        return prisma.tb_schedules.findMany({
+            where: {
+                pickupLocationId: pickupLocationId || undefined,
+                destinationId: destinationId || undefined,
+                date: date || undefined,
+                time: time || undefined
+            },
+            include: {
+                pickupLocation: true,
+                destination: true
+            },
+            orderBy: {
+                id: 'asc'
+            }
+        })
     }
 
 }
