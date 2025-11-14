@@ -67,13 +67,10 @@ model tb_schedules {
   id                        Int                   @id @default(autoincrement())
   pickupLocation            tb_pickup_locations   @relation(fields: [pickupLocationId], references: [id])
   pickupLocationId          Int
-
   destination               tb_destinations       @relation(fields: [destinationId], references: [id])
   destinationId             Int
-
   time                      String
   date                      DateTime
-
   createdAt                 DateTime              @default(now())
   updatedAt                 DateTime              @updatedAt
 }
