@@ -3,12 +3,15 @@
 import HeroSection from "../components/about/HeroSection";
 import SejarahSection from "../components/about/SejarahSection";
 import VisiMisiSection from "../components/about/VisiMisiSection";
-export default function AboutUsPage() {
+import TeamSection from "../components/about/TeamSection";
+
+export default function AboutPage() {
   return (
-    <div className="w-full pb-20">
+    <main className="flex flex-col min-h-screen bg-white dark:bg-black">
       <HeroSection />
       <SejarahSection />
       <VisiMisiSection />
-    </div>
+      <TeamSection />
+    </main>
   );
 }
