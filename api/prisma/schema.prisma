@@ -55,7 +55,7 @@ model tb_destinations {
 model tb_pickup_locations {
   id          Int       @id @default(autoincrement())
   name        String
-  createdAt   DateTime
-  updatedAt   DateTime
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
 
