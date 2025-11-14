@@ -18,10 +18,6 @@ export default function SearchCard() {
 
   const displayTime = time || "--:--";
 
-  /* =====================================================================================
-     FIX ESLINT ERROR: setState tidak boleh dipanggil sync dalam effect
-     Solusi → gunakan setTimeout agar dianggap async
-  ====================================================================================== */
   useEffect(() => {
     if (typeof window !== "undefined" && "geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
@@ -90,6 +86,13 @@ export default function SearchCard() {
     setDisplayDate(formatDate(value));
   };
 
+    const handleSearch = () => {
+    console.log("Searching tiket...");
+    console.log("Jumlah:", people);
+    console.log("Tanggal:", date);
+    console.log("Waktu:", time);
+  };
+
   return (
     <div className="bg-white rounded-2xl shadow-md p-6 w-full max-w-5xl mx-auto border border-gray-100">
       {/* Header */}
@@ -104,146 +107,151 @@ export default function SearchCard() {
         </button>
       </div>
 
-      {/* Form */}
-      <div className="mt-4 grid grid-cols-1 md:grid-cols-5 gap-3 items-center">
-        {/* Penjemputan */}
-        <div className="flex flex-col w-full">
-          <label className="text-xs text-gray-400 mb-1">Lokasi Penjemputan</label>
-          <div className="flex items-center gap-2 border rounded-full px-4 py-2 bg-white w-full">
-            <MapPin className="text-gray-500 w-4 h-4" />
+     {/* FORM GRID */}
+<div className="mt-4 grid grid-cols-1 md:grid-cols-5 gap-8 items-center">
 
-            <select
-              value={pickupLocation}
-              onChange={(e) => setPickupLocation(e.target.value)}
-              className="text-gray-700 text-sm bg-transparent outline-none w-full"
-            >
-              <option value="">Pilih Penjemputan</option>
-              <option value="Terminal Rajabasa">Terminal Rajabasa</option>
-              <option value="Terminal Kemiling">Terminal Kemiling</option>
-              <option value="Stasiun Tanjung Karang">Stasiun Tanjung Karang</option>
-            </select>
-          </div>
-        </div>
+  {/* Penjemputan */}
+  <div className="flex flex-col w-full">
+    <label className="text-xs text-gray-400 mb-1">Lokasi Penjemputan</label>
+    <div className="flex items-center gap-2 border rounded-full px-4 py-2 bg-white w-full">
+      <MapPin className="text-gray-500 w-4 h-4" />
 
-        {/* Tujuan Wisata */}
-        <div className="flex flex-col w-full">
-          <label className="text-xs text-gray-400 mb-1">Tujuan Wisata</label>
-          <div className="flex items-center gap-2 border rounded-full px-4 py-2 bg-white w-full">
-            <MapPin className="text-gray-500 w-4 h-4" />
+      <select
+        value={pickupLocation}
+        onChange={(e) => setPickupLocation(e.target.value)}
+        className="text-gray-700 text-sm bg-transparent outline-none w-full"
+      >
+        <option value="">Pilih Penjemputan</option>
+        <option value="Terminal Rajabasa">Terminal Rajabasa</option>
+        <option value="Terminal Kemiling">Terminal Kemiling</option>
+        <option value="Stasiun Tanjung Karang">Stasiun Tanjung Karang</option>
+      </select>
+    </div>
+  </div>
 
-            <select
-              value={tourDestination}
-              onChange={(e) => setTourDestination(e.target.value)}
-              className="text-gray-700 text-sm bg-transparent outline-none w-full"
-            >
-              <option value="">Pilih Tujuan</option>
+  {/* Tujuan Wisata */}
+  <div className="flex flex-col w-full">
+    <label className="text-xs text-gray-400 mb-1">Tujuan Wisata</label>
+    <div className="flex items-center gap-2 border rounded-full px-4 py-2 bg-white w-full">
+      <MapPin className="text-gray-500 w-4 h-4" />
 
-              <optgroup label="Pantai">
-                <option value="Pantai Mutun">Pantai Mutun</option>
-                <option value="Pantai Sari Ringgung">Pantai Sari Ringgung</option>
-                <option value="Pantai Kelagian">Pantai Kelagian</option>
-                <option value="Pantai Tanjung Setia">Pantai Tanjung Setia</option>
-                <option value="Pantai Klara">Pantai Klara</option>
-                <option value="Pantai Marina">Pantai Marina</option>
-                <option value="Pantai Sebalang">Pantai Sebalang</option>
-              </optgroup>
+      <select
+        value={tourDestination}
+        onChange={(e) => setTourDestination(e.target.value)}
+        className="text-gray-700 text-sm bg-transparent outline-none w-full"
+      >
+        <option value="">Pilih Tujuan</option>
 
-              <optgroup label="Pulau">
-                <option value="Pulau Pahawang">Pulau Pahawang</option>
-                <option value="Pulau Tegal Mas">Pulau Tegal Mas</option>
-                <option value="Pulau Kelagian Lunik">Pulau Kelagian Lunik</option>
-                <option value="Pulau Mahitam">Pulau Mahitam</option>
-                <option value="Pulau Balak">Pulau Balak</option>
-              </optgroup>
+        <optgroup label="Pantai">
+          <option value="Pantai Mutun">Pantai Mutun</option>
+          <option value="Pantai Sari Ringgung">Pantai Sari Ringgung</option>
+          <option value="Pantai Kelagian">Pantai Kelagian</option>
+          <option value="Pantai Tanjung Setia">Pantai Tanjung Setia</option>
+          <option value="Pantai Klara">Pantai Klara</option>
+          <option value="Pantai Marina">Pantai Marina</option>
+          <option value="Pantai Sebalang">Pantai Sebalang</option>
+        </optgroup>
 
-              <optgroup label="Gunung">
-                <option value="Gunung Rajabasa">Gunung Rajabasa</option>
-                <option value="Gunung Pesawaran">Gunung Pesawaran</option>
-                <option value="Gunung Seminung">Gunung Seminung</option>
-              </optgroup>
+        <optgroup label="Pulau">
+          <option value="Pulau Pahawang">Pulau Pahawang</option>
+          <option value="Pulau Tegal Mas">Pulau Tegal Mas</option>
+          <option value="Pulau Kelagian Lunik">Pulau Kelagian Lunik</option>
+          <option value="Pulau Mahitam">Pulau Mahitam</option>
+          <option value="Pulau Balak">Pulau Balak</option>
+        </optgroup>
 
-              <optgroup label="Bukit">
-                <option value="Bukit Pangonan">Bukit Pangonan</option>
-                <option value="Bukit Sakura">Bukit Sakura</option>
-                <option value="Bukit Aslan">Bukit Aslan</option>
-                <option value="Bukit Kumbang">Bukit Kumbang</option>
-              </optgroup>
+        <optgroup label="Gunung">
+          <option value="Gunung Rajabasa">Gunung Rajabasa</option>
+          <option value="Gunung Pesawaran">Gunung Pesawaran</option>
+          <option value="Gunung Seminung">Gunung Seminung</option>
+        </optgroup>
 
-              <optgroup label="Air Terjun">
-                <option value="Air Terjun Putri Malu">Air Terjun Putri Malu</option>
-                <option value="Air Terjun Curup Gangsa">Air Terjun Curup Gangsa</option>
-                <option value="Air Terjun Lembah Pelangi">Air Terjun Lembah Pelangi</option>
-                <option value="Air Terjun Ciupang">Air Terjun Ciupang</option>
-                <option value="Air Terjun Way Lalaan">Air Terjun Way Lalaan</option>
-              </optgroup>
-            </select>
-          </div>
-        </div>
+        <optgroup label="Bukit">
+          <option value="Bukit Pangonan">Bukit Pangonan</option>
+          <option value="Bukit Sakura">Bukit Sakura</option>
+          <option value="Bukit Aslan">Bukit Aslan</option>
+          <option value="Bukit Kumbang">Bukit Kumbang</option>
+        </optgroup>
 
-        {/* Tanggal */}
-        <div className="flex flex-col w-full relative">
-          <label className="text-xs text-gray-400 mb-1">Tanggal</label>
+        <optgroup label="Air Terjun">
+          <option value="Air Terjun Putri Malu">Air Terjun Putri Malu</option>
+          <option value="Air Terjun Curup Gangsa">Air Terjun Curup Gangsa</option>
+          <option value="Air Terjun Lembah Pelangi">Air Terjun Lembah Pelangi</option>
+          <option value="Air Terjun Ciupang">Air Terjun Ciupang</option>
+          <option value="Air Terjun Way Lalaan">Air Terjun Way Lalaan</option>
+        </optgroup>
+      </select>
+    </div>
+  </div>
 
-          <div
-            onClick={handleCalendarClick}
-            className="flex items-center gap-2 border rounded-full px-4 py-2 bg-white w-full relative cursor-pointer"
-          >
-            <Calendar className="text-gray-500 w-4 h-4" />
-            <span className="text-gray-700 text-sm select-none">{displayDate}</span>
+  {/* Tanggal */}
+  <div className="flex flex-col w-full relative">
+    <label className="text-xs text-gray-400 mb-1">Tanggal</label>
 
-            <input
-              ref={dateInputRef}
-              type="date"
-              value={date}
-              onChange={handleDateChange}
-              className="absolute inset-0 opacity-0 cursor-pointer"
-            />
-          </div>
-        </div>
+    <div
+      onClick={handleCalendarClick}
+      className="flex items-center gap-2 border rounded-full px-4 py-2 bg-white w-full relative cursor-pointer"
+    >
+      <Calendar className="text-gray-500 w-4 h-4" />
+      <span className="text-gray-700 text-sm select-none">{displayDate}</span>
 
-        {/* Waktu */}
-        <div className="flex flex-col w-full relative">
-          <label className="text-xs text-gray-400 mb-1">Waktu</label>
+      <input
+        ref={dateInputRef}
+        type="date"
+        value={date}
+        onChange={handleDateChange}
+        className="absolute inset-0 opacity-0 cursor-pointer"
+      />
+    </div>
+  </div>
 
-          <div
-            onClick={() => timeInputRef.current?.showPicker?.()}
-            className="flex items-center gap-2 border rounded-full px-4 py-2 bg-white w-full relative cursor-pointer"
-          >
-            <Clock className="text-gray-500 w-4 h-4" />
+  {/* Waktu */}
+  <div className="flex flex-col w-full relative">
+    <label className="text-xs text-gray-400 mb-1">Waktu</label>
 
-            <span className="text-gray-700 text-sm select-none flex-1 text-left">
-              {displayTime}
-            </span>
+    <div
+      onClick={() => timeInputRef.current?.showPicker?.()}
+      className="flex items-center gap-2 border rounded-full px-4 py-2 bg-white w-full relative cursor-pointer"
+    >
+      <Clock className="text-gray-500 w-4 h-4" />
 
-            <input
-              ref={timeInputRef}
-              type="time"
-              value={time}
-              min="07:00"
-              max="16:00"
-              onChange={(e) => setTime(e.target.value)}
-              className="absolute inset-0 opacity-0 cursor-pointer"
-            />
-          </div>
-        </div>
+      <span className="text-gray-700 text-sm select-none flex-1">
+        {displayTime}
+      </span>
 
-        {/* Tiket */}
-        <div className="flex flex-col w-full">
-          <label className="text-xs text-gray-400 mb-1">Jumlah Tiket</label>
+      <input
+        ref={timeInputRef}
+        type="time"
+        value={time}
+        min="07:00"
+        max="16:00"
+        onChange={(e) => setTime(e.target.value)}
+        className="absolute inset-0 opacity-0 cursor-pointer"
+      />
+    </div>
+  </div>
 
-          <div className="flex items-center gap-2 border rounded-full px-4 py-2 bg-white w-full">
-            <Users className="text-gray-500 w-4 h-4" />
+ {/* Search Button – lebar pendek */}
+<div className="flex flex-col md:w-auto justify-end">
+  <label className="text-xs text-transparent mb-1">.</label>
 
-            <input
-              type="number"
-              min="1"
-              max="16"
-              value={people}
-              onChange={(e) => setPeople(Number(e.target.value))}
-              className="text-gray-700 text-sm bg-transparent outline-none w-full"
-            />
-          </div>
-        </div>
+  <button
+    onClick={handleSearch}
+    className="
+      bg-blue-500 text-white
+      px-4 py-2
+      rounded-full text-sm
+      font-medium
+      shadow-sm hover:bg-blue-600
+      active:scale-95 transition-all
+      w-[90px]          /* ← LEBAR dibuat pendek */
+      md:ml-15
+    "
+  >
+    Search
+  </button>
+</div>
+
       </div>
     </div>
   );
