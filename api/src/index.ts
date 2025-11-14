@@ -5,9 +5,10 @@ import cookieParser from "cookie-parser"; // ✅ tambahkan ini
 dotenv.config();
 
 import express from "express";
-import userRoutes from "./routes/userRoute";
-import authRoutes from "./routes/authRoutes";
-import destinationRoutes from "./routes/destinationRoutes";
+import userRoute from "./routes/userRoute";
+import authRoute from "./routes/authRoute";
+import destinationRoute from "./routes/destinationRoute";
+import pickupLocationRoute from "./routes/pickupLocationRoute";
 import { errorHandler } from "./middlewares/errorHandler";
 
 const app = express();
@@ -21,9 +22,10 @@ app.use(cors({
 
 app.use(cookieParser()); // ✅ daftarkan middleware cookie-parser
 
-app.use("/api/users", userRoutes);
-app.use("/api/auth", authRoutes);
-app.use("/api/destinations", destinationRoutes);
+app.use("/api/users", userRoute);
+app.use("/api/auth", authRoute);
+app.use("/api/destinations", destinationRoute);
+app.use("/api/pickup-locations", pickupLocationRoute);
 
 app.use(errorHandler);
 

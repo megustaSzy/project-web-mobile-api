@@ -46,7 +46,6 @@ export const destinationController = {
             return res.status(201).json({
                 message: "berhasil menambahkan pantai",
                 success: true,
-                destination
             })
 
         } catch (error) {
@@ -65,7 +64,6 @@ export const destinationController = {
           return res.status(200).json({
             success: true,
             message: "destinasi berhasil diperbarui",
-            data: existingDestination
           })
 
         } catch (error) {

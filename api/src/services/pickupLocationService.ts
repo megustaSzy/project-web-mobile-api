@@ -1,16 +1,17 @@
 import prisma from "../lib/prisma"
+import { createError } from "../utils/createError"
 
 interface PickupData{
     name: string
 }
 
-export const pickupLocation = {
+export const pickupLocationService = {
 
     // GET all pickup
     async getAllPickups() {
         return prisma.tb_pickup_locations.findMany({
             orderBy: {
-                name: 'asc'
+                id: 'asc'
             }
         })
     },
@@ -25,7 +26,7 @@ export const pickupLocation = {
     },
 
     // ADD pickup
-    async addPickupLocation(data: PickupData) {
+    async createPickupLocation(data: PickupData) {
         return prisma.tb_pickup_locations.create({
             data: {
                 name: data.name
@@ -33,6 +34,23 @@ export const pickupLocation = {
         })
     },
 
+    // EDIT pickup
+    async editPickupLocation(id: number, data: PickupData) {
+        const pickup = await prisma.tb_pickup_locations.findFirst({
+            where: {
+                id
+            }
+        });
+
+        if(!pickup) createError("id tidak ditemukan", 404);
+
+        return prisma.tb_pickup_locations.update({
+            where: {
+                id
+            },
+            data
+        })
+    },
     
     async deletePickupById(id: number) {
         return prisma.tb_pickup_locations.delete({

@@ -81,7 +81,7 @@ export const userController = {
         }
     },
 
-    async getProfile(req: Request, res: Response, next: NextFunction) {
+    async getProfile(req: Request, res: Response) {
         return res.status(200).json({
             success: true,
             user: (req as any).user

@@ -50,6 +50,8 @@ model tb_destinations {
   category    String     
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt  
+
+  schedules   tb_schedules[]
 }
 
 model tb_pickup_locations {
@@ -57,5 +59,22 @@ model tb_pickup_locations {
   name        String
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+
+  shcedules   tb_schedules[]
+}
+
+model tb_schedules {
+  id                        Int                   @id @default(autoincrement())
+  pickupLocation            tb_pickup_locations   @relation(fields: [pickupLocationId], references: [id])
+  pickupLocationId          Int
+
+  destination               tb_destinations       @relation(fields: [destinationId], references: [id])
+  destinationId             Int
+
+  time                      String
+  date                      DateTime
+
+  createdAt                 DateTime              @default(now())
+  updatedAt                 DateTime              @updatedAt
 }
 
