@@ -9,6 +9,7 @@ import userRoute from "./routes/userRoute";
 import authRoute from "./routes/authRoute";
 import destinationRoute from "./routes/destinationRoute";
 import pickupLocationRoute from "./routes/pickupLocationRoute";
+import scheduleRoute from "./routes/scheduleRoute"
 import { errorHandler } from "./middlewares/errorHandler";
 
 const app = express();
@@ -26,6 +27,7 @@ app.use("/api/users", userRoute);
 app.use("/api/auth", authRoute);
 app.use("/api/destinations", destinationRoute);
 app.use("/api/pickup-locations", pickupLocationRoute);
+app.use("/api/schedule", scheduleRoute);
 
 app.use(errorHandler);
 
