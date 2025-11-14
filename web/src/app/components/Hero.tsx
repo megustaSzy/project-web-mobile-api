@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import SearchCard from "./SearchCard"; 
 import { Calendar, Clock, Users, Search, MapPin } from "lucide-react";
 
+
 const images = ["/images/hero1.jpg", "/images/hero2.jpg", "/images/hero3.jpg"];
  
 export default function Hero() {
