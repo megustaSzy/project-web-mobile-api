@@ -191,19 +191,22 @@ export default function SearchCard() {
         </div>
 
         {/* Waktu */}
-        <div className="flex flex-col w-full md:w-auto">
-          <label className="text-xs text-gray-400 mb-1">Waktu</label>
-          <div className="flex items-center gap-2 border rounded-full px-4 py-2">
-            <Clock className="text-gray-500 w-4 h-4" />
-            <input
-              type="text"
-              placeholder="07.00 - 16.00"
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-              className="text-gray-700 text-sm bg-transparent outline-none w-full"
-            />
-          </div>
-        </div>
+<div className="flex flex-col w-full md:w-auto">
+  <label className="text-xs text-gray-400 mb-1">Waktu</label>
+  <div className="flex items-center gap-2 border rounded-full px-4 py-2 bg-white focus-within:ring-2 focus-within:ring-blue-300 transition">
+    <Clock className="text-gray-500 w-4 h-4" />
+
+    <input
+      type="time"
+      value={time}
+      onChange={(e) => setTime(e.target.value)}
+      min="07:00"
+      max="16:00"
+      className="text-gray-700 text-sm bg-transparent outline-none w-full"
+      required
+    />
+  </div>
+</div>
 
         {/* Jumlah Tiket */}
         <div className="flex flex-col w-full md:w-auto">
