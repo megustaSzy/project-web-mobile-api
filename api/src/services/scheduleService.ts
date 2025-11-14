@@ -1,6 +1,11 @@
 import prisma from "../lib/prisma"
 
-
+interface ScheduleData{
+    pickupLocationId: number,
+    destinationId: number,
+    time: string,
+    date: string
+}
 
 export const scheduleService = {
 
@@ -18,6 +23,27 @@ export const scheduleService = {
         });
     },
 
-    
+    async getScheduleById(id: number) {
+        return prisma.tb_schedules.findUnique({
+            where: {
+                id
+            },
+            include: {
+                pickupLocation: true,
+                destination: true
+            }
+        })
+    },
+
+    async createSchedule(data: ScheduleData) {
+        return prisma.tb_schedules.create({
+            data: {
+                pickupLocationId: data.pickupLocationId,
+                destinationId: data.destinationId,
+                time: data.time,
+                date: data.date
+            }
+        });
+    }
 
 }
