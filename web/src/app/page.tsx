@@ -40,8 +40,7 @@ export default function Home() {
         {/* <SearchCard /> */}
       </section>
 
-      {/* Footer */}
-      <Footer />
+
     </main>
   );
 }

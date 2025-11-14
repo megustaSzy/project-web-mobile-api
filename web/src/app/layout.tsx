@@ -35,6 +35,8 @@ import "./globals.css";
 //   );
 // }
 
+
+
 export const metadata = {
   title: "LamiGo - Jelajah Alam Lampung",
   description: "Temukan destinasi terbaik dan pesan tiket dengan mudah",
@@ -44,9 +46,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="id">
       <body className="antialiased text-slate-900 bg-white">
-        {/* <NavBar /> */}
+        <NavBar />
         {children}
-        {/* <Footer /> */}
+        <Footer />
       </body>
     </html>
   );
