@@ -189,14 +189,17 @@ const timeInputRef = useRef(null);
     </div>
   </div>
 
-
 {/* Waktu */}
 <div className="flex flex-col w-full relative">
   <label className="text-xs text-gray-400 mb-1">Waktu</label>
 
   <div
+<<<<<<< HEAD
     onClick={() => (timeInputRef.current as any)?.showPicker?.()}
 
+=======
+     onClick={handleDateChange} 
+>>>>>>> d1be22f65ace8338ee2dc1f3303f10d2b908055b
     className="flex items-center gap-2 border rounded-full px-4 py-2 bg-white w-full relative cursor-pointer"
   >
     <Clock className="text-gray-500 w-4 h-4" />
