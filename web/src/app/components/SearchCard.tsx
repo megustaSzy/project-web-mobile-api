@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { MapPin, Calendar, Clock, Users } from "lucide-react";
+import { MapPin, Calendar, Clock , Users } from "lucide-react";
+
 
 export default function SearchCard() {
   const [location, setLocation] = useState("Mendeteksi lokasi...");
@@ -13,6 +14,8 @@ export default function SearchCard() {
   const dateInputRef = useRef<HTMLInputElement | null>(null);
 const [pickupLocation, setPickupLocation] = useState("");
 const [tourDestination, setTourDestination] = useState("");
+const displayTime = time ? time : "--:--";
+const timeInputRef = useRef(null);
 
   // 🔹 Deteksi lokasi otomatis
   useEffect(() => {
@@ -186,21 +189,30 @@ const [tourDestination, setTourDestination] = useState("");
     </div>
   </div>
 
-  {/* Waktu */}
-  <div className="flex flex-col w-full">
-    <label className="text-xs text-gray-400 mb-1">Waktu</label>
-    <div className="flex items-center gap-2 border rounded-full px-4 py-2 bg-white w-full">
-      <input
-        type="time"
-        value={time}
-        onChange={(e) => setTime(e.target.value)}
-        min="07:00"
-        max="16:00"
-        className="text-gray-700 text-sm bg-transparent outline-none w-full"
-        required
-      />
-    </div>
+
+{/* Waktu */}
+<div className="flex flex-col w-full relative">
+  <label className="text-xs text-gray-400 mb-1">Waktu</label>
+
+  <div
+    onClick={() => timeInputRef.current?.showPicker()} 
+    className="flex items-center gap-2 border rounded-full px-4 py-2 bg-white w-full relative cursor-pointer"
+  >
+    <Clock className="text-gray-500 w-4 h-4" />
+    <span className="text-gray-700 text-sm select-none">{displayTime}</span>
+
+    <input
+      ref={timeInputRef}
+      type="time"
+      value={time}
+      min="07:00"
+      max="16:00"
+      onChange={(e) => setTime(e.target.value)}
+      className="absolute inset-0 opacity-0"
+    />
   </div>
+</div>
+
 
   {/* Jumlah Tiket menjadi Search Bar */}
   <div className="flex flex-col w-full">
