@@ -1,84 +1,96 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { MapPin, Calendar, Clock , Users } from "lucide-react";
-
+import { MapPin, Calendar, Clock, Users } from "lucide-react";
 
 export default function SearchCard() {
   const [location, setLocation] = useState("Mendeteksi lokasi...");
-  const [destination, setDestination] = useState("");
   const [date, setDate] = useState("");
   const [displayDate, setDisplayDate] = useState("Pilih tanggal");
   const [time, setTime] = useState("");
   const [people, setPeople] = useState(1);
-  const dateInputRef = useRef<HTMLInputElement | null>(null);
-const [pickupLocation, setPickupLocation] = useState("");
-const [tourDestination, setTourDestination] = useState("");
-const displayTime = time ? time : "--:--";
-const timeInputRef = useRef(null);
 
-  // 🔹 Deteksi lokasi otomatis
+  const [pickupLocation, setPickupLocation] = useState("");
+  const [tourDestination, setTourDestination] = useState("");
+
+  const dateInputRef = useRef<HTMLInputElement | null>(null);
+  const timeInputRef = useRef<HTMLInputElement | null>(null);
+
+  const displayTime = time || "--:--";
+
   useEffect(() => {
     if (typeof window !== "undefined" && "geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         async (pos) => {
           const { latitude, longitude } = pos.coords;
+
           try {
             const res = await fetch(
               `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
             );
             const data = await res.json();
+
             const city =
               data.address?.city ||
               data.address?.town ||
               data.address?.village ||
               "Lokasi tidak diketahui";
             const state = data.address?.state || "";
-            setLocation(`${city}, ${state}`);
+
+            setTimeout(() => {
+              setLocation(`${city}, ${state}`);
+            }, 0);
           } catch {
-            setLocation("Gagal mendeteksi lokasi");
+            setTimeout(() => {
+              setLocation("Gagal mendeteksi lokasi");
+            }, 0);
           }
         },
-        () => setLocation("Izin lokasi ditolak")
+
+        () => {
+          setTimeout(() => {
+            setLocation("Izin lokasi ditolak");
+          }, 0);
+        }
       );
     } else {
-      setLocation("Perangkat tidak mendukung geolokasi");
+      setTimeout(() => {
+        setLocation("Perangkat tidak mendukung geolokasi");
+      }, 0);
     }
   }, []);
 
-  // 🔹 Format tanggal gaya Indonesia
+  // Format tanggal Indonesia
   const formatDate = (value: string) => {
     if (!value) return "Pilih tanggal";
-    const dateObj = new Date(value);
-    const formatted = dateObj.toLocaleDateString("id-ID", {
-      weekday: "short",
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
-    return formatted.replaceAll(".", "");
+    const dt = new Date(value);
+    return dt
+      .toLocaleDateString("id-ID", {
+        weekday: "short",
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      })
+      .replaceAll(".", "");
   };
 
-  // 🔹 Klik area kalender
+  // Klik area tanggal
   const handleCalendarClick = () => {
-    if (dateInputRef.current) {
-      dateInputRef.current.showPicker?.(); // Buka date picker
-    }
+    dateInputRef.current?.showPicker?.();
   };
 
-  // 🔹 Saat pilih tanggal
+  // Saat memilih tanggal
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setDate(value);
     setDisplayDate(formatDate(value));
   };
 
-  // 🔹 Tombol Search
-  const handleSearch = () => {
-    alert(
-      `Mencari tiket ke ${destination || "?"} pada ${displayDate} (${time ||
-        "-"}) untuk ${people} orang.`
-    );
+    const handleSearch = () => {
+    console.log("Searching tiket...");
+    console.log("Jumlah:", people);
+    console.log("Tanggal:", date);
+    console.log("Waktu:", time);
   };
 
   return (
@@ -89,19 +101,21 @@ const timeInputRef = useRef(null);
           <p className="text-sm text-gray-400">Lokasi Kamu</p>
           <h2 className="text-lg font-semibold text-gray-800">{location}</h2>
         </div>
+
         <button className="text-sm text-gray-500 hover:text-blue-600 transition">
           Cari Histori &gt;
         </button>
       </div>
 
-      {/* Isi Form */}
-<div className="mt-4 grid grid-cols-1 md:grid-cols-5 gap-3 items-center">
+     {/* FORM GRID */}
+<div className="mt-4 grid grid-cols-1 md:grid-cols-5 gap-8 items-center">
 
-  {/* Lokasi Penjemputan */}
+  {/* Penjemputan */}
   <div className="flex flex-col w-full">
     <label className="text-xs text-gray-400 mb-1">Lokasi Penjemputan</label>
     <div className="flex items-center gap-2 border rounded-full px-4 py-2 bg-white w-full">
       <MapPin className="text-gray-500 w-4 h-4" />
+
       <select
         value={pickupLocation}
         onChange={(e) => setPickupLocation(e.target.value)}
@@ -120,6 +134,7 @@ const timeInputRef = useRef(null);
     <label className="text-xs text-gray-400 mb-1">Tujuan Wisata</label>
     <div className="flex items-center gap-2 border rounded-full px-4 py-2 bg-white w-full">
       <MapPin className="text-gray-500 w-4 h-4" />
+
       <select
         value={tourDestination}
         onChange={(e) => setTourDestination(e.target.value)}
@@ -172,9 +187,10 @@ const timeInputRef = useRef(null);
   {/* Tanggal */}
   <div className="flex flex-col w-full relative">
     <label className="text-xs text-gray-400 mb-1">Tanggal</label>
+
     <div
       onClick={handleCalendarClick}
-      className="flex items-center gap-2 border rounded-full px-4 py-2 bg-white w-full relative"
+      className="flex items-center gap-2 border rounded-full px-4 py-2 bg-white w-full relative cursor-pointer"
     >
       <Calendar className="text-gray-500 w-4 h-4" />
       <span className="text-gray-700 text-sm select-none">{displayDate}</span>
@@ -189,54 +205,54 @@ const timeInputRef = useRef(null);
     </div>
   </div>
 
-{/* Waktu */}
-<div className="flex flex-col w-full relative">
-  <label className="text-xs text-gray-400 mb-1">Waktu</label>
+  {/* Waktu */}
+  <div className="flex flex-col w-full relative">
+    <label className="text-xs text-gray-400 mb-1">Waktu</label>
 
-  <div
-    onClick={() => (timeInputRef.current as any)?.showPicker?.()}
-    className="flex items-center gap-2 border rounded-full px-4 py-2 bg-white w-full relative cursor-pointer"
-  >
-    <Clock className="text-gray-500 w-4 h-4" />
+    <div
+      onClick={() => timeInputRef.current?.showPicker?.()}
+      className="flex items-center gap-2 border rounded-full px-4 py-2 bg-white w-full relative cursor-pointer"
+    >
+      <Clock className="text-gray-500 w-4 h-4" />
 
-    <span className="text-gray-700 text-sm select-none flex-1 text-left">
-      {displayTime}
-    </span>
+      <span className="text-gray-700 text-sm select-none flex-1">
+        {displayTime}
+      </span>
 
-    <input
-      ref={timeInputRef}
-      type="time"
-      value={time}
-      min="07:00"
-      max="16:00"
-      onChange={(e) => setTime(e.target.value)}
-      className="absolute inset-0 opacity-0 cursor-pointer"
-    />
-  </div>
-</div>
-
-
-
-  {/* Jumlah Tiket menjadi Search Bar */}
-  <div className="flex flex-col w-full">
-    <label className="text-xs text-gray-400 mb-1">Jumlah Tiket</label>
-    <div className="flex items-center gap-2 border rounded-full px-4 py-2 bg-white w-full">
-      <Users className="text-gray-500 w-4 h-4" />
       <input
-        type="number"
-        min="1"
-        max="16"
-        placeholder="Cari jumlah tiket..."
-        value={people}
-        onChange={(e) => setPeople(Number(e.target.value))}
-        className="text-gray-700 text-sm bg-transparent outline-none w-full"
+        ref={timeInputRef}
+        type="time"
+        value={time}
+        min="07:00"
+        max="16:00"
+        onChange={(e) => setTime(e.target.value)}
+        className="absolute inset-0 opacity-0 cursor-pointer"
       />
+    </div>
   </div>
 
+ {/* Search Button – lebar pendek */}
+<div className="flex flex-col md:w-auto justify-end">
+  <label className="text-xs text-transparent mb-1">.</label>
+
+  <button
+    onClick={handleSearch}
+    className="
+      bg-blue-500 text-white
+      px-4 py-2
+      rounded-full text-sm
+      font-medium
+      shadow-sm hover:bg-blue-600
+      active:scale-95 transition-all
+      w-[90px]          /* ← LEBAR dibuat pendek */
+      md:ml-15
+    "
+  >
+    Search
+  </button>
 </div>
 
-  </div>
-
-</div>
+      </div>
+    </div>
   );
 }
