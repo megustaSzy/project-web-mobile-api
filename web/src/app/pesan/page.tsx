@@ -6,6 +6,8 @@
   import { useSearchParams } from "next/navigation";
   import { motion, AnimatePresence } from "framer-motion";
 
+  
+  
   const destinations = [
     {
       id: 1,
@@ -37,6 +39,8 @@
     const searchParams = useSearchParams();
     const destId = Number(searchParams.get("id"));
     const selectedDest = destinations.find((d) => d.id === destId);
+    const params = useSearchParams();
+    const nama = params.get("nama"); 
 
     const [pickup, setPickup] = useState("");
     const [date, setDate] = useState("");
