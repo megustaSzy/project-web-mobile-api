@@ -36,7 +36,7 @@ export default function PesananTourPage() {
         ❗ Tidak ada data wisata untuk: <b>{selectedKabupaten}</b>
       </p>
     );
-  }
+  } 
 
   const filteredDestinasi = kabupatenData.destinasi.filter(
     (d) => d.kategori.toLowerCase() === selectedCategory.toLowerCase()
@@ -95,15 +95,13 @@ export default function PesananTourPage() {
                 <p className="text-gray-600 text-sm">{dest.deskripsi ?? "-"}</p>
 
                 <div className="flex justify-between items-center mt-3">
-                  <button
-                    className="bg-blue-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-600 transition"
-                    onClick={() =>
-                      router.push(`/pesan?nama=${encodeURIComponent(dest.name)}`)
+                <button
+               className="bg-blue-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-600 transition"
+          onClick={() => router.push("/pesan")}
+        >
+          Pesan Sekarang
+        </button>
 
-                    }
-                  >
-                    Pesan Sekarang
-                  </button>
 
                   <p className="font-semibold text-gray-800 text-sm">
                     Rp{dest.harga}

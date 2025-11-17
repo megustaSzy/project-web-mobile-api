@@ -178,7 +178,7 @@ export default function NavBar() {
             <Link href="/about" onClick={() => setOpen(false)}>
               About Us
             </Link>
-            <Link href="#tours" onClick={() => setOpen(false)}>
+            <Link href="/tourlist" onClick={() => setOpen(false)}>
               Tour List
             </Link>
             <Link href="#tickets" onClick={() => setOpen(false)}>
