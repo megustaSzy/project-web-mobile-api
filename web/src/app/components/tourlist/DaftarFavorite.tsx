@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import Link from "next/link";
 
 export default function DaftarFavorite() {
   const wisataData = [
@@ -89,15 +90,18 @@ export default function DaftarFavorite() {
               className="rounded-md object-cover"
             />
 
-            <div className="flex flex-col gap-1">
+             <div className="flex flex-col gap-1">
               <h2 className="font-semibold text-gray-800">{item.name}</h2>
               <p className="text-sm text-gray-500">{item.desc}</p>
-              <a
-                href="#"
+
+              <Link
+                href={`/pesanantour?kabupaten=${encodeURIComponent(
+                  item.name
+                )}`}
                 className="text-blue-500 font-medium text-sm hover:underline"
               >
                 Lihat Detail
-              </a>
+              </Link>
             </div>
 
             <div className="ml-auto text-end">
