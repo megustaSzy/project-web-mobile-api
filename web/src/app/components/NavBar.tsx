@@ -94,9 +94,17 @@ export default function NavBar() {
           <Link href="#tickets" className="hover:text-blue-500">
             My Ticket
           </Link>
-          <Link href="#contact" className="hover:text-blue-500">
-            Contact
-          </Link>
+            <Link
+      href="#contact"
+      scroll={false}
+      onClick={() => {
+        setOpen(false);
+        document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
+      }}
+      className="hover:text-blue-500 transition-colors duration-300"
+    >
+      Contact
+    </Link>
         </nav>
 
         {/* 🔹 Profil atau Login (Desktop) */}
@@ -178,7 +186,7 @@ export default function NavBar() {
             <Link href="/about" onClick={() => setOpen(false)}>
               About Us
             </Link>
-            <Link href="#tours" onClick={() => setOpen(false)}>
+            <Link href="/tourlist" onClick={() => setOpen(false)}>
               Tour List
             </Link>
             <Link href="#tickets" onClick={() => setOpen(false)}>

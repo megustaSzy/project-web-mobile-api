@@ -7,7 +7,6 @@
   import { motion, AnimatePresence } from "framer-motion";
 
   
-  
   const destinations = [
     {
       id: 1,

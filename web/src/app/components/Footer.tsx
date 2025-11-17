@@ -1,6 +1,10 @@
 export default function Footer() {
   return (
-    <footer className="relative z-10 bg-[#0c1220] text-white pt-16 pb-8 overflow-hidden">
+    <footer
+  id="contact"
+  className="relative z-10 bg-[#0c1220] text-white pt-16 pb-8 overflow-hidden"
+>
+
       {/* Background pattern */}
       <div
         className="absolute inset-0 z-0 opacity-10 pointer-events-none"
