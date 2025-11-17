@@ -18,7 +18,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle, XCircle } from "lucide-react";
 
-/* ✅ Komponen popup animasi */
+/*  Komponen popup animasi */
 function AuthModal({
   open,
   status,
@@ -244,7 +244,7 @@ export function LoginForm({
         </Card>
       </section>
 
-      {/* ✅ Popup otomatis */}
+      {/*  Popup otomatis */}
       <AuthModal
         open={modalOpen}
         status={modalStatus}
