@@ -88,7 +88,7 @@ export default function NavBar() {
           <Link href="/about" className="hover:text-blue-500">
             About Us
           </Link>
-          <Link href="#tours" className="hover:text-blue-500">
+          <Link href="/tourlist" className="hover:text-blue-500">
             Tour List
           </Link>
           <Link href="#tickets" className="hover:text-blue-500">
