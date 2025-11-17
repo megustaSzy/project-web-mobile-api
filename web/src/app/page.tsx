@@ -11,8 +11,9 @@ export default function Home() {
   
   return (
     <main className="flex flex-col min-h-screen bg-white dark:bg-black">
-      {/* Navbar */}
+    { /* Navbar */ }
       <NavBar />
+
 
       {/* Hero Section */}
       <section>
@@ -40,6 +41,8 @@ export default function Home() {
         {/* <SearchCard /> */}
       </section>
 
+    {/* footer */}
+    <Footer />
 
     </main>
   );

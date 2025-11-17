@@ -46,9 +46,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="id">
       <body className="antialiased text-slate-900 bg-white">
-        <NavBar />
+        {/* <NavBar /> */}
         {children}
-        <Footer />
+        {/* <Footer /> */}
       </body>
     </html>
   );

@@ -9,10 +9,12 @@ export default function NavBar() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userData, setUserData] = useState<{ name?: string; avatar?: string }>({
-    name: "User",
-    avatar: "/images/profile.jpg",
-  });
+  const [userData, setUserData] = useState<{ name?: string; avatar?: string }>(
+    {
+      name: "User",
+      avatar: "/images/profile.jpg",
+    }
+  );
 
   // 🔹 Efek scroll (ubah warna navbar)
   useEffect(() => {
@@ -40,20 +42,16 @@ export default function NavBar() {
         console.warn("Data profil lokal rusak");
       }
     } else {
-      // default
       setUserData({ name: "User", avatar: "/images/profile.jpg" });
     }
   };
 
   useEffect(() => {
     loadLocalProfile();
-
-    // 🔄 Dengarkan perubahan localStorage agar navbar ikut update realtime
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === "profile") loadLocalProfile();
     };
     window.addEventListener("storage", handleStorageChange);
-
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
@@ -78,7 +76,7 @@ export default function NavBar() {
           <Image src="/images/logo.png" alt="Logo" width={40} height={40} />
         </div>
 
-        {/* 🔹 Menu Tengah */}
+        {/* 🔹 Menu Tengah (Desktop) */}
         <nav
           className={`hidden md:flex absolute left-1/2 transform -translate-x-1/2 gap-8 transition-colors duration-300 ${
             scrolled ? "text-gray-800" : "text-white"
@@ -90,7 +88,7 @@ export default function NavBar() {
           <Link href="/about" className="hover:text-blue-500">
             About Us
           </Link>
-          <Link href="#tours" className="hover:text-blue-500">
+          <Link href="/tourlist" className="hover:text-blue-500">
             Tour List
           </Link>
           <Link href="#tickets" className="hover:text-blue-500">
@@ -101,7 +99,7 @@ export default function NavBar() {
           </Link>
         </nav>
 
-        {/* 🔹 Profil atau Login */}
+        {/* 🔹 Profil atau Login (Desktop) */}
         <div className="hidden md:flex gap-3 ml-auto items-center relative">
           {isLoggedIn ? (
             <div className="flex items-center gap-2 group relative cursor-pointer">
@@ -160,38 +158,79 @@ export default function NavBar() {
         </button>
       </div>
 
-      {/* 🔹 Mobile Menu */}
-      {open && (
+      {/* 🔹 Mobile Menu — SUDAH DIPERBAIKI */}
+      <div
+        className={`md:hidden overflow-hidden transition-all duration-300 ${
+          open ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+        }`}
+      >
         <div
-          className={`md:hidden border-t px-4 py-3 transition-all duration-300 ${
+          className={`border-t px-4 py-3 ${
             scrolled
               ? "bg-white text-gray-800"
               : "bg-white/20 backdrop-blur-md text-white"
           }`}
         >
-          <nav className="flex flex-col gap-3 text-center">
-            <Link href="/">Home</Link>
-            <Link href="#about">About Us</Link>
-            <Link href="#tours">Tour List</Link>
-            <Link href="#tickets">My Ticket</Link>
-            <Link href="#contact">Contact</Link>
+          <nav className="flex flex-col gap-4 text-center font-medium">
+            <Link href="/" onClick={() => setOpen(false)}>
+              Home
+            </Link>
+            <Link href="/about" onClick={() => setOpen(false)}>
+              About Us
+            </Link>
+            <Link href="#tours" onClick={() => setOpen(false)}>
+              Tour List
+            </Link>
+            <Link href="#tickets" onClick={() => setOpen(false)}>
+              My Ticket
+            </Link>
+            <Link href="#contact" onClick={() => setOpen(false)}>
+              Contact
+            </Link>
 
-            <div className="pt-2 flex flex-col gap-2">
+            {/* Auth Buttons */}
+            <div className="pt-2 flex flex-col gap-3">
               {isLoggedIn ? (
                 <>
-                  <Link href="/profil">Edit Profil</Link>
-                  <button onClick={handleLogout}>Logout</button>
+                  <Link
+                    href="/profil"
+                    onClick={() => setOpen(false)}
+                    className="py-2 rounded-md hover:bg-gray-100 hover:text-gray-800 transition"
+                  >
+                    Edit Profil
+                  </Link>
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setOpen(false);
+                    }}
+                    className="py-2 rounded-md bg-red-500 text-white hover:bg-red-600 transition"
+                  >
+                    Logout
+                  </button>
                 </>
               ) : (
                 <>
-                  <Link href="/login">Log In</Link>
-                  <Link href="/register">Sign In</Link>
+                  <Link
+                    href="/login"
+                    onClick={() => setOpen(false)}
+                    className="py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition"
+                  >
+                    Log In
+                  </Link>
+                  <Link
+                    href="/signup"
+                    onClick={() => setOpen(false)}
+                    className="py-2 rounded-md border border-blue-600 text-blue-600 hover:bg-blue-50 transition"
+                  >
+                    Sign In
+                  </Link>
                 </>
               )}
             </div>
           </nav>
         </div>
-      )}
+      </div>
     </header>
   );
 }

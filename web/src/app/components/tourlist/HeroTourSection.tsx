@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 
-export default function HeroSection() {
+export default function HeroTourSection() {
   return (
     <div className="relative w-full h-[430px] overflow-hidden rounded-b-[0px] shadow-lg">
       {/* Background Image */}
