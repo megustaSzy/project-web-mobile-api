@@ -219,7 +219,7 @@ export default function NavBar() {
                     Log In
                   </Link>
                   <Link
-                    href="/register"
+                    href="/signup"
                     onClick={() => setOpen(false)}
                     className="py-2 rounded-md border border-blue-600 text-blue-600 hover:bg-blue-50 transition"
                   >
