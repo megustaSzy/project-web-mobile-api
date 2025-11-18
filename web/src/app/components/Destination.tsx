@@ -50,7 +50,7 @@ export default function DestinasiSection() {
       />
 
       {/* Konten Utama */}
-      <div className="relative z-10 max-w-6xl mx-auto px-4 py-40 text-center">
+      <div className="relative z-10 max-w-6xl mx-auto px-4 py-16 text-center">
         {/* Judul */}
         <h2 className="text-3xl md:text-4xl font-extrabold mb-8 text-gray-800">
           Tujuan Wisata Favorit

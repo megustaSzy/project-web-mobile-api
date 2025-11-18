@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import NavBar from "./components/NavBar";
 import Footer from "./components/Footer";
-import "./globals.css";
+import "@/app/globals.css";
 
 
 // const geistSans = Geist({
