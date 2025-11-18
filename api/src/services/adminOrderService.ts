@@ -20,6 +20,22 @@ export const adminOrderService = {
 
         if(!order) throw new Error("order tidak ditemukan");
         return order
+    },
+
+    async deleteById(id: number) {
+        const order = await prisma.tb_orders.findUnique({
+            where: {
+                id
+            }
+        });
+
+        if(!order) throw new Error("order tidak ditemukan");
+
+        return await prisma.tb_orders.delete({
+            where: {
+                id
+            }
+        })
     }
 
 }
