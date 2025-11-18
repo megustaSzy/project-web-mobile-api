@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { adminOrderService } from "../services/adminOrderService"
+import { orderService } from "../services/orderService";
 
 export const adminOrderController = {
 
@@ -33,6 +34,25 @@ export const adminOrderController = {
                 success: true,
                 data: order
             });
+        } catch (error: any) {
+            res.status(404).json({
+                message: error.message
+            })
+        }
+    },
+
+
+    async deleteOrderById(req: Request, res: Response) {
+        try {
+            
+            const id = Number(req.params.id);
+            const order = await adminOrderService.deleteById(id);
+
+            res.status(200).json({
+                message: "order berhasil dihapus",
+                success: true
+            })
+
         } catch (error: any) {
             res.status(404).json({
                 message: error.message
