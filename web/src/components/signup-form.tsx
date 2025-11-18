@@ -74,6 +74,14 @@ export default function SignupForm({ ...props }: React.ComponentProps<typeof Car
         {...props}
         className="w-full max-w-md shadow-lg border border-gray-100 rounded-2xl"
       >
+         {/* LOGO */}
+        <div className="flex justify-center mb-4">
+          <img
+            src="/images/logo.png" // Pastikan file ada di public/logo.png
+            alt="Logo"
+            className="h-20 w-auto object-contain"
+          />
+        </div>
         <CardHeader className="text-center space-y-0">
           <CardTitle className="text-2xl font-semibold text-gray-800">
             Create an Account
@@ -85,13 +93,13 @@ export default function SignupForm({ ...props }: React.ComponentProps<typeof Car
 
         <CardContent>
           <form onSubmit={handleSignup} className="space-y-4">
-            <FieldGroup className="space-y-2">
+            <FieldGroup className="space-y-0">
               <Field>
                 <FieldLabel htmlFor="name">Full Name</FieldLabel>
                 <Input
                   id="name"
                   type="text"
-                  placeholder="John Doe"
+                  placeholder="LamiGo"
                   required
                 />
               </Field>
@@ -101,7 +109,7 @@ export default function SignupForm({ ...props }: React.ComponentProps<typeof Car
                 <Input
                   id="email"
                   type="email"
-                  placeholder="m@example.com"
+                  placeholder="LamiGo@gmail.com"
                   required
                 />
               </Field>
@@ -121,7 +129,7 @@ export default function SignupForm({ ...props }: React.ComponentProps<typeof Car
                 <Input
                   id="phone"
                   type="text"
-                  placeholder="0812-3456-7890"
+                  placeholder="08xxxxxxxxxx"
                   required
                 />
               </Field>
