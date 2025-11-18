@@ -60,7 +60,7 @@ export const authService = {
                 role: user.role
             },
             JWT_SECRET,
-            { expiresIn: "15s" } // sengaja pendek untuk testing auto refresh
+            { expiresIn: "10m" } // sengaja pendek untuk testing auto refresh
         );
 
         // ==== REFRESH TOKEN (plain string, disimpan ke DB) ====
@@ -104,7 +104,7 @@ export const authService = {
                 role: user!.role,
             },
             JWT_SECRET,
-            { expiresIn: "15s" }
+            { expiresIn: "10m" }
         );
 
         return newAccessToken;
