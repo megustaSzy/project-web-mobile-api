@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { scheduleService } from "../services/scheduleService"
+import { createError } from "../utils/createError";
 
 
 export const scheduleController = {
@@ -21,9 +22,10 @@ export const scheduleController = {
         try {
             const id = Number(req.params.id);
 
-            const schedule = await scheduleService.getScheduleById(id);
+            if(isNaN(id)) createError("id tidak valid", 400);
 
-            if(!schedule)
+            const schedule = await scheduleService.getScheduleById(id);
+            if(!schedule) createError("schedule tidak ditemukan", 404)
 
             return res.status(200).json({
                 success: true,

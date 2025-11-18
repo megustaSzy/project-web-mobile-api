@@ -26,7 +26,7 @@ export const destinationController = {
             if(isNaN(id)) createError("id tidak valid", 400);
 
             const destination = await destinationService.getDestinationById(id);
-            if(!destination) createError("user tidak ditemukan", 400);
+            if(!destination) createError("user tidak ditemukan", 404);
 
             return res.status(200).json({
                 success: true,
@@ -61,6 +61,8 @@ export const destinationController = {
 
           const existingDestination = await destinationService.editDestination(id, req.body);
 
+          if(!existingDestination) createError("id tidak ditemukan", 400);
+
           return res.status(200).json({
             success: true,
             message: "destinasi berhasil diperbarui",
@@ -77,7 +79,9 @@ export const destinationController = {
 
             if(isNaN(id)) createError("id tidak valid", 400);
 
-            await destinationService.deleteDestinationById(id);
+            const destination = await destinationService.deleteDestinationById(id);
+
+            if(!destination) createError("id tidak ditemukan", 404)
 
             return res.status(200).json({
                 success: true,
