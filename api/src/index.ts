@@ -10,6 +10,8 @@ import authRoute from "./routes/authRoute";
 import destinationRoute from "./routes/destinationRoute";
 import pickupLocationRoute from "./routes/pickupLocationRoute";
 import scheduleRoute from "./routes/scheduleRoute"
+import provinceRoute from "./routes/external";
+import orderRoute from "./routes/orderRoute"
 import { errorHandler } from "./middlewares/errorHandler";
 
 const app = express();
@@ -28,6 +30,8 @@ app.use("/api/auth", authRoute);
 app.use("/api/destinations", destinationRoute);
 app.use("/api/pickup-locations", pickupLocationRoute);
 app.use("/api/schedules", scheduleRoute);
+app.use("/api/region", provinceRoute);
+app.use("/api/orders", orderRoute)
 
 app.use(errorHandler);
 
