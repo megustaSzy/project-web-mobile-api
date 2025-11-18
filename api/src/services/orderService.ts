@@ -1,3 +1,4 @@
+import { error } from "console";
 import prisma from "../lib/prisma";
 
 
@@ -63,5 +64,18 @@ export const orderService = {
                 id: 'asc'
             }
         })
+    },
+
+    async getOderById(id: number) {
+        const order = prisma.tb_orders.findUnique({
+            where: {
+                id
+            }
+        });
+
+        if(!order) throw new Error("order tidak ditemukan");
+
+
+        return order
     }
 }
