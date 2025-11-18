@@ -52,5 +52,16 @@ export const orderService = {
         });
 
         return order
+    },
+
+    async getOrdersByUser(userId: number) {
+        return await prisma.tb_orders.findMany({
+            where: {
+                userId
+            },
+            orderBy: {
+                id: 'asc'
+            }
+        })
     }
 }
