@@ -1,17 +1,15 @@
 import { Router } from "express";
 import { authMiddleware } from "../middlewares/authMiddleware";
+import { authorizeRoles } from "../middlewares/roleMiddleware";
 import { adminOrderController } from "../controllers/adminOrderController";
-
-
 
 const router = Router();
 
+// ADMIN ONLY
+router.get("/", authMiddleware, authorizeRoles("Admin"), adminOrderController.getAllOrders);
 
-router.get("/", authMiddleware, adminOrderController.getAllOrders);
+router.get("/:id", authMiddleware, authorizeRoles("Admin"), adminOrderController.getAllById);
 
-router.get("/:id", authMiddleware, adminOrderController.getAllOrderById);
+router.delete("/:id", authMiddleware, authorizeRoles("Admin"), adminOrderController.deleteOrderById);
 
-router.delete("/:id", authMiddleware, adminOrderController.deleteOrderById);
-
-
-export default router
+export default router;

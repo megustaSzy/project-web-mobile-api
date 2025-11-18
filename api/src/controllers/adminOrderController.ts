@@ -24,7 +24,7 @@ export const adminOrderController = {
 
     },
 
-    async getAllOrderById(req: Request, res: Response) {
+    async getAllById(req: Request, res: Response) {
         try {
             const id = Number(req.params.id);
             const order = await adminOrderService.getOrderById(id);
