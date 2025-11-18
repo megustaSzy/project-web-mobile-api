@@ -5,6 +5,8 @@ import { useState } from "react";
 import Image from "next/image";
 import { wisataByKabupaten } from "@/app/data/wisata";
 import { MapPin } from "lucide-react";
+import NavBar from "../components/NavBar";
+import Footer from "../components/Footer";
 
 const categories = ["Pantai", "Pulau", "Gunung", "Air Terjun", "Bukit"];
 
@@ -112,6 +114,8 @@ export default function PesananTourPage() {
           ))
         )}
       </div>
+      <NavBar />
+      <Footer />
     </section>
   );
 }
