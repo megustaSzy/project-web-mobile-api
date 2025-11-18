@@ -29,7 +29,28 @@ export const orderService = {
         // hitung total harga
         const totalPrice = schedule.destination.price * tickets;
 
-
         // insert ke tb orders
+        const order = await prisma.tb_orders.create({
+            data: {
+                userId,
+                scheduleId,
+                tickets,
+                totalPrice,
+
+                userName: user.name,
+                userPhone: user.notelp,
+
+
+                destinationName: schedule.destination.name,
+                destinationPrice: schedule.destination.price,
+
+
+                // snapshot jadwal
+                date: schedule.date,
+                time: schedule.time
+            }
+        });
+
+        return order
     }
 }
