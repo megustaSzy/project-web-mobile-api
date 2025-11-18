@@ -26,7 +26,7 @@ export const destinationController = {
             if(isNaN(id)) createError("id tidak valid", 400);
 
             const destination = await destinationService.getDestinationById(id);
-            if(!destination) createError("user tidak ditemukan", 404);
+            if(!destination) createError("destinasi tidak ditemukan", 404);
 
             return res.status(200).json({
                 success: true,
