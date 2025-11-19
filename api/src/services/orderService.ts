@@ -2,14 +2,13 @@ import prisma from "../lib/prisma";
 
 export const orderService = {
     async createOrder(userId: number, scheduleId: number, tickets: number) {
-
         // Pastikan user ada
         const user = await prisma.tb_user.findUnique({
             where: { id: userId }
         });
 
         if (!user) throw new Error("User tidak ditemukan");
-
+        
         // Ambil jadwal + destinasi
         const schedule = await prisma.tb_schedules.findUnique({
             where: { id: scheduleId },
