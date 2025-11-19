@@ -15,6 +15,8 @@ export default function AdminDashboard() {
 
       {/* TABLE WITH TABS */}
       <DocumentsTable />
+
+
     </div>
   );
 }

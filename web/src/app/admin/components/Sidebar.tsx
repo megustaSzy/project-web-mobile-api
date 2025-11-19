@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import Link from "next/link";
 
 export default function Sidebar() {
   return (
@@ -12,8 +13,25 @@ export default function Sidebar() {
 
       <div className="flex flex-col gap-1 text-sm">
         <span className="text-xs font-semibold text-slate-500 px-2">Kelola</span>
-        <Button variant="ghost" className="justify-start">Manajement Pengguna</Button>
-        <Button variant="ghost" className="justify-start">Manajement Destinasi</Button>
+
+        <Link href="/admin">
+  <Button variant="ghost" className="justify-start w-full">Beranda</Button>
+</Link>
+
+<Link href="/admin/manajment-pengguna">
+  <Button variant="ghost" className="justify-start w-full">
+    Manajement Pengguna
+  </Button>
+</Link>
+
+
+
+       <Link href="/admin/manajment-destinasi">
+  <Button variant="ghost" className="justify-start w-full">
+    Manajement Destinasi
+  </Button>
+</Link>
+
         <Button variant="ghost" className="justify-start">Kategori Destinasi</Button>
         <Button variant="ghost" className="justify-start">Kategori Provinsi</Button>
         <Button variant="ghost" className="justify-start">Ticket</Button>
@@ -25,6 +43,7 @@ export default function Sidebar() {
             <AvatarImage src="/images/logo.png" />
             <AvatarFallback>LG</AvatarFallback>
           </Avatar>
+
           <div className="text-sm">
             <p className="font-medium">LamiGo</p>
             <p className="text-xs text-slate-500">LamiGo@Yahoo.com</p>
