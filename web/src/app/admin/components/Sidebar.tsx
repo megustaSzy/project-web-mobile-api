@@ -11,21 +11,23 @@ export default function Sidebar() {
       <Button className="w-full mb-4">+ Quick Create</Button>
 
       <div className="flex flex-col gap-1 text-sm">
-        <span className="text-xs font-semibold text-slate-500 px-2">Dashboards</span>
-        <Button variant="ghost" className="justify-start">Default</Button>
-        <Button variant="ghost" className="justify-start">CRM</Button>
-        <Button variant="ghost" className="justify-start">Finance</Button>
+        <span className="text-xs font-semibold text-slate-500 px-2">Kelola</span>
+        <Button variant="ghost" className="justify-start">Manajement Pengguna</Button>
+        <Button variant="ghost" className="justify-start">Manajement Destinasi</Button>
+        <Button variant="ghost" className="justify-start">Kategori Destinasi</Button>
+        <Button variant="ghost" className="justify-start">Kategori Provinsi</Button>
+        <Button variant="ghost" className="justify-start">Ticket</Button>
       </div>
 
       <div className="mt-auto pt-4">
         <div className="flex items-center gap-3 p-2 border rounded-lg">
           <Avatar className="h-10 w-10">
-            <AvatarImage src="/avatar.png" />
-            <AvatarFallback>AK</AvatarFallback>
+            <AvatarImage src="/images/logo.png" />
+            <AvatarFallback>LG</AvatarFallback>
           </Avatar>
           <div className="text-sm">
-            <p className="font-medium">Arhan Khan</p>
-            <p className="text-xs text-slate-500">hello@arhankhz.com</p>
+            <p className="font-medium">LamiGo</p>
+            <p className="text-xs text-slate-500">LamiGo@Yahoo.com</p>
           </div>
         </div>
       </div>
