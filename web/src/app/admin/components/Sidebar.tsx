@@ -37,7 +37,11 @@ export default function Sidebar() {
     Kategori Wisata
   </Button>
 </Link>
-        <Button variant="ghost" className="justify-start">Kategori Provinsi</Button>
+             <Link href="/admin/kategori-kabupaten">
+  <Button variant="ghost" className="justify-start w-full">
+    Kategori Kabupaten
+  </Button>
+</Link>
         <Button variant="ghost" className="justify-start">Ticket</Button>
       </div>
 
