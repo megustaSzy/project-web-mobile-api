@@ -18,13 +18,14 @@ export const adminOrderController = {
 
         } catch (error: any) {
             res.status(500).json({
-                message: error.message
+                message: error.message,
+                success: false
             })
         }
 
     },
 
-    async getAllById(req: Request, res: Response) {
+    async getOrderById(req: Request, res: Response) {
         try {
             const id = Number(req.params.id);
             const order = await adminOrderService.getOrderById(id);
@@ -36,11 +37,11 @@ export const adminOrderController = {
             });
         } catch (error: any) {
             res.status(404).json({
-                message: error.message
+                message: error.message,
+                success: false
             })
         }
     },
-
 
     async deleteOrderById(req: Request, res: Response) {
         try {
@@ -55,7 +56,8 @@ export const adminOrderController = {
 
         } catch (error: any) {
             res.status(404).json({
-                message: error.message
+                message: error.message,
+                success: false
             })
         }
     }

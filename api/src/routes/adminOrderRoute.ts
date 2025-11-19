@@ -8,7 +8,7 @@ const router = Router();
 // ADMIN ONLY
 router.get("/", authMiddleware, authorizeRoles("Admin"), adminOrderController.getAllOrders);
 
-router.get("/:id", authMiddleware, authorizeRoles("Admin"), adminOrderController.getAllById);
+router.get("/:id", authMiddleware, authorizeRoles("Admin"), adminOrderController.getOrderById);
 
 router.delete("/:id", authMiddleware, authorizeRoles("Admin"), adminOrderController.deleteOrderById);
 

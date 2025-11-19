@@ -29,9 +29,9 @@ Project terdiri dari **Backend (API)**, **Frontend Web**, dan **Frontend Mobile*
 ## 📁 **Project Structure**
 
 ```
-/lamigo-backend
-/lamigo-web
-/lamigo-mobile
+/api
+/web
+/mobile
 ```
 
 ---

@@ -15,7 +15,6 @@ export const pickupLocationService = {
             }
         })
     },
-
     // get by id
     async getPickupById(id: number) {
         return prisma.tb_pickup_locations.findUnique({
@@ -51,7 +50,7 @@ export const pickupLocationService = {
             data
         })
     },
-    
+
     async deletePickupById(id: number) {
         return prisma.tb_pickup_locations.delete({
             where:{
