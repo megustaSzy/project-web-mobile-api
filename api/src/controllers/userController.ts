@@ -48,7 +48,7 @@ export const userController = {
         throw createError("Akses ditolak", 403);
       }
 
-      const updatedUser = await userService.updatedUserById(id, req.body);
+      const updatedUser = await userService.updateUserById(id, req.body);
 
       return res.status(200).json({
         success: true,
