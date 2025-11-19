@@ -48,6 +48,7 @@ export const authController = {
                 success: true,
                 user,
                 token,
+                refreshToken,
             });
 
         } catch (error: any) {

@@ -50,7 +50,7 @@ export const pickupLocationService = {
             data
         })
     },
-    
+
     async deletePickupById(id: number) {
         return prisma.tb_pickup_locations.delete({
             where:{
