@@ -41,11 +41,11 @@ Project terdiri dari **Backend (API)**, **Frontend Web**, dan **Frontend Mobile*
 ### Clone Repository
 
 ```bash
-git clone https://github.com/username/lamigo-backend.git
-cd lamigo-backend
+git clone https://github.com/megustaSzy/project-web-mobile-api.git
+cd api
 ```
 
-### \*\*1. Set up API
+### **1. Set up API
 
 ```bash
 cd api
@@ -85,8 +85,8 @@ npm run dev
 ### **1. Clone Repository**
 
 ```bash
-https://github.com/megustaSzy/project-web-mobile-api.git
-cd project-web-mobile-api
+git clone https://github.com/megustaSzy/project-web-mobile-api.git
+cd web
 ```
 
 ```bash
@@ -120,8 +120,8 @@ npm run dev
 ### **1. Clone Repository**
 
 ```bash
-git clone https://github.com/username/lamigo-mobile.git
-cd lamigo-mobile
+git clone https://github.com/megustaSzy/project-web-mobile-api.git
+cd mobile
 ```
 
 ### **2. Install Dependencies**
