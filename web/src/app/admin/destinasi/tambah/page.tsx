@@ -53,12 +53,14 @@ export default function Page() {
   }
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-semibold mb-6">Tambah Destinasi</h1>
+  <div className="p-6 max-w-4xl mx-auto">
+    <h1 className="text-2xl font-semibold mb-6">Tambah Destinasi</h1>
 
-      <div className="space-y-4 bg-white p-6 rounded-xl border shadow-sm">
+    <div className="space-y-6 bg-white p-6 rounded-xl border shadow-sm">
 
-        {/* NAMA */}
+      {/* ROW 1: NAMA & HARGA */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* NAMA DESTINASI */}
         <div>
           <label className="font-medium">Nama Destinasi</label>
           <input
@@ -73,7 +75,7 @@ export default function Page() {
 
         {/* HARGA */}
         <div>
-          <label className="font-medium">Harga</label>
+          <label className="font-medium">Harga Tiket</label>
           <input
             type="text"
             name="harga"
@@ -83,7 +85,10 @@ export default function Page() {
             placeholder="Contoh: Rp25.000"
           />
         </div>
+      </div>
 
+      {/* ROW 2: KABUPATEN & KATEGORI */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* KABUPATEN */}
         <div>
           <label className="font-medium">Kabupaten</label>
@@ -104,7 +109,7 @@ export default function Page() {
 
         {/* KATEGORI */}
         <div>
-          <label className="font-medium">Kategori</label>
+          <label className="font-medium">Kategori Wisata</label>
           <select
             name="kategori"
             value={form.kategori}
@@ -119,37 +124,39 @@ export default function Page() {
             ))}
           </select>
         </div>
+      </div>
 
-        {/* DESKRIPSI */}
-        <div>
-          <label className="font-medium">Deskripsi</label>
-          <textarea
-            name="deskripsi"
-            value={form.deskripsi}
-            onChange={handleInput}
-            rows={4}
-            className="w-full mt-1 border rounded-lg px-3 py-2"
-            placeholder="Tulis deskripsi destinasi..."
-          />
-        </div>
+      {/* DESKRIPSI */}
+      <div>
+        <label className="font-medium">Deskripsi</label>
+        <textarea
+          name="deskripsi"
+          value={form.deskripsi}
+          onChange={handleInput}
+          rows={4}
+          className="w-full mt-1 border rounded-lg px-3 py-2"
+          placeholder="Tulis deskripsi destinasi..."
+        />
+      </div>
 
-        {/* UPLOAD GAMBAR */}
-        <div>
-          <label className="font-medium">Upload Gambar</label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImage}
-            className="w-full mt-1 border rounded-lg px-3 py-2"
-          />
-        </div>
+      {/* UPLOAD GAMBAR */}
+      <div>
+        <label className="font-medium">Upload Gambar</label>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleImage}
+          className="w-full mt-1 border rounded-lg px-3 py-2"
+        />
+      </div>
 
-        {/* BUTTON */}
-        <div className="flex justify-end gap-3 pt-4">
-          <Button variant="outline">Batal</Button>
-          <Button onClick={handleSubmit}>Simpan</Button>
-        </div>
+      {/* BUTTON */}
+      <div className="flex justify-end gap-3 pt-4">
+        <Button variant="outline">Batal</Button>
+        <Button onClick={handleSubmit}>Simpan</Button>
       </div>
     </div>
-  );
+  </div>
+);
+
 }
