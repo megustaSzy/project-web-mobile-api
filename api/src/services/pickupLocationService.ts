@@ -15,7 +15,6 @@ export const pickupLocationService = {
             }
         })
     },
-
     // get by id
     async getPickupById(id: number) {
         return prisma.tb_pickup_locations.findUnique({

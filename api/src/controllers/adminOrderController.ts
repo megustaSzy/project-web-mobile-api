@@ -41,7 +41,6 @@ export const adminOrderController = {
         }
     },
 
-
     async deleteOrderById(req: Request, res: Response) {
         try {
             

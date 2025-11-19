@@ -1,9 +1,6 @@
 import prisma from "../lib/prisma";
 
 export const orderService = {
-    // ==========================
-    // CREATE ORDER
-    // ==========================
     async createOrder(userId: number, scheduleId: number, tickets: number) {
 
         // Pastikan user ada
@@ -52,9 +49,6 @@ export const orderService = {
         return order;
     },
 
-    // ==========================
-    // GET MY ORDERS
-    // ==========================
     async getOrdersByUser(userId: number) {
         return await prisma.tb_orders.findMany({
             where: { userId },
@@ -64,9 +58,6 @@ export const orderService = {
         });
     },
 
-    // ==========================
-    // GET ORDER BY ID
-    // ==========================
     async getOrderById(id: number) {
         const order = await prisma.tb_orders.findUnique({
             where: { id }

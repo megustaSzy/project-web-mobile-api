@@ -12,7 +12,6 @@ interface UserData{
 }
 
 export const userService = {
-
     // GET all
     async getAllUsers() {
         return prisma.tb_user.findMany({

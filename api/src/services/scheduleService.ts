@@ -10,7 +10,6 @@ export interface ScheduleData{
 }
 
 export const scheduleService = {
-
     // Get ALL schedule
     async getAllSchedules() {
 

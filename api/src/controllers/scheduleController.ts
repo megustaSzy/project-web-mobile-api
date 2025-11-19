@@ -35,7 +35,6 @@ export const scheduleController = {
             next(error)
         }
     },
-
     // controller POST
     async createSchedule(req: Request, res: Response, next: NextFunction) {
         try {
