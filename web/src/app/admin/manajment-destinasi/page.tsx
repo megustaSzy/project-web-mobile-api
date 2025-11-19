@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function Page() {
     const router = useRouter();
@@ -89,9 +90,12 @@ export default function Page() {
                 {/* TOMBOL Aksi */}
                <td className="py-3 px-4">
   <div className="flex justify-center gap-2">
-    <Button size="sm" variant="outline" className="min-w-[70px]">
-      Edit
-    </Button>
+    
+<Link href="/admin/destinasi/edit">
+  <Button size="sm" variant="outline" className="min-w-[70px]">
+    Edit
+  </Button>
+</Link>
     <Button size="sm" variant="destructive" className="min-w-[70px]">
       Hapus
     </Button>
