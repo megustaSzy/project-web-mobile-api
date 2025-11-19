@@ -42,7 +42,11 @@ export default function Sidebar() {
     Kategori Kabupaten
   </Button>
 </Link>
-        <Button variant="ghost" className="justify-start">Ticket</Button>
+        <Link href="/admin/tiket">
+  <Button variant="ghost" className="justify-start w-full">
+    Tiket
+  </Button>
+</Link>
       </div>
 
       <div className="mt-auto pt-4">

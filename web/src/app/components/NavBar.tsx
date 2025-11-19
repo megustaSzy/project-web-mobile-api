@@ -91,7 +91,7 @@ export default function NavBar() {
           <Link href="/tourlist" className="hover:text-blue-500">
             Tour List
           </Link>
-          <Link href="#tickets" className="hover:text-blue-500">
+          <Link href="/tiket" className="hover:text-blue-500">
             My Ticket
           </Link>
             <button
