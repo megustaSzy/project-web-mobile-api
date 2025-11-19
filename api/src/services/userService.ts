@@ -31,7 +31,7 @@ export const userService = {
     },
 
     // update user by ID
-    async updateUserById(id: number, data: UserData) {
+    async updatedUserById(id: number, data: UserData) {
         
         const user = await prisma.tb_user.findUnique({
             where: {
