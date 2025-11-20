@@ -9,10 +9,10 @@ Project terdiri dari **Backend (API)**, **Frontend Web**, dan **Frontend Mobile*
 
 ### **Backend**
 
-- **Express** (TypeScript)
-- **Prisma ORM**
-- **PostgreSQL**
-- **JWT Authentication**
+- **Programming Langueage**: Express (v5.1.0)
+- **ORM**: Prisma (v6.19.0)
+- **Database**: PostgreSQL (v17.6.1)
+- **Authentication**: Jsonwebtoken (v9.0.2)
 
 ### **Frontend Web**
 
@@ -45,7 +45,7 @@ git clone https://github.com/megustaSzy/project-web-mobile-api.git
 cd api
 ```
 
-### **1. Set up API
+### 1. Set up API
 
 ```bash
 cd api
