@@ -1,9 +1,9 @@
-# **Backend**
+# **Tech Stack Backend**
 
-* **Programming Language**: Express (v5.1.0) — *Framework Node.js untuk membangun REST API.*
-* **ORM**: Prisma (v6.19.0) — *Mengelola database menggunakan model schema, migration, dan query builder.*
-* **Database**: PostgreSQL (v17.6.1) — *Penyimpanan data utama aplikasi.*
-* **Authentication**: Jsonwebtoken (v9.0.2) — *Digunakan untuk sistem login & proteksi endpoint menggunakan token.*
+* **Programming Langueage**: Express (v5.1.0)
+* **ORM**: Prisma (v6.19.0) 
+* **Database**: PostgreSQL (v17.6.1) — 
+* **Authentication**: Jsonwebtoken (v9.0.2) 
 
 ---
 
@@ -94,4 +94,3 @@ Dokumentasi lengkap endpoint (Users, Auth, Schedule, Order, dsb):
 
 ---
 
-Kalau mau, saya bisa bikin versi **lebih estetik**, **lebih ringkas**, atau **lebih teknis untuk developer**.
