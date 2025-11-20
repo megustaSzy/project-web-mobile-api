@@ -16,13 +16,14 @@ Project terdiri dari **Backend (API)**, **Frontend Web**, dan **Frontend Mobile*
 
 ### **Frontend Web**
 
-- **Next.js**
-- **Tailwind CSS**
-- **Shadcn/UI**
+- **Programming Langueage**: NextJS (v16.0.1) 
+- **UI Library**
+* Tailwind CSS (v4)
 
 ### **Frontend Mobile**
 
-- **React Native (Expo)**
+- **Programming Language**: React Native Expo (v54.0.23)
+- **UI Library**: React Native Paper
 
 ---
 
