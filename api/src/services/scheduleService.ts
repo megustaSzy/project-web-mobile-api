@@ -1,112 +1,112 @@
-import prisma from "../lib/prisma";
+import prisma from "../lib/prisma"
 import { createError } from "../utils/createError";
 
-export interface ScheduleData {
-  pickupLocationId: number;
-  destinationId: number;
-  time: string;
-  date: string;
+export interface ScheduleData{
+    pickupLocationId: number,
+    destinationId: number,
+    time: string,
+    date: string
 }
 
 export const scheduleService = {
+    // Get ALL schedule
+    async getAllSchedules() {
 
-  // GET all schedules
-  // Mengambil semua jadwal, termasuk relasi pickupLocation & destination
-  async getAllSchedules() {
-    return prisma.tb_schedules.findMany({
-      include: {
-        pickupLocation: true,
-        destination: true,
-      },
-      orderBy: {
-        date: "asc",
-      },
-    });
-  },
+        return prisma.tb_schedules.findMany({
+            include: {
+                pickupLocation: true,
+                destination: true
+            },
+            orderBy: {
+                date: 'asc'
+            }
+        });
+    },
 
-  // GET schedule by ID
-  // Mengambil schedule berdasarkan ID
-  async getScheduleById(id: number) {
-    const schedule = await prisma.tb_schedules.findUnique({
-      where: { id },
-      include: {
-        pickupLocation: true,
-        destination: true,
-      },
-    });
+    async getScheduleById(id: number) {
+        return prisma.tb_schedules.findUnique({
+            where: {
+                id
+            },
+            include: {
+                pickupLocation: true,
+                destination: true
+            }
+        })
+    },
 
-    if (!schedule) createError("Schedule tidak ditemukan", 404);
+    async createSchedule(data: ScheduleData) {
+        const existingSchedule = await prisma.tb_schedules.findFirst({
+            where: {
+                pickupLocationId: data.pickupLocationId,
+                destinationId: data.destinationId,
+                time: data.time,
+                date: new Date(data.date)
+            }
+        });
 
-    return schedule;
-  },
+        if(existingSchedule) {
+            throw new Error("schedule sudah ada, tidak boleh duplikat")
+        }
 
-  // CREATE new schedule
-  // Membuat schedule baru, mencegah duplikat
-  async createSchedule(data: ScheduleData) {
-    const existingSchedule = await prisma.tb_schedules.findFirst({
-      where: {
-        pickupLocationId: data.pickupLocationId,
-        destinationId: data.destinationId,
-        time: data.time,
-        date: new Date(data.date),
-      },
-    });
+        return prisma.tb_schedules.create({
+            data: {
+                pickupLocationId: data.pickupLocationId,
+                destinationId: data.destinationId,
+                time: data.time,
+                date: new Date(data.date)
+            }
+        })
+    },
 
-    if (existingSchedule) createError("Schedule sudah ada, tidak boleh duplikat", 400);
+    async updateSchedule(id: number, data: ScheduleData) {
+        return prisma.tb_schedules.update({
+            where: {
+                id
+            },
+            data: {
+                pickupLocationId: data.pickupLocationId,
+                destinationId: data.destinationId,
+                time: data.time,
+                date: new Date(data.date)
+            }
+        });
+    },
 
-    return prisma.tb_schedules.create({
-      data: {
-        pickupLocationId: data.pickupLocationId,
-        destinationId: data.destinationId,
-        time: data.time,
-        date: new Date(data.date),
-      },
-    });
-  },
+    async deleteSchedule (id: number) {
+        const deleteId = await prisma.tb_schedules.findUnique({
+            where: {
+                id
+            }
+        })
 
-  // UPDATE schedule by ID
-  // Mengubah jadwal berdasarkan ID
-  async updateSchedule(id: number, data: ScheduleData) {
-    const schedule = await prisma.tb_schedules.findUnique({ where: { id } });
-    if (!schedule) createError("Schedule tidak ditemukan", 404);
+        if(!deleteId) createError("id tidak ditemukan", 404)
 
-    return prisma.tb_schedules.update({
-      where: { id },
-      data: {
-        pickupLocationId: data.pickupLocationId,
-        destinationId: data.destinationId,
-        time: data.time,
-        date: new Date(data.date),
-      },
-    });
-  },
+        return prisma.tb_schedules.delete({
+            where: {
+                id
+            }
+        })
+    },
 
-  // DELETE schedule by ID
-  // Menghapus jadwal berdasarkan ID
-  async deleteSchedule(id: number) {
-    const schedule = await prisma.tb_schedules.findUnique({ where: { id } });
-    if (!schedule) createError("Schedule tidak ditemukan", 404);
+    async searchSchedule(filters: ScheduleData) {
 
-    return prisma.tb_schedules.delete({ where: { id } });
-  },
+        const { pickupLocationId, destinationId, time, date } = filters;
 
-  // SEARCH schedule dengan filter opsional
-  // Mencari schedule berdasarkan pickupLocation, destination, time, dan date
-  async searchSchedule(filters: Partial<ScheduleData>) {
-    const { pickupLocationId, destinationId, time, date } = filters;
-
-    return prisma.tb_schedules.findMany({
-      where: {
-        pickupLocationId: pickupLocationId ? Number(pickupLocationId) : undefined,
-        destinationId: destinationId ? Number(destinationId) : undefined,
-        time: time || undefined,
-        date: date ? new Date(date) : undefined,
-      },
-      include: {
-        pickupLocation: true,
-        destination: true,
-      },
-      orderBy: { id: "asc" },
-    });
-  },
-};
+        return prisma.tb_schedules.findMany({
+            where: {
+                pickupLocationId: pickupLocationId ? Number(pickupLocationId) : undefined,
+                destinationId: destinationId ? Number(destinationId) : undefined,
+                date: date ? new Date(date) : undefined,
+                time: time || undefined,
+            },
+            include: {
+                pickupLocation: true,
+                destination: true,
+            },
+            orderBy: {
+                id: 'asc',
+            },
+        });
+    }
+}
