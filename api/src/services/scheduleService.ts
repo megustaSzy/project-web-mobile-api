@@ -1,112 +1,129 @@
-import prisma from "../lib/prisma"
+import prisma from "../lib/prisma";
 import { createError } from "../utils/createError";
 
-export interface ScheduleData{
-    pickupLocationId: number,
-    destinationId: number,
-    time: string,
-    date: string
+export interface ScheduleData {
+  pickupLocationId: number;
+  destinationId: number;
+  time: string;
+  date: string; // format harus YYYY-MM-DD
+}
+
+// Helper: parsing date aman
+function parseSafeDate(date: string): Date {
+  const parsed = new Date(date + "T00:00:00");
+  if (isNaN(parsed.getTime())) {
+    throw createError("Format tanggal tidak valid (gunakan YYYY-MM-DD)", 400);
+  }
+  return parsed;
 }
 
 export const scheduleService = {
-    // Get ALL schedule
-    async getAllSchedules() {
+  // GET ALL
+  async getAllSchedules() {
+    return prisma.tb_schedules.findMany({
+      include: {
+        pickupLocation: true,
+        destination: true,
+      },
+      orderBy: {
+        date: "asc",
+      },
+    });
+  },
 
-        return prisma.tb_schedules.findMany({
-            include: {
-                pickupLocation: true,
-                destination: true
-            },
-            orderBy: {
-                date: 'asc'
-            }
-        });
-    },
+  // GET BY ID
+  async getScheduleById(id: number) {
+    const schedule = await prisma.tb_schedules.findUnique({
+      where: { id },
+      include: {
+        pickupLocation: true,
+        destination: true,
+      },
+    });
 
-    async getScheduleById(id: number) {
-        return prisma.tb_schedules.findUnique({
-            where: {
-                id
-            },
-            include: {
-                pickupLocation: true,
-                destination: true
-            }
-        })
-    },
+    if (!schedule) throw createError("ID schedule tidak ditemukan", 404);
 
-    async createSchedule(data: ScheduleData) {
-        const existingSchedule = await prisma.tb_schedules.findFirst({
-            where: {
-                pickupLocationId: data.pickupLocationId,
-                destinationId: data.destinationId,
-                time: data.time,
-                date: new Date(data.date)
-            }
-        });
+    return schedule;
+  },
 
-        if(existingSchedule) {
-            throw new Error("schedule sudah ada, tidak boleh duplikat")
-        }
+  // CREATE
+  async createSchedule(data: ScheduleData) {
+    return prisma.$transaction(async (tx) => {
+      const parsedDate = parseSafeDate(data.date);
 
-        return prisma.tb_schedules.create({
-            data: {
-                pickupLocationId: data.pickupLocationId,
-                destinationId: data.destinationId,
-                time: data.time,
-                date: new Date(data.date)
-            }
-        })
-    },
+      // Cek duplikat
+      const existingSchedule = await tx.tb_schedules.findFirst({
+        where: {
+          pickupLocationId: data.pickupLocationId,
+          destinationId: data.destinationId,
+          time: data.time,
+          date: parsedDate,
+        },
+      });
 
-    async updateSchedule(id: number, data: ScheduleData) {
-        return prisma.tb_schedules.update({
-            where: {
-                id
-            },
-            data: {
-                pickupLocationId: data.pickupLocationId,
-                destinationId: data.destinationId,
-                time: data.time,
-                date: new Date(data.date)
-            }
-        });
-    },
+      if (existingSchedule) {
+        throw createError("Schedule sudah ada, tidak boleh duplikat", 400);
+      }
 
-    async deleteSchedule (id: number) {
-        const deleteId = await prisma.tb_schedules.findUnique({
-            where: {
-                id
-            }
-        })
+      // Create schedule
+      return tx.tb_schedules.create({
+        data: {
+          pickupLocationId: data.pickupLocationId,
+          destinationId: data.destinationId,
+          time: data.time,
+          date: parsedDate,
+        },
+      });
+    });
+  },
 
-        if(!deleteId) createError("id tidak ditemukan", 404)
+  // UPDATE
+  async updateSchedule(id: number, data: ScheduleData) {
+    const parsedDate = parseSafeDate(data.date);
 
-        return prisma.tb_schedules.delete({
-            where: {
-                id
-            }
-        })
-    },
+    const schedule = await prisma.tb_schedules.findUnique({
+      where: { id },
+    });
 
-    async searchSchedule(filters: ScheduleData) {
+    if (!schedule) throw createError("ID schedule tidak ditemukan", 404);
 
-        const { pickupLocationId, destinationId, time, date } = filters;
+    return prisma.tb_schedules.update({
+      where: { id },
+      data: {
+        pickupLocationId: data.pickupLocationId,
+        destinationId: data.destinationId,
+        time: data.time,
+        date: parsedDate,
+      },
+    });
+  },
 
-        return prisma.tb_schedules.findMany({
-            where: {
-                pickupLocationId: pickupLocationId ? Number(pickupLocationId) : undefined,
-                destinationId: destinationId ? Number(destinationId) : undefined,
-                date: date ? new Date(date) : undefined,
-                time: time || undefined,
-            },
-            include: {
-                pickupLocation: true,
-                destination: true,
-            },
-            orderBy: {
-                id: 'asc',
-            },
-        });
-    }
-}
+  // DELETE
+  async deleteSchedule(id: number) {
+    const existing = await prisma.tb_schedules.findUnique({ where: { id } });
+    if (!existing) throw createError("ID schedule tidak ditemukan", 404);
+
+    return prisma.tb_schedules.delete({ where: { id } });
+  },
+
+  // SEARCH
+  async searchSchedule(filters: Partial<ScheduleData>) {
+    const { pickupLocationId, destinationId, time, date } = filters;
+
+    return prisma.tb_schedules.findMany({
+      where: {
+        pickupLocationId: pickupLocationId ? Number(pickupLocationId) : undefined,
+        destinationId: destinationId ? Number(destinationId) : undefined,
+        time: time || undefined,
+        date: date ? parseSafeDate(date) : undefined,
+      },
+      include: {
+        pickupLocation: true,
+        destination: true,
+      },
+      orderBy: {
+        id: "asc",
+      },
+    });
+  },
+};
