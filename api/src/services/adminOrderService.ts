@@ -1,41 +1,31 @@
-import prisma from "../lib/prisma"
-
+import prisma from "../lib/prisma";
+import { createError } from "../utils/createError";
 
 export const adminOrderService = {
 
-    async getAllOrders() {
-        return await prisma.tb_orders.findMany({
-            orderBy: {
-                id: 'asc'
-            }
-        });
-    },
+  // GET all orders
+  // Mengambil semua order
+  async getAllOrders() {
+    return prisma.tb_orders.findMany({
+      orderBy: { id: "asc" },
+    });
+  },
 
-    async getOrderById(id: number) {
-        const order = await prisma.tb_orders.findUnique({
-            where: {
-                id
-            }
-        });
+  // GET order by ID
+  // Mengambil detail order berdasarkan ID
+  async getOrderById(id: number) {
+    const order = await prisma.tb_orders.findUnique({ where: { id } });
+    if (!order) createError("Order tidak ditemukan", 404);
 
-        if(!order) throw new Error("order tidak ditemukan");
-        return order
-    },
+    return order;
+  },
 
-    async deleteById(id: number) {
-        const order = await prisma.tb_orders.findUnique({
-            where: {
-                id
-            }
-        });
+  // DELETE order by ID
+  // Menghapus order berdasarkan ID
+  async deleteById(id: number) {
+    const order = await prisma.tb_orders.findUnique({ where: { id } });
+    if (!order) createError("Order tidak ditemukan", 404);
 
-        if(!order) throw new Error("order tidak ditemukan");
-
-        return await prisma.tb_orders.delete({
-            where: {
-                id
-            }
-        })
-    }
-
-}
+    return prisma.tb_orders.delete({ where: { id } });
+  },
+};

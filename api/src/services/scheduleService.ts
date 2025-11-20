@@ -1,4 +1,3 @@
-
 import prisma from "../lib/prisma"
 import { createError } from "../utils/createError";
 
@@ -69,7 +68,7 @@ export const scheduleService = {
                 pickupLocationId: data.pickupLocationId,
                 destinationId: data.destinationId,
                 time: data.time,
-                date: data.date
+                date: new Date(data.date)
             }
         });
     },

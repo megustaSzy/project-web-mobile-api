@@ -153,3 +153,8 @@ npx expo start
 - Kelola jadwal, destinasi, pembayaran, dan tiket
 - Dashboard admin berbasis web
 - Aplikasi mobile untuk user (React Native)
+
+
+# **Link Dokumentasi API**
+
+https://documenter.getpostman.com/view/49345109/2sB3WwrdGU
