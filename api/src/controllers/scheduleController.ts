@@ -1,9 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { scheduleService } from "../services/scheduleService";
-import { createError } from "../utils/createError";
+import { createError } from "../utilities/createError";
 
 export const scheduleController = {
-
   // GET all schedules
   // Mengambil semua schedule dari database
   async getAllSchedules(req: Request, res: Response, next: NextFunction) {
@@ -40,51 +39,52 @@ export const scheduleController = {
   // POST create new schedule
   // Membuat schedule baru dengan data dari request body
   async createSchedule(req: Request, res: Response, next: NextFunction) {
-  try {
-    const { pickupLocationId, destinationId, time, date } = req.body;
+    try {
+      const { pickupLocationId, destinationId, time, date } = req.body;
 
-    if (!pickupLocationId || !destinationId || !time || !date) {
-      return res.status(400).json({
-        success: false,
-        message: "pickupLocationId, destinationId, time, dan date wajib diisi",
+      if (!pickupLocationId || !destinationId || !time || !date) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "pickupLocationId, destinationId, time, dan date wajib diisi",
+        });
+      }
+
+      // Validasi waktu format HH:MM
+      if (!/^\d{2}:\d{2}$/.test(time)) {
+        return res.status(400).json({
+          success: false,
+          message: "Format time harus HH:MM",
+        });
+      }
+
+      // Validasi tanggal
+      const parsedDate = new Date(date);
+      if (isNaN(parsedDate.getTime())) {
+        return res.status(400).json({
+          success: false,
+          message: "Format date tidak valid (gunakan YYYY-MM-DD)",
+        });
+      }
+
+      const data = {
+        pickupLocationId: Number(pickupLocationId),
+        destinationId: Number(destinationId),
+        time: String(time),
+        date: String(date),
+      };
+
+      const schedule = await scheduleService.createSchedule(data);
+
+      return res.status(201).json({
+        success: true,
+        message: "Schedule berhasil dibuat",
+        data: schedule,
       });
+    } catch (error) {
+      next(error);
     }
-
-    // Validasi waktu format HH:MM
-    if (!/^\d{2}:\d{2}$/.test(time)) {
-      return res.status(400).json({
-        success: false,
-        message: "Format time harus HH:MM"
-      });
-    }
-
-    // Validasi tanggal
-    const parsedDate = new Date(date);
-    if (isNaN(parsedDate.getTime())) {
-      return res.status(400).json({
-        success: false,
-        message: "Format date tidak valid (gunakan YYYY-MM-DD)"
-      });
-    }
-
-    const data = {
-      pickupLocationId: Number(pickupLocationId),
-      destinationId: Number(destinationId),
-      time: String(time),
-      date: String(date),
-    };
-
-    const schedule = await scheduleService.createSchedule(data);
-
-    return res.status(201).json({
-      success: true,
-      message: "Schedule berhasil dibuat",
-      data: schedule,
-    });
-  } catch (error) {
-    next(error);
-  }
-},
+  },
   // PUT update schedule by ID
   // Mengubah data schedule berdasarkan ID
   async editScheduleById(req: Request, res: Response, next: NextFunction) {
@@ -138,5 +138,4 @@ export const scheduleController = {
       next(error);
     }
   },
-
 };

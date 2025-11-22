@@ -51,7 +51,6 @@ export const authController = {
         message: "Login berhasil",
         user,
         token,
-        refreshToken,
       });
 
     } catch (error: any) {

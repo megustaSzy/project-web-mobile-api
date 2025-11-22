@@ -1,5 +1,5 @@
 import prisma from "../lib/prisma";
-import { createError } from "../utils/createError";
+import { createError } from "../utilities/createError";
 
 export interface ScheduleData {
   pickupLocationId: number;
@@ -112,7 +112,9 @@ export const scheduleService = {
 
     return prisma.tb_schedules.findMany({
       where: {
-        pickupLocationId: pickupLocationId ? Number(pickupLocationId) : undefined,
+        pickupLocationId: pickupLocationId
+          ? Number(pickupLocationId)
+          : undefined,
         destinationId: destinationId ? Number(destinationId) : undefined,
         time: time || undefined,
         date: date ? parseSafeDate(date) : undefined,

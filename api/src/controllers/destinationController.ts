@@ -1,9 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { destinationService } from "../services/destinationService";
-import { createError } from "../utils/createError";
+import { createError } from "../utilities/createError";
 
 export const destinationController = {
-
   // GET all destinations
   // Mengambil semua destinasi
   async getDestinations(req: Request, res: Response, next: NextFunction) {
@@ -60,8 +59,12 @@ export const destinationController = {
       const id = Number(req.params.id);
       if (isNaN(id)) throw createError("ID tidak valid", 400);
 
-      const updatedDestination = await destinationService.editDestination(id, req.body);
-      if (!updatedDestination) throw createError("Destinasi tidak ditemukan", 404);
+      const updatedDestination = await destinationService.editDestination(
+        id,
+        req.body
+      );
+      if (!updatedDestination)
+        throw createError("Destinasi tidak ditemukan", 404);
 
       return res.status(200).json({
         success: true,
@@ -80,8 +83,11 @@ export const destinationController = {
       const id = Number(req.params.id);
       if (isNaN(id)) throw createError("ID tidak valid", 400);
 
-      const deletedDestination = await destinationService.deleteDestinationById(id);
-      if (!deletedDestination) throw createError("Destinasi tidak ditemukan", 404);
+      const deletedDestination = await destinationService.deleteDestinationById(
+        id
+      );
+      if (!deletedDestination)
+        throw createError("Destinasi tidak ditemukan", 404);
 
       return res.status(200).json({
         success: true,

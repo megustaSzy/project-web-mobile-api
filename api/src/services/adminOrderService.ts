@@ -1,8 +1,7 @@
 import prisma from "../lib/prisma";
-import { createError } from "../utils/createError";
+import { createError } from "../utilities/createError";
 
 export const adminOrderService = {
-
   // GET all orders
   // Mengambil semua order
   async getAllOrders() {

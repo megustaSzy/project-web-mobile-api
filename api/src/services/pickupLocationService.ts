@@ -1,12 +1,11 @@
 import prisma from "../lib/prisma";
-import { createError } from "../utils/createError";
+import { createError } from "../utilities/createError";
 
 interface PickupData {
   name: string;
 }
 
 export const pickupLocationService = {
-
   // GET all pickup locations
   // Mengambil semua lokasi penjemputan
   async getAllPickups() {
@@ -18,7 +17,9 @@ export const pickupLocationService = {
   // GET pickup by ID
   // Mengambil lokasi penjemputan berdasarkan ID
   async getPickupById(id: number) {
-    const pickup = await prisma.tb_pickup_locations.findUnique({ where: { id } });
+    const pickup = await prisma.tb_pickup_locations.findUnique({
+      where: { id },
+    });
     if (!pickup) createError("ID tidak ditemukan", 404);
 
     return pickup;
@@ -35,7 +36,9 @@ export const pickupLocationService = {
   // UPDATE pickup location by ID
   // Mengubah lokasi penjemputan berdasarkan ID
   async editPickupLocation(id: number, data: PickupData) {
-    const pickup = await prisma.tb_pickup_locations.findUnique({ where: { id } });
+    const pickup = await prisma.tb_pickup_locations.findUnique({
+      where: { id },
+    });
     if (!pickup) createError("ID tidak ditemukan", 404);
 
     return prisma.tb_pickup_locations.update({
@@ -47,7 +50,9 @@ export const pickupLocationService = {
   // DELETE pickup location by ID
   // Menghapus lokasi penjemputan berdasarkan ID
   async deletePickupById(id: number) {
-    const pickup = await prisma.tb_pickup_locations.findUnique({ where: { id } });
+    const pickup = await prisma.tb_pickup_locations.findUnique({
+      where: { id },
+    });
     if (!pickup) createError("ID tidak ditemukan", 404);
 
     return prisma.tb_pickup_locations.delete({ where: { id } });
