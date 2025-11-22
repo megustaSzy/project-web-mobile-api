@@ -1,6 +1,6 @@
 import prisma from "../lib/prisma";
 import bcrypt from "bcryptjs";
-import { createError } from "../utils/createError";
+import { createError } from "../utilities/createError";
 
 interface UserData {
   name: string;
@@ -11,7 +11,6 @@ interface UserData {
 }
 
 export const userService = {
-
   // GET all users
   // Mengambil semua user dari database
   async getAllUsers() {

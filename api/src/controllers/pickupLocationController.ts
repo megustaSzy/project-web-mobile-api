@@ -1,9 +1,8 @@
 import { pickupLocationService } from "../services/pickupLocationService";
 import { NextFunction, Request, Response } from "express";
-import { createError } from "../utils/createError";
+import { createError } from "../utilities/createError";
 
 export const pickupLocationController = {
-
   // GET all pickup locations
   // Mengambil semua lokasi penjemputan
   async getAllPickup(req: Request, res: Response, next: NextFunction) {
@@ -14,7 +13,6 @@ export const pickupLocationController = {
         success: true,
         data: pickups,
       });
-
     } catch (error) {
       next(error);
     }
@@ -34,7 +32,6 @@ export const pickupLocationController = {
         success: true,
         data: pickup,
       });
-
     } catch (error) {
       next(error);
     }
@@ -51,7 +48,6 @@ export const pickupLocationController = {
         message: "Berhasil menambah lokasi penjemputan",
         data: pickup,
       });
-
     } catch (error) {
       next(error);
     }
@@ -64,7 +60,10 @@ export const pickupLocationController = {
       const id = Number(req.params.id);
       if (isNaN(id)) throw createError("ID tidak valid", 400);
 
-      const updatedPickup = await pickupLocationService.editPickupLocation(id, req.body);
+      const updatedPickup = await pickupLocationService.editPickupLocation(
+        id,
+        req.body
+      );
       if (!updatedPickup) throw createError("Lokasi tidak ditemukan", 404);
 
       return res.status(200).json({
@@ -72,7 +71,6 @@ export const pickupLocationController = {
         message: "Lokasi berhasil diperbarui",
         data: updatedPickup,
       });
-
     } catch (error) {
       next(error);
     }
@@ -92,10 +90,8 @@ export const pickupLocationController = {
         success: true,
         message: "Lokasi berhasil dihapus",
       });
-
     } catch (error) {
       next(error);
     }
   },
-
 };

@@ -1,9 +1,8 @@
 import { userService } from "../services/userService";
 import { Request, Response, NextFunction } from "express";
-import { createError } from "../utils/createError";
+import { createError } from "../utilities/createError";
 
 export const userController = {
-
   async getAllUsers(req: Request, res: Response, next: NextFunction) {
     try {
       const users = await userService.getAllUsers();
