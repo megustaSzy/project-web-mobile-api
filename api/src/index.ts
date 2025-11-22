@@ -12,7 +12,7 @@ import pickupLocationRoute from "./routes/pickupLocationRoute";
 import scheduleRoute from "./routes/scheduleRoute";
 import provinceRoute from "./routes/external";
 import orderRoute from "./routes/orderRoute";
-import adminOrderRoute from "./routes/adminOrderRoute";    // ✅ tambahkan ini
+import adminOrderRoute from "./routes/adminOrderRoute";  
 
 import { errorHandler } from "./middlewares/errorHandler";
 
@@ -37,7 +37,7 @@ app.use("/api/pickup-locations", pickupLocationRoute);
 app.use("/api/schedules", scheduleRoute);
 app.use("/api/region", provinceRoute);
 app.use("/api/orders", orderRoute);
-app.use("/api/admin/orders", adminOrderRoute);  // ✅ perbaikan penting
+app.use("/api/admin/orders", adminOrderRoute);  
 
 // Error handler
 app.use(errorHandler);
