@@ -14,7 +14,7 @@ import provinceRoute from "./routes/external";
 import orderRoute from "./routes/orderRoute";
 import adminOrderRoute from "./routes/adminOrderRoute";  
 
-import { errorHandler } from "./middlewares/errorHandler";
+// import { errorHandler } from "./middlewares/errorHandler";
 
 const app = express();
 
@@ -40,6 +40,6 @@ app.use("/api/orders", orderRoute);
 app.use("/api/admin/orders", adminOrderRoute);  
 
 // Error handler
-app.use(errorHandler);
+// app.use(errorHandler);
 
 export default app;
