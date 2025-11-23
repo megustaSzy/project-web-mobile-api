@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { adminOrderService } from "../services/adminOrderService";
+import { ResponseData } from "@/utilities/Response";
 
 export const adminOrderController = {
 
@@ -9,16 +10,10 @@ export const adminOrderController = {
     try {
       const orders = await adminOrderService.getAllOrders();
 
-      return res.status(200).json({
-        success: true,
-        message: "Berhasil mengambil data orders",
-        data: orders,
-      });
-    } catch (error: any) {
-      return res.status(500).json({
-        success: false,
-        message: error.message,
-      });
+      return ResponseData.ok(res, orders, "daftar order berhasil diambil");
+
+    } catch (error) {
+      return ResponseData.serverError(res, error);
     }
   },
 
@@ -27,32 +22,14 @@ export const adminOrderController = {
   async getOrderById(req: Request, res: Response) {
     try {
       const id = Number(req.params.id);
-      if (isNaN(id)) {
-        return res.status(400).json({
-          success: false,
-          message: "ID tidak valid",
-        });
-      }
+      if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
 
       const order = await adminOrderService.getOrderById(id);
 
-      if (!order) {
-        return res.status(404).json({
-          success: false,
-          message: "Order tidak ditemukan",
-        });
-      }
+      return ResponseData.ok(res, order, "detail order berhasil diambil");
 
-      return res.status(200).json({
-        success: true,
-        message: "Detail order",
-        data: order,
-      });
-    } catch (error: any) {
-      return res.status(500).json({
-        success: false,
-        message: error.message,
-      });
+    } catch (error) {
+      return ResponseData.serverError(res, error);
     }
   },
 
@@ -61,31 +38,14 @@ export const adminOrderController = {
   async deleteOrderById(req: Request, res: Response) {
     try {
       const id = Number(req.params.id);
-      if (isNaN(id)) {
-        return res.status(400).json({
-          success: false,
-          message: "ID tidak valid",
-        });
-      }
+      if (isNaN(id)) ResponseData.badRequest(res, "id tidak valid");
 
       const deleted = await adminOrderService.deleteById(id);
 
-      if (!deleted) {
-        return res.status(404).json({
-          success: false,
-          message: "Order tidak ditemukan",
-        });
-      }
+      return ResponseData.ok(res, deleted, "order berhasil dihapus");
 
-      return res.status(200).json({
-        success: true,
-        message: "Order berhasil dihapus",
-      });
-    } catch (error: any) {
-      return res.status(500).json({
-        success: false,
-        message: error.message,
-      });
+    } catch (error) {
+      return ResponseData.serverError(res, error);
     }
   },
 };
