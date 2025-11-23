@@ -28,7 +28,7 @@ export const userService = {
       where: { id },
     });
 
-    if (!user) createError("ID tidak ditemukan", 404);
+    if (!user) createError("id tidak ditemukan", 404);
 
     return user;
   },
@@ -40,7 +40,7 @@ export const userService = {
       where: { id },
     });
 
-    if (!user) createError("ID tidak ditemukan", 404);
+    if (!user) createError("id tidak ditemukan", 404);
 
     if (data.password) {
       data.password = await bcrypt.hash(data.password, 10);
@@ -59,7 +59,7 @@ export const userService = {
       where: { id },
     });
 
-    if (!user) createError("ID tidak ditemukan", 404);
+    if (!user) createError("id tidak ditemukan", 404);
 
     return prisma.tb_user.delete({
       where: { id },

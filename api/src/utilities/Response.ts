@@ -67,16 +67,18 @@ export const ResponseData = {
   serverError: (res: Response, error: any, message = 'Internal server error'): Response => {
     logger.error('Internal server error:', error)
 
-    const errorMessage = CONFIG.appMode === 'development'
-      ? error?.message || 'Unexpected error'
-      : null
+    const status = error?.statusCode || StatusCodes.INTERNAL_SERVER_ERROR
+    const errorMessage =
+      CONFIG.appMode === 'development'
+        ? error?.message || 'Unexpected error'
+        : null
 
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      status: StatusCodes.INTERNAL_SERVER_ERROR,
-      message,
+    return res.status(status).json({
+      status,
+      message: error?.message || message,
       error: errorMessage,
       data: null,
-    })
+    });
   },
 
   /**

@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { orderService } from "../services/orderService";
+import { ResponseData } from "@/utilities/Response";
 
 export const orderController = {
 
@@ -11,10 +12,7 @@ export const orderController = {
       const { scheduleId, tickets } = req.body;
 
       if (!scheduleId || !tickets) {
-        return res.status(400).json({
-          success: false,
-          message: "scheduleId dan tickets wajib diisi",
-        });
+        return ResponseData.badRequest(res, "scheduleId dan tickets wajib diisi");
       }
 
       const order = await orderService.createOrder(
@@ -23,18 +21,14 @@ export const orderController = {
         Number(tickets)
       );
 
-      return res.status(201).json({
-        success: true,
-        message: "Order berhasil dibuat",
-        data: order,
-      });
+      if(!order) {
+        return ResponseData.notFound(res, "user atau jadwal tidak ditemukan");
+      }
 
-    } catch (err: any) {
-      return res.status(500).json({
-        success: false,
-        message: "Terjadi kesalahan",
-        error: err.message,
-      });
+      return ResponseData.created(res, order, "order berhasil dibuat");
+
+    } catch (error) {
+      return ResponseData.serverError(res, error);
     }
   },
 
@@ -46,19 +40,30 @@ export const orderController = {
 
       const orders = await orderService.getOrdersByUser(userId);
 
-      return res.status(200).json({
-        success: true,
-        message: "Berhasil mengambil riwayat order",
-        data: orders,
-      });
+      return ResponseData.ok(res, orders, "data order berhasil diambil");
 
-    } catch (error: any) {
-      return res.status(500).json({
-        success: false,
-        message: "Gagal mengambil data order",
-        error: error.message,
-      });
+    } catch (error) {
+      return ResponseData.serverError(res, error);
     }
   },
 
-};
+  async getOrderById(req: Request, res: Response) {
+    try {
+      const id = Number(req.params.id);
+      if (isNaN(id)) {
+        return ResponseData.badRequest(res, "id tidak valid");
+      }
+
+      const order = await orderService.getOrderById(id);
+
+      if(!order) {
+        return ResponseData.notFound(res, "order tidak ditemukan");
+      }
+
+      return ResponseData.ok(res, order, "data order berhasil diambil");
+
+    } catch (error) {
+      return ResponseData.serverError(res, error);
+    }
+  }
+}
