@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { orderService } from "../services/orderService";
-import { ResponseData } from "@/utilities/Response";
+import { ResponseData } from "../utilities/Response";
 
 export const orderController = {
 

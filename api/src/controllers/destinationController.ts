@@ -1,7 +1,7 @@
 import { NextFunction, Request, response, Response } from "express";
 import { destinationService } from "../services/destinationService";
 import { createError } from "../utilities/createError";
-import { ResponseData } from "@/utilities/Response";
+import { ResponseData } from "../utilities/Response";
 
 export const destinationController = {
   // GET all destinations

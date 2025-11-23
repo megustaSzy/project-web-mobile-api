@@ -1,4 +1,4 @@
-import { ResponseData } from "@/utilities/Response";
+import { ResponseData } from "../utilities/Response";
 import { authService } from "../services/authService";
 import { Request, Response } from "express";
 
@@ -30,15 +30,24 @@ export const authController = {
       // Semua logic login ada di authService
       const { user, token, refreshToken } = await authService.loginUser(email, password);
 
+      res.cookie("accessToken", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 60 * 60 * 1000, // 1 jam
+      });
+
       // Simpan refresh token di cookie httpOnly
       res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
-        maxAge: 1 * 60 * 1000, // 1 menit (testing)
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 hari
       });
 
-      return ResponseData.ok(res, { user, token }, "login berhasil");
+      return ResponseData.ok
+      (res, 
+        { user, token, refreshToken }, "login berhasil");
 
     } catch (error: any) {
       return ResponseData.unauthorized(res, error.message);
@@ -50,11 +59,19 @@ export const authController = {
   async refreshToken(req: Request, res: Response) {
     try {
       const token = req.cookies.refreshToken;
+
       if (!token) {
         return ResponseData.unauthorized(res, "refresh token tidak ditemukan");
       }
 
       const newAccessToken = await authService.refreshAccessToken(token);
+
+      res.cookie("accessToken", newAccessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 60 * 60 * 1000 // 1 jam, sesuaikan
+      });
 
       return ResponseData.ok(res, { token: newAccessToken }, "token berhasil diperbarui");
 
@@ -73,6 +90,7 @@ export const authController = {
         await authService.logoutUser(token);
       }
 
+      res.clearCookie("accessToken")
       res.clearCookie("refreshToken");
 
       return ResponseData.ok(res, null, "logout berhasil");

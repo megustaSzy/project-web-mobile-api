@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { adminOrderService } from "../services/adminOrderService";
-import { ResponseData } from "@/utilities/Response";
+import { ResponseData } from "../utilities/Response";
 
 export const adminOrderController = {
 

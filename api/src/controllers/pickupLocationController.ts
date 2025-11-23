@@ -1,7 +1,7 @@
 import { pickupLocationService } from "../services/pickupLocationService";
 import { NextFunction, Request, Response } from "express";
 import { createError } from "../utilities/createError";
-import { ResponseData } from "@/utilities/Response";
+import { ResponseData } from "../utilities/Response";
 
 export const pickupLocationController = {
   // GET all pickup locations
