@@ -1,100 +1,78 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Request, response, Response } from "express";
 import { destinationService } from "../services/destinationService";
 import { createError } from "../utilities/createError";
+import { ResponseData } from "@/utilities/Response";
 
 export const destinationController = {
   // GET all destinations
   // Mengambil semua destinasi
-  async getDestinations(req: Request, res: Response, next: NextFunction) {
+  async getDestinations(req: Request, res: Response) {
     try {
       const destinations = await destinationService.getAllDestinations();
-      return res.status(200).json({
-        success: true,
-        data: destinations,
-      });
+      return ResponseData.ok(res, destinations, "daftar destinasi berhasil diambil");
     } catch (error) {
-      next(error);
+      ResponseData.serverError(res, error);
     }
   },
 
   // GET destination by ID
   // Mengambil destinasi berdasarkan ID
-  async getDestinationById(req: Request, res: Response, next: NextFunction) {
+  async getDestinationById(req: Request, res: Response) {
     try {
       const id = Number(req.params.id);
-      if (isNaN(id)) throw createError("ID tidak valid", 400);
+      if (isNaN(id)) ResponseData.badRequest(res, "id tidak valid");
 
       const destination = await destinationService.getDestinationById(id);
-      if (!destination) throw createError("Destinasi tidak ditemukan", 404);
 
-      return res.status(200).json({
-        success: true,
-        data: destination,
-      });
+      return ResponseData.ok(res, destination, "destinasi berhasil diambil");
     } catch (error) {
-      next(error);
+      return ResponseData.serverError(res, error);
     }
   },
 
   // POST add new destination
   // Menambahkan destinasi baru
-  async addDestination(req: Request, res: Response, next: NextFunction) {
+  async addDestination(req: Request, res: Response) {
     try {
       const destination = await destinationService.addDestination(req.body);
 
-      return res.status(201).json({
-        success: true,
-        message: "Berhasil menambahkan destinasi",
-        data: destination,
-      });
+      return ResponseData.created(res, destination, "destinasi berhasil ditambahkan");
     } catch (error) {
-      next(error);
+      return ResponseData.serverError(res, error)
     }
   },
 
   // PUT update destination by ID
   // Mengubah data destinasi berdasarkan ID
-  async updateDestination(req: Request, res: Response, next: NextFunction) {
+  async updateDestination(req: Request, res: Response) {
     try {
       const id = Number(req.params.id);
-      if (isNaN(id)) throw createError("ID tidak valid", 400);
+      if (isNaN(id)) ResponseData.badRequest(res, "id tidak valid");
 
       const updatedDestination = await destinationService.editDestination(
         id,
         req.body
       );
-      if (!updatedDestination)
-        throw createError("Destinasi tidak ditemukan", 404);
 
-      return res.status(200).json({
-        success: true,
-        message: "Destinasi berhasil diperbarui",
-        data: updatedDestination,
-      });
+      return ResponseData.ok(res, updatedDestination, "destinasi berhasil diperbarui");
     } catch (error) {
-      next(error);
+      return ResponseData.serverError(res, error);
     }
   },
 
   // DELETE destination by ID
   // Menghapus destinasi berdasarkan ID
-  async deleteDestination(req: Request, res: Response, next: NextFunction) {
+  async deleteDestination(req: Request, res: Response) {
     try {
       const id = Number(req.params.id);
-      if (isNaN(id)) throw createError("ID tidak valid", 400);
+      if (isNaN(id)) ResponseData.badRequest(res, "id tidak valid");
 
-      const deletedDestination = await destinationService.deleteDestinationById(
-        id
-      );
-      if (!deletedDestination)
-        throw createError("Destinasi tidak ditemukan", 404);
+      await destinationService.deleteDestinationById(id);
 
-      return res.status(200).json({
-        success: true,
-        message: "Destinasi berhasil dihapus",
-      });
+      return ResponseData.ok(res, null, "destinasi berhasil dihapus");
+
     } catch (error) {
-      next(error);
+      return ResponseData.serverError(res, error);
     }
   },
 };

@@ -14,7 +14,7 @@ export const adminOrderService = {
   // Mengambil detail order berdasarkan ID
   async getOrderById(id: number) {
     const order = await prisma.tb_orders.findUnique({ where: { id } });
-    if (!order) createError("Order tidak ditemukan", 404);
+    if (!order) createError("order tidak ditemukan", 404);
 
     return order;
   },
@@ -23,7 +23,7 @@ export const adminOrderService = {
   // Menghapus order berdasarkan ID
   async deleteById(id: number) {
     const order = await prisma.tb_orders.findUnique({ where: { id } });
-    if (!order) createError("Order tidak ditemukan", 404);
+    if (!order) createError("order tidak ditemukan", 404);
 
     return prisma.tb_orders.delete({ where: { id } });
   },

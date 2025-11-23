@@ -7,7 +7,7 @@ export const orderService = {
             where: { id: userId }
         });
 
-        if (!user) throw new Error("User tidak ditemukan");
+        if (!user) return null;
         
         // Ambil jadwal + destinasi
         const schedule = await prisma.tb_schedules.findUnique({
@@ -17,7 +17,7 @@ export const orderService = {
             }
         });
 
-        if (!schedule) throw new Error("Jadwal tidak ditemukan");
+        if (!schedule) return null;
 
         // Hitung total harga
         const totalPrice = schedule.destination.price * tickets;
@@ -62,8 +62,6 @@ export const orderService = {
             where: { id }
         });
 
-        if (!order) throw new Error("Order tidak ditemukan");
-
-        return order;
+        return order || null;
     }
 };
