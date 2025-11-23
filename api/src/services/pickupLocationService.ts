@@ -20,7 +20,7 @@ export const pickupLocationService = {
     const pickup = await prisma.tb_pickup_locations.findUnique({
       where: { id },
     });
-    if (!pickup) createError("ID tidak ditemukan", 404);
+    if (!pickup) createError("id tidak ditemukan", 404);
 
     return pickup;
   },
@@ -39,7 +39,7 @@ export const pickupLocationService = {
     const pickup = await prisma.tb_pickup_locations.findUnique({
       where: { id },
     });
-    if (!pickup) createError("ID tidak ditemukan", 404);
+    if (!pickup) createError("id tidak ditemukan", 404);
 
     return prisma.tb_pickup_locations.update({
       where: { id },
@@ -53,7 +53,7 @@ export const pickupLocationService = {
     const pickup = await prisma.tb_pickup_locations.findUnique({
       where: { id },
     });
-    if (!pickup) createError("ID tidak ditemukan", 404);
+    if (!pickup) createError("id tidak ditemukan", 404);
 
     return prisma.tb_pickup_locations.delete({ where: { id } });
   },

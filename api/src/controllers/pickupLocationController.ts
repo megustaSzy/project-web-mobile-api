@@ -1,97 +1,79 @@
 import { pickupLocationService } from "../services/pickupLocationService";
 import { NextFunction, Request, Response } from "express";
 import { createError } from "../utilities/createError";
+import { ResponseData } from "@/utilities/Response";
 
 export const pickupLocationController = {
   // GET all pickup locations
   // Mengambil semua lokasi penjemputan
-  async getAllPickup(req: Request, res: Response, next: NextFunction) {
+  async getAllPickup(req: Request, res: Response) {
     try {
       const pickups = await pickupLocationService.getAllPickups();
 
-      return res.status(200).json({
-        success: true,
-        data: pickups,
-      });
+      return ResponseData.ok(res, pickups, "daftar lokasi penjemputan berhasil diambil");
+
     } catch (error) {
-      next(error);
+      return ResponseData.serverError(res, error);
     }
   },
 
   // GET pickup location by ID
   // Mengambil lokasi penjemputan berdasarkan ID
-  async getPickupById(req: Request, res: Response, next: NextFunction) {
+  async getPickupById(req: Request, res: Response) {
     try {
       const id = Number(req.params.id);
-      if (isNaN(id)) throw createError("ID tidak valid", 400);
+      if (isNaN(id)) ResponseData.badRequest(res, "id tidak valid");
 
       const pickup = await pickupLocationService.getPickupById(id);
-      if (!pickup) throw createError("Lokasi tidak ditemukan", 404);
 
-      return res.status(200).json({
-        success: true,
-        data: pickup,
-      });
+      return ResponseData.ok(res, pickup, "lokasi penjemputan berhasil diambil");
     } catch (error) {
-      next(error);
+      ResponseData.serverError(res, error);
     }
   },
 
   // POST add new pickup location
   // Menambahkan lokasi penjemputan baru
-  async addPickup(req: Request, res: Response, next: NextFunction) {
+  async addPickup(req: Request, res: Response) {
     try {
       const pickup = await pickupLocationService.createPickupLocation(req.body);
 
-      return res.status(201).json({
-        success: true,
-        message: "Berhasil menambah lokasi penjemputan",
-        data: pickup,
-      });
+      return ResponseData.created(res, pickup, "lokasi penjemputan berhasil ditambahkan");
     } catch (error) {
-      next(error);
+      ResponseData.serverError(res, error);
     }
   },
 
   // PUT update pickup location by ID
   // Mengubah lokasi penjemputan berdasarkan ID
-  async updatePickupLocation(req: Request, res: Response, next: NextFunction) {
+  async updatePickupLocation(req: Request, res: Response) {
     try {
       const id = Number(req.params.id);
-      if (isNaN(id)) throw createError("ID tidak valid", 400);
+      if (isNaN(id)) ResponseData.badRequest(res, "id tidak valid");
 
       const updatedPickup = await pickupLocationService.editPickupLocation(
         id,
         req.body
       );
-      if (!updatedPickup) throw createError("Lokasi tidak ditemukan", 404);
 
-      return res.status(200).json({
-        success: true,
-        message: "Lokasi berhasil diperbarui",
-        data: updatedPickup,
-      });
+      return ResponseData.ok(res, updatedPickup, "lokasi penjemputan berhasil diperbarui");
     } catch (error) {
-      next(error);
+      return ResponseData.serverError(res, error);
     }
   },
 
   // DELETE pickup location by ID
   // Menghapus lokasi penjemputan berdasarkan ID
-  async deletePickup(req: Request, res: Response, next: NextFunction) {
+  async deletePickup(req: Request, res: Response) {
     try {
       const id = Number(req.params.id);
-      if (isNaN(id)) throw createError("ID tidak valid", 400);
+      if (isNaN(id)) ResponseData.badRequest(res, "id tidak valid");
 
       const deleted = await pickupLocationService.deletePickupById(id);
-      if (!deleted) throw createError("Lokasi tidak ditemukan", 404);
 
-      return res.status(200).json({
-        success: true,
-        message: "Lokasi berhasil dihapus",
-      });
+      return ResponseData.ok(res, deleted, "lokasi penjemputan berhasil dihapus");
     } catch (error) {
-      next(error);
+      ResponseData.serverError(res, error);
     }
   },
 };
