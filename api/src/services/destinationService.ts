@@ -1,14 +1,6 @@
 import prisma from "../lib/prisma";
 import { createError } from "../utilities/createError";
-
-interface DestinationData {
-  name: string;
-  location: string;
-  imageUrl: string;
-  description: string;
-  price: number;
-  category: string;
-}
+import { DestinationData } from "../types/destination";
 
 export const destinationService = {
   // GET all destinations
