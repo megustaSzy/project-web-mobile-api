@@ -1,12 +1,12 @@
 import { Router } from "express";
-import { asyncHandler } from "../middlewares/asyncHandler";
+// import { asyncHandler } from "../middlewares/asyncHandler";
 import { authController } from "../controllers/authController";
 
 const router = Router();
 
-router.post("/register", asyncHandler(authController.register));
-router.post("/login", asyncHandler(authController.login));
-router.post("/refresh", asyncHandler(authController.refreshToken));
-router.post("/logout", asyncHandler(authController.logout));
+router.post("/register", authController.register);
+router.post("/login", authController.login);
+router.post("/refresh", authController.refreshToken);
+router.post("/logout", authController.logout);
 
 export default router;
