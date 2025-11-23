@@ -1,14 +1,7 @@
 import prisma from "../lib/prisma";
 import bcrypt from "bcryptjs";
 import { createError } from "../utilities/createError";
-
-interface UserData {
-  name: string;
-  email: string;
-  password?: string; // opsional saat update
-  notelp: string;
-  role: "Admin" | "User";
-}
+import { UserData } from "../types/user";
 
 export const userService = {
   // GET all users
