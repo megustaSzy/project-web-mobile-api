@@ -1,9 +1,7 @@
 import prisma from "../lib/prisma";
 import { createError } from "../utilities/createError";
+import { PickupData } from "../types/pickup";
 
-interface PickupData {
-  name: string;
-}
 
 export const pickupLocationService = {
   // GET all pickup locations

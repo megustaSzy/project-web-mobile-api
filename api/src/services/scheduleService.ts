@@ -35,7 +35,7 @@ export const scheduleService = {
       },
     });
 
-    if (!schedule) throw createError("ID schedule tidak ditemukan", 404);
+    if (!schedule) createError("id schedule tidak ditemukan", 404);
 
     return schedule;
   },
@@ -56,7 +56,7 @@ export const scheduleService = {
       });
 
       if (existingSchedule) {
-        throw createError("Schedule sudah ada, tidak boleh duplikat", 400);
+        createError("schedule sudah ada, tidak boleh duplikat", 400);
       }
 
       // Create schedule
@@ -79,7 +79,7 @@ export const scheduleService = {
       where: { id },
     });
 
-    if (!schedule) throw createError("ID schedule tidak ditemukan", 404);
+    if (!schedule) createError("id schedule tidak ditemukan", 404);
 
     return prisma.tb_schedules.update({
       where: { id },
@@ -95,7 +95,7 @@ export const scheduleService = {
   // DELETE
   async deleteSchedule(id: number) {
     const existing = await prisma.tb_schedules.findUnique({ where: { id } });
-    if (!existing) throw createError("ID schedule tidak ditemukan", 404);
+    if (!existing) createError("ID schedule tidak ditemukan", 404);
 
     return prisma.tb_schedules.delete({ where: { id } });
   },
