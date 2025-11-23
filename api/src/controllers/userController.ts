@@ -1,18 +1,16 @@
 import { userService } from "../services/userService";
 import { Request, Response, NextFunction } from "express";
 import { createError } from "../utilities/createError";
+import { ResponseData } from "@/utilities/Response";
 
 export const userController = {
   async getAllUsers(req: Request, res: Response, next: NextFunction) {
     try {
       const users = await userService.getAllUsers();
 
-      return res.status(200).json({
-        success: true,
-        users,
-      });
+      return ResponseData.ok(res, users, "daftar user berhasil diambil");
     } catch (error) {
-      next(error);
+      return ResponseData.serverError(res, error);
     }
   },
 
