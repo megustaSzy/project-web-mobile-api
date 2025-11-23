@@ -1,12 +1,6 @@
 import prisma from "../lib/prisma";
 import { createError } from "../utilities/createError";
-
-export interface ScheduleData {
-  pickupLocationId: number;
-  destinationId: number;
-  time: string;
-  date: string; // format harus YYYY-MM-DD
-}
+import { ScheduleData } from "../types/schedule";
 
 // Helper: parsing date aman
 function parseSafeDate(date: string): Date {
