@@ -1,3 +1,4 @@
+import { ResponseData } from "@/utilities/Response";
 import { authService } from "../services/authService";
 import { Request, Response } from "express";
 
@@ -9,16 +10,10 @@ export const authController = {
     try {
       const user = await authService.registerUser(req.body);
 
-      return res.status(201).json({
-        success: true,
-        message: "Berhasil membuat akun",
-        user,
-      });
+      return ResponseData.created(res, user, "registrasi berhasil");
+
     } catch (error: any) {
-      return res.status(400).json({
-        success: false,
-        message: error.message,
-      });
+      return ResponseData.badRequest(res, error.message);
     }
   },
 
@@ -29,10 +24,7 @@ export const authController = {
       const { email, password } = req.body;
 
       if (!email || !password) {
-        return res.status(400).json({
-          success: false,
-          message: "Email dan password wajib diisi",
-        });
+        return ResponseData.badRequest(res, "email dan password wajib diisi");
       }
 
       // Semua logic login ada di authService
@@ -46,18 +38,10 @@ export const authController = {
         maxAge: 1 * 60 * 1000, // 1 menit (testing)
       });
 
-      return res.status(200).json({
-        success: true,
-        message: "Login berhasil",
-        user,
-        token,
-      });
+      return ResponseData.ok(res, { user, token }, "login berhasil");
 
     } catch (error: any) {
-      return res.status(401).json({
-        success: false,
-        message: error.message,
-      });
+      return ResponseData.unauthorized(res, error.message);
     }
   },
 
@@ -67,24 +51,15 @@ export const authController = {
     try {
       const token = req.cookies.refreshToken;
       if (!token) {
-        return res.status(401).json({
-          success: false,
-          message: "No refresh token",
-        });
+        return ResponseData.unauthorized(res, "refresh token tidak ditemukan");
       }
 
       const newAccessToken = await authService.refreshAccessToken(token);
 
-      return res.status(200).json({
-        success: true,
-        token: newAccessToken,
-      });
+      return ResponseData.ok(res, { token: newAccessToken }, "token berhasil diperbarui");
 
     } catch (error: any) {
-      return res.status(401).json({
-        success: false,
-        message: error.message,
-      });
+      return ResponseData.unauthorized(res, error.message);
     }
   },
 
@@ -100,16 +75,10 @@ export const authController = {
 
       res.clearCookie("refreshToken");
 
-      return res.status(200).json({
-        success: true,
-        message: "Logout berhasil",
-      });
+      return ResponseData.ok(res, null, "logout berhasil");
 
     } catch (error: any) {
-      return res.status(500).json({
-        success: false,
-        message: error.message,
-      });
+      return ResponseData.serverError(res, error);
     }
   },
 
