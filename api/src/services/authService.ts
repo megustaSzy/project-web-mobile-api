@@ -2,16 +2,9 @@ import prisma from "../lib/prisma";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
+import { UserData } from "../types/auth";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
-
-interface UserData {
-    name: string,
-    email: string,
-    password: string,
-    role: "Admin" | "User",
-    notelp: string
-}
 
 export const authService = {
 
