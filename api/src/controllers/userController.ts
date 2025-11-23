@@ -1,7 +1,7 @@
 import { userService } from "../services/userService";
 import { Request, Response } from "express";
 import { createError } from "../utilities/createError";
-import { ResponseData } from "@/utilities/Response";
+import { ResponseData } from "../utilities/Response";
 
 export const userController = {
   async getAllUsers(req: Request, res: Response) {

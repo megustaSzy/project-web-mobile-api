@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { scheduleService } from "../services/scheduleService";
 import { createError } from "../utilities/createError";
-import { ResponseData } from "@/utilities/Response";
+import { ResponseData } from "../utilities/Response";
 
 export const scheduleController = {
   // GET all schedules
