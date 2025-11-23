@@ -22,8 +22,6 @@ export const userController = {
 
       const user = await userService.getUserById(id);
 
-      if (!user) return ResponseData.notFound(res, "user tidak ditemukan");
-
       return ResponseData.ok(res, user, "user berhasil diambil");
     } catch (error) {
       return ResponseData.serverError(res, error);

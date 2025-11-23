@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { scheduleService } from "../services/scheduleService";
 import { createError } from "../utilities/createError";
+import { ResponseData } from "@/utilities/Response";
 
 export const scheduleController = {
   // GET all schedules
@@ -8,12 +9,13 @@ export const scheduleController = {
   async getAllSchedules(req: Request, res: Response, next: NextFunction) {
     try {
       const schedules = await scheduleService.getAllSchedules();
-      return res.status(200).json({
-        success: true,
-        data: schedules,
-      });
+      return ResponseData.ok(
+        res,
+        schedules,
+        "daftar schedule berhasil diambil"
+      );
     } catch (error) {
-      next(error);
+      return ResponseData.serverError(res, error);
     }
   },
 
@@ -22,17 +24,15 @@ export const scheduleController = {
   async getScheduleById(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
-      if (isNaN(id)) throw createError("ID tidak valid", 400);
+      if (isNaN(id)) ResponseData.badRequest(res, "id tidak valid");
 
       const schedule = await scheduleService.getScheduleById(id);
-      if (!schedule) throw createError("Schedule tidak ditemukan", 404);
 
-      return res.status(200).json({
-        success: true,
-        data: schedule,
-      });
+      return ResponseData.ok(res, schedule, "schedule berhasil diambil");
+
     } catch (error) {
-      next(error);
+
+      ResponseData.serverError(res, error);
     }
   },
 
@@ -43,28 +43,18 @@ export const scheduleController = {
       const { pickupLocationId, destinationId, time, date } = req.body;
 
       if (!pickupLocationId || !destinationId || !time || !date) {
-        return res.status(400).json({
-          success: false,
-          message:
-            "pickupLocationId, destinationId, time, dan date wajib diisi",
-        });
+        return ResponseData.badRequest(res, "semua field wajib diisi");
       }
 
       // Validasi waktu format HH:MM
       if (!/^\d{2}:\d{2}$/.test(time)) {
-        return res.status(400).json({
-          success: false,
-          message: "Format time harus HH:MM",
-        });
+        return ResponseData.badRequest(res, "Format time tidak valid (gunakan HH:MM)");
       }
 
       // Validasi tanggal
       const parsedDate = new Date(date);
       if (isNaN(parsedDate.getTime())) {
-        return res.status(400).json({
-          success: false,
-          message: "Format date tidak valid (gunakan YYYY-MM-DD)",
-        });
+        return ResponseData.badRequest(res, "Format date tidak valid (gunakan YYYY-MM-DD)");
       }
 
       const data = {
@@ -76,13 +66,10 @@ export const scheduleController = {
 
       const schedule = await scheduleService.createSchedule(data);
 
-      return res.status(201).json({
-        success: true,
-        message: "Schedule berhasil dibuat",
-        data: schedule,
-      });
+      return ResponseData.created(res, schedule, "schedule berhasil dibuat");
+
     } catch (error) {
-      next(error);
+      return ResponseData.serverError(res, error);
     }
   },
   // PUT update schedule by ID
@@ -90,17 +77,13 @@ export const scheduleController = {
   async editScheduleById(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
-      if (isNaN(id)) throw createError("ID tidak valid", 400);
+      if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
 
       const schedule = await scheduleService.updateSchedule(id, req.body);
 
-      return res.status(200).json({
-        success: true,
-        message: "Schedule berhasil diubah",
-        data: schedule,
-      });
+      return ResponseData.ok(res, schedule, "schedule berhasil diperbarui");
     } catch (error) {
-      next(error);
+      return ResponseData.serverError(res, error);
     }
   },
 
@@ -109,16 +92,13 @@ export const scheduleController = {
   async deleteScheduleById(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
-      if (isNaN(id)) throw createError("ID tidak valid", 400);
+      if (isNaN(id)) ResponseData.badRequest(res, "id tidak valid");
 
       await scheduleService.deleteSchedule(id);
 
-      return res.status(200).json({
-        success: true,
-        message: "Schedule berhasil dihapus",
-      });
+      return ResponseData.ok(res, null, "schedule berhasil dihapus");
     } catch (error) {
-      next(error);
+      ResponseData.serverError(res, error);
     }
   },
 
@@ -130,12 +110,10 @@ export const scheduleController = {
 
       const schedules = await scheduleService.searchSchedule(filters);
 
-      return res.status(200).json({
-        success: true,
-        data: schedules,
-      });
+      return ResponseData.ok(res, schedules, "hasil pencarian schedule berhasil diambil");
+
     } catch (error) {
-      next(error);
+      ResponseData.serverError(res, error);
     }
   },
 };
