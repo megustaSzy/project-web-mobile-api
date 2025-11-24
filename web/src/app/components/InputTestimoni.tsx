@@ -39,11 +39,13 @@ export default function CeritaPage() {
 
             <textarea placeholder="Komentar" rows={4} className="w-full p-3 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"></textarea>
 
+{/*  RATING  */}
+<div className="backdrop-blur-md bg-white/70 shadow-lg rounded-2xl p-6 w-full border border-gray-200 transition-all">
+  <h3 className="text-lg font-semibold text-gray-700 mb-3 text-center md:text-left">
+    Beri Rating
+  </h3>
 
-{/* ⭐⭐⭐⭐⭐ RATING SECTION (CLEAN UI) */}
-<div className="bg-white shadow-md rounded-xl p-5 mt-0 w-full border border-gray-200">
-
-  <div className="flex gap-2 justify-center md:justify-start">
+  <div className="flex gap-3 justify-center md:justify-start">
     {[1, 2, 3, 4, 5].map((value) => {
       const full = value <= rating;
       const half = rating + 0.5 === value;
@@ -51,7 +53,7 @@ export default function CeritaPage() {
       return (
         <div
           key={value}
-          className="relative cursor-pointer transition-all hover:scale-110"
+          className="relative cursor-pointer transition-transform duration-200 hover:scale-125 group"
           onClick={() =>
             setRating(
               value === rating ? value - 0.5 : value === rating + 0.5 ? value : value
@@ -63,21 +65,24 @@ export default function CeritaPage() {
           }}
         >
           {/* Base star */}
-          <StarIcon size={32} className="text-gray-300" />
+          <StarIcon
+            size={30}
+            className="text-gray-300 transition-colors duration-200"
+          />
 
           {/* Full star */}
           {full && (
             <StarIcon
-              size={32}
-              className="absolute top-0 left-0 text-yellow-400 fill-yellow-400"
+              size={30}
+              className="absolute top-0 left-0 text-yellow-400 fill-yellow-400 drop-shadow-[0_0_6px_rgba(255,200,0,0.7)] group-hover:drop-shadow-[0_0_10px_rgba(255,200,0,1)]"
             />
           )}
 
           {/* Half star */}
           {half && (
             <StarIcon
-              size={32}
-              className="absolute top-0 left-0 text-yellow-400 fill-yellow-400"
+              size={30}
+              className="absolute top-0 left-0 text-yellow-400 fill-yellow-400 drop-shadow-[0_0_6px_rgba(255,200,0,0.7)] group-hover:drop-shadow-[0_0_10px_rgba(255,200,0,1)]"
               style={{ clipPath: "inset(0 50% 0 0)" }}
             />
           )}
@@ -86,14 +91,13 @@ export default function CeritaPage() {
     })}
   </div>
 
-  <p className="text-xs text-gray-500 mt-2">
+  {/* Rating text */}
+  <p className="text-sm text-gray-600 mt-4 text-center md:text-left font-medium">
     {rating > 0
-      ? ` Rating kamu: ${rating} / 5`
+      ? `Rating kamu: ${rating} / 5`
       : "Klik untuk rating • Klik kanan = setengah bintang"}
   </p>
 </div>
-
-
 
             <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition">
               Kirim

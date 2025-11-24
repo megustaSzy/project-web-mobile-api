@@ -128,30 +128,54 @@ export default function NavBar() {
 
         {/* BAGIAN KANAN DESKTOP */}
         <div className="hidden md:flex gap-3 ml-auto items-center relative">
-          
-          {/* 🌍 Language Switcher */}
-          <div className="relative group">
-            <button
-              className={`px-3 py-1 rounded-md text-sm border transition ${
-                scrolled ? "text-gray-800 border-gray-600" : "text-white border-white"
-              }`}
-            >
-              {language === "id" ? "🇮🇩 ID" : "🇬🇧 EN"}
-            </button>
 
-            <div className="absolute right-0 mt-2 bg-white rounded-md shadow-lg w-32 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-              <button
-                onClick={() => handleChangeLanguage("id")}
-                className="w-full px-4 py-2 text-left hover:bg-gray-100"
-              >
-                🇮🇩 Indonesia
-              </button>
-              <button
-                onClick={() => handleChangeLanguage("en")}
-                className="w-full px-4 py-2 text-left hover:bg-gray-100"
-              >
-                🇬🇧 English
-              </button>
+          {/* 🌍 Language Switcher - Elegant Dropdown */}
+<div className="relative group">
+  
+  {/* BUTTON */}
+  <button
+    className={`flex items-center gap-1 px-2 py-1 rounded-lg text-sm border font-medium transition 
+      ${scrolled ? "text-gray-800 border-gray-400" : "text-white border-white"}`}
+  >
+    <span className="uppercase">{language}</span>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      className="w-3 h-3 mt-0.5"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+    </svg>
+  </button>
+
+  {/* DROPDOWN */}
+  <div className="
+    absolute right-0 mt-2 w-40 rounded-xl overflow-hidden shadow-xl bg-white 
+    opacity-0 invisible group-hover:opacity-100 group-hover:visible
+    transition-all duration-200
+  ">
+    {/* Indonesia */}
+    <button
+      onClick={() => handleChangeLanguage("id")}
+      className={`w-full flex items-start gap-2 px-4 py-2 text-left text-sm 
+        ${language === "id" ? "text-blue-600" : "text-gray-700"} 
+        hover:bg-gray-100`}
+    >
+      <span className="text-xs font-semibold text-gray-500 uppercase">ID</span>
+      <span>Indonesia</span>
+    </button>
+
+    {/* English */}
+    <button
+      onClick={() => handleChangeLanguage("en")}
+      className={`w-full flex items-start gap-2 px-4 py-2 text-left text-sm 
+        ${language === "en" ? "text-blue-600" : "text-gray-700"} 
+        hover:bg-gray-100`}
+    >
+      <span className="text-xs font-semibold text-gray-500 uppercase">US</span>
+      <span>English</span>
+    </button>
             </div>
           </div>
 
