@@ -17,6 +17,18 @@ export const destinationController = {
     }
   },
 
+  async getByCategory(req: Request, res: Response) {
+    try {
+      const { category }= req.params;
+
+      const destinations = await destinationService.getByCategory(category);
+
+      return ResponseData.ok(res, destinations, "berhasil menampilkan kategori");
+    } catch (error) {
+      return ResponseData.serverError(res, error)
+    }
+  },
+
   // GET destination by Id
   async getDestinationById(req: Request, res: Response) {
     try {
@@ -74,5 +86,5 @@ export const destinationController = {
     }
   },
 
-  
+
 };
