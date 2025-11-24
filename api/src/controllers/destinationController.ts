@@ -2,6 +2,7 @@ import { NextFunction, Request, response, Response } from "express";
 import { destinationService } from "../services/destinationService";
 import { createError } from "../utilities/createError";
 import { ResponseData } from "../utilities/Response";
+import { VALID_CATEGORIES } from "../constants/destinationCategories";
 
 export const destinationController = {
   // GET all destinations
@@ -9,14 +10,32 @@ export const destinationController = {
   async getDestinations(req: Request, res: Response) {
     try {
       const destinations = await destinationService.getAllDestinations();
+
       return ResponseData.ok(res, destinations, "daftar destinasi berhasil diambil");
+
     } catch (error) {
       ResponseData.serverError(res, error);
     }
   },
 
-  // GET destination by ID
-  // Mengambil destinasi berdasarkan ID
+  async getByCategory(req: Request, res: Response) {
+    try {
+      const { category }= req.params;
+      const lowerCat = category.toLowerCase();
+
+      if(!VALID_CATEGORIES.includes(lowerCat)) {
+        return ResponseData.notFound(res, `kategori "${category}" tidak valid: ${VALID_CATEGORIES.join(", ")}`
+      )}
+
+      const destinations = await destinationService.getByCategory(category);
+
+      return ResponseData.ok(res, destinations, "berhasil menampilkan kategori");
+    } catch (error) {
+      return ResponseData.serverError(res, error)
+    }
+  },
+
+  // GET destination by Id
   async getDestinationById(req: Request, res: Response) {
     try {
       const id = Number(req.params.id);
@@ -30,7 +49,6 @@ export const destinationController = {
     }
   },
 
-  // POST add new destination
   // Menambahkan destinasi baru
   async addDestination(req: Request, res: Response) {
     try {
@@ -42,7 +60,6 @@ export const destinationController = {
     }
   },
 
-  // PUT update destination by ID
   // Mengubah data destinasi berdasarkan ID
   async updateDestination(req: Request, res: Response) {
     try {
@@ -60,7 +77,6 @@ export const destinationController = {
     }
   },
 
-  // DELETE destination by ID
   // Menghapus destinasi berdasarkan ID
   async deleteDestination(req: Request, res: Response) {
     try {
@@ -75,4 +91,6 @@ export const destinationController = {
       return ResponseData.serverError(res, error);
     }
   },
+
+
 };
