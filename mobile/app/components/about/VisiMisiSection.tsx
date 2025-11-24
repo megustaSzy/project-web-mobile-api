@@ -1,93 +1,178 @@
 import React from "react";
+import { View, Text, Image, ScrollView, StyleSheet } from "react-native";
 
 export default function VisiMisiSection() {
   return (
-    <section className="w-full py-20 bg-[linear-gradient(to_bottom,#bfd8f7,#ffffff,#bfd8f7)]">
+    <ScrollView style={styles.container}>
 
-      <div className="max-w-6xl mx-auto px-6 md:px-10">
-        {/* Visi */}
-        <div className="mb-16">
-          <h2 className="text-4xl font-bold mb-6">Visi</h2>
-          <div className="bg-white shadow-md rounded-2xl p-6 md:p-8 border border-gray-100">
-            <p className="text-gray-700 leading-relaxed">
-              Menjadi platform wisata digital yang berperan aktif dalam membangun ekosistem
-              pariwisata Lampung yang maju, inklusif, dan berkelanjutan.
-            </p>
-          </div>
-        </div>
+      {/* Visi */}
+      <View style={styles.sectionWrapper}>
+        <Text style={styles.sectionTitle}>Visi</Text>
 
-        {/* Misi */}
-        <div className="mb-20">
-          <h2 className="text-4xl font-bold mb-6">Misi</h2>
-          <div className="bg-white shadow-md rounded-2xl p-6 md:p-8 border border-gray-100 space-y-2">
-            <p className="text-gray-700 leading-relaxed">
-              Mengembangkan teknologi yang memudahkan wisatawan menemukan dan menjelajahi
-              destinasi di Lampung.
-            </p>
-            <p className="text-gray-700 leading-relaxed">
-              Mendorong kolaborasi antara wisatawan, pelaku lokal, dan pemerintah daerah.
-            </p>
-            <p className="text-gray-700 leading-relaxed">
-              Menyediakan layanan wisata yang aman, informatif, dan berorientasi pada kepuasan
-              pengguna.
-            </p>
-            <p className="text-gray-700 leading-relaxed">
-              Menumbuhkan kesadaran akan pentingnya pelestarian alam dan budaya lokal.
-            </p>
-          </div>
-        </div>
+        <View style={styles.card}>
+          <Text style={styles.text}>
+            Menjadi platform wisata digital yang berperan aktif dalam membangun
+            ekosistem pariwisata Lampung yang maju, inklusif, dan berkelanjutan.
+          </Text>
+        </View>
+      </View>
 
-        {/* Nilai Utama */}
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold">Nilai Utama LamiGo</h2>
-        </div>
+      {/* Misi */}
+      <View style={styles.sectionWrapper}>
+        <Text style={styles.sectionTitle}>Misi</Text>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Inovatif */}
-          <div className="bg-white shadow-md border border-gray-100 rounded-2xl p-6 flex items-start gap-4">
-            <img src="/images/14.svg" alt="Inovatif" className="w-20 h-20" />
-            <div>
-              <h3 className="font-semibold text-lg">Inovatif</h3>
-              <p className="text-gray-600 text-sm">
-                Selalu berinovasi untuk menciptakan pengalaman wisata yang relevan dengan perkembangan zaman.
-              </p>
-            </div>
-          </div>
+        <View style={styles.card}>
+          <Text style={styles.text}>
+            Mengembangkan teknologi yang memudahkan wisatawan menemukan dan
+            menjelajahi destinasi di Lampung.
+          </Text>
 
-          {/* Tanggung Jawab */}
-          <div className="bg-white shadow-md border border-gray-100 rounded-2xl p-6 flex items-start gap-4">
-            <img src="/images/15.svg" alt="Tanggung Jawab" className="w-20 h-20" />
-            <div>
-              <h3 className="font-semibold text-lg">Tanggung Jawab</h3>
-              <p className="text-gray-600 text-sm">
-                Berkomitmen menjaga kepercayaan pengguna dan mendukung pariwisata berkelanjutan.
-              </p>
-            </div>
-          </div>
+          <Text style={styles.text}>
+            Mendorong kolaborasi antara wisatawan, pelaku lokal, dan pemerintah daerah.
+          </Text>
 
-          {/* Kolaboratif */}
-          <div className="bg-white shadow-md border border-gray-100 rounded-2xl p-6 flex items-start gap-4">
-            <img src="/images/17.svg" alt="Kolaboratif" className="w-20 h-20" />
-            <div>
-              <h3 className="font-semibold text-lg">Kolaboratif</h3>
-              <p className="text-gray-600 text-sm">
-                Membangun kerja sama dengan berbagai pihak demi kemajuan wisata daerah.
-              </p>
-            </div>
-          </div>
+          <Text style={styles.text}>
+            Menyediakan layanan wisata yang aman, informatif, dan berorientasi
+            pada kepuasan pengguna.
+          </Text>
 
-          {/* Cepat */}
-          <div className="bg-white shadow-md border border-gray-100 rounded-2xl p-6 flex items-start gap-4">
-            <img src="/images/18.svg" alt="Cepat" className="w-20 h-20" />
-            <div>
-              <h3 className="font-semibold text-lg">Cepat</h3>
-              <p className="text-gray-600 text-sm">
-                Memberikan layanan yang responsif dan efisien untuk setiap kebutuhan wisatawan.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+          <Text style={styles.text}>
+            Menumbuhkan kesadaran akan pentingnya pelestarian alam dan budaya lokal.
+          </Text>
+        </View>
+      </View>
+
+      {/* Nilai Utama */}
+      <Text style={styles.centerTitle}>Nilai Utama LamiGo</Text>
+
+      {/* Grid Nilai */}
+      <View style={styles.grid}>
+
+        {/* Inovatif */}
+        <View style={styles.cardRow}>
+          <Image
+            source={require("../../assets/images/14.png")}
+            style={styles.icon}
+          />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.cardTitle}>Inovatif</Text>
+            <Text style={styles.cardText}>
+              Selalu berinovasi untuk menciptakan pengalaman wisata yang relevan
+              dengan perkembangan zaman.
+            </Text>
+          </View>
+        </View>
+
+        {/* Tanggung Jawab */}
+        <View style={styles.cardRow}>
+          <Image
+            source={require("../../assets/images/15.png")}
+            style={styles.icon}
+          />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.cardTitle}>Tanggung Jawab</Text>
+            <Text style={styles.cardText}>
+              Berkomitmen menjaga kepercayaan pengguna dan mendukung pariwisata
+              berkelanjutan.
+            </Text>
+          </View>
+        </View>
+
+        {/* Kolaboratif */}
+        <View style={styles.cardRow}>
+          <Image
+            source={require("../../assets/images/17.png")}
+            style={styles.icon}
+          />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.cardTitle}>Kolaboratif</Text>
+            <Text style={styles.cardText}>
+              Membangun kerja sama dengan berbagai pihak demi kemajuan wisata daerah.
+            </Text>
+          </View>
+        </View>
+
+        {/* Cepat */}
+        <View style={styles.cardRow}>
+          <Image
+            source={require("../../assets/images/18.png")}
+            style={styles.icon}
+          />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.cardTitle}>Cepat</Text>
+            <Text style={styles.cardText}>
+              Memberikan layanan yang responsif dan efisien untuk setiap kebutuhan wisatawan.
+            </Text>
+          </View>
+        </View>
+
+      </View>
+
+    </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: "#bfd8f7",
+    padding: 20,
+  },
+  sectionWrapper: {
+    marginBottom: 30,
+  },
+  sectionTitle: {
+    fontSize: 28,
+    fontWeight: "bold",
+    marginBottom: 12,
+    color: "#0a1a35",
+  },
+  centerTitle: {
+    fontSize: 28,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 20,
+    color: "#0a1a35",
+  },
+  card: {
+    backgroundColor: "#fff",
+    padding: 18,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    elevation: 2,
+    gap: 10,
+  },
+  text: {
+    color: "#374151",
+    fontSize: 15,
+    lineHeight: 22,
+  },
+  grid: {
+    gap: 20,
+    marginBottom: 40,
+  },
+  cardRow: {
+    flexDirection: "row",
+    backgroundColor: "#fff",
+    padding: 16,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    elevation: 2,
+    gap: 15,
+  },
+  icon: {
+    width: 70,
+    height: 70,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 3,
+  },
+  cardText: {
+    fontSize: 14,
+    color: "#4b5563",
+    lineHeight: 20,
+  },
+});
