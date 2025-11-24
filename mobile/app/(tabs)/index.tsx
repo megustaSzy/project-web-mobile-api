@@ -11,7 +11,10 @@ import { Search } from 'lucide-react-native';
 import Hero from "@/app/components/Hero";
 import Destinasi from "@/app/components/Destinasi";
 import SearchCard from "@/app/components/SearchCard";
-
+import ChooseUs from "@/app/components/ChooseUs";
+import Testimoni from "@/app/components/Testimoni";
+import InputTestimoni from "@/app/components/InputTestimoni";
+import Footer from "@/app/components/Footer";
 
 export default function HomeScreen() {
   return (
@@ -30,6 +33,10 @@ export default function HomeScreen() {
       <Hero/>
       {/* <SearchCard/> */}
       <Destinasi/>
+      <ChooseUs/>
+      <Testimoni/>
+      <InputTestimoni/>
+      <Footer/>
     </ParallaxScrollView>
   );
 }
