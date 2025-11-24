@@ -120,14 +120,14 @@ export default function NavBarMobile() {
 
           {/* Profile */}
           {isLoggedIn ? (
-            <TouchableOpacity onPress={() => router.push("/profil")}>
+            <TouchableOpacity onPress={() => router.push("/profile")}>
               <Image
                 source={userData.avatar}
                 style={styles.profilePic}
               />
             </TouchableOpacity>
           ) : (
-            <TouchableOpacity onPress={() => router.push("/login")}>
+            <TouchableOpacity onPress={() => router.push("/auth/login")}>
               <Text style={styles.loginBtn}>{t.login}</Text>
             </TouchableOpacity>
           )}
@@ -162,7 +162,7 @@ export default function NavBarMobile() {
           {/* Auth */}
           {isLoggedIn ? (
             <>
-              <TouchableOpacity onPress={() => router.push("/profil")}>
+              <TouchableOpacity onPress={() => router.push("/profile")}>
                 <Text style={styles.menuItem}>{t.editProfile}</Text>
               </TouchableOpacity>
 
@@ -176,13 +176,13 @@ export default function NavBarMobile() {
           ) : (
             <>
               <TouchableOpacity
-                onPress={() => router.push("/login")}
+                onPress={() => router.push("/auth/login")}
                 style={styles.loginBtnFull}
               >
                 <Text style={styles.loginTxtWhite}>{t.login}</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => router.push("/signup")}
+                onPress={() => router.push("/auth/signup")}
                 style={styles.signupBtn}
               >
                 <Text style={styles.signupTxt}>{t.signup}</Text>
