@@ -28,9 +28,9 @@ export const authController = {
       }
 
       // Semua logic login ada di authService
-      const { user, token, refreshToken } = await authService.loginUser(email, password);
+      const { user, token: accessToken, refreshToken } = await authService.loginUser(email, password);
 
-      res.cookie("accessToken", token, {
+      res.cookie("accessToken", accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
@@ -47,7 +47,7 @@ export const authController = {
 
       return ResponseData.ok
       (res, 
-        { user, token, refreshToken }, "login berhasil");
+        { user, accessToken, refreshToken }, "login berhasil");
 
     } catch (error: any) {
       return ResponseData.unauthorized(res, error.message);

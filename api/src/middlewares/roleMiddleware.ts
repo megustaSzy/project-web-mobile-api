@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import { ResponseData } from "../utilities/Response";
 
 export const authorizeRoles = (...allowedRoles: string[]) => {
     
@@ -7,17 +8,11 @@ export const authorizeRoles = (...allowedRoles: string[]) => {
         const user = (req as any).user;
 
         if (!user) {
-            return res.status(401).json({
-                message: "unauthorized",
-                success: false,
-            });
+            return ResponseData.unauthorized(res, "unauthorized");
         }
 
         if (!allowedRoles.includes(user.role)) {
-            return res.status(403).json({
-                message: "role tidak memiliki akses",
-                success: false,
-            });
+            return ResponseData.forbidden(res, "role tidak memiliki akses")
         }
 
         next();

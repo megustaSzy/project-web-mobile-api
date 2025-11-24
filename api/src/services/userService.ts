@@ -5,20 +5,27 @@ import { UserData } from "../types/user";
 
 export const userService = {
   // GET all users
-  // Mengambil semua user dari database
   async getAllUsers() {
     return prisma.tb_user.findMany({
       orderBy: {
         id: "asc",
-      },
+      }, select: {
+        name: true,
+        email: true,
+        notelp: true,
+      }
     });
   },
 
   // GET user by ID
-  // Mengambil user berdasarkan ID
   async getUserById(id: number) {
     const user = await prisma.tb_user.findUnique({
       where: { id },
+      select: {
+        name: true,
+        email: true,
+        notelp: true
+      }
     });
 
     if (!user) createError("id tidak ditemukan", 404);
