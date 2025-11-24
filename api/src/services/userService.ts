@@ -5,12 +5,15 @@ import { UserData } from "../types/user";
 
 export const userService = {
   // GET all users
-  // Mengambil semua user dari database
   async getAllUsers() {
     return prisma.tb_user.findMany({
       orderBy: {
         id: "asc",
-      },
+      }, select: {
+        name: true,
+        email: true,
+        notelp: true,
+      }
     });
   },
 
