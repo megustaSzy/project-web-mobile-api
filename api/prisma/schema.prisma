@@ -62,7 +62,7 @@ model tb_pickup_locations {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  shcedules   tb_schedules[]
+  schedules   tb_schedules[]
 }
 
 model tb_schedules {
@@ -98,5 +98,6 @@ model tb_orders {
   time            String
 
   createdAt       DateTime          @default(now())
+  orderCode       String?            @unique
 }
 
