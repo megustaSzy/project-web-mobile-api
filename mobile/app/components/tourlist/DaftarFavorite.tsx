@@ -1,118 +1,167 @@
-"use client";
+import React from "react";
+import { View, Text, Image, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
 
-import Image from "next/image";
-import { useState } from "react";
-import Link from "next/link";
-
-export default function DaftarFavorite() {
+export default function DaftarFavorite({ navigation }) {
   const wisataData = [
     {
       name: "Kabupaten Pesawaran",
       desc: "Temukan berbagai wisata di Kabupaten Pesawaran",
       total: 15,
-      img: "/images/favorite/19.png",
+      img: require("../../assets/images/favorite/19.png"),
     },
     {
       name: "Kabupaten Lampung Selatan",
       desc: "Temukan berbagai wisata di Kabupaten Lampung Selatan",
       total: 9,
-      img: "/images/favorite/20.png",
+      img: require("../../assets/images/favorite/20.png"),
     },
     {
       name: "Kabupaten Tanggamus",
       desc: "Temukan berbagai wisata di Kabupaten Tanggamus",
       total: 8,
-      img: "/images/favorite/24.png",
+      img: require("../../assets/images/favorite/24.png"),
     },
     {
       name: "Kabupaten Lampung Barat",
       desc: "Temukan berbagai wisata di Kabupaten Lampung Barat",
       total: 8,
-      img: "/images/favorite/21.png",
+      img: require("../../assets/images/favorite/21.png"),
     },
     {
       name: "Kabupaten Way Kanan",
       desc: "Temukan berbagai wisata di Kabupaten Way Kanan",
       total: 2,
-      img: "/images/favorite/23.png",
+      img: require("../../assets/images/favorite/23.png"),
     },
     {
       name: "Kabupaten Pesisir Barat",
       desc: "Temukan berbagai wisata di Kabupaten Pesisir Barat",
       total: 3,
-      img: "/images/favorite/22.png",
+      img: require("../../assets/images/favorite/22.png"),
     },
     {
       name: "Kabupaten Tulang Bawang Barat",
       desc: "Temukan berbagai wisata di Kabupaten Tulang Bawang Barat",
       total: 2,
-      img: "/images/favorite/26.png",
+      img: require("../../assets/images/favorite/26.png"),
     },
     {
       name: "Kota Bandar Lampung",
       desc: "Temukan berbagai wisata di Kota Bandar Lampung",
       total: 4,
-      img: "/images/favorite/25.png",
+      img: require("../../assets/images/favorite/25.png"),
     },
     {
       name: "Kabupaten Lampung Tengah",
       desc: "Temukan berbagai wisata di Kabupaten Lampung Tengah",
       total: 1,
-      img: "/images/favorite/27.png",
+      img: require("../../assets/images/favorite/27.png"),
     },
     {
       name: "Destinasi Belum Terklarifikasi",
       desc: "Destinasi berada di perbatasan / belum jelas administratif",
       total: 4,
-      img: "/images/favorite/28.png",
+      img: require("../../assets/images/favorite/28.png"),
     },
   ];
 
   return (
-    <section className="w-full min-h-screen bg-gradient-to-b from-[#a7c8e7] to-white px-6 py-20">
-      <h1 className="text-center text-3xl font-semibold mb-10">
-        Tujuan Wisata Favorit
-      </h1>
+    <ScrollView style={styles.container}>
+      <Text style={styles.title}>Tujuan Wisata Favorit</Text>
 
-      {/* CARD LIST */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+      <View style={styles.cardWrap}>
         {wisataData.map((item, i) => (
-          <div
+          <TouchableOpacity
             key={i}
-            className="bg-white rounded-2xl shadow-md px-5 py-6 flex gap-4 items-start"
+            style={styles.card}
+            onPress={() =>
+              navigation.navigate("PemesananTour", {
+                kabupaten: item.name,
+              })
+            }
           >
-            {/* Gambar Kabupaten */}
-            <Image
-              src={item.img}
-              alt={item.name}
-              width={70}
-              height={70}
-              className="rounded-md object-cover"
-            />
+            <Image source={item.img} style={styles.image} />
 
-             <div className="flex flex-col gap-1">
-              <h2 className="font-semibold text-gray-800">{item.name}</h2>
-              <p className="text-sm text-gray-500">{item.desc}</p>
+            <View style={styles.textWrap}>
+              <Text style={styles.cardTitle}>{item.name}</Text>
+              <Text style={styles.cardDesc}>{item.desc}</Text>
 
-              <Link
-                href={`/pesanantour?kabupaten=${encodeURIComponent(
-                  item.name
-                )}`}
-                className="text-blue-500 font-medium text-sm hover:underline"
-              >
-                Lihat Detail
-              </Link>
-            </div>
+              <Text style={styles.detailLink}>Lihat Detail</Text>
+            </View>
 
-            <div className="ml-auto text-end">
-              <p className="text-2xl font-semibold text-gray-800">
-                {item.total}
-              </p>
-              <p className="text-[11px] text-gray-500 -mt-1">Destinasi</p>
-            </div>
-          </div>
+            <View style={styles.totalWrap}>
+              <Text style={styles.totalNumber}>{item.total}</Text>
+              <Text style={styles.totalText}>Destinasi</Text>
+            </View>
+          </TouchableOpacity>
         ))}
-      </div>
-    </section>
+      </View>
+    </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#a7c8e7",
+    paddingVertical: 25,
+    paddingHorizontal: 16,
+  },
+  title: {
+    textAlign: "center",
+    fontSize: 24,
+    fontWeight: "600",
+    marginBottom: 18,
+  },
+  cardWrap: {
+    width: "100%",
+  },
+  card: {
+    flexDirection: "row",
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 14,
+    alignItems: "flex-start",
+    elevation: 3,
+  },
+  image: {
+    width: 70,
+    height: 70,
+    borderRadius: 10,
+    marginRight: 12,
+  },
+  textWrap: {
+    flex: 1,
+  },
+  cardTitle: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#333",
+  },
+  cardDesc: {
+    fontSize: 12,
+    marginTop: 2,
+    color: "#777",
+  },
+  detailLink: {
+    marginTop: 6,
+    fontSize: 13,
+    color: "#1d4ed8",
+    fontWeight: "500",
+  },
+  totalWrap: {
+    alignItems: "flex-end",
+    justifyContent: "center",
+  },
+  totalNumber: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#333",
+  },
+  totalText: {
+    fontSize: 10,
+    color: "#777",
+    marginTop: -3,
+  },
+});
