@@ -1,28 +1,63 @@
-"use client";
-import Image from "next/image";
+import React from "react";
+import { View, Text, ImageBackground, StyleSheet } from "react-native";
 
 export default function HeroSection() {
   return (
-    <div className="relative w-full h-[420px] overflow-hidden rounded-b-[0px] shadow-lg">
-      {/* Background Image */}
-      <Image 
-        src="/images/boute.jpg  "
-        alt="Hero"
-        fill
-        className="object-cover"
-      />
+    <View style={styles.container}>
+      <ImageBackground
+        source={require("../assets/boute.jpg")} // sesuaikan path gambar
+        style={styles.background}
+        imageStyle={styles.image}
+      >
+        <View style={styles.overlay} />
 
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-black/40"></div>
-
-      {/* Text */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white px-4">
-        <h1 className="text-3xl font-semibold mb-2">About Us</h1>
-        <p className="max-w-xl text-sm opacity-90">
-          Temukan destinasi terbaik, atur perjalanan impianmu, dan pesan tiket
-          dengan mudah dalam satu aplikasi lengkap untuk semua kebutuhan liburan
-        </p>
-      </div>
-    </div>
+        <View style={styles.textWrapper}>
+          <Text style={styles.title}>About Us</Text>
+          <Text style={styles.description}>
+            Temukan destinasi terbaik, atur perjalanan impianmu, dan pesan tiket
+            dengan mudah dalam satu aplikasi lengkap untuk semua kebutuhan liburan.
+          </Text>
+        </View>
+      </ImageBackground>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    width: "100%",
+    height: 420,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+    overflow: "hidden",
+  },
+  background: {
+    flex: 1,
+    justifyContent: "center",
+  },
+  image: {
+    resizeMode: "cover",
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.4)",
+  },
+  textWrapper: {
+    paddingHorizontal: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  title: {
+    fontSize: 28,
+    color: "#fff",
+    fontWeight: "600",
+    marginBottom: 8,
+  },
+  description: {
+    fontSize: 14,
+    color: "#fff",
+    opacity: 0.9,
+    textAlign: "center",
+    maxWidth: 300,
+  },
+});
