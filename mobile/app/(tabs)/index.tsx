@@ -28,7 +28,7 @@ export default function HomeScreen() {
         <HelloWave />
       </ThemedView>
       <Hero/>
-      <SearchCard/>
+      {/* <SearchCard/> */}
       <Destinasi/>
     </ParallaxScrollView>
   );

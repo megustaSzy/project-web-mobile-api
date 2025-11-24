@@ -9,7 +9,7 @@ const destinations = [
     id: 1,
     name: "Rio The Beach",
     location: "Kalianda",
-    image: require("../assets/images/hero1.jpg"),
+    image: require("../../assets/images/hero1.jpg"),
     desc: "Pantai Rio The Beach menghadirkan keindahan pasir putih dan ombak tenang.",
     price: 120000,
     category: "Pantai",
