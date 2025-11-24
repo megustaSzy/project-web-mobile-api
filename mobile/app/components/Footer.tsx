@@ -13,7 +13,7 @@ export default function FooterMobile() {
         {/* Logo & Lokasi */}
         <View style={styles.section}>
           <View style={styles.logoRow}>
-            <Image source={require("./images/logo.png")} style={styles.logo} />
+            <Image source={require("../../assets/images/logo.png")} style={styles.logo} />
             <Text style={styles.logoTitle}>LamiGo Destination Lampung</Text>
           </View>
           <Text style={styles.textMuted}>
@@ -54,7 +54,7 @@ export default function FooterMobile() {
             style={styles.contactRow}
             onPress={() => Linking.openURL("https://wa.me/6285100889876")}
           >
-            <Image source={require("./images/8.png")} style={styles.icon} />
+            <Image source={require("../../assets/images/8.png")} style={styles.icon} />
             <View>
               <Text style={styles.textMuted}>Whatsapp</Text>
               <Text style={styles.contactText}>+62851 0088 9876</Text>
@@ -66,7 +66,7 @@ export default function FooterMobile() {
             style={styles.contactRow}
             onPress={() => Linking.openURL("mailto:LamiGoLampung.com")}
           >
-            <Image source={require("./images/9.png")} style={styles.icon} />
+            <Image source={require("../../assets/images/9.png")} style={styles.icon} />
             <View>
               <Text style={styles.textMuted}>Email</Text>
               <Text style={styles.contactText}>LamiGoLampung.com</Text>
@@ -78,7 +78,7 @@ export default function FooterMobile() {
             style={styles.contactRow}
             onPress={() => Linking.openURL("tel:087688009876")}
           >
-            <Image source={require("./images/10.png")} style={styles.icon} />
+            <Image source={require("../../assets/images/10.png")} style={styles.icon} />
             <View>
               <Text style={styles.textMuted}>Telpon</Text>
               <Text style={styles.contactText}>0876 8800 9876</Text>
