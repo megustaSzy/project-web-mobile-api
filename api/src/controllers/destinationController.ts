@@ -2,6 +2,7 @@ import { NextFunction, Request, response, Response } from "express";
 import { destinationService } from "../services/destinationService";
 import { createError } from "../utilities/createError";
 import { ResponseData } from "../utilities/Response";
+import { VALID_CATEGORIES } from "../constants/destinationCategories";
 
 export const destinationController = {
   // GET all destinations
@@ -20,6 +21,11 @@ export const destinationController = {
   async getByCategory(req: Request, res: Response) {
     try {
       const { category }= req.params;
+      const lowerCat = category.toLowerCase();
+
+      if(!VALID_CATEGORIES.includes(lowerCat)) {
+        return ResponseData.notFound(res, `kategori "${category}" tidak valid: ${VALID_CATEGORIES.join(", ")}`
+      )}
 
       const destinations = await destinationService.getByCategory(category);
 
