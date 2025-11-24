@@ -63,29 +63,5 @@ export const orderService = {
         });
 
         return order || null;
-    },
-
-    async getUsersOrders (userId: number) {
-        return prisma.tb_orders.findMany({
-            where: {
-                userId
-            },
-            orderBy: {
-                createdAt: 'desc'
-            },
-            select: {
-                id: true,
-                orderCode: true,
-                tickets: true,
-                totalPrice: true,
-                userName: true,
-                userPhone: true,
-                destinationName: true,
-                destinationPrice: true,
-                date: true,
-                time: true,
-                createdAt: true
-            }
-        })
     }
 };

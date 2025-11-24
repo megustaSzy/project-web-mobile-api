@@ -11,7 +11,18 @@ export const destinationService = {
     });
   },
 
-  // GET destination by ID
+  //tampilkan berdasarkan category
+  async getByCategory(category: string) {
+    return prisma.tb_destinations.findMany({
+      where: {
+        category: {
+          equals: category,
+          mode: "insensitive"
+        }
+      }
+    })
+  },
+
   // Mengambil destinasi berdasarkan ID
   async getDestinationById(id: number) {
     const destination = await prisma.tb_destinations.findUnique({

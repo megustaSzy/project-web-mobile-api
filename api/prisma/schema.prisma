@@ -98,6 +98,5 @@ model tb_orders {
   time            String
 
   createdAt       DateTime          @default(now())
-  orderCode       String?            @unique
 }
 

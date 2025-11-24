@@ -9,14 +9,15 @@ export const destinationController = {
   async getDestinations(req: Request, res: Response) {
     try {
       const destinations = await destinationService.getAllDestinations();
+
       return ResponseData.ok(res, destinations, "daftar destinasi berhasil diambil");
+
     } catch (error) {
       ResponseData.serverError(res, error);
     }
   },
 
-  // GET destination by ID
-  // Mengambil destinasi berdasarkan ID
+  // GET destination by Id
   async getDestinationById(req: Request, res: Response) {
     try {
       const id = Number(req.params.id);
@@ -30,7 +31,6 @@ export const destinationController = {
     }
   },
 
-  // POST add new destination
   // Menambahkan destinasi baru
   async addDestination(req: Request, res: Response) {
     try {
@@ -42,7 +42,6 @@ export const destinationController = {
     }
   },
 
-  // PUT update destination by ID
   // Mengubah data destinasi berdasarkan ID
   async updateDestination(req: Request, res: Response) {
     try {
@@ -60,7 +59,6 @@ export const destinationController = {
     }
   },
 
-  // DELETE destination by ID
   // Menghapus destinasi berdasarkan ID
   async deleteDestination(req: Request, res: Response) {
     try {
@@ -75,4 +73,6 @@ export const destinationController = {
       return ResponseData.serverError(res, error);
     }
   },
+
+  
 };
