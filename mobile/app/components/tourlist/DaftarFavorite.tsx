@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, Image, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, Image, ScrollView, TouchableOpacity, StyleSheet ,ImageBackground} from "react-native";
 
 export default function DaftarFavorite({ navigation }) {
   const wisataData = [
@@ -7,61 +7,61 @@ export default function DaftarFavorite({ navigation }) {
       name: "Kabupaten Pesawaran",
       desc: "Temukan berbagai wisata di Kabupaten Pesawaran",
       total: 15,
-      img: require("../../assets/images/favorite/19.png"),
+      img: require("../../../assets/images/favorite/19.png"),
     },
     {
       name: "Kabupaten Lampung Selatan",
       desc: "Temukan berbagai wisata di Kabupaten Lampung Selatan",
       total: 9,
-      img: require("../../assets/images/favorite/20.png"),
+      img: require("../../../assets/images/favorite/20.png"),
     },
     {
       name: "Kabupaten Tanggamus",
       desc: "Temukan berbagai wisata di Kabupaten Tanggamus",
       total: 8,
-      img: require("../../assets/images/favorite/24.png"),
+      img: require("../../../assets/images/favorite/24.png"),
     },
     {
       name: "Kabupaten Lampung Barat",
       desc: "Temukan berbagai wisata di Kabupaten Lampung Barat",
       total: 8,
-      img: require("../../assets/images/favorite/21.png"),
+      img: require("../../../assets/images/favorite/21.png"),
     },
     {
       name: "Kabupaten Way Kanan",
       desc: "Temukan berbagai wisata di Kabupaten Way Kanan",
       total: 2,
-      img: require("../../assets/images/favorite/23.png"),
+      img: require("../../../assets/images/favorite/23.png"),
     },
     {
       name: "Kabupaten Pesisir Barat",
       desc: "Temukan berbagai wisata di Kabupaten Pesisir Barat",
       total: 3,
-      img: require("../../assets/images/favorite/22.png"),
+      img: require("../../../assets/images/favorite/22.png"),
     },
     {
       name: "Kabupaten Tulang Bawang Barat",
       desc: "Temukan berbagai wisata di Kabupaten Tulang Bawang Barat",
       total: 2,
-      img: require("../../assets/images/favorite/26.png"),
+      img: require("../../../assets/images/favorite/26.png"),
     },
     {
       name: "Kota Bandar Lampung",
       desc: "Temukan berbagai wisata di Kota Bandar Lampung",
       total: 4,
-      img: require("../../assets/images/favorite/25.png"),
+      img: require("../../../assets/images/favorite/25.png"),
     },
     {
       name: "Kabupaten Lampung Tengah",
       desc: "Temukan berbagai wisata di Kabupaten Lampung Tengah",
       total: 1,
-      img: require("../../assets/images/favorite/27.png"),
+      img: require("../../../assets/images/favorite/27.png"),
     },
     {
       name: "Destinasi Belum Terklarifikasi",
       desc: "Destinasi berada di perbatasan / belum jelas administratif",
       total: 4,
-      img: require("../../assets/images/favorite/28.png"),
+      img: require("../../../assets/images/favorite/28.png"),
     },
   ];
 

@@ -5,7 +5,7 @@ export default function HeroTourSection() {
   return (
     <View style={styles.container}>
       <ImageBackground
-        source={require("../../assets/images/hero1.jpg")}
+        source={require("../../../assets/images/hero1.jpg")}
         style={styles.image}
         resizeMode="cover"
       >
