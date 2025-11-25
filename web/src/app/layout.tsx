@@ -1,5 +1,7 @@
 import { ReactNode } from "react";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import NavBar from "./components/NavBar";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Footer from "./components/Footer";
 import "@/app/globals.css";
 
