@@ -1,57 +1,116 @@
-"use client";
+import React from "react";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
+import QRCode from "react-native-qrcode-svg";
 
-import { QRCodeSVG } from "qrcode.react";
+export default function DetailTiketScreen({ route }: any) {
+  const { id } = route.params;
 
-export default function DetailTiket({ params }: { params: { id: string } }) {
-  const tiketId = params.id;
-
-  // --- Dummy data, nanti diganti dengan fetch dari database ---
+  // Dummy data — nanti diganti fetch dari API/database
   const tiket = {
-    id: tiketId,
+    id: id,
     destinasi: "Pantai Sari Ringgung",
     nama: "Muhammad Arif Alfa'iz",
     tanggal: "2025-11-20",
     jumlah: 2,
-    code: `TIK-${tiketId}ABC123`, // contoh kode tiket
+    code: `TIK-${id}ABC123`,
     status: "Sudah Dibayar",
   };
 
-  return (
-    <div className="p-6 max-w-md mx-auto">
-      <h1 className="text-xl font-semibold mb-4">Detail Tiket</h1>
+  const badgeColor =
+    tiket.status === "Sudah Dibayar"
+      ? styles.badgeSuccess
+      : styles.badgeWaiting;
 
-      <div className="bg-white p-6 rounded-xl shadow border">
+  return (
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.title}>Detail Tiket</Text>
+
+      <View style={styles.card}>
         {/* KODE TIKET */}
-        <p className="text-sm text-gray-600">Kode Tiket</p>
-        <h2 className="text-lg font-bold">{tiket.code}</h2>
+        <Text style={styles.label}>Kode Tiket</Text>
+        <Text style={styles.ticketCode}>{tiket.code}</Text>
 
         {/* INFORMASI */}
-        <div className="mt-4 space-y-1">
-          <p>Destinasi: {tiket.destinasi}</p>
-          <p>Nama Pemesan: {tiket.nama}</p>
-          <p>Tanggal Kunjungan: {tiket.tanggal}</p>
-          <p>Jumlah Tiket: {tiket.jumlah}</p>
+        <View style={styles.info}>
+          <Text>Destinasi: {tiket.destinasi}</Text>
+          <Text>Nama Pemesan: {tiket.nama}</Text>
+          <Text>Tanggal Kunjungan: {tiket.tanggal}</Text>
+          <Text>Jumlah Tiket: {tiket.jumlah}</Text>
 
-          <span
-            className={`inline-block mt-2 px-2 py-1 text-xs rounded ${
-              tiket.status === "Sudah Dibayar"
-                ? "bg-green-100 text-green-700"
-                : "bg-yellow-100 text-yellow-700"
-            }`}
-          >
-            {tiket.status}
-          </span>
-        </div>
+          <View style={[styles.badge, badgeColor]}>
+            <Text style={styles.badgeText}>{tiket.status}</Text>
+          </View>
+        </View>
 
         {/* QR CODE */}
-        <div className="flex justify-center mt-6">
-          <QRCodeSVG value={tiket.code} size={200} />
-        </div>
+        <View style={styles.qrWrapper}>
+          <QRCode value={tiket.code} size={200} />
+        </View>
 
-        <p className="text-center text-sm mt-3 text-gray-500">
+        <Text style={styles.note}>
           Tunjukkan QR Code ini di loket untuk masuk
-        </p>
-      </div>
-    </div>
+        </Text>
+      </View>
+    </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 16,
+    alignItems: "center",
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: "700",
+    marginBottom: 16,
+  },
+  card: {
+    backgroundColor: "#fff",
+    width: "100%",
+    padding: 20,
+    borderRadius: 14,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: "#ddd",
+  },
+  label: {
+    fontSize: 13,
+    color: "#666",
+  },
+  ticketCode: {
+    fontSize: 18,
+    fontWeight: "700",
+  },
+  info: {
+    marginTop: 10,
+    gap: 4,
+  },
+  badge: {
+    marginTop: 6,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    alignSelf: "flex-start",
+    borderRadius: 6,
+  },
+  badgeSuccess: {
+    backgroundColor: "#CFF9D9",
+  },
+  badgeWaiting: {
+    backgroundColor: "#FFF2B3",
+  },
+  badgeText: {
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  qrWrapper: {
+    marginTop: 20,
+    alignItems: "center",
+  },
+  note: {
+    textAlign: "center",
+    marginTop: 10,
+    color: "#777",
+    fontSize: 13,
+  },
+});
