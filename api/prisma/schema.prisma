@@ -49,9 +49,11 @@ model tb_destinations {
   imageUrl    String
   description String 
   price       Int
-  category    String     
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt  
+
+  categroyId  Int?
+  category    tb_category?      @relation(fields: [categroyId], references: [id])     
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt  
 
   schedules   tb_schedules[]
 }
@@ -98,5 +100,11 @@ model tb_orders {
   time            String
 
   createdAt       DateTime          @default(now())
+}
+
+model tb_category {
+  id              Int               @id @default(autoincrement())
+  name            String
+  destinations    tb_destinations[]
 }
 
