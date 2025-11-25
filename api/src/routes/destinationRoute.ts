@@ -8,7 +8,6 @@ const router = Router();
 // Public
 router.get("/", destinationController.getDestinations);
 router.get("/:id", destinationController.getDestinationById);
-router.get("/category/:category", destinationController.getByCategory);
 
 // Admin only
 router.post("/", authMiddleware, authorizeRoles("Admin"), destinationController.addDestination);
