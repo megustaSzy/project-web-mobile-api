@@ -1,21 +1,27 @@
-"use client";
-
-import Link from "next/link";
-import { useMemo, useState } from "react";
-import NavBar from "../components/NavBar";
-import Footer from "../components/Footer";
+import React, { useMemo, useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  FlatList,
+  StyleSheet,
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
 
 type Ticket = {
   id: number;
   code: string;
   destinasi: string;
-  tanggal: string; // ISO yyyy-mm-dd
+  tanggal: string; // yyyy-mm-dd
   status: "Sudah Dibayar" | "Menunggu Konfirmasi" | "Dibatalkan";
 };
 
-export default function TiketPage() {
+export default function TiketScreen() {
+  const navigation: any = useNavigation();
+
   const [query, setQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   const [tickets] = useState<Ticket[]>([
     {
@@ -36,6 +42,7 @@ export default function TiketPage() {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
+
     return tickets
       .filter((t) => (statusFilter === "all" ? true : t.status === statusFilter))
       .filter(
@@ -45,7 +52,9 @@ export default function TiketPage() {
           t.code.toLowerCase().includes(q) ||
           t.tanggal.includes(q)
       )
-      .sort((a, b) => new Date(a.tanggal).getTime() - new Date(b.tanggal).getTime());
+      .sort(
+        (a, b) => new Date(a.tanggal).getTime() - new Date(b.tanggal).getTime()
+      );
   }, [tickets, query, statusFilter]);
 
   const formatDate = (iso: string) => {
@@ -61,126 +70,156 @@ export default function TiketPage() {
     }
   };
 
-  const statusBadge = (status: Ticket["status"]) => {
-    if (status === "Sudah Dibayar")
-      return "bg-green-100 text-green-800";
-    if (status === "Menunggu Konfirmasi")
-      return "bg-yellow-100 text-yellow-800";
-    return "bg-red-100 text-red-800";
+  const badgeColor = (status: Ticket["status"]) => {
+    if (status === "Sudah Dibayar") return styles.badgeGreen;
+    if (status === "Menunggu Konfirmasi") return styles.badgeYellow;
+    return styles.badgeRed;
   };
 
   return (
-    <>
-      {/* NAVBAR FULL WIDTH */}
-      <NavBar />
+    <View style={styles.container}>
+      <Text style={styles.title}>Tiket Saya</Text>
 
-      {/* MAIN CONTENT */}
-      <div className="p-6 max-w-4xl mx-auto pt-24">
-        <h1 className="text-2xl font-semibold mb-4">Tiket Saya</h1>
+      {/* SEARCH */}
+      <TextInput
+        value={query}
+        onChangeText={setQuery}
+        placeholder="Cari berdasarkan destinasi, kode, atau tanggal..."
+        style={styles.search}
+      />
 
-        {/* Controls */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
-          <div className="flex items-center gap-2 w-full sm:w-2/3">
-            <label htmlFor="search" className="sr-only">Cari tiket</label>
-            <input
-              id="search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Cari berdasarkan destinasi, kode, atau tanggal..."
-              className="w-full p-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-sky-300"
-              aria-label="Cari tiket"
-            />
-          </div>
+      {/* FILTER */}
+      <View style={styles.filterContainer}>
+        <Text style={styles.filterLabel}>Filter:</Text>
 
-          <div className="flex items-center gap-2">
-            <label htmlFor="filter" className="text-sm text-gray-600">Filter:</label>
-            <select
-              id="filter"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="p-2 rounded border bg-white"
-              aria-label="Filter status tiket"
+        <TouchableOpacity onPress={() => setStatusFilter("all")}>
+          <Text style={statusFilter === "all" ? styles.filterActive : styles.filterText}>
+            Semua
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => setStatusFilter("Sudah Dibayar")}>
+          <Text
+            style={
+              statusFilter === "Sudah Dibayar"
+                ? styles.filterActive
+                : styles.filterText
+            }
+          >
+            Sudah Dibayar
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => setStatusFilter("Menunggu Konfirmasi")}>
+          <Text
+            style={
+              statusFilter === "Menunggu Konfirmasi"
+                ? styles.filterActive
+                : styles.filterText
+            }
+          >
+            Menunggu
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => setStatusFilter("Dibatalkan")}>
+          <Text
+            style={
+              statusFilter === "Dibatalkan" ? styles.filterActive : styles.filterText
+            }
+          >
+            Dibatalkan
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* LIST */}
+      {filtered.length === 0 ? (
+        <View style={styles.emptyBox}>
+          <Text style={{ color: "#666" }}>Tidak ada tiket yang cocok.</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={filtered}
+          keyExtractor={(item) => item.id.toString()}
+          contentContainerStyle={{ paddingBottom: 80 }}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={styles.card}
+              onPress={() => navigation.navigate("TiketDetail", { id: item.id })}
             >
-              <option value="all">Semua</option>
-              <option value="Sudah Dibayar">Sudah Dibayar</option>
-              <option value="Menunggu Konfirmasi">Menunggu Konfirmasi</option>
-              <option value="Dibatalkan">Dibatalkan</option>
-            </select>
-          </div>
-        </div>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.destinasi}>{item.destinasi}</Text>
 
-        {/* List */}
-        <div className="space-y-4">
-          {filtered.length === 0 && (
-            <div className="p-6 bg-white border rounded-xl text-center text-gray-600">
-              Tidak ada tiket yang cocok.
-            </div>
+                <Text style={styles.info}>{formatDate(item.tanggal)}</Text>
+
+                <Text style={styles.kode}>Kode: {item.code}</Text>
+              </View>
+
+              <View style={[styles.badge, badgeColor(item.status)]}>
+                <Text style={styles.badgeText}>{item.status}</Text>
+              </View>
+            </TouchableOpacity>
           )}
-
-          {filtered.map((t) => (
-            <Link
-              key={t.id}
-              href={`/tiket/${t.id}`}
-              className="block"
-              aria-label={`Buka detail tiket ${t.destinasi}`}
-            >
-              <article
-                className="p-4 border rounded-xl bg-white shadow-sm hover:shadow-md transition flex flex-col sm:flex-row sm:items-center gap-4"
-                role="button"
-              >
-                <div className="flex-1 min-w-0">
-                  <h2 className="text-lg px-2 font-medium truncate">
-                    {t.destinasi}
-                  </h2>
-
-                  <div className="mt-1 flex flex-col sm:flex-row sm:items-center sm:gap-4 text-sm text-gray-600">
-                    <time dateTime={t.tanggal} className="flex items-center gap-2 px-2">
-                      <span>{formatDate(t.tanggal)}</span>
-                    </time>
-
-                    <div className="flex items-center gap-3 mt-1 sm:mt-0">
-                      <div className="text-xs text-gray-500">
-                        Kode: <span className="font-medium">{t.code}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex-shrink-0 flex items-center gap-4 sm:flex-col sm:items-end">
-                  <span
-                    className={`inline-block px-3 py-1 text-xs font-medium rounded-full ${statusBadge(
-                      t.status
-                    )}`}
-                  >
-                    {t.status}
-                  </span>
-
-                  <span className="hidden sm:inline-block">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5 text-sky-500"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 5l7 7-7 7"
-                      />
-                    </svg>
-                  </span>
-                </div>
-              </article>
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      {/* FOOTER FULL WIDTH */}
-      <Footer />
-    </>
+        />
+      )}
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: { flex: 1, padding: 16, backgroundColor: "#f5f5f5" },
+  title: { fontSize: 22, fontWeight: "600", marginBottom: 12 },
+  search: {
+    padding: 12,
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    borderColor: "#ddd",
+    borderWidth: 1,
+    marginBottom: 12,
+  },
+  filterContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginBottom: 16,
+    flexWrap: "wrap",
+  },
+  filterLabel: { color: "#444", marginRight: 4 },
+  filterText: { color: "#666" },
+  filterActive: { color: "#2563eb", fontWeight: "700" },
+
+  card: {
+    padding: 16,
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    marginBottom: 10,
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+
+  destinasi: { fontSize: 16, fontWeight: "600" },
+  info: { fontSize: 14, color: "#666", marginTop: 4 },
+  kode: { fontSize: 12, color: "#777", marginTop: 4 },
+
+  badge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    alignSelf: "center",
+  },
+  badgeText: { fontSize: 12, fontWeight: "600" },
+
+  badgeGreen: { backgroundColor: "#d1fae5" },
+  badgeYellow: { backgroundColor: "#fef9c3" },
+  badgeRed: { backgroundColor: "#fee2e2" },
+
+  emptyBox: {
+    padding: 20,
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    alignItems: "center",
+  },
+});
