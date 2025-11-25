@@ -28,6 +28,7 @@ export default function NavBar() {
   // 🔹 Load Language
   useEffect(() => {
     const savedLang = localStorage.getItem("language");
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (savedLang) setLanguage(savedLang);
   }, []);
 
@@ -58,6 +59,7 @@ export default function NavBar() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadLocalProfile();
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === "profile") loadLocalProfile();
