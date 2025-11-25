@@ -3,10 +3,10 @@ import prisma from "../lib/prisma";
 
 export const categoryService = {
 
-    async getByCategory(categoryId: number) {
+    async getByCategory() {
         return prisma.tb_category.findMany({
-            where: {
-                id: categoryId
+            orderBy: {
+                id: 'asc'
             },
             include: {
                 destinations: true
