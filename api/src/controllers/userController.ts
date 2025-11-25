@@ -36,7 +36,7 @@ export const userController = {
 
       const currentUser = (req as any).user;
 
-      if (currentUser.role !== "Admin" && currentUser.id !== id) {
+      if (currentUser.role !== "Admin" && Number(currentUser.id) !== id) {
         return ResponseData.forbidden(res, "akses ditolak");
       }
 

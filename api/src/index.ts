@@ -14,6 +14,7 @@ import scheduleRoute from "./routes/scheduleRoute";
 import provinceRoute from "./routes/external";
 import orderRoute from "./routes/orderRoute";
 import adminOrderRoute from "./routes/adminOrderRoute";  
+import categoryRoute from "./routes/categoryRoute";
 
 // import { errorHandler } from "./middlewares/errorHandler";
 
@@ -39,6 +40,7 @@ app.use("/api/schedules", scheduleRoute);
 app.use("/api/region", provinceRoute);
 app.use("/api/orders", orderRoute);
 app.use("/api/admin/orders", adminOrderRoute);  
+app.use("/api/category", categoryRoute);
 
 // Error handler
 // app.use(errorHandler);
