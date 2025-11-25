@@ -4,5 +4,5 @@ export interface DestinationData {
   imageUrl: string;
   description: string;
   price: number;
-  category: string;
+  categoryId: number;
 }

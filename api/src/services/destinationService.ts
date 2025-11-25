@@ -11,18 +11,6 @@ export const destinationService = {
     });
   },
 
-  //tampilkan berdasarkan category
-  async getByCategory(category: string) {
-    return prisma.tb_destinations.findMany({
-      where: {
-        category: {
-          equals: category,
-          mode: "insensitive"
-        }
-      }
-    })
-  },
-
   // Mengambil destinasi berdasarkan ID
   async getDestinationById(id: number) {
     const destination = await prisma.tb_destinations.findUnique({
@@ -41,7 +29,20 @@ export const destinationService = {
     });
     if (existingDestination) createError("nama pantai sudah ada", 400);
 
-    return prisma.tb_destinations.create({ data });
+    return prisma.tb_destinations.create({ 
+      data: {
+        name: data.name,
+        location: data.location,
+        imageUrl: data.imageUrl,
+        description: data.description,
+        price: data.price,
+        category: {
+          connect: {
+            id: data.categoryId
+          }
+        }
+      } 
+    });
   },
 
   // UPDATE destination by ID
@@ -54,7 +55,18 @@ export const destinationService = {
 
     return prisma.tb_destinations.update({
       where: { id },
-      data,
+      data: {
+        name: data.name,
+        location: data.location,
+        imageUrl: data.imageUrl,
+        description: data.description,
+        price: data.price,
+        category: {
+          connect: {
+            id: data.categoryId
+          }
+        }
+      }
     });
   },
 

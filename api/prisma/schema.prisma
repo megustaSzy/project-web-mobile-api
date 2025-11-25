@@ -50,8 +50,8 @@ model tb_destinations {
   description String 
   price       Int
 
-  categroyId  Int?
-  category    tb_category?      @relation(fields: [categroyId], references: [id])     
+  categroyId  Int
+  category    tb_category      @relation(fields: [categroyId], references: [id])     
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt  
 
