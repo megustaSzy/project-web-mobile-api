@@ -1,207 +1,227 @@
-"use client";
-
 import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  Image,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-/**
- * ProfilePage
- * - ambil awal dari API (jika ada)
- * - tapi ketika user "Simpan Foto" => simpan ke localStorage (base64)
- * - update state lokal supaya navbar bisa baca dari localStorage
- */
-
-export default function ProfilePage() {
-  const [user, setUser] = useState<{ name: string; email: string; avatar: string }>({
+export default function ProfileScreen() {
+  const [user, setUser] = useState({
     name: "",
     email: "",
-    avatar: "/images/profile.jpg",
+    avatar: null as string | null,
   });
+
   const [loading, setLoading] = useState(true);
-  const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
 
-  // Utility: konversi file -> base64 data URL
-  const fileToDataUrl = (file: File): Promise<string> =>
-    new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (typeof reader.result === "string") resolve(reader.result);
-        else reject(new Error("Gagal konversi file"));
-      };
-      reader.onerror = () => reject(new Error("FileReader error"));
-      reader.readAsDataURL(file);
+  // Convert image to base64
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+      base64: true,
     });
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
+    if (!result.canceled) {
+      const base64Img = `data:image/jpeg;base64,${result.assets[0].base64}`;
+      setPreview(base64Img);
+    }
+  };
 
-    // prioritas: jika user sudah menyimpan profil di localStorage -> gunakan itu
-    const local = localStorage.getItem("profile");
-    if (local) {
-      try {
+  // Load profile (local first)
+  useEffect(() => {
+    const loadProfile = async () => {
+      const local = await AsyncStorage.getItem("profile");
+      const token = await AsyncStorage.getItem("token");
+
+      if (local) {
         const p = JSON.parse(local);
         setUser({
           name: p.name || "Pengguna",
           email: p.email || "",
-          avatar: p.avatar || "/images/profile.jpg",
+          avatar: p.avatar || null,
         });
         setLoading(false);
         return;
-      } catch {
-        // jatuhkan ke fetch API jika JSON corrupt
       }
-    }
 
-    // fallback: ambil dari API (jika ada token)
-    if (!token) {
-      setLoading(false);
-      return;
-    }
+      if (!token) {
+        setLoading(false);
+        return;
+      }
 
-    fetch("http://10.93.86.50:3001/api/users", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(async (res) => {
-        if (!res.ok) throw new Error("Gagal mengambil profil");
-        return res.json();
-      })
-      .then((data) => {
-        const avatarUrl = data.avatar
-          ? data.avatar.startsWith("http")
-            ? data.avatar
-            : `http://10.93.86.50:3001/uploads/${data.avatar}`
-          : "/images/profile.jpg";
-
-        setUser({
-          name: data.name || "Pengguna",
-          email: data.email || "",
-          avatar: avatarUrl,
+      try {
+        const res = await fetch("http://10.93.86.50:3001/api/users", {
+          headers: { Authorization: `Bearer ${token}` },
         });
-      })
-      .catch((err) => {
-        console.error("Error ambil profil:", err);
-      })
-      .finally(() => setLoading(false));
+
+        if (res.ok) {
+          const data = await res.json();
+          const avatarUrl = data.avatar
+            ? data.avatar.startsWith("http")
+              ? data.avatar
+              : `http://10.93.86.50:3001/uploads/${data.avatar}`
+            : null;
+
+          setUser({
+            name: data.name || "Pengguna",
+            email: data.email || "",
+            avatar: avatarUrl,
+          });
+        }
+      } catch (err) {
+        console.log("Gagal fetch profil", err);
+      }
+
+      setLoading(false);
+    };
+
+    loadProfile();
   }, []);
 
-  // Menangani perubahan input file
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selected = e.target.files?.[0];
-    if (!selected) return;
-    setFile(selected);
-    setPreview(URL.createObjectURL(selected));
-  };
-
-  // Simpan profil (lokal): konversi file ke base64 dan simpan ke localStorage
+  // Save to local (AsyncStorage)
   const handleSaveLocal = async () => {
-    try {
-      let avatarData = user.avatar; // default tetap avatar yang ada
+    const newProfile = {
+      name: user.name || "Pengguna",
+      email: user.email || "",
+      avatar: preview || user.avatar,
+    };
 
-      if (file) {
-        // convert to base64 data URL
-        avatarData = await fileToDataUrl(file);
-      }
+    setUser(newProfile);
 
-      // update state lokal
-      const newProfile = {
-        name: user.name || "Pengguna",
-        email: user.email || "",
-        avatar: avatarData,
-      };
-      setUser(newProfile);
+    await AsyncStorage.setItem("profile", JSON.stringify(newProfile));
+    setPreview(null);
 
-      // simpan di localStorage sebagai JSON
-      localStorage.setItem("profile", JSON.stringify(newProfile));
-
-      // bersihkan preview/file setelah simpan
-      setFile(null);
-      setPreview(null);
-
-      // beri notifikasi kecil
-      alert("Profil disimpan secara lokal — perubahan langsung muncul di navigasi.");
-    } catch (err) {
-      console.error("Gagal menyimpan profil secara lokal:", err);
-      alert("Terjadi kesalahan saat menyimpan profil (lokal).");
-    }
+    Alert.alert("Berhasil", "Profil berhasil disimpan secara lokal.");
   };
 
-  // Opsional: edit nama inline (bisa kamu ganti dengan form)
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setUser((prev) => ({ ...prev, name: e.target.value }));
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem("token");
+    // Jika ingin hapus profile:
+    // await AsyncStorage.removeItem("profile");
+    Alert.alert("Logout", "Anda telah keluar.");
   };
 
-  // Logout
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    // opsional: hapus profile lokal juga jika mau
-    // localStorage.removeItem("profile");
-    window.location.href = "/login";
-  };
-
-  if (loading)
+  if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <p className="text-gray-600 animate-pulse">Memuat profil...</p>
-      </div>
+      <View style={styles.center}>
+        <ActivityIndicator size="large" color="#3b82f6" />
+        <Text>Memuat profil...</Text>
+      </View>
     );
+  }
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-50 px-4">
-      <div className="bg-white shadow-xl rounded-2xl p-8 w-full max-w-md text-center">
-        {/* Foto Profil */}
-        <div className="relative mb-6">
-          <img
-            src={preview || user.avatar}
-            alt="Foto Profil"
-            className="w-32 h-32 rounded-full object-cover border-4 border-blue-100 mx-auto shadow-sm"
-          />
-          <label className="absolute bottom-0 right-[35%] bg-blue-500 hover:bg-blue-600 text-white rounded-full p-2 cursor-pointer transition">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              className="hidden"
-            />
-            ✎
-          </label>
-        </div>
-
-        {/* Nama (bisa diedit langsung) */}
-        <input
-          value={user.name}
-          onChange={handleNameChange}
-          className="w-full text-center border mb-2 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200"
-          placeholder="Nama Anda"
+    <View style={styles.container}>
+      {/* Foto */}
+      <View style={{ alignItems: "center", marginBottom: 20 }}>
+        <Image
+          source={{
+            uri: preview || user.avatar || "https://via.placeholder.com/150",
+          }}
+          style={styles.avatar}
         />
 
-        <p className="text-gray-500 text-sm mb-6">{user.email}</p>
+        <TouchableOpacity style={styles.editBtn} onPress={pickImage}>
+          <Text style={{ color: "white", fontSize: 18 }}>✎</Text>
+        </TouchableOpacity>
+      </View>
 
-        {/* Jika ada preview (file baru), tampilkan tombol Simpan Lokal */}
-        {preview && (
-          <button
-            onClick={handleSaveLocal}
-            className="w-full bg-blue-600 text-white py-2 rounded-lg mb-4 hover:bg-blue-700 transition-all"
-          >
-            Simpan Foto & Nama (Lokal)
-          </button>
-        )}
+      {/* Nama */}
+      <TextInput
+        placeholder="Nama"
+        value={user.name}
+        onChangeText={(val) => setUser({ ...user, name: val })}
+        style={styles.input}
+      />
 
-        {/* Juga sediakan tombol Simpan Nama tanpa upload foto */}
-        {!preview && (
-          <button
-            onClick={handleSaveLocal}
-            className="w-full bg-blue-500 text-white py-2 rounded-lg mb-4 hover:bg-blue-600 transition-all"
-          >
-            Simpan Nama (Lokal)
-          </button>
-        )}
+      <Text style={{ color: "#666", marginBottom: 25 }}>{user.email}</Text>
 
-        <button
-          onClick={handleLogout}
-          className="w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition-all"
-        >
-          Logout
-        </button>
-      </div>
-    </div>
+      {preview ? (
+        <TouchableOpacity style={styles.saveBtn} onPress={handleSaveLocal}>
+          <Text style={styles.btnText}>Simpan Foto & Nama (Lokal)</Text>
+        </TouchableOpacity>
+      ) : (
+        <TouchableOpacity style={styles.saveSecondary} onPress={handleSaveLocal}>
+          <Text style={styles.btnText}>Simpan Nama (Lokal)</Text>
+        </TouchableOpacity>
+      )}
+
+      <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
+        <Text style={styles.btnText}>Logout</Text>
+      </TouchableOpacity>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 20,
+    flex: 1,
+    backgroundColor: "#f5f5f5",
+    alignItems: "center",
+  },
+  avatar: {
+    width: 140,
+    height: 140,
+    borderRadius: 100,
+    borderWidth: 3,
+    borderColor: "#93c5fd",
+  },
+  editBtn: {
+    position: "absolute",
+    bottom: 0,
+    right: 90,
+    backgroundColor: "#3b82f6",
+    padding: 10,
+    borderRadius: 30,
+  },
+  input: {
+    width: "100%",
+    backgroundColor: "white",
+    padding: 12,
+    borderRadius: 10,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: "#ddd",
+  },
+  saveBtn: {
+    backgroundColor: "#2563eb",
+    padding: 15,
+    borderRadius: 10,
+    width: "100%",
+    marginBottom: 10,
+  },
+  saveSecondary: {
+    backgroundColor: "#3b82f6",
+    padding: 15,
+    borderRadius: 10,
+    width: "100%",
+    marginBottom: 10,
+  },
+  logoutBtn: {
+    backgroundColor: "#ef4444",
+    padding: 15,
+    borderRadius: 10,
+    width: "100%",
+    marginTop: 10,
+  },
+  btnText: {
+    color: "white",
+    textAlign: "center",
+    fontWeight: "bold",
+  },
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+});

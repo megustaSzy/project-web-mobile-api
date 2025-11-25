@@ -1,47 +1,44 @@
-"use client";
-
-import { useSearchParams, useRouter } from "next/navigation";
-import { useState } from "react";
-import Image from "next/image";
-import { wisataByKabupaten } from "@/app/data/wisata";
-import { MapPin } from "lucide-react";
-import NavBar from "../components/NavBar";
-import Footer from "../components/Footer";
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  ScrollView,
+  StyleSheet,
+} from "react-native";
+import { useRoute, useNavigation } from "@react-navigation/native";
+import { MapPin } from "lucide-react-native";
+import { wisataByKabupaten } from "../data/wisata"; // sesuaikan path
 
 const categories = ["Pantai", "Pulau", "Gunung", "Air Terjun", "Bukit"];
 
 export default function PesananTourPage() {
-  const params = useSearchParams();
-  const router = useRouter();
+  const route = useRoute();
+  const navigation = useNavigation();
+  const { kabupaten } = route.params ?? {};
 
-  const selectedKabupaten = params.get("kabupaten") ?? "";
   const [selectedCategory, setSelectedCategory] = useState("Pantai");
 
-  if (!selectedKabupaten) {
+  if (!kabupaten) {
     return (
-      <>
-        <NavBar />
-        <p className="text-center text-red-500 font-semibold py-20">
-          ❗ Tidak ada kabupaten dipilih, kembali ke halaman sebelumnya.
-        </p>
-        <Footer />
-      </>
+      <View style={styles.center}>
+        <Text style={styles.error}>❗ Kabupaten tidak ditemukan.</Text>
+      </View>
     );
   }
 
   const kabupatenData = wisataByKabupaten.find((item) =>
-    selectedKabupaten.toLowerCase().includes(item.kabupaten.toLowerCase())
+    kabupaten.toLowerCase().includes(item.kabupaten.toLowerCase())
   );
 
   if (!kabupatenData) {
     return (
-      <>
-        <NavBar />
-        <p className="text-center text-red-500 font-semibold py-20">
-          ❗ Tidak ada data wisata untuk: <b>{selectedKabupaten}</b>
-        </p>
-        <Footer />
-      </>
+      <View style={styles.center}>
+        <Text style={styles.error}>
+          ❗ Tidak ada data wisata untuk {kabupaten}
+        </Text>
+      </View>
     );
   }
 
@@ -50,84 +47,195 @@ export default function PesananTourPage() {
   );
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <NavBar />
+    <ScrollView style={styles.container}>
+      <Text style={styles.title}>
+        Tujuan Wisata Favorit di {kabupatenData.kabupaten}
+      </Text>
 
-      <section className="flex-1 px-6 py-16 bg-gradient-to-b from-[#a7c8e7] to-white">
-        <h1 className="text-center text-3xl font-bold mb-10 text-gray-800">
-          Tujuan Wisata Favorit di {kabupatenData.kabupaten}
-        </h1>
-
-        {/* FILTER BUTTON */}
-        <div className="flex justify-center gap-3 mb-10 flex-wrap">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`px-6 py-2 rounded-full text-sm font-medium shadow-md transition ${
-                selectedCategory === cat
-                  ? "bg-blue-500 text-white"
-                  : "bg-white hover:bg-blue-100"
-              }`}
+      {/* FILTER KATEGORI */}
+      <View style={styles.filterContainer}>
+        {categories.map((cat) => (
+          <TouchableOpacity
+            key={cat}
+            onPress={() => setSelectedCategory(cat)}
+            style={[
+              styles.filterButton,
+              selectedCategory === cat && styles.filterButtonActive,
+            ]}
+          >
+            <Text
+              style={[
+                styles.filterText,
+                selectedCategory === cat && styles.filterTextActive,
+              ]}
             >
               {cat}
-            </button>
-          ))}
-        </div>
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
 
-        {/* LIST DESTINASI */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7 max-w-7xl mx-auto">
-          {filteredDestinasi.length === 0 ? (
-            <p className="text-center text-gray-600 col-span-3">
-              Tidak ada destinasi kategori <b>{selectedCategory}</b>
-            </p>
-          ) : (
-            filteredDestinasi.map((dest, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-2xl shadow-md overflow-hidden"
-              >
-                <Image
-                  src={`/images/${dest.image ?? "hero1.png"}`}
-                  alt={dest.name}
-                  width={400}
-                  height={240}
-                  className="w-full h-48 object-cover"
-                />
+      {/* LIST WISATA */}
+      <View style={styles.grid}>
+        {filteredDestinasi.length === 0 ? (
+          <Text style={styles.noData}>
+            Tidak ada destinasi kategori {selectedCategory}
+          </Text>
+        ) : (
+          filteredDestinasi.map((dest, index) => (
+            <View key={index} style={styles.card}>
+              <Image
+                source={
+                  dest.image
+                    ? require(`../assets/${dest.image}`)
+                    : require("../assets/hero1.png")
+                }
+                style={styles.image}
+              />
 
-                <div className="p-4 space-y-2">
-                  <h2 className="font-bold text-lg text-gray-800">
-                    {dest.name}
-                  </h2>
+              <View style={styles.cardContent}>
+                <Text style={styles.cardTitle}>{dest.name}</Text>
 
-                  <p className="flex items-center gap-1 text-gray-600 text-sm">
-                    <MapPin size={16} /> {kabupatenData.kabupaten}
-                  </p>
+                <View style={styles.locationRow}>
+                  <MapPin size={16} color="#444" />
+                  <Text style={styles.locationText}>
+                    {kabupatenData.kabupaten}
+                  </Text>
+                </View>
 
-                  <p className="text-gray-600 text-sm">
-                    {dest.deskripsi ?? "-"}
-                  </p>
+                <Text style={styles.desc}>
+                  {dest.deskripsi ?? "Tidak ada deskripsi."}
+                </Text>
 
-                  <div className="flex justify-between items-center mt-3">
-                    <button
-                      className="bg-blue-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-600 transition"
-                      onClick={() => router.push("/pesan")}
-                    >
-                      Pesan Sekarang
-                    </button>
+                <View style={styles.bottomRow}>
+                  <TouchableOpacity
+                    style={styles.orderButton}
+                    onPress={() => navigation.navigate("Pesan")}
+                  >
+                    <Text style={styles.orderText}>Pesan Sekarang</Text>
+                  </TouchableOpacity>
 
-                    <p className="font-semibold text-gray-800 text-sm">
-                      Rp{dest.harga}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      </section>
-
-      <Footer />
-    </div>
+                  <Text style={styles.price}>Rp{dest.harga}</Text>
+                </View>
+              </View>
+            </View>
+          ))
+        )}
+      </View>
+    </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#e4eff8",
+    padding: 16,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginVertical: 20,
+    color: "#1f2937",
+  },
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  error: {
+    color: "red",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+
+  // Filter
+  filterContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    gap: 10,
+    marginBottom: 20,
+  },
+  filterButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 18,
+    backgroundColor: "white",
+    borderRadius: 20,
+    elevation: 2,
+  },
+  filterButtonActive: {
+    backgroundColor: "#3b82f6",
+  },
+  filterText: {
+    fontSize: 13,
+    color: "#374151",
+  },
+  filterTextActive: {
+    color: "white",
+    fontWeight: "bold",
+  },
+
+  // Grid
+  grid: {
+    gap: 16,
+  },
+
+  // Card
+  card: {
+    backgroundColor: "white",
+    borderRadius: 20,
+    overflow: "hidden",
+    elevation: 3,
+  },
+  image: {
+    width: "100%",
+    height: 180,
+  },
+  cardContent: {
+    padding: 14,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#111827",
+  },
+  locationRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 4,
+    gap: 4,
+  },
+  locationText: {
+    fontSize: 13,
+    color: "#555",
+  },
+  desc: {
+    fontSize: 13,
+    color: "#555",
+    marginTop: 8,
+  },
+  bottomRow: {
+    marginTop: 12,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  orderButton: {
+    backgroundColor: "#3b82f6",
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+  },
+  orderText: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 13,
+  },
+  price: {
+    fontWeight: "bold",
+    color: "#111",
+  },
+});
+
