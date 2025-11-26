@@ -12,6 +12,7 @@ export const userService = {
       }, select: {
         name: true,
         email: true,
+        role: true,
         notelp: true,
       }
     });
@@ -59,7 +60,7 @@ export const userService = {
       where: { id },
     });
 
-    if (!user) createError("id tidak ditemukan", 404);
+    if (!user) throw createError("id tidak ditemukan", 404);
 
     return prisma.tb_user.delete({
       where: { id },

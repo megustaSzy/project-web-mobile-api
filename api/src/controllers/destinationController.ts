@@ -1,46 +1,52 @@
-import { NextFunction, Request, response, Response } from "express";
+import { Request, Response } from "express";
 import { destinationService } from "../services/destinationService";
-import { createError } from "../utilities/createError";
 import { ResponseData } from "../utilities/Response";
-// import { VALID_CATEGORIES } from "../constants/destinationCategories";
 
 export const destinationController = {
-  // GET all destinations
-  // Mengambil semua destinasi
+
   async getDestinations(req: Request, res: Response) {
     try {
-      const destinations = await destinationService.getAllDestinations();
+      const category = req.query.category as string | undefined;
 
-      return ResponseData.ok(res, destinations, "daftar destinasi berhasil diambil");
+      const destinations = await destinationService.getAllDestinations(category);
 
-    } catch (error) {
-      ResponseData.serverError(res, error);
-    }
-  },
-  // GET destination by Id
-  async getDestinationById(req: Request, res: Response) {
-    try {
-      const id = Number(req.params.id);
-      if (isNaN(id)) ResponseData.badRequest(res, "id tidak valid");
+      return ResponseData.ok(
+        res,
+        destinations,
+        category
+          ? `destinasi kategori ${category} berhasil diambil`
+          : "semua destinasi berhasil diambil"
+      );
 
-      const destination = await destinationService.getDestinationById(id);
-
-      return ResponseData.ok(res, destination, "destinasi berhasil diambil");
     } catch (error) {
       return ResponseData.serverError(res, error);
     }
   },
 
-  // Menambahkan destinasi baru
+  async getDestinationById(req: Request, res: Response) {
+    try {
+      const id = Number(req.params.id);
+      if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
+
+      const destination = await destinationService.getDestinationById(id);
+
+      return ResponseData.ok(res, destination, "destinasi berhasil diambil");
+
+    } catch (error) {
+      return ResponseData.serverError(res, error);
+    }
+  },
+
   async addDestination(req: Request, res: Response) {
     try {
       const destination = await destinationService.addDestination(req.body);
 
       return ResponseData.created(res, destination, "destinasi berhasil ditambahkan");
     } catch (error) {
-      return ResponseData.serverError(res, error)
+      return ResponseData.serverError(res, error);
     }
   },
+
 
   // Mengubah data destinasi berdasarkan ID
   async updateDestination(req: Request, res: Response) {

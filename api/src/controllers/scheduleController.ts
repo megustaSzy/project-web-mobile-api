@@ -24,6 +24,7 @@ export const scheduleController = {
   async getScheduleById(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
+      
       if (isNaN(id)) ResponseData.badRequest(res, "id tidak valid");
 
       const schedule = await scheduleService.getScheduleById(id);

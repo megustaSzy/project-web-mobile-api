@@ -1,10 +1,11 @@
 import prisma from "../lib/prisma";
 import { CategoryData } from "../types/category";
+import { createError } from "../utilities/createError";
 
 
 export const categoryService = {
 
-    async getByCategory() {
+    async getAllCategories() {
         return prisma.tb_category.findMany({
             orderBy: {
                 id: 'asc'
@@ -13,6 +14,22 @@ export const categoryService = {
                 destinations: true
             }
         })
+    },
+
+    async getCategoryById(id: number) {
+
+        const category = await prisma.tb_category.findFirst({
+            where: {
+                id
+            },
+            include: {
+                destinations: true
+            }
+        });
+
+        if(!category) createError("id tidak ditemukan", 404);
+
+        return category
     },
 
     async addCategory(data: CategoryData) {
@@ -24,6 +41,16 @@ export const categoryService = {
                 destinations: true
             }
         })
+    },
+
+    async deleteCategoriesById(id: number) {
+        const category = await prisma.tb_category.delete({
+            where: {
+                id
+            }
+        });
+
+        if(category) createError("id tidak ditemukan", 404)
     }
 
 }
