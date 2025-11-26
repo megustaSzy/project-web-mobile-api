@@ -108,3 +108,22 @@ model tb_category {
   destinations    tb_destinations[]
 }
 
+model tb_about {
+  id            Int           @id @default(autoincrement())
+  history       String
+  vision        String
+  mission       String
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  // relasi 
+  coreValues    tb_core_value[]
+}
+
+model tb_core_value {
+  id            Int           @id @default(autoincrement())
+  value         String
+  aboutId       Int
+  about         tb_about      @relation(fields: [aboutId], references: [id])
+}
+
