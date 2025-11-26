@@ -9,7 +9,8 @@ import {
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { MapPin } from "lucide-react-native";
-import { wisataByKabupaten } from "../data/wisata"; // sesuaikan path
+import { wisataByKabupaten } from "../../data/wisata";
+import { images } from "../../../assets/images"; // 🔥 FIX gambar
 
 const categories = ["Pantai", "Pulau", "Gunung", "Air Terjun", "Bukit"];
 
@@ -35,9 +36,7 @@ export default function PesananTourPage() {
   if (!kabupatenData) {
     return (
       <View style={styles.center}>
-        <Text style={styles.error}>
-          ❗ Tidak ada data wisata untuk {kabupaten}
-        </Text>
+        <Text style={styles.error}>❗ Tidak ada data wisata untuk {kabupaten}</Text>
       </View>
     );
   }
@@ -85,11 +84,7 @@ export default function PesananTourPage() {
           filteredDestinasi.map((dest, index) => (
             <View key={index} style={styles.card}>
               <Image
-                source={
-                  dest.image
-                    ? require(`../assets/${dest.image}`)
-                    : require("../assets/hero1.png")
-                }
+                source={images[dest.image] ?? images["hero1.png"]} // 🔥 FIX disini
                 style={styles.image}
               />
 
@@ -127,11 +122,7 @@ export default function PesananTourPage() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#e4eff8",
-    padding: 16,
-  },
+  container: { flex: 1, backgroundColor: "#e4eff8", padding: 16 },
   title: {
     fontSize: 22,
     fontWeight: "bold",
@@ -139,18 +130,9 @@ const styles = StyleSheet.create({
     marginVertical: 20,
     color: "#1f2937",
   },
-  center: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  error: {
-    color: "red",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
+  center: { flex: 1, justifyContent: "center", alignItems: "center" },
+  error: { color: "red", fontSize: 16, fontWeight: "bold" },
 
-  // Filter
   filterContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -165,57 +147,25 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     elevation: 2,
   },
-  filterButtonActive: {
-    backgroundColor: "#3b82f6",
-  },
-  filterText: {
-    fontSize: 13,
-    color: "#374151",
-  },
-  filterTextActive: {
-    color: "white",
-    fontWeight: "bold",
-  },
+  filterButtonActive: { backgroundColor: "#3b82f6" },
+  filterText: { fontSize: 13, color: "#374151" },
+  filterTextActive: { color: "white", fontWeight: "bold" },
 
-  // Grid
-  grid: {
-    gap: 16,
-  },
-
-  // Card
+  grid: { gap: 16 },
   card: {
     backgroundColor: "white",
     borderRadius: 20,
     overflow: "hidden",
     elevation: 3,
   },
-  image: {
-    width: "100%",
-    height: 180,
-  },
-  cardContent: {
-    padding: 14,
-  },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#111827",
-  },
-  locationRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 4,
-    gap: 4,
-  },
-  locationText: {
-    fontSize: 13,
-    color: "#555",
-  },
-  desc: {
-    fontSize: 13,
-    color: "#555",
-    marginTop: 8,
-  },
+  image: { width: "100%", height: 180 },
+  cardContent: { padding: 14 },
+  cardTitle: { fontSize: 18, fontWeight: "bold", color: "#111827" },
+
+  locationRow: { flexDirection: "row", alignItems: "center", marginTop: 4, gap: 4 },
+  locationText: { fontSize: 13, color: "#555" },
+  desc: { fontSize: 13, color: "#555", marginTop: 8 },
+
   bottomRow: {
     marginTop: 12,
     flexDirection: "row",
@@ -228,14 +178,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 10,
   },
-  orderText: {
-    color: "white",
-    fontWeight: "bold",
-    fontSize: 13,
-  },
-  price: {
-    fontWeight: "bold",
-    color: "#111",
-  },
+  orderText: { color: "white", fontWeight: "bold", fontSize: 13 },
+  price: { fontWeight: "bold", color: "#111" },
 });
-
