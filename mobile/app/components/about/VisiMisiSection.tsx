@@ -51,7 +51,7 @@ export default function VisiMisiSection() {
         {/* Inovatif */}
         <View style={styles.cardRow}>
           <Image
-            source={require("../../assets/images/14.svg")}
+            source={require("../../../assets/images/14.svg")}
             style={styles.icon}
           />
           <View style={{ flex: 1 }}>
@@ -66,7 +66,7 @@ export default function VisiMisiSection() {
         {/* Tanggung Jawab */}
         <View style={styles.cardRow}>
           <Image
-            source={require("../../assets/images/15.svg")}
+            source={require("../../../assets/images/15.svg")}
             style={styles.icon}
           />
           <View style={{ flex: 1 }}>
@@ -81,7 +81,7 @@ export default function VisiMisiSection() {
         {/* Kolaboratif */}
         <View style={styles.cardRow}>
           <Image
-            source={require("../../assets/images/17.svg")}
+            source={require("../../../assets/images/17.svg")}
             style={styles.icon}
           />
           <View style={{ flex: 1 }}>
@@ -95,7 +95,7 @@ export default function VisiMisiSection() {
         {/* Cepat */}
         <View style={styles.cardRow}>
           <Image
-            source={require("../../assets/images/18.svg")}
+            source={require("../../../assets/images/18.svg")}
             style={styles.icon}
           />
           <View style={{ flex: 1 }}>

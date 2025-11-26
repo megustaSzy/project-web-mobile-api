@@ -5,7 +5,7 @@ export default function HeroSection() {
   return (
     <View style={styles.container}>
       <ImageBackground
-        source={require("../../assets/images/boute.jpg")} // sesuaikan path gambar
+        source={require("../../../assets/images/boute.jpg")} // sesuaikan path gambar
         style={styles.background}
         imageStyle={styles.image}
       >

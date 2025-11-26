@@ -14,7 +14,7 @@ export default function TeamSection() {
         {/* Member 1 */}
         <View style={styles.card}>
           <Image
-            source={require("../../assets/images/faiz.jpg")}
+            source={require("../../../assets/images/faiz.jpg")}
             style={styles.avatar}
           />
           <Text style={styles.name}>M. Arif Alfa’iz</Text>
@@ -24,7 +24,7 @@ export default function TeamSection() {
         {/* Member 2 */}
         <View style={styles.card}>
           <Image
-            source={require("../../assets/images/faiz.jpg")}
+            source={require("../../../assets/images/faiz.jpg")}
             style={styles.avatar}
           />
           <Text style={styles.name}>Fadly Mustofainal A.</Text>
@@ -34,7 +34,7 @@ export default function TeamSection() {
         {/* Member 3 */}
         <View style={styles.card}>
           <Image
-            source={require("../../assets/images/boute.jpg")}
+            source={require("../../../assets/images/boute.jpg")}
             style={styles.avatar}
           />
           <Text style={styles.name}>Raditya Ahmad</Text>

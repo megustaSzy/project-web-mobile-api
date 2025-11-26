@@ -7,7 +7,7 @@ export default function CeritaPage() {
       
       {/* Background gradasi */}
       <ImageBackground
-        source={require("../../assets/images/tekturgaris.svg")} // sesuaikan path dan format gambar
+        source={require("../../../assets/images/tekturgaris.svg")} // sesuaikan path dan format gambar
         style={styles.background}
         imageStyle={{ opacity: 0.2 }}
       >
@@ -29,12 +29,12 @@ export default function CeritaPage() {
           </View>
 
           {/* Gambar */}
-          {/* <View style={styles.imageWrapper}>
+          <View style={styles.imageWrapper}>
             <Image
-              source={require("../../../assets/16.png")} // sesuaikan dengan lokasi file
+              source={require("../../../assets/images/16.svg")} // sesuaikan dengan lokasi file
               style={styles.image}
             />
-          </View> */}
+          </View>
 
         </View>
       </ImageBackground>

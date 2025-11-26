@@ -9,8 +9,8 @@ import {
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { MapPin } from "lucide-react-native";
-import { wisataByKabupaten } from "../../data/wisata";
-import { images } from "../../../assets/images"; // 🔥 FIX gambar
+import { wisataByKabupaten } from "../data/wisata";
+import { images } from "../../assets/images"; // 🔥 FIX gambar
 
 const categories = ["Pantai", "Pulau", "Gunung", "Air Terjun", "Bukit"];
 
