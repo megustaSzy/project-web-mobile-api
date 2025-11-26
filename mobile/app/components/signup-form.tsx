@@ -1,37 +1,28 @@
-"use client";
-
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import React, { useState } from "react";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Field,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { FcGoogle } from "react-icons/fc";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { Ionicons } from "@expo/vector-icons";
 
-export default function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
-  const router = useRouter();
+export default function SignupForm() {
+  const navigation = useNavigation();
+
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const name = (document.getElementById("name") as HTMLInputElement)?.value;
-    const email = (document.getElementById("email") as HTMLInputElement)?.value;
-    const password = (document.getElementById("password") as HTMLInputElement)?.value;
-    const phone = (document.getElementById("phone") as HTMLInputElement)?.value;
-
+  const handleSignup = async () => {
     if (!name || !email || !password || !phone) {
       setMessage("Semua field harus diisi!");
       return;
@@ -43,9 +34,7 @@ export default function SignupForm({ ...props }: React.ComponentProps<typeof Car
 
       const response = await fetch("http://10.93.86.50:3001/api/auth/register", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password, phone }),
       });
 
@@ -53,10 +42,7 @@ export default function SignupForm({ ...props }: React.ComponentProps<typeof Car
 
       if (response.ok) {
         setMessage("Pendaftaran berhasil! Silakan login.");
-        console.log("User registered:", data);
-
-        // Redirect ke halaman login
-        setTimeout(() => router.push("/login"), 1500);
+        setTimeout(() => navigation.navigate("Login"), 1500);
       } else {
         setMessage(data.message || "Pendaftaran gagal. Coba lagi.");
       }
@@ -69,110 +55,181 @@ export default function SignupForm({ ...props }: React.ComponentProps<typeof Car
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center via-white to-gray-100 p-4">
-      <Card
-        {...props}
-        className="w-full max-w-md shadow-lg border border-gray-100 rounded-2xl"
-      >
-         {/* LOGO */}
-        <div className="flex justify-center mb-4">
-          <img
-            src="/images/logo.png" // Pastikan file ada di public/logo.png
-            alt="Logo"
-            className="h-20 w-auto object-contain"
-          />
-        </div>
-        <CardHeader className="text-center space-y-0">
-          <CardTitle className="text-2xl font-semibold text-gray-800">
-            Create an Account
-          </CardTitle>
-          <CardDescription className="text-gray-500 text-sm">
-            Enter your information to get started
-          </CardDescription>
-        </CardHeader>
+    <ScrollView contentContainerStyle={styles.container}>
+      <View style={styles.card}>
+        <Image source={require("../assets/logo.png")} style={styles.logo} />
 
-        <CardContent>
-          <form onSubmit={handleSignup} className="space-y-4">
-            <FieldGroup className="space-y-0">
-              <Field>
-                <FieldLabel htmlFor="name">Full Name</FieldLabel>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="LamiGo"
-                  required
-                />
-              </Field>
+        <Text style={styles.title}>Create an Account</Text>
+        <Text style={styles.subtitle}>Enter your information to get started</Text>
 
-              <Field>
-                <FieldLabel htmlFor="email">Email</FieldLabel>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="LamiGo@gmail.com"
-                  required
-                />
-              </Field>
+        <Text style={styles.label}>Full Name</Text>
+        <TextInput
+          style={styles.input}
+          value={name}
+          onChangeText={setName}
+          placeholder="LamiGo"
+        />
 
-              <Field>
-                <FieldLabel htmlFor="password">Password</FieldLabel>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  required
-                />
-              </Field>
+        <Text style={styles.label}>Email</Text>
+        <TextInput
+          style={styles.input}
+          value={email}
+          onChangeText={setEmail}
+          placeholder="LamiGo@gmail.com"
+          keyboardType="email-address"
+        />
 
-              <Field>
-                <FieldLabel htmlFor="phone">No Handphone</FieldLabel>
-                <Input
-                  id="phone"
-                  type="text"
-                  placeholder="08xxxxxxxxxx"
-                  required
-                />
-              </Field>
-            </FieldGroup>
+        <Text style={styles.label}>Password</Text>
+        <TextInput
+          style={styles.input}
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          placeholder="••••••••"
+        />
 
-            {/* Tombol Register */}
-            <div className="flex flex-col gap-3">
-              <Button
-                type="submit"
-                variant="default"
-                className="w-full bg-blue-500 hover:bg-blue-700 text-white"
-                disabled={loading}
-              >
-                {loading ? "Membuat akun..." : "Create Account"}
-              </Button>
+        <Text style={styles.label}>Phone</Text>
+        <TextInput
+          style={styles.input}
+          value={phone}
+          onChangeText={setPhone}
+          keyboardType="phone-pad"
+          placeholder="08xxxxxxxxxx"
+        />
 
-              <Button
-                variant="outline"
-                type="button"
-                className="w-full flex items-center justify-center gap-2"
-              >
-                <FcGoogle size={20} />
-                Sign up with Google
-              </Button>
-            </div>
+        <TouchableOpacity style={styles.button} onPress={handleSignup} disabled={loading}>
+          {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Create Account</Text>}
+        </TouchableOpacity>
 
-            {/* Pesan status */}
-            {message && (
-              <p className="text-center text-sm text-gray-600 mt-2">{message}</p>
-            )}
+        <View style={styles.orContainer}>
+          <View style={styles.line} />
+          <Text style={styles.orText}>atau</Text>
+          <View style={styles.line} />
+        </View>
 
-            <p className="text-sm text-center text-gray-500 mt-4">
-              Already have an account?{" "}
-              <Link
-                href="/login"
-                className="text-primary font-medium hover:underline"
-              >
-                Sign in
-              </Link>
-            </p>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+        <TouchableOpacity style={styles.googleBtn}>
+          <Ionicons name="logo-google" size={20} color="#DB4437" />
+          <Text style={styles.googleText}>Sign up with Google</Text>
+        </TouchableOpacity>
+
+        {message ? <Text style={styles.footerText}>{message}</Text> : null}
+
+        <Text style={styles.footerText}>
+          Already have an account?{" "}
+          <Text style={styles.signup} onPress={() => navigation.navigate("Login")}>
+            Sign in
+          </Text>
+        </Text>
+      </View>
+    </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexGrow: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 16,
+    backgroundColor: "#f7f7f7",
+  },
+  card: {
+    width: "100%",
+    maxWidth: 400,
+    backgroundColor: "#fff",
+    borderRadius: 20,
+    padding: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  logo: {
+    width: 80,
+    height: 80,
+    resizeMode: "contain",
+    alignSelf: "center",
+    marginBottom: 16,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#1f2937",
+    textAlign: "center",
+  },
+  subtitle: {
+    fontSize: 14,
+    color: "#6b7280",
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  label: {
+    fontSize: 14,
+    color: "#374151",
+    marginBottom: 6,
+    marginTop: 12,
+  },
+  input: {
+    width: "100%",
+    height: 45,
+    borderWidth: 1,
+    borderColor: "#d1d5db",
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    backgroundColor: "#f9fafb",
+    color: "#111827",
+  },
+  button: {
+    marginTop: 20,
+    backgroundColor: "#3b82f6",
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 16,
+  },
+  orContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 16,
+  },
+  line: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "#d1d5db",
+  },
+  orText: {
+    marginHorizontal: 10,
+    color: "#6b7280",
+    fontSize: 12,
+  },
+  googleBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#d1d5db",
+    paddingVertical: 10,
+    borderRadius: 10,
+    gap: 10,
+  },
+  googleText: {
+    color: "#111827",
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  footerText: {
+    textAlign: "center",
+    color: "#6b7280",
+    fontSize: 12,
+    marginTop: 10,
+  },
+  signup: {
+    color: "#3b82f6",
+    fontWeight: "600",
+  },
+});
