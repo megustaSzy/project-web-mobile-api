@@ -42,5 +42,20 @@ export const aboutService = {
         })
     },
 
+    async deleteAbout(id: number) {
+        const existing = await prisma.tb_about.findUnique({
+            where: {
+                id
+            }
+        });
+
+        if(!existing) createError("id tidak ditemukan", 404);
+
+        return prisma.tb_about.delete({
+            where: {
+                id
+            }
+        })
+    }
 
 }
