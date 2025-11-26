@@ -44,13 +44,19 @@ export const categoryService = {
     },
 
     async deleteCategoriesById(id: number) {
-        const category = await prisma.tb_category.delete({
+        const category = await prisma.tb_category.findUnique({
+            where: {
+                id
+            }
+        })
+        
+        if(!category) createError("id tidak ditemukan", 404)
+        
+        return prisma.tb_category.delete({
             where: {
                 id
             }
         });
-
-        if(category) createError("id tidak ditemukan", 404)
+        
     }
-
 }
