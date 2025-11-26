@@ -5,11 +5,9 @@ import { authMiddleware } from "../middlewares/authMiddleware";
 
 const router = Router();
 
-// Public
 router.get("/", destinationController.getDestinations);
 router.get("/:id", destinationController.getDestinationById);
 
-// Admin only
 router.post("/", authMiddleware, authorizeRoles("Admin"), destinationController.addDestination);
 router.put("/:id", authMiddleware, authorizeRoles("Admin"), destinationController.updateDestination);
 router.delete("/:id", authMiddleware, authorizeRoles("Admin"), destinationController.deleteDestination);
