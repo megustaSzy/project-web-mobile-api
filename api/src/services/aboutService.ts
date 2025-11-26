@@ -29,38 +29,38 @@ export const aboutService = {
         return about?.mission ?? null;
     },
 
-    // async createAbout (id: number, data: AboutData) {
-    //     const existing = await prisma.tb_about.findFirst({
-    //         where: {
-    //             id
-    //         }
-    //     });
+    async createAbout (id: number, data: AboutData) {
+        const existing = await prisma.tb_about.findFirst({
+            where: {
+                id
+            }
+        });
 
-    //     if(!existing) throw new Error("about tidak ditemukan");
+        if(!existing) throw new Error("about tidak ditemukan");
 
-    //     return prisma.tb_about.update({
-    //         where: {
-    //             id
-    //         },
-    //         data
-    //     });
-    // },
+        return prisma.tb_about.update({
+            where: {
+                id
+            },
+            data
+        });
+    },
 
-    // async updateAbout(id: number, data: AboutData) {
-    //     const existing = await prisma.tb_about.findFirst({
-    //         where: {
-    //             id
-    //         }
-    //     });
+    async updateAbout(id: number, data: AboutData) {
+        const existing = await prisma.tb_about.findFirst({
+            where: {
+                id
+            }
+        });
 
-    //     if(!existing) createError("id tidak ditemukan", 404);
+        if(!existing) createError("id tidak ditemukan", 404);
 
-    //     return prisma.tb_about.update({
-    //         where: {
-    //             id
-    //         },
-    //         data
-    //     })
-    // }
+        return prisma.tb_about.update({
+            where: {
+                id
+            },
+            data
+        })
+    }
 
 }
