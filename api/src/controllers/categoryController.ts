@@ -8,9 +8,24 @@ export const categoryController = {
 
     async getCategory(req: Request, res: Response) {
         try {
-            const category = await categoryService.getByCategory();
+            const category = await categoryService.getAllCategories();
 
             return ResponseData.ok(res, category, "category berhasil diambil")
+
+        } catch (error) {
+            return ResponseData.serverError(res, error)
+        }
+    },
+
+
+    async getCategoryById(req: Request, res: Response) {
+        try {
+            const id = Number(req.params.id)
+            if(isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
+
+            const category = await categoryService.getCategoryById(id);
+
+            return ResponseData.ok(res, category, "berhasil menampilkan data")
 
         } catch (error) {
             return ResponseData.serverError(res, error)
@@ -22,11 +37,25 @@ export const categoryController = {
 
             const { name } = req.body;
 
-            if(!name) return ResponseData.badRequest(res, "nama wajib diisi");
+            if(!name) ResponseData.badRequest(res, "nama wajib diisi");
 
             const category = await categoryService.addCategory({name});
 
             return ResponseData.created(res, category, "berhasil menambah category")
+        } catch (error) {
+            return ResponseData.serverError(res, error)
+        }
+    },
+
+    async deleteCategories(req: Request, res: Response) {
+        try {
+            const id = Number(req.params.id);
+            if(isNaN(id)) ResponseData.badRequest(res, "id tidak valid");
+    
+            await categoryService.deleteCategoriesById(id)
+    
+            return ResponseData.ok(res, "kategori berhasil dihapus");
+            
         } catch (error) {
             return ResponseData.serverError(res, error)
         }
