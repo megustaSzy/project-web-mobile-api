@@ -45,7 +45,7 @@ export default function ForgotPasswordForm() {
 
         {/* Logo */}
         <Image
-          source={require("../assets/logo.png")}
+          source={require("../../assets/images/logo.png")}
           style={styles.logo}
         />
 

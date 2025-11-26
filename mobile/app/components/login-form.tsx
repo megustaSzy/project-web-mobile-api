@@ -1,255 +1,312 @@
-"use client";
-
-import Image from "next/image";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { FcGoogle } from "react-icons/fc";
+import React, { useState } from "react";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle, XCircle } from "lucide-react";
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
+import Modal from "react-native-modal";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation } from "@react-navigation/native";
+import { Ionicons } from "@expo/vector-icons";
 
-/*  Komponen popup animasi */
-function AuthModal({
-  open,
-  status,
-  message,
-}: {
-  open: boolean;
-  status: "success" | "error" | null;
-  message: string;
-}) {
-  return (
-    <AnimatePresence>
-      {open && (
-        <motion.div
-          key="modal"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.4 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
-        >
-          <motion.div
-            initial={{ scale: 0.9 }}
-            animate={{ scale: 1 }}
-            exit={{ scale: 0.9 }}
-            className={`rounded-2xl shadow-xl p-6 text-center w-[90%] max-w-sm ${
-              status === "success" ? "bg-green-50" : "bg-red-50"
-            }`}
-          >
-            {status === "success" ? (
-              <CheckCircle className="w-12 h-12 mx-auto text-green-600 mb-3" />
-            ) : (
-              <XCircle className="w-12 h-12 mx-auto text-red-600 mb-3" />
-            )}
 
-            <h3
-              className={`text-lg font-semibold mb-1 ${
-                status === "success" ? "text-green-700" : "text-red-700"
-              }`}
-            >
-              {status === "success" ? "Berhasil!" : "Gagal!"}
-            </h3>
+export default function LoginForm() {
+  const navigation = useNavigation();
 
-            <p className="text-gray-600 text-sm">{message}</p>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-}
-
-export function LoginForm({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
-  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
+
+  const [modalVisible, setModalVisible] = useState(false);
   const [modalStatus, setModalStatus] = useState<"success" | "error" | null>(
     null
   );
   const [modalMessage, setModalMessage] = useState("");
 
-  // ✅ Fungsi Login
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const email = (document.getElementById("email") as HTMLInputElement)?.value;
-    const password = (document.getElementById("password") as HTMLInputElement)
-      ?.value;
-
+  // 👍 Fungsi Login
+  const handleLogin = async () => {
     if (!email || !password) {
       setModalStatus("error");
-      setModalMessage("Masukkan email dan password terlebih dahulu!");
-      setModalOpen(true);
-      setTimeout(() => setModalOpen(false), 1800);
+      setModalMessage("Masukkan email dan password!");
+      setModalVisible(true);
       return;
     }
 
     try {
       setLoading(true);
-      const response = await fetch("http://10.93.86.50:3001/api/auth/login", {
+
+      const res = await fetch("http://10.93.86.50:3001/api/auth/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await response.json();
-      console.log("Respon API:", data);
+      const data = await res.json();
 
-      if (response.ok) {
-        // ✅ Simpan token dari API (pastikan nama field benar)
+      if (res.ok) {
         const token = data.accessToken || data.token;
 
         if (token) {
-          localStorage.setItem("token", token);
-          console.log("Token disimpan:", token);
+          await AsyncStorage.setItem("token", token);
         }
 
-        // ✅ Tampilkan popup sukses
         setModalStatus("success");
-        setModalMessage("Login berhasil! Selamat datang kembali 👋");
-        setModalOpen(true);
+        setModalMessage("Login berhasil! Selamat datang 👋");
+        setModalVisible(true);
 
-        // Tutup otomatis + redirect
         setTimeout(() => {
-          setModalOpen(false);
-          router.push("/");
+          setModalVisible(false);
+          navigation.navigate("Home");
         }, 1500);
       } else {
         setModalStatus("error");
         setModalMessage(data.message || "Email atau password salah.");
-        setModalOpen(true);
-        setTimeout(() => setModalOpen(false), 1800);
+        setModalVisible(true);
       }
-    } catch (error) {
-      console.error("Login error:", error);
+    } catch (err) {
       setModalStatus("error");
       setModalMessage("Tidak dapat terhubung ke server.");
-      setModalOpen(true);
-      setTimeout(() => setModalOpen(false), 1800);
+      setModalVisible(true);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <>
-      <section
-        className={cn(
-          "flex flex-col items-center justify-center min-h-screen px-4",
-          className
-        )}
-        {...props}
+    <View style={styles.container}>
+      {/* Card */}
+      <View style={styles.card}>
+        <Image
+          source={require("../assets/logo.png")}
+          style={styles.logo}
+        />
+
+        <Text style={styles.title}>Login Akun</Text>
+        <Text style={styles.subtitle}>Masuk ke akun kamu untuk melanjutkan</Text>
+
+        {/* Input Email */}
+        <Text style={styles.label}>Email</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="you@example.com"
+          value={email}
+          onChangeText={setEmail}
+        />
+
+        {/* Input Password */}
+        <Text style={styles.label}>Password</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="••••••••"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
+
+        {/* Tombol Login */}
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleLogin}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Login</Text>
+          )}
+        </TouchableOpacity>
+
+        {/* Garis OR */}
+        <View style={styles.orContainer}>
+          <View style={styles.line} />
+          <Text style={styles.orText}>atau</Text>
+          <View style={styles.line} />
+        </View>
+
+        {/* Google Button */}
+        <TouchableOpacity style={styles.googleBtn}>
+          <Icon name="logo-google" size={20} color="#DB4437" />
+          <Text style={styles.googleText}>Login dengan Google</Text>
+        </TouchableOpacity>
+
+        <Text style={styles.footerText}>
+          Belum punya akun?{" "}
+          <Text
+            style={styles.signup}
+            onPress={() => navigation.navigate("Signup")}
+          >
+            Daftar sekarang
+          </Text>
+        </Text>
+      </View>
+
+      {/* Popup Modal */}
+      <Modal
+        isVisible={modalVisible}
+        onBackdropPress={() => setModalVisible(false)}
+        animationIn="zoomIn"
+        animationOut="zoomOut"
       >
-        <Card className="w-full max-w-md shadow-lg border border-gray-100 rounded-2xl bg-white/80 backdrop-blur">
-          <CardHeader className="text-center pb-2 flex flex-col items-center">
-            <Image
-              src="/images/logo.png"
-              alt="Logo"
-              width={61}
-              height={61}
-              className="w-16 h-16 object-contain mb-3"
-            />
-            <CardTitle className="text-2xl font-bold text-gray-800">
-              Login Akun
-            </CardTitle>
-            <CardDescription className="text-gray-500">
-              Masuk ke akun kamu untuk melanjutkan
-            </CardDescription>
-          </CardHeader>
-
-          <CardContent>
-            <form onSubmit={handleLogin} className="space-y-5">
-              <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Email
-                </label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  className="w-full"
-                  required
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Password
-                </label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  className="w-full"
-                  required
-                />
-              </div>
-
-              <Button
-                type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition-all duration-200"
-                disabled={loading}
-              >
-                {loading ? "Sedang masuk..." : "Login"}
-              </Button>
-
-              <div className="relative">
-                <hr className="border-gray-200" />
-                <span className="absolute left-1/2 -translate-x-1/2 -top-2 bg-white px-2 text-gray-400 text-sm">
-                  atau
-                </span>
-              </div>
-
-              <Button
-                variant="outline"
-                type="button"
-                className="w-full border-gray-300 hover:bg-gray-50 py-2 rounded-lg flex items-center justify-center gap-2"
-              >
-                <FcGoogle size={20} />
-                Login dengan Google
-              </Button>
-
-              <p className="text-center text-sm text-gray-500 pt-2">
-                Belum punya akun?{" "}
-                <a
-                  href="/signup"
-                  className="text-blue-600 hover:underline font-medium"
-                >
-                  Daftar sekarang
-                </a>
-              </p>
-            </form>
-          </CardContent>
-        </Card>
-      </section>
-
-      {/*  Popup otomatis */}
-      <AuthModal
-        open={modalOpen}
-        status={modalStatus}
-        message={modalMessage}
-      />
-    </>
+        <View
+          style={[
+            styles.modalBox,
+            modalStatus === "success"
+              ? { backgroundColor: "#ECFDF5" }
+              : { backgroundColor: "#FEF2F2" },
+          ]}
+        >
+          <Icon
+            name={modalStatus === "success" ? "checkmark-circle" : "close-circle"}
+            size={60}
+            color={modalStatus === "success" ? "#059669" : "#DC2626"}
+          />
+          <Text
+            style={[
+              styles.modalTitle,
+              modalStatus === "success"
+                ? { color: "#059669" }
+                : { color: "#DC2626" },
+            ]}
+          >
+            {modalStatus === "success" ? "Berhasil!" : "Gagal!"}
+          </Text>
+          <Text style={styles.modalMessage}>{modalMessage}</Text>
+        </View>
+      </Modal>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#ffffff",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 20,
+  },
+
+  card: {
+    width: "100%",
+    maxWidth: 360,
+    padding: 25,
+    borderRadius: 20,
+    backgroundColor: "white",
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+
+  logo: {
+    width: 70,
+    height: 70,
+    alignSelf: "center",
+    marginBottom: 10,
+  },
+
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+    color: "#1F2937",
+  },
+
+  subtitle: {
+    textAlign: "center",
+    color: "#6B7280",
+    marginBottom: 20,
+  },
+
+  label: {
+    marginTop: 10,
+    marginBottom: 5,
+    fontSize: 14,
+    color: "#374151",
+  },
+
+  input: {
+    borderWidth: 1,
+    borderColor: "#D1D5DB",
+    borderRadius: 10,
+    padding: 10,
+    fontSize: 14,
+    backgroundColor: "#F9FAFB",
+  },
+
+  button: {
+    backgroundColor: "#2563EB",
+    paddingVertical: 12,
+    borderRadius: 10,
+    marginTop: 20,
+    alignItems: "center",
+  },
+
+  buttonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+
+  orContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 15,
+  },
+  line: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "#E5E7EB",
+  },
+  orText: {
+    marginHorizontal: 10,
+    color: "#9CA3AF",
+    fontSize: 12,
+  },
+
+  googleBtn: {
+    flexDirection: "row",
+    borderWidth: 1,
+    borderColor: "#D1D5DB",
+    padding: 12,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 10,
+  },
+  googleText: {
+    fontSize: 14,
+    color: "#374151",
+  },
+
+  footerText: {
+    textAlign: "center",
+    marginTop: 15,
+    color: "#6B7280",
+  },
+  signup: {
+    color: "#2563EB",
+    fontWeight: "600",
+  },
+
+  modalBox: {
+    padding: 25,
+    borderRadius: 20,
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    marginTop: 10,
+  },
+  modalMessage: {
+    fontSize: 14,
+    color: "#4B5563",
+    textAlign: "center",
+    marginTop: 5,
+  },
+});
