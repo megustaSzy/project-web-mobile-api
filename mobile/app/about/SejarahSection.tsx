@@ -7,7 +7,7 @@ export default function CeritaPage() {
       
       {/* Background gradasi */}
       <ImageBackground
-        source={require("../../../assets/images/tekturgaris.svg")} // sesuaikan path dan format gambar
+        source={require("../../assets/images/tekturgaris.svg")} // sesuaikan path dan format gambar
         style={styles.background}
         imageStyle={{ opacity: 0.2 }}
       >
