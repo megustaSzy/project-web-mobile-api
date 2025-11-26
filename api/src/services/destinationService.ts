@@ -64,7 +64,6 @@ export const destinationService = {
     return prisma.tb_destinations.create({
       data: {
         name: data.name,
-        location: data.location,
         imageUrl: data.imageUrl,
         description: data.description,
         price: data.price,
@@ -81,7 +80,6 @@ export const destinationService = {
       where: { id },
       data: {
         name: data.name,
-        location: data.location,
         imageUrl: data.imageUrl,
         description: data.description,
         price: data.price,
@@ -91,6 +89,14 @@ export const destinationService = {
   },
 
   async deleteDestinationById(id: number) {
+    const existing = await prisma.tb_destinations.findFirst({
+      where: {
+        id
+      }
+    });
+
+    if(!existing) createError("id tidak ditemukan", 404);
+
     return prisma.tb_destinations.delete({ where: { id } });
   }
 };
