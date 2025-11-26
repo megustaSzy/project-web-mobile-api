@@ -1,11 +1,28 @@
 import prisma from "../lib/prisma";
 import { createError } from "../utilities/createError";
 import { DestinationData } from "../types/destination";
+import { Pagination } from "../utilities/Pagination";
 
 export const destinationService = {
 
-  async getAllDestinations(category?: string) {
-    return prisma.tb_destinations.findMany({
+  async getAllDestinations(page: number, limit: number,category?: string) {
+    // limit 10
+    const pagination = new Pagination(page, limit);
+
+    const count = await prisma.tb_destinations.count({
+      where: category
+        ? {
+            category: {
+              name: {
+                contains: category,
+                mode: "insensitive"
+              }
+            }
+          }
+        : undefined,
+    });
+
+    const rows = await prisma.tb_destinations.findMany({
       where: category
         ? {
             category: {
@@ -19,8 +36,12 @@ export const destinationService = {
       include: {
         category: true
       },
-      orderBy: { id: "asc" }
+      orderBy: { id: "asc" },
+      skip: pagination.offset,
+      take: pagination.limit
     });
+
+    return pagination.paginate({ count, rows })
   },
 
   async getDestinationById(id: number) {
