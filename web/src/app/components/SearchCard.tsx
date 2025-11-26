@@ -1,13 +1,14 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { MapPin, Calendar, Clock, Users } from "lucide-react";
-
 export default function SearchCard() {
   const [location, setLocation] = useState("Mendeteksi lokasi...");
   const [date, setDate] = useState("");
   const [displayDate, setDisplayDate] = useState("Pilih tanggal");
   const [time, setTime] = useState("");
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [people, setPeople] = useState(1);
 
   const [pickupLocation, setPickupLocation] = useState("");
@@ -108,7 +109,18 @@ export default function SearchCard() {
       </div>
 
      {/* FORM GRID */}
-<div className="mt-4 grid grid-cols-1 md:grid-cols-5 gap-8 items-center">
+     <div
+  className="
+    mt-4 
+    grid grid-cols-1
+    sm:grid-cols-2
+    md:grid-cols-5
+    lg:grid-cols-5 
+    gap-6 md:gap-8 
+    items-center
+  "
+>
+
 
   {/* Penjemputan */}
   <div className="flex flex-col w-full">
@@ -245,7 +257,7 @@ export default function SearchCard() {
       shadow-sm hover:bg-blue-600
       active:scale-95 transition-all
       w-[90px]          /* ← LEBAR dibuat pendek */
-      md:ml-15
+      md:ml-10
     "
   >
     Search

@@ -6,6 +6,8 @@ import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 
 export default function NavBar() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [darkMode, setDarkMode] = useState(false);
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
