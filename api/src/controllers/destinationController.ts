@@ -6,9 +6,13 @@ export const destinationController = {
 
   async getDestinations(req: Request, res: Response) {
     try {
+      const page = Number(req.query.page) || 1;
+
+      const limit = 10;
+
       const category = req.query.category as string | undefined;
 
-      const destinations = await destinationService.getAllDestinations(category);
+      const destinations = await destinationService.getAllDestinations(page, limit, category);
 
       return ResponseData.ok(
         res,

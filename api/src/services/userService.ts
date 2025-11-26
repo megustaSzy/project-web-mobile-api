@@ -2,20 +2,31 @@ import prisma from "../lib/prisma";
 import bcrypt from "bcryptjs";
 import { createError } from "../utilities/createError";
 import { UserData } from "../types/user";
+import { Pagination } from "../utilities/Pagination";
 
 export const userService = {
   // GET all users
-  async getAllUsers() {
-    return prisma.tb_user.findMany({
+  async getAllUsers(page: number, limit: number) {
+
+    const pagination = new Pagination(page, limit);
+
+    const count= await prisma.tb_user.count();
+
+    const rows = await prisma.tb_user.findMany({
+      skip: pagination.offset,
+      take: pagination.limit,
       orderBy: {
         id: "asc",
       }, select: {
+        id: true,
         name: true,
         email: true,
         role: true,
         notelp: true,
       }
     });
+
+    return pagination.paginate({ count, rows})
   },
 
   // GET user by ID
