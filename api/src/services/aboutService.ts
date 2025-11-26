@@ -61,6 +61,22 @@ export const aboutService = {
             },
             data
         })
+    },
+
+    async deleteAbout(id: number) {
+        const deleteAbout = await prisma.tb_about.findFirst({
+            where: {
+                id
+            }
+        });
+
+        if(!deleteAbout) createError("id tidak ditemukan", 404);
+
+        return prisma.tb_about.delete({
+            where: {
+                id
+            }
+        })
     }
 
 }
