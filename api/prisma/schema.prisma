@@ -17,9 +17,13 @@ model tb_user {
   id          Int         @id @default(autoincrement())
   name        String      
   email       String      @unique
-  password    String    
-  notelp      String
+  password    String?    
+  notelp      String?
   role        Role        @default(User)
+
+  provider    String?      @default("local")
+  providerId  String?
+
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 

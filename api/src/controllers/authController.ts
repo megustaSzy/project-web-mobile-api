@@ -4,65 +4,47 @@ import { Request, Response } from "express";
 
 export const authController = {
 
-  // POST /register
-  // Membuat akun baru
   async register(req: Request, res: Response) {
     try {
       const user = await authService.registerUser(req.body);
-
       return ResponseData.created(res, user, "registrasi berhasil");
-
     } catch (error: any) {
       return ResponseData.badRequest(res, error.message);
     }
   },
 
-  // POST /login
-  // Login user dan buat token + refreshToken
   async login(req: Request, res: Response) {
     try {
       const { email, password } = req.body;
 
-      if (!email || !password) {
-        return ResponseData.badRequest(res, "email dan password wajib diisi");
-      }
-
-      // Semua logic login ada di authService
-      const { user, token: accessToken, refreshToken } = await authService.loginUser(email, password);
+      const { user, accessToken, refreshToken } =
+        await authService.loginUser(email, password);
 
       res.cookie("accessToken", accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
-        maxAge: 60 * 60 * 1000, // 1 jam
+        maxAge: 60 * 60 * 1000,
       });
 
-      // Simpan refresh token di cookie httpOnly
       res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 hari
+        maxAge: 7 * 24 * 60 * 60 * 1000
       });
 
-      return ResponseData.ok
-      (res, 
-        { user, accessToken, refreshToken }, "login berhasil");
+      return ResponseData.ok(res, { user }, "login berhasil");
 
     } catch (error: any) {
       return ResponseData.unauthorized(res, error.message);
     }
   },
 
-  // POST /refresh-token
-  // Memperbarui access token menggunakan refresh token
   async refreshToken(req: Request, res: Response) {
     try {
       const token = req.cookies.refreshToken;
-
-      if (!token) {
-        return ResponseData.unauthorized(res, "refresh token tidak ditemukan");
-      }
+      if (!token) return ResponseData.unauthorized(res, "refresh token tidak ditemukan");
 
       const newAccessToken = await authService.refreshAccessToken(token);
 
@@ -70,27 +52,22 @@ export const authController = {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
-        maxAge: 60 * 60 * 1000 // 1 jam, sesuaikan
+        maxAge: 60 * 60 * 1000
       });
 
-      return ResponseData.ok(res, { token: newAccessToken }, "token berhasil diperbarui");
+      return ResponseData.ok(res, null, "token diperbarui");
 
     } catch (error: any) {
       return ResponseData.unauthorized(res, error.message);
     }
   },
 
-  // POST /logout
-  // Logout user dan hapus refresh token
   async logout(req: Request, res: Response) {
     try {
       const token = req.cookies.refreshToken;
+      if (token) await authService.logoutUser(token);
 
-      if (token) {
-        await authService.logoutUser(token);
-      }
-
-      res.clearCookie("accessToken")
+      res.clearCookie("accessToken");
       res.clearCookie("refreshToken");
 
       return ResponseData.ok(res, null, "logout berhasil");
@@ -99,5 +76,75 @@ export const authController = {
       return ResponseData.serverError(res, error);
     }
   },
+
+  async googleCallback(req: Request, res: Response) {
+  try {
+    const profile = (req as any).user;
+
+    if (!profile) {
+      return ResponseData.unauthorized(res, "Profil Google tidak ditemukan");
+    }
+
+    const { user, accessToken, refreshToken } =
+      await authService.loginWithGoogle(profile);
+
+    // Simpan token ke cookie
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 1000 // 1 jam
+    });
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 hari
+    });
+
+    // Kembalikan JSON karena belum ada frontend
+    return ResponseData.ok(
+      res,{user,accessToken,refreshToken}, "login google berhasil");
+
+  } catch (err: any) {
+    return ResponseData.serverError(res, err.message);
+  }
+}
+
+// async googleCallback(req: Request, res: Response) {
+//   try {
+//     const profile = (req as any).user;
+
+//     if (!profile) {
+//       return ResponseData.unauthorized(res, "Profil Google tidak ditemukan");
+//     }
+
+//     const { user, accessToken, refreshToken } =
+//       await authService.loginWithGoogle(profile);
+
+//     // set cookie
+//     res.cookie("accessToken", accessToken, {
+//       httpOnly: true,
+//       secure: process.env.NODE_ENV === "production",
+//       sameSite: "lax",
+//       maxAge: 60 * 60 * 1000 
+//     });
+
+//     res.cookie("refreshToken", refreshToken, {
+//       httpOnly: true,
+//       secure: process.env.NODE_ENV === "production",
+//       sameSite: "strict",
+//       maxAge: 7 * 24 * 60 * 60 * 1000 
+//     });
+
+//     // ⬅️ redirect ke frontend, token tetap dikirim via cookie
+//     return res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
+
+//   } catch (err: any) {
+//     return ResponseData.serverError(res, err.message);
+//   }
+// }
+
 
 };
