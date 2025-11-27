@@ -1,8 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Dimensions, ImageBackground, Image } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Dimensions,
+  ImageBackground,
+  Image,
+  Platform,
+} from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
-import SearchCard from "./SearchCard"; // pastikan file ini ada
-import { ScrollView } from "react-native";
+import SearchCard from "./SearchCard";
 
 const { width, height } = Dimensions.get("window");
 
@@ -11,7 +18,6 @@ const images = [
   require("../../assets/images/hero2.jpg"),
   require("../../assets/images/hero3.jpg"),
 ];
-
 
 export default function Hero() {
   const [current, setCurrent] = useState(0);
@@ -31,8 +37,8 @@ export default function Hero() {
       <View style={styles.backgroundWrapper}>
         <Animated.View
           key={current}
-          entering={FadeIn.duration(800)}
-          exiting={FadeOut.duration(800)}
+          entering={FadeIn.duration(600)}
+          exiting={FadeOut.duration(600)}
           style={styles.absoluteFill}
         >
           <ImageBackground
@@ -45,7 +51,7 @@ export default function Hero() {
         </Animated.View>
       </View>
 
-      {/* Hero Content */}
+      {/* Content */}
       <View style={styles.content}>
         <Image
           source={require("../../assets/images/best.png")}
@@ -59,21 +65,18 @@ export default function Hero() {
           Temukan destinasi terbaik, atur perjalanan impianmu, dan pesan tiket dengan mudah dalam satu aplikasi.
         </Text>
 
-        {/* Pagination dots */}
+        {/* Dots */}
         <View style={styles.dots}>
           {images.map((_, index) => (
             <View
               key={index}
-              style={[
-                styles.dot,
-                current === index && styles.dotActive
-              ]}
+              style={[styles.dot, current === index && styles.dotActive]}
             />
           ))}
         </View>
       </View>
 
-      {/* SearchCard */}
+      {/* Search Box */}
       <View style={styles.searchWrapper}>
         <SearchCard />
       </View>
@@ -83,7 +86,7 @@ export default function Hero() {
 
 const styles = StyleSheet.create({
   container: {
-    height: height * 0.9,
+    height: height * 0.75, // lebih pas untuk Android (ukuran aman)
     width: "100%",
     justifyContent: "flex-end",
   },
@@ -100,42 +103,42 @@ const styles = StyleSheet.create({
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: "rgba(0,0,0,0.45)",
   },
   content: {
-    position: "relative",
     zIndex: 10,
     alignItems: "center",
-    paddingHorizontal: 20,
-    marginBottom: 100,
+    paddingHorizontal: 25,
+    marginBottom: Platform.OS === "android" ? 70 : 90,
   },
   logo: {
-    width: 100,
-    height: 100,
+    width: 85,
+    height: 85,
     marginBottom: 10,
   },
   title: {
     color: "#fff",
-    fontSize: 28,
-    fontWeight: "bold",
+    fontSize: 26,
+    fontWeight: "700",
     textAlign: "center",
     marginBottom: 10,
   },
   subtitle: {
-    color: "rgba(255,255,255,0.9)",
+    color: "rgba(255,255,255,0.85)",
     fontSize: 14,
     textAlign: "center",
-    maxWidth: 300,
-    marginBottom: 15,
+    maxWidth: 330,
+    marginBottom: 12,
   },
   dots: {
     flexDirection: "row",
     gap: 6,
+    marginTop: 5,
   },
   dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 50,
+    width: 8,
+    height: 8,
+    borderRadius: 10,
     backgroundColor: "rgba(255,255,255,0.4)",
   },
   dotActive: {
@@ -143,7 +146,7 @@ const styles = StyleSheet.create({
   },
   searchWrapper: {
     position: "absolute",
-    bottom: -30,
+    bottom: Platform.OS === "android" ? -20 : -30, 
     left: "5%",
     right: "5%",
     zIndex: 20,

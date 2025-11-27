@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, Image, StyleSheet, ScrollView ,ImageBackground} from "react-native";
-import MapView, { Marker } from "react-native-maps";
+// import MapView, { Marker } from "react-native-maps";
 
 export default function TeamSection() {
   return (
@@ -46,7 +46,7 @@ export default function TeamSection() {
       {/* Maps */}
       <Text style={styles.mapTitle}>Lokasi Universitas Teknokrat</Text>
 
-      <MapView
+      {/* <MapView
         style={styles.map}
         initialRegion={{
           latitude: -5.38273375,
@@ -62,7 +62,7 @@ export default function TeamSection() {
           }}
           title="Universitas Teknokrat Indonesia"
         />
-      </MapView>
+      </MapView> */}
 
     </ScrollView>
   );
