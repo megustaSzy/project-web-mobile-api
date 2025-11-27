@@ -31,7 +31,7 @@ export default function NavBarMobile() {
       setScrolled(value > 10);
     });
     return () => scrollY.removeListener(listener);
-  }, []);
+  }, [scrollY]);
 
   // === Load Language ===
   useEffect(() => {
