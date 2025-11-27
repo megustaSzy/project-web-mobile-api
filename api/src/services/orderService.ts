@@ -33,7 +33,7 @@ export const orderService = {
 
                 // snapshot user
                 userName: user.name,
-                userPhone: user.notelp,
+                userPhone: user.notelp ?? "",
 
                 // snapshot destinasi
                 destinationName: schedule.destination.name,
