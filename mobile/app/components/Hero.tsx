@@ -4,52 +4,24 @@ import {
   Text,
   StyleSheet,
   Dimensions,
-  ImageBackground,
   Image,
   Platform,
 } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import SearchCard from "./SearchCard";
+import { LinearGradient } from "expo-linear-gradient";
 
-const { width, height } = Dimensions.get("window");
-
-const images = [
-  require("../../assets/images/hero1.jpg"),
-  require("../../assets/images/hero2.jpg"),
-  require("../../assets/images/hero3.jpg"),
-];
+const { height } = Dimensions.get("window");
 
 export default function Hero() {
-  const [current, setCurrent] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % images.length);
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, []);
-
   return (
     <View style={styles.container}>
       
-      {/* Background Slider */}
-      <View style={styles.backgroundWrapper}>
-        <Animated.View
-          key={current}
-          entering={FadeIn.duration(600)}
-          exiting={FadeOut.duration(600)}
-          style={styles.absoluteFill}
-        >
-          <ImageBackground
-            source={images[current]}
-            style={styles.backgroundImage}
-            resizeMode="cover"
-          >
-            <View style={styles.overlay} />
-          </ImageBackground>
-        </Animated.View>
-      </View>
+      {/* Background Traveloka Style */}
+      <LinearGradient
+        colors={["#3FA9F5", "#1A73E8"]}
+        style={styles.background}
+      />
 
       {/* Content */}
       <View style={styles.content}>
@@ -64,16 +36,6 @@ export default function Hero() {
         <Text style={styles.subtitle}>
           Temukan destinasi terbaik, atur perjalanan impianmu, dan pesan tiket dengan mudah dalam satu aplikasi.
         </Text>
-
-        {/* Dots */}
-        <View style={styles.dots}>
-          {images.map((_, index) => (
-            <View
-              key={index}
-              style={[styles.dot, current === index && styles.dotActive]}
-            />
-          ))}
-        </View>
       </View>
 
       {/* Search Box */}
@@ -86,24 +48,15 @@ export default function Hero() {
 
 const styles = StyleSheet.create({
   container: {
-    height: height * 0.75, // lebih pas untuk Android (ukuran aman)
+    height: height * 0.75,
     width: "100%",
     justifyContent: "flex-end",
   },
-  backgroundWrapper: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  absoluteFill: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  backgroundImage: {
+  background: {
     width: "100%",
     height: "100%",
-    justifyContent: "center",
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.45)",
+    borderBottomLeftRadius: 15,
+    borderBottomRightRadius: 15,
   },
   content: {
     zIndex: 10,
@@ -130,23 +83,9 @@ const styles = StyleSheet.create({
     maxWidth: 330,
     marginBottom: 12,
   },
-  dots: {
-    flexDirection: "row",
-    gap: 6,
-    marginTop: 5,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 10,
-    backgroundColor: "rgba(255,255,255,0.4)",
-  },
-  dotActive: {
-    backgroundColor: "#fff",
-  },
   searchWrapper: {
     position: "absolute",
-    bottom: Platform.OS === "android" ? -20 : -30, 
+    bottom: Platform.OS === "android" ? -20 : -30,
     left: "5%",
     right: "5%",
     zIndex: 20,
