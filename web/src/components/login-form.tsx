@@ -12,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -224,6 +225,9 @@ export function LoginForm({
               <Button
                 variant="outline"
                 type="button"
+                onClick={() => {
+                  window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google`;
+                }}
                 className="w-full border-gray-300 hover:bg-gray-50 py-2 rounded-lg flex items-center justify-center gap-2"
               >
                 <FcGoogle size={20} />
@@ -245,11 +249,7 @@ export function LoginForm({
       </section>
 
       {/*  Popup otomatis */}
-      <AuthModal
-        open={modalOpen}
-        status={modalStatus}
-        message={modalMessage}
-      />
+      <AuthModal open={modalOpen} status={modalStatus} message={modalMessage} />
     </>
   );
 }
