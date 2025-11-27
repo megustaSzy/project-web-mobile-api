@@ -14,4 +14,30 @@ export const categoryService = {
     });
   },
 
+  async getCategoryById(id: number) {
+    const category = await prisma.tb_category.findFirst({
+      where: {
+        id,
+      },
+      include: {
+        destinations: true,
+      },
+    });
+
+    if (!category) createError("id tidak ditemukan", 404);
+
+    return category;
+  },
+
+  async addCategory(data: CategoryData) {
+    return prisma.tb_category.create({
+      data: {
+        name: data.name,
+      },
+      include: {
+        destinations: true,
+      },
+    });
+  },
+
 };
