@@ -75,6 +75,7 @@ export const destinationService = {
     });
   },
 
+
   async editDestination(id: number, data: DestinationData) {
     return prisma.tb_destinations.update({
       where: { id },
