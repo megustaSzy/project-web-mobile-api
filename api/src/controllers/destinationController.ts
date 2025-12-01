@@ -7,9 +7,7 @@ export const destinationController = {
   async getDestinations(req: Request, res: Response) {
     try {
       const page = Number(req.query.page) || 1;
-
       const limit = 10;
-
       const category = req.query.category as string | undefined;
 
       const destinations = await destinationService.getAllDestinations(page, limit, category);
@@ -43,6 +41,15 @@ export const destinationController = {
 
   async addDestination(req: Request, res: Response) {
     try {
+      // Validasi body
+      if (!req.body.categoryId || isNaN(Number(req.body.categoryId))) {
+        return ResponseData.badRequest(res, "categoryId tidak valid");
+      }
+
+      if (!req.body.price || isNaN(Number(req.body.price))) {
+        return ResponseData.badRequest(res, "price tidak valid");
+      }
+
       const image = req.file ? `/uploads/${req.file.filename}` : null;
 
       const destination = await destinationService.addDestination({
@@ -58,18 +65,17 @@ export const destinationController = {
     }
   },
 
-  // Mengubah data destinasi berdasarkan ID
   async updateDestination(req: Request, res: Response) {
     try {
       const id = Number(req.params.id);
-      if (isNaN(id)) ResponseData.badRequest(res, "id tidak valid");
+      if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
 
       const image = req.file ? `/uploads/${req.file.filename}` : undefined;
 
       const updatedDestination = await destinationService.editDestination(id, {
         ...req.body,
-        imageUrl: image 
-      })
+        imageUrl: image
+      });
 
       return ResponseData.ok(res, updatedDestination, "destinasi berhasil diperbarui");
     } catch (error) {
@@ -77,20 +83,16 @@ export const destinationController = {
     }
   },
 
-  // Menghapus destinasi berdasarkan ID
   async deleteDestination(req: Request, res: Response) {
     try {
       const id = Number(req.params.id);
-      if (isNaN(id)) ResponseData.badRequest(res, "id tidak valid");
+      if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
 
       await destinationService.deleteDestinationById(id);
 
       return ResponseData.ok(res, null, "destinasi berhasil dihapus");
-
     } catch (error) {
       return ResponseData.serverError(res, error);
     }
   },
-
-
 };
