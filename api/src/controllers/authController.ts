@@ -140,7 +140,7 @@ export const authController = {
 
       const message = await authService.resetPassword(email, newPassword);
 
-      return ResponseData.ok(res, message, "password direset");
+      return ResponseData.ok(res, message, "password berhasil diperbarui");
     } catch (error) {
       return ResponseData.serverError(res, error)
     }
