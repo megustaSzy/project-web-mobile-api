@@ -45,6 +45,7 @@ app.use("/api/orders", orderRoute);
 app.use("/api/admin/orders", adminOrderRoute);  
 app.use("/api/category", categoryRoute);
 app.use("/api/about", aboutRoute)
+app.use("/uploads", express.static("public/uploads"));
 
 // console.log(process.env.GOOGLE_CLIENT_ID);
 // console.log(process.env.GOOGLE_CLIENT_SECRET);
