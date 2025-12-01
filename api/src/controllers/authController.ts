@@ -34,7 +34,7 @@ export const authController = {
         maxAge: 7 * 24 * 60 * 60 * 1000
       });
 
-      return ResponseData.ok(res, { user }, "login berhasil");
+      return ResponseData.ok(res, { user, accessToken, refreshToken }, "login berhasil");
 
     } catch (error: any) {
       return ResponseData.unauthorized(res, error.message);
@@ -105,7 +105,8 @@ export const authController = {
 
     // Kembalikan JSON karena belum ada frontend
     return ResponseData.ok(
-      res,{user,accessToken,refreshToken}, "login google berhasil");
+      
+      res,{user, accessToken, refreshToken}, "login google berhasil");
 
   } catch (err: any) {
     return ResponseData.serverError(res, err.message);

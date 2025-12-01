@@ -43,7 +43,12 @@ export const destinationController = {
 
   async addDestination(req: Request, res: Response) {
     try {
-      const destination = await destinationService.addDestination(req.body);
+      const image = req.file ? `/uploads/${req.file.filename}` : null;
+
+      const destination = await destinationService.addDestination({
+        ...req.body,
+        imageUrl: image,
+      });
 
       return ResponseData.created(res, destination, "destinasi berhasil ditambahkan");
     } catch (error) {
@@ -51,17 +56,18 @@ export const destinationController = {
     }
   },
 
-
   // Mengubah data destinasi berdasarkan ID
   async updateDestination(req: Request, res: Response) {
     try {
       const id = Number(req.params.id);
       if (isNaN(id)) ResponseData.badRequest(res, "id tidak valid");
 
-      const updatedDestination = await destinationService.editDestination(
-        id,
-        req.body
-      );
+      const image = req.file ? `/uploads/${req.file.filename}` : undefined;
+
+      const updatedDestination = await destinationService.editDestination(id, {
+        ...req.body,
+        imageUrl: image,
+      })
 
       return ResponseData.ok(res, updatedDestination, "destinasi berhasil diperbarui");
     } catch (error) {

@@ -75,12 +75,13 @@ export const destinationService = {
     });
   },
 
+
   async editDestination(id: number, data: DestinationData) {
     return prisma.tb_destinations.update({
       where: { id },
       data: {
         name: data.name,
-        imageUrl: data.imageUrl,
+        ...(data.imageUrl ? { imageUrl: data.imageUrl } : {}),
         description: data.description,
         price: data.price,
         category: { connect: { id: data.categoryId } }
