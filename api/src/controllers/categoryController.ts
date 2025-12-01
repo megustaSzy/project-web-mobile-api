@@ -45,6 +45,21 @@ export const categoryController = {
     }
   },
 
+  async updateCategory(req: Request, res: Response) {
+    try {
+      const id = Number(req.params.id);
+  
+      if(isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
+  
+      const category = await categoryService.editCategory(id, req.body);
+  
+      return ResponseData.ok(res, category, "berhasil update category");
+      
+    } catch (error) {
+      return ResponseData.serverError(res, error)
+    }
+  },
+
   async deleteCategories(req: Request, res: Response) {
     try {
       const id = Number(req.params.id);
