@@ -43,14 +43,18 @@ export const destinationController = {
 
   async addDestination(req: Request, res: Response) {
     try {
-      const destination = await destinationService.addDestination(req.body);
+      const image = req.file ? `/uploads/${req.file.filename}` : null;
+
+      const destination = await destinationService.addDestination({
+        ...req.body,
+        imageUrl: image,
+      });
 
       return ResponseData.created(res, destination, "destinasi berhasil ditambahkan");
     } catch (error) {
       return ResponseData.serverError(res, error);
     }
   },
-
 
   // Mengubah data destinasi berdasarkan ID
   async updateDestination(req: Request, res: Response) {
