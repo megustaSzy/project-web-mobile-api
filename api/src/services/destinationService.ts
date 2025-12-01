@@ -81,7 +81,7 @@ export const destinationService = {
       where: { id },
       data: {
         name: data.name,
-        imageUrl: data.imageUrl,
+        ...(data.imageUrl ? { imageUrl: data.imageUrl } : {}),
         description: data.description,
         price: data.price,
         category: { connect: { id: data.categoryId } }
