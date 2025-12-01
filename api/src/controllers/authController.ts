@@ -111,7 +111,24 @@ export const authController = {
   } catch (err: any) {
     return ResponseData.serverError(res, err.message);
   }
-}
+  },
+
+  async forgotPassword(req: Request, res: Response) {
+    try {
+      const message = await authService.requestOtp(req.body.email);
+      return ResponseData.ok(res, message, "OTP dikirim")
+    } catch (error) {
+      return ResponseData.serverError(res, error)
+    }
+  },
+
+  async verifyOtp(req: Request, res: Response) {
+    try {
+      const { email, otp } = req.body
+    } catch (error) {
+      
+    }
+  }
 
 // async googleCallback(req: Request, res: Response) {
 //   try {
