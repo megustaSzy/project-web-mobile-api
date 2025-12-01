@@ -1,15 +1,25 @@
 import prisma from "../lib/prisma";
 import { createError } from "../utilities/createError";
 import { PickupData } from "../types/pickup";
+import { Pagination } from "../utilities/Pagination";
 
 
 export const pickupLocationService = {
   // GET all pickup locations
   // Mengambil semua lokasi penjemputan
-  async getAllPickups() {
-    return prisma.tb_pickup_locations.findMany({
+  async getAllPickups(page: number, limit: number) {
+
+    const pagination = new Pagination(page, limit);
+
+    const count = await prisma.tb_pickup_locations.count();
+
+    const rows = await prisma.tb_pickup_locations.findMany({
+      skip: pagination.offset,
+      take: pagination.limit,
       orderBy: { id: "asc" },
     });
+
+    return pagination.paginate({ count, rows })
   },
 
   // GET pickup by ID
