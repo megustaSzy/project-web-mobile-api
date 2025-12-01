@@ -9,7 +9,8 @@ const router = Router();
 router.get("/", categoryController.getCategory);
 router.get("/:id", categoryController.getCategoryById);
 router.post("/", authMiddleware, authorizeRoles("Admin"), categoryController.createCategoty);
-router.delete("/:id", categoryController.deleteCategories)
+router.put("/:id", authMiddleware, authorizeRoles("Admin"), categoryController.updateCategory);
+router.delete("/:id", authMiddleware, authorizeRoles("Admin"),categoryController.deleteCategories)
 
 
 export default router;

@@ -111,7 +111,40 @@ export const authController = {
   } catch (err: any) {
     return ResponseData.serverError(res, err.message);
   }
-}
+  },
+
+  async forgotPassword(req: Request, res: Response) {
+    try {
+      const message = await authService.requestOtp(req.body.email);
+      return ResponseData.ok(res, message, "OTP dikirim")
+    } catch (error) {
+      return ResponseData.serverError(res, error)
+    }
+  },
+
+  async verifyOtp(req: Request, res: Response) {
+    try {
+      const { email, otp } = req.body;
+
+      const message = await authService.verifyOtp(email, otp);
+
+      return ResponseData.ok(res, message, "OTP Valid");
+    } catch (error) {
+      return ResponseData.serverError(res, error)
+    }
+  },
+
+  async resetPassword(req: Request, res: Response) {
+    try {
+      const { email, newPassword } = req.body;
+
+      const message = await authService.resetPassword(email, newPassword);
+
+      return ResponseData.ok(res, message, "password direset");
+    } catch (error) {
+      return ResponseData.serverError(res, error)
+    }
+  }
 
 // async googleCallback(req: Request, res: Response) {
 //   try {

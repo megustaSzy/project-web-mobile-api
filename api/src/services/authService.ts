@@ -3,6 +3,8 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 import { AuthData } from "../types/auth";
+import { sendEmail } from "../utilities/sendEmail";
+import { createError } from "../utilities/createError";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET!;
@@ -32,7 +34,7 @@ export const authService = {
     const tokenId = uuidv4();
 
     const accessToken = jwt.sign({ id: userId }, JWT_SECRET, {
-      expiresIn: "10m",
+      expiresIn: "1h",
     });
 
     const refreshToken = jwt.sign({ id: userId, tokenId }, JWT_REFRESH_SECRET, {
@@ -80,7 +82,7 @@ export const authService = {
       throw new Error("refresh token kadaluarsa");
 
     const newAccessToken = jwt.sign({ id: payload.id }, JWT_SECRET, {
-      expiresIn: "10m",
+      expiresIn: "1h",
     });
 
     return newAccessToken;
@@ -124,4 +126,71 @@ export const authService = {
 
     return { user, accessToken, refreshToken };
   },
+
+  async requestOtp(email: string) {
+    const user = await prisma.tb_user.findUnique({
+      where: {
+        email
+      }
+    });
+
+    if(!email) createError ("email tidak ditemukan", 404);
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    const expires = new Date(Date.now() + 5 * 60 * 1000);
+
+    await prisma.tb_otp.create({
+      data: {
+        email,
+        otp,
+        expiresAt: expires
+      }
+    });
+
+    await sendEmail(
+      email,
+      "Kode OTP Reset Password",
+      `Kode OTP anda salah: ${otp}\nOTP hanya berlaku selama 5 menit`
+    );
+
+    return "Kode OTP berhasil dikirim ke email anda"
+  },
+
+  async verifyOtp(email: string, otp: string) {
+    const record = await prisma.tb_otp.findFirst({
+      where: {
+        email, otp
+      },
+      orderBy: {
+        createdAt: "desc"
+      }
+    });
+    
+    if (!record) throw new Error("OTP salah");
+    if (record.expiresAt < new Date()) throw new Error("OTP kadaluarsa");
+
+    await prisma.tb_otp.delete({
+      where: {
+        id: record.id
+      }
+    });
+
+    return "OTP Valid";
+  },
+
+  async resetPassword (email: string, newPassword: string) {
+    const hashed = await bcrypt.hash(newPassword, 10);
+
+    await prisma.tb_user.update({
+      where: {
+        email
+      },
+      data: {
+        password: hashed
+      }
+    });
+
+    return "Password berhasil dibuat"
+  }
 };

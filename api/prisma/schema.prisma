@@ -120,3 +120,11 @@ model tb_about {
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 }
+
+model tb_otp {
+  id          Int           @id @default(autoincrement())
+  email       String        @unique
+  otp         String
+  expiresAt   DateTime
+  createdAt   DateTime      @default(now())
+}
