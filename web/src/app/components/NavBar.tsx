@@ -2,326 +2,361 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
+
+interface UserProfile {
+  name?: string;
+  avatar?: string;
+}
+
+interface TranslationMap {
+  home: string;
+  about: string;
+  tour: string;
+  ticket: string;
+  contact: string;
+  login: string;
+  signup: string;
+  editProfile: string;
+  logout: string;
+}
+
+interface TranslateApiResponse {
+  translated?: string;
+  error?: string;
+}
 
 export default function NavBar() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [darkMode, setDarkMode] = useState(false);
-  const [open, setOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userData, setUserData] = useState<{ name?: string; avatar?: string }>(
-    {
-      name: "User",
-      avatar: "/images/profile.jpg",
-    }
-  );
+  const [darkMode, setDarkMode] = useState<boolean>(false);
+  const [open, setOpen] = useState<boolean>(false);
+  const [scrolled, setScrolled] = useState<boolean>(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
-  const [language, setLanguage] = useState("id");
+  const [userData, setUserData] = useState<UserProfile>({
+    name: "User",
+    avatar: "/images/profile.jpg",
+  });
 
-  // 🔹 Scroll effect
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  const [language, setLanguage] = useState<string>("id");
 
-  // 🔹 Load Language
-  useEffect(() => {
-    const savedLang = localStorage.getItem("language");
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (savedLang) setLanguage(savedLang);
-  }, []);
-
-  const handleChangeLanguage = (lang: string) => {
-    setLanguage(lang);
-    localStorage.setItem("language", lang);
+  const translationSource: TranslationMap = {
+    home: "Beranda",
+    about: "Tentang Kami",
+    tour: "Daftar Wisata",
+    ticket: "Tiket Saya",
+    contact: "Kontak",
+    login: "Masuk",
+    signup: "Daftar",
+    editProfile: "Edit Profil",
+    logout: "Keluar",
   };
 
-  // 🔹 Load Profile & Token
-  const loadLocalProfile = () => {
+  const [translations, setTranslations] = useState<TranslationMap>(translationSource);
+
+  const loadLocalProfile = (): void => {
+    if (typeof window === "undefined") return;
+
     const token = localStorage.getItem("token");
     const storedProfile = localStorage.getItem("profile");
 
-    if (token) setIsLoggedIn(true);
-    else setIsLoggedIn(false);
+    setIsLoggedIn(Boolean(token));
 
     if (storedProfile) {
       try {
-        const parsed = JSON.parse(storedProfile);
+        const parsed = JSON.parse(storedProfile) as UserProfile;
         setUserData({
-          name: parsed.name || "User",
-          avatar: parsed.avatar || "/images/profile.jpg",
+          name: parsed?.name ?? "User",
+          avatar: parsed?.avatar ?? "/images/profile.jpg",
         });
-      } catch {
-        console.warn("Profile rusak");
+      } catch (err) {
+        // jika parsing gagal, tetap gunakan default
+        console.warn("Gagal parsing profile dari localStorage:", err);
       }
     }
   };
 
+  const translateWithGoogle = async (target: string): Promise<TranslationMap> => {
+    // fallback: jika target sama dengan 'id', kembalikan source
+    if (target === "id") return translationSource;
+
+    const result: Partial<TranslationMap> = {};
+    // gunakan loop atas key yang dijamin ada
+    const keys = Object.keys(translationSource) as (keyof TranslationMap)[];
+
+    for (const key of keys) {
+      const textToTranslate = translationSource[key];
+
+      try {
+        const res = await fetch("/api/translate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ text: textToTranslate, target }),
+        });
+
+        if (!res.ok) {
+          // jika error, fallback ke teks asli
+          result[key] = translationSource[key];
+          continue;
+        }
+
+        const data = (await res.json()) as TranslateApiResponse;
+        result[key] = data.translated ?? translationSource[key];
+      } catch (err) {
+        // jika fetch error, gunakan fallback
+        console.warn("Translate request error:", err);
+        result[key] = translationSource[key];
+      }
+    }
+
+    // Type assertion karena kita yakin semua key sudah diisi
+    return result as TranslationMap;
+  };
+
+  const handleChangeLanguage = async (lang: string) => {
+    // simpan terlebih dahulu (agar UI langsung berubah uppercase dll)
+    setLanguage(lang);
+    if (typeof window !== "undefined") localStorage.setItem("language", lang);
+
+    // jika bahasa id maka langsung pakai source
+    if (lang === "id") {
+      setTranslations(translationSource);
+      if (typeof window !== "undefined") localStorage.setItem("translations", JSON.stringify(translationSource));
+      return;
+    }
+
+    // Panggil translate dan simpan
+    const newTrans = await translateWithGoogle(lang);
+    setTranslations(newTrans);
+    if (typeof window !== "undefined") localStorage.setItem("translations", JSON.stringify(newTrans));
+  };
+
+  /* =========================
+     EFFECTS
+     ========================= */
+  // Load initial data (language, translations, profile)
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (typeof window === "undefined") return;
+
+    // language (safe fallback)
+    const savedLang = localStorage.getItem("language") ?? "id";
+    setLanguage(savedLang);
+
+    // translations
+    const savedTrans = localStorage.getItem("translations");
+    if (savedTrans) {
+      try {
+        setTranslations(JSON.parse(savedTrans) as TranslationMap);
+      } catch {
+        setTranslations(translationSource);
+      }
+    } else {
+      // jika belum ada translations dan bahasa bukan id, fetch translations
+      if (savedLang !== "id") {
+        // panggil tapi jangan block rendering pertama
+        translateWithGoogle(savedLang).then((t) => {
+          setTranslations(t);
+          localStorage.setItem("translations", JSON.stringify(t));
+        });
+      } else {
+        setTranslations(translationSource);
+      }
+    }
+
+    // load profile
     loadLocalProfile();
-    const handleStorageChange = (e: StorageEvent) => {
+
+    // storage listener untuk detect perubahan di tab lain
+    const handleStorage = (e: StorageEvent) => {
       if (e.key === "profile") loadLocalProfile();
+      if (e.key === "language") {
+        const newLang = e.newValue ?? "id";
+        setLanguage(newLang);
+      }
     };
-    window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
+
+    window.addEventListener("storage", handleStorage);
+
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+    };
+    // NOTE: intentionally empty deps so runs once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // 🔹 Logout
-  const handleLogout = () => {
-    localStorage.removeItem("token");
+  // Scroll effect
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  /* =========================
+     LOGOUT
+     ========================= */
+  const handleLogout = (): void => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("token");
+      localStorage.removeItem("profile");
+    }
     setIsLoggedIn(false);
     setUserData({ name: "User", avatar: "/images/profile.jpg" });
   };
 
-  // 🌎 TEXT SESUAI BAHASA
-  const t = {
-    home: language === "id" ? "Beranda" : "Home",
-    about: language === "id" ? "Tentang Kami" : "About Us",
-    tour: language === "id" ? "Daftar Wisata" : "Tour List",
-    ticket: language === "id" ? "Tiket Saya" : "My Ticket",
-    contact: language === "id" ? "Kontak" : "Contact",
-    login: language === "id" ? "Masuk" : "Login",
-    signup: language === "id" ? "Daftar" : "Sign Up",
-    editProfile: language === "id" ? "Edit Profil" : "Edit Profile",
-    logout: language === "id" ? "Keluar" : "Logout",
-  };
-
+  /* =========================
+     RENDER
+     ========================= */
   return (
     <header
       className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-        scrolled
-          ? "bg-white shadow-md border-b border-gray-200"
-          : "bg-transparent border-b border-white/10"
+        scrolled ? "bg-white shadow-md border-b border-gray-200" : "bg-transparent border-b border-white/10"
       }`}
     >
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center h-16">
-        
-        {/* Logo */}
+        {/* LOGO */}
         <div className="flex items-center gap-2">
           <Image src="/images/logo.png" alt="Logo" width={40} height={40} />
         </div>
 
         {/* MENU DESKTOP */}
         <nav
-          className={`hidden md:flex absolute left-1/2 transform -translate-x-1/2 gap-8 transition-colors duration-300 ${
+          className={`hidden md:flex absolute left-1/2 transform -translate-x-1/2 gap-8 ${
             scrolled ? "text-gray-800" : "text-white"
           }`}
         >
-          <Link href="/" className="hover:text-blue-500">{t.home}</Link>
-          <Link href="/about" className="hover:text-blue-500">{t.about}</Link>
-          <Link href="/tourlist" className="hover:text-blue-500">{t.tour}</Link>
-          <Link href="/tiket" className="hover:text-blue-500">{t.ticket}</Link>
+          <Link href="/">{translations.home}</Link>
+          <Link href="/about">{translations.about}</Link>
+          <Link href="/tourlist">{translations.tour}</Link>
+          <Link href="/tiket">{translations.ticket}</Link>
 
           <button
-            onClick={() => {
-              setOpen(false);
-              document.getElementById("contact")?.scrollIntoView({
-                behavior: "smooth",
-                block: "start",
-              });
-            }}
-            className="hover:text-blue-500 transition-colors duration-300"
+            onClick={() =>
+              typeof document !== "undefined" &&
+              document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })
+            }
           >
-            {t.contact}
+            {translations.contact}
           </button>
         </nav>
 
-        {/* BAGIAN KANAN DESKTOP */}
+        {/* RIGHT */}
         <div className="hidden md:flex gap-3 ml-auto items-center relative">
+          {/* LANGUAGE */}
+          <div className="relative group">
+            <button
+              className={`flex items-center gap-1 px-2 py-1 rounded-lg text-sm border ${
+                scrolled ? "text-gray-800 border-gray-400" : "text-white border-white"
+              }`}
+            >
+              {language.toUpperCase()}
+            </button>
 
-          {/* 🌍 Language Switcher - Elegant Dropdown */}
-<div className="relative group">
-  
-  {/* BUTTON */}
-  <button
-    className={`flex items-center gap-1 px-2 py-1 rounded-lg text-sm border font-medium transition 
-      ${scrolled ? "text-gray-800 border-gray-400" : "text-white border-white"}`}
-  >
-    <span className="uppercase">{language}</span>
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      className="w-3 h-3 mt-0.5"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-    </svg>
-  </button>
-
-  {/* DROPDOWN */}
-  <div className="
-    absolute right-0 mt-2 w-40 rounded-xl overflow-hidden shadow-xl bg-white 
-    opacity-0 invisible group-hover:opacity-100 group-hover:visible
-    transition-all duration-200
-  ">
-    {/* Indonesia */}
-    <button
-      onClick={() => handleChangeLanguage("id")}
-      className={`w-full flex items-start gap-2 px-4 py-2 text-left text-sm 
-        ${language === "id" ? "text-blue-600" : "text-gray-700"} 
-        hover:bg-gray-100`}
-    >
-      <span className="text-xs font-semibold text-gray-500 uppercase">ID</span>
-      <span>Indonesia</span>
-    </button>
-
-    {/* English */}
-    <button
-      onClick={() => handleChangeLanguage("en")}
-      className={`w-full flex items-start gap-2 px-4 py-2 text-left text-sm 
-        ${language === "en" ? "text-blue-600" : "text-gray-700"} 
-        hover:bg-gray-100`}
-    >
-      <span className="text-xs font-semibold text-gray-500 uppercase">US</span>
-      <span>English</span>
-    </button>
+            <div className="absolute right-0 mt-2 w-40 rounded-xl overflow-hidden shadow-xl bg-white opacity-0 invisible group-hover:opacity-100 group-hover:visible">
+              <button onClick={() => handleChangeLanguage("id")} className="w-full px-4 py-2 hover:bg-gray-100">
+                🇮🇩 Indonesia
+              </button>
+              <button onClick={() => handleChangeLanguage("en")} className="w-full px-4 py-2 hover:bg-gray-100">
+                🇺🇸 English
+              </button>
             </div>
           </div>
 
-          {/* PROFIL / LOGIN */}
+          {/* PROFILE / LOGIN */}
           {isLoggedIn ? (
-            <div className="flex items-center gap-2 group relative cursor-pointer">
+            <div className="relative group flex items-center gap-2 cursor-pointer">
               <Image
-                src={userData.avatar || "/images/profile.jpg"}
-                alt="Profile"
+                src={(userData.avatar ?? "/images/profile.jpg") as string}
                 width={35}
                 height={35}
-                className="rounded-full border border-gray-300 object-cover"
+                alt="Profile"
+                className="rounded-full"
               />
-              <span
-                className={`text-sm font-medium ${
-                  scrolled ? "text-gray-800" : "text-white"
-                }`}
-              >
-                {userData.name}
-              </span>
+              <span>{userData.name}</span>
 
-              <div className="absolute right-0 top-10 bg-white rounded-md shadow-lg w-40 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-                <Link
-                  href="/profil"
-                  className="block px-4 py-2 hover:bg-gray-100"
-                >
-                  {t.editProfile}
+              <div className="absolute right-0 top-10 bg-white shadow-lg rounded-lg w-40 opacity-0 invisible group-hover:opacity-100 group-hover:visible">
+                <Link href="/profil" className="block px-4 py-2 hover:bg-gray-100">
+                  {translations.editProfile}
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="block w-full text-left px-4 py-2 hover:bg-red-100 hover:text-red-600"
+                  className="block w-full text-left px-4 py-2 hover:bg-red-100 text-red-600"
                 >
-                  {t.logout}
+                  {translations.logout}
                 </button>
               </div>
             </div>
           ) : (
             <Link
               href="/login"
-              className={`px-3 py-1 text-sm rounded-full border transition ${
-                scrolled
-                  ? "border-gray-700 text-gray-700 hover:bg-blue-600 hover:text-white"
-                  : "border-white text-white hover:bg-blue-600 hover:text-white"
+              className={`px-3 py-1 rounded-full border ${
+                scrolled ? "text-gray-700 border-gray-700" : "text-white border-white"
               }`}
             >
-              {t.login}
+              {translations.login}
             </Link>
           )}
         </div>
 
-        {/* BURGER BUTTON */}
-        <button onClick={() => setOpen(!open)} className="md:hidden ml-auto p-2">
-          {open ? (
-            <X className={scrolled ? "text-gray-800" : "text-white"} />
-          ) : (
-            <Menu className={scrolled ? "text-gray-800" : "text-white"} />
-          )}
+        {/* BURGER */}
+        <button onClick={() => setOpen((v) => !v)} className="md:hidden ml-auto p-2">
+          {open ? <X className={scrolled ? "text-gray-800" : "text-white"} /> : <Menu className={scrolled ? "text-gray-800" : "text-white"} />}
         </button>
       </div>
 
-      {/* MENU MOBILE */}
-      <div
-        className={`md:hidden overflow-hidden transition-all duration-300 ${
-          open ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
-        }`}
-      >
-        <div
-          className={`border-t px-4 py-3 ${
-            scrolled
-              ? "bg-white text-gray-800"
-              : "bg-white/20 backdrop-blur-md text-white"
-          }`}
-        >
-          <nav className="flex flex-col gap-4 text-center font-medium">
-            <Link href="/" onClick={() => setOpen(false)}>{t.home}</Link>
-            <Link href="/about" onClick={() => setOpen(false)}>{t.about}</Link>
-            <Link href="/tourlist" onClick={() => setOpen(false)}>{t.tour}</Link>
-            <Link href="#tickets" onClick={() => setOpen(false)}>{t.ticket}</Link>
-            <Link href="#contact" onClick={() => setOpen(false)}>{t.contact}</Link>
+      {/* MOBILE MENU */}
+      <div className={`md:hidden overflow-hidden transition-all ${open ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}>
+        <div className="bg-white border-t px-4 py-3 text-gray-800">
+          <nav className="flex flex-col gap-4 text-center">
+            <Link href="/" onClick={() => setOpen(false)}>
+              {translations.home}
+            </Link>
+            <Link href="/about" onClick={() => setOpen(false)}>
+              {translations.about}
+            </Link>
+            <Link href="/tourlist" onClick={() => setOpen(false)}>
+              {translations.tour}
+            </Link>
+            <Link href="/tiket" onClick={() => setOpen(false)}>
+              {translations.ticket}
+            </Link>
+            <button onClick={() => setOpen(false)}>{translations.contact}</button>
 
-            {/* AUTH */}
-            <div className="pt-2 flex flex-col gap-3">
-              {isLoggedIn ? (
-                <>
-                  <Link
-                    href="/profil"
-                    onClick={() => setOpen(false)}
-                    className="py-2 rounded-md hover:bg-gray-100 hover:text-gray-800"
-                  >
-                    {t.editProfile}
-                  </Link>
-                  <button
-                    onClick={() => {
-                      handleLogout();
-                      setOpen(false);
-                    }}
-                    className="py-2 rounded-md bg-red-500 text-white hover:bg-red-600"
-                  >
-                    {t.logout}
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    href="/login"
-                    onClick={() => setOpen(false)}
-                    className="py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700"
-                  >
-                    {t.login}
-                  </Link>
-                  <Link
-                    href="/signup"
-                    onClick={() => setOpen(false)}
-                    className="py-2 rounded-md border border-blue-600 text-blue-600 hover:bg-blue-50"
-                  >
-                    {t.signup}
-                  </Link>
-                </>
-              )}
-            </div>
+            {isLoggedIn ? (
+              <>
+                <Link href="/profil" className="py-2" onClick={() => setOpen(false)}>
+                  {translations.editProfile}
+                </Link>
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setOpen(false);
+                  }}
+                  className="py-2 bg-red-500 text-white rounded-md"
+                >
+                  {translations.logout}
+                </button>
+              </>
+            ) : (
+              <>
+                <Link href="/login" onClick={() => setOpen(false)} className="py-2 bg-blue-600 text-white rounded-md">
+                  {translations.login}
+                </Link>
+                <Link href="/signup" onClick={() => setOpen(false)} className="py-2 border border-blue-600 text-blue-600 rounded-md">
+                  {translations.signup}
+                </Link>
+              </>
+            )}
 
-            {/* 🌍 Language Mobile */}
             <div className="border-t mt-3 pt-3 flex justify-center gap-4">
-              <button
-                onClick={() => handleChangeLanguage("id")}
-                className={`px-3 py-1 rounded-md ${
-                  language === "id"
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-200 text-gray-800"
-                }`}
-              >
+              <button onClick={() => handleChangeLanguage("id")} className={`px-3 py-1 rounded-md ${language === "id" ? "bg-blue-600 text-white" : "bg-gray-200"}`}>
                 🇮🇩 ID
               </button>
-              <button
-                onClick={() => handleChangeLanguage("en")}
-                className={`px-3 py-1 rounded-md ${
-                  language === "en"
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-200 text-gray-800"
-                }`}
-              >
-                🇬🇧 EN
+              <button onClick={() => handleChangeLanguage("en")} className={`px-3 py-1 rounded-md ${language === "en" ? "bg-blue-600 text-white" : "bg-gray-200"}`}>
+                🇺🇸 EN
               </button>
             </div>
           </nav>
