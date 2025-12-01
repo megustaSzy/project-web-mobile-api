@@ -124,9 +124,25 @@ export const authController = {
 
   async verifyOtp(req: Request, res: Response) {
     try {
-      const { email, otp } = req.body
+      const { email, otp } = req.body;
+
+      const message = await authService.verifyOtp(email, otp);
+
+      return ResponseData.ok(res, message, "OTP Valid");
     } catch (error) {
-      
+      return ResponseData.serverError(res, error)
+    }
+  },
+
+  async resetPassword(req: Request, res: Response) {
+    try {
+      const { email, newPassword } = req.body;
+
+      const message = await authService.resetPassword(email, newPassword);
+
+      return ResponseData.ok(res, message, "password direset");
+    } catch (error) {
+      return ResponseData.serverError(res, error)
     }
   }
 
