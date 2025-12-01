@@ -5,7 +5,11 @@ import { ResponseData } from "../utilities/Response";
 export const categoryController = {
   async getCategory(req: Request, res: Response) {
     try {
-      const category = await categoryService.getAllCategories();
+
+      const page = Number(req.query.page) || 1;
+      const limit = Number(req.query.limit) || 10;
+
+      const category = await categoryService.getAllCategories(page, limit);
 
       return ResponseData.ok(res, category, "category berhasil diambil");
     } catch (error) {
