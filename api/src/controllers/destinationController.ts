@@ -47,6 +47,8 @@ export const destinationController = {
 
       const destination = await destinationService.addDestination({
         ...req.body,
+        categoryId: Number(req.body.categoryId),
+        price: Number(req.body.price),
         imageUrl: image,
       });
 
@@ -66,7 +68,7 @@ export const destinationController = {
 
       const updatedDestination = await destinationService.editDestination(id, {
         ...req.body,
-        imageUrl: image,
+        imageUrl: image 
       })
 
       return ResponseData.ok(res, updatedDestination, "destinasi berhasil diperbarui");

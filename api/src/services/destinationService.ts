@@ -55,6 +55,10 @@ export const destinationService = {
   },
 
   async addDestination(data: DestinationData) {
+
+    const price = Number(data.price)
+    const categoryId = Number(data.categoryId);
+
     const category = await prisma.tb_category.findUnique({
       where: { id: data.categoryId }
     });
@@ -66,8 +70,8 @@ export const destinationService = {
         name: data.name,
         imageUrl: data.imageUrl,
         description: data.description,
-        price: data.price,
-        category: { connect: { id: data.categoryId } }
+        price: price,
+        category: { connect: { id: categoryId } }
       },
       include: {
         category: true

@@ -1,6 +1,7 @@
 import prisma from "../lib/prisma";
 import { createError } from "../utilities/createError";
 import { ScheduleData } from "../types/schedule";
+import { Pagination } from "../utilities/Pagination";
 
 // Helper: parsing date aman
 function parseSafeDate(date: string): Date {
@@ -13,8 +14,15 @@ function parseSafeDate(date: string): Date {
 
 export const scheduleService = {
   // GET ALL
-  async getAllSchedules() {
-    return prisma.tb_schedules.findMany({
+  async getAllSchedules(page: number, limit: number) {
+
+    const pagination = new Pagination(page, limit);
+
+    const count = await prisma.tb_schedules.count();
+
+    const rows = await prisma.tb_schedules.findMany({
+      skip: pagination.offset,
+      take: pagination.limit,
       include: {
         pickupLocation: true,
         destination: true,
@@ -23,6 +31,8 @@ export const scheduleService = {
         date: "asc",
       },
     });
+
+    return pagination.paginate({ count, rows })
   },
 
   // GET BY ID
