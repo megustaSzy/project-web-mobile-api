@@ -3,6 +3,8 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 import { AuthData } from "../types/auth";
+import { sendEmail } from "../utilities/sendEmail";
+import { createError } from "../utilities/createError";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET!;
@@ -124,4 +126,34 @@ export const authService = {
 
     return { user, accessToken, refreshToken };
   },
+
+  async requestOtp(email: string) {
+    const user = await prisma.tb_user.findUnique({
+      where: {
+        email
+      }
+    });
+
+    if(!email) createError ("email tidak ditemukan", 404);
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    const expires = new Date(Date.now() + 5 * 60 * 1000);
+
+    await prisma.tb_otp.create({
+      data: {
+        email,
+        otp,
+        expiresAt: expires
+      }
+    });
+
+    await sendEmail(
+      email,
+      "Kode OTP Reset Password",
+      `Kode OTP anda salah: ${otp}\nOTP hanya berlaku selama 5 menit`
+    );
+
+    return "Kode OTP berhasil dikirim ke email anda"
+  }
 };
