@@ -32,7 +32,7 @@ export const authService = {
     const tokenId = uuidv4();
 
     const accessToken = jwt.sign({ id: userId }, JWT_SECRET, {
-      expiresIn: "10m",
+      expiresIn: "1h",
     });
 
     const refreshToken = jwt.sign({ id: userId, tokenId }, JWT_REFRESH_SECRET, {
@@ -80,7 +80,7 @@ export const authService = {
       throw new Error("refresh token kadaluarsa");
 
     const newAccessToken = jwt.sign({ id: payload.id }, JWT_SECRET, {
-      expiresIn: "10m",
+      expiresIn: "1h",
     });
 
     return newAccessToken;

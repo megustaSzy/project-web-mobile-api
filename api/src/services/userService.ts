@@ -46,7 +46,6 @@ export const userService = {
   },
 
   // UPDATE user by ID
-  // Mengubah data user berdasarkan ID
   async updateUserById(id: number, data: UserData) {
     const user = await prisma.tb_user.findUnique({
       where: { id },
@@ -65,7 +64,6 @@ export const userService = {
   },
 
   // DELETE user by ID
-  // Menghapus user berdasarkan ID
   async deleteUserById(id: number) {
     const user = await prisma.tb_user.findUnique({
       where: { id },
