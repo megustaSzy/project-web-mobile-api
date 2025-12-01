@@ -1,17 +1,25 @@
 import prisma from "../lib/prisma";
 import { createError } from "../utilities/createError";
+import { Pagination } from "../utilities/Pagination";
 
 export const adminOrderService = {
 
   // Mengambil semua order
-  async getAllOrders() {
+  async getAllOrders(page: number, limit: number) {
 
-    return prisma.tb_orders.findMany({
+    const pagination = new Pagination(page, limit);
 
+    const count = await prisma.tb_orders.count();
+
+    const rows = await prisma.tb_orders.findMany({
+      skip: pagination.offset,
+      take: pagination.limit,
       orderBy: { 
         id: "asc" 
       },
     });
+
+    return pagination.paginate({ count, rows })
   },
 
 
