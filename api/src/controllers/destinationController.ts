@@ -62,10 +62,12 @@ export const destinationController = {
       const id = Number(req.params.id);
       if (isNaN(id)) ResponseData.badRequest(res, "id tidak valid");
 
-      const updatedDestination = await destinationService.editDestination(
-        id,
-        req.body
-      );
+      const image = req.file ? `/uploads/${req.file.filename}` : undefined;
+
+      const updatedDestination = await destinationService.editDestination(id, {
+        ...req.body,
+        imageUrl: image,
+      })
 
       return ResponseData.ok(res, updatedDestination, "destinasi berhasil diperbarui");
     } catch (error) {
