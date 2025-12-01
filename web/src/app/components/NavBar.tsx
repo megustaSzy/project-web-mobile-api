@@ -33,6 +33,7 @@ export default function NavBar() {
   const [open, setOpen] = useState<boolean>(false);
   const [scrolled, setScrolled] = useState<boolean>(false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [openLang, setOpenLang] = useState(false);
 
   const [userData, setUserData] = useState<UserProfile>({
     name: "User",
@@ -53,7 +54,8 @@ export default function NavBar() {
     logout: "Keluar",
   };
 
-  const [translations, setTranslations] = useState<TranslationMap>(translationSource);
+  const [translations, setTranslations] =
+    useState<TranslationMap>(translationSource);
 
   const loadLocalProfile = (): void => {
     if (typeof window === "undefined") return;
@@ -77,7 +79,9 @@ export default function NavBar() {
     }
   };
 
-  const translateWithGoogle = async (target: string): Promise<TranslationMap> => {
+  const translateWithGoogle = async (
+    target: string
+  ): Promise<TranslationMap> => {
     // fallback: jika target sama dengan 'id', kembalikan source
     if (target === "id") return translationSource;
 
@@ -124,19 +128,18 @@ export default function NavBar() {
     // jika bahasa id maka langsung pakai source
     if (lang === "id") {
       setTranslations(translationSource);
-      if (typeof window !== "undefined") localStorage.setItem("translations", JSON.stringify(translationSource));
+      if (typeof window !== "undefined")
+        localStorage.setItem("translations", JSON.stringify(translationSource));
       return;
     }
 
     // Panggil translate dan simpan
     const newTrans = await translateWithGoogle(lang);
     setTranslations(newTrans);
-    if (typeof window !== "undefined") localStorage.setItem("translations", JSON.stringify(newTrans));
+    if (typeof window !== "undefined")
+      localStorage.setItem("translations", JSON.stringify(newTrans));
   };
 
-  /* =========================
-     EFFECTS
-     ========================= */
   // Load initial data (language, translations, profile)
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -207,13 +210,12 @@ export default function NavBar() {
     setUserData({ name: "User", avatar: "/images/profile.jpg" });
   };
 
-  /* =========================
-     RENDER
-     ========================= */
   return (
     <header
       className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-        scrolled ? "bg-white shadow-md border-b border-gray-200" : "bg-transparent border-b border-white/10"
+        scrolled
+          ? "bg-white shadow-md border-b border-gray-200"
+          : "bg-transparent border-b border-white/10"
       }`}
     >
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center h-16">
@@ -236,7 +238,9 @@ export default function NavBar() {
           <button
             onClick={() =>
               typeof document !== "undefined" &&
-              document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })
+              document
+                .getElementById("contact")
+                ?.scrollIntoView({ behavior: "smooth" })
             }
           >
             {translations.contact}
@@ -246,23 +250,46 @@ export default function NavBar() {
         {/* RIGHT */}
         <div className="hidden md:flex gap-3 ml-auto items-center relative">
           {/* LANGUAGE */}
-          <div className="relative group">
+          <div className="relative">
             <button
-              className={`flex items-center gap-1 px-2 py-1 rounded-lg text-sm border ${
-                scrolled ? "text-gray-800 border-gray-400" : "text-white border-white"
-              }`}
+              onClick={() => setOpenLang((prev: boolean) => !prev)}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm border transition-all duration-200
+      ${
+        scrolled
+          ? "text-gray-800 border-gray-400 bg-white"
+          : "text-white border-white bg-white/20 backdrop-blur-md"
+      }
+      hover:scale-105
+    `}
             >
+              <span className="text-lg">{language === "id" ? "🇮🇩" : "🇺🇸"}</span>
               {language.toUpperCase()}
             </button>
 
-            <div className="absolute right-0 mt-2 w-40 rounded-xl overflow-hidden shadow-xl bg-white opacity-0 invisible group-hover:opacity-100 group-hover:visible">
-              <button onClick={() => handleChangeLanguage("id")} className="w-full px-4 py-2 hover:bg-gray-100">
-                🇮🇩 Indonesia
-              </button>
-              <button onClick={() => handleChangeLanguage("en")} className="w-full px-4 py-2 hover:bg-gray-100">
-                🇺🇸 English
-              </button>
-            </div>
+            {/* DROPDOWN */}
+            {openLang && (
+              <div className="absolute right-0 mt-2 w-40 rounded-xl shadow-lg bg-white overflow-hidden animate-fadeIn">
+                <button
+                  onClick={() => {
+                    handleChangeLanguage("id");
+                    setOpenLang(false);
+                  }}
+                  className="flex items-center gap-2 w-full px-4 py-2 hover:bg-gray-100 text-left"
+                >
+                  🇮🇩 Indonesia
+                </button>
+
+                <button
+                  onClick={() => {
+                    handleChangeLanguage("en");
+                    setOpenLang(false);
+                  }}
+                  className="flex items-center gap-2 w-full px-4 py-2 hover:bg-gray-100 text-left"
+                >
+                  🇺🇸 English
+                </button>
+              </div>
+            )}
           </div>
 
           {/* PROFILE / LOGIN */}
@@ -278,7 +305,10 @@ export default function NavBar() {
               <span>{userData.name}</span>
 
               <div className="absolute right-0 top-10 bg-white shadow-lg rounded-lg w-40 opacity-0 invisible group-hover:opacity-100 group-hover:visible">
-                <Link href="/profil" className="block px-4 py-2 hover:bg-gray-100">
+                <Link
+                  href="/profil"
+                  className="block px-4 py-2 hover:bg-gray-100"
+                >
                   {translations.editProfile}
                 </Link>
                 <button
@@ -293,7 +323,9 @@ export default function NavBar() {
             <Link
               href="/login"
               className={`px-3 py-1 rounded-full border ${
-                scrolled ? "text-gray-700 border-gray-700" : "text-white border-white"
+                scrolled
+                  ? "text-gray-700 border-gray-700"
+                  : "text-white border-white"
               }`}
             >
               {translations.login}
@@ -302,13 +334,24 @@ export default function NavBar() {
         </div>
 
         {/* BURGER */}
-        <button onClick={() => setOpen((v) => !v)} className="md:hidden ml-auto p-2">
-          {open ? <X className={scrolled ? "text-gray-800" : "text-white"} /> : <Menu className={scrolled ? "text-gray-800" : "text-white"} />}
+        <button
+          onClick={() => setOpen((v) => !v)}
+          className="md:hidden ml-auto p-2"
+        >
+          {open ? (
+            <X className={scrolled ? "text-gray-800" : "text-white"} />
+          ) : (
+            <Menu className={scrolled ? "text-gray-800" : "text-white"} />
+          )}
         </button>
       </div>
 
       {/* MOBILE MENU */}
-      <div className={`md:hidden overflow-hidden transition-all ${open ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}>
+      <div
+        className={`md:hidden overflow-hidden transition-all ${
+          open ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+        }`}
+      >
         <div className="bg-white border-t px-4 py-3 text-gray-800">
           <nav className="flex flex-col gap-4 text-center">
             <Link href="/" onClick={() => setOpen(false)}>
@@ -323,11 +366,17 @@ export default function NavBar() {
             <Link href="/tiket" onClick={() => setOpen(false)}>
               {translations.ticket}
             </Link>
-            <button onClick={() => setOpen(false)}>{translations.contact}</button>
+            <button onClick={() => setOpen(false)}>
+              {translations.contact}
+            </button>
 
             {isLoggedIn ? (
               <>
-                <Link href="/profil" className="py-2" onClick={() => setOpen(false)}>
+                <Link
+                  href="/profil"
+                  className="py-2"
+                  onClick={() => setOpen(false)}
+                >
                   {translations.editProfile}
                 </Link>
                 <button
@@ -342,20 +391,38 @@ export default function NavBar() {
               </>
             ) : (
               <>
-                <Link href="/login" onClick={() => setOpen(false)} className="py-2 bg-blue-600 text-white rounded-md">
+                <Link
+                  href="/login"
+                  onClick={() => setOpen(false)}
+                  className="py-2 bg-blue-600 text-white rounded-md"
+                >
                   {translations.login}
                 </Link>
-                <Link href="/signup" onClick={() => setOpen(false)} className="py-2 border border-blue-600 text-blue-600 rounded-md">
+                <Link
+                  href="/signup"
+                  onClick={() => setOpen(false)}
+                  className="py-2 border border-blue-600 text-blue-600 rounded-md"
+                >
                   {translations.signup}
                 </Link>
               </>
             )}
 
             <div className="border-t mt-3 pt-3 flex justify-center gap-4">
-              <button onClick={() => handleChangeLanguage("id")} className={`px-3 py-1 rounded-md ${language === "id" ? "bg-blue-600 text-white" : "bg-gray-200"}`}>
+              <button
+                onClick={() => handleChangeLanguage("id")}
+                className={`px-3 py-1 rounded-md ${
+                  language === "id" ? "bg-blue-600 text-white" : "bg-gray-200"
+                }`}
+              >
                 🇮🇩 ID
               </button>
-              <button onClick={() => handleChangeLanguage("en")} className={`px-3 py-1 rounded-md ${language === "en" ? "bg-blue-600 text-white" : "bg-gray-200"}`}>
+              <button
+                onClick={() => handleChangeLanguage("en")}
+                className={`px-3 py-1 rounded-md ${
+                  language === "en" ? "bg-blue-600 text-white" : "bg-gray-200"
+                }`}
+              >
                 🇺🇸 EN
               </button>
             </div>
