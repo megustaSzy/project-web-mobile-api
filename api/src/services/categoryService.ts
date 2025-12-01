@@ -50,6 +50,23 @@ export const categoryService = {
     });
   },
 
+  async editCategory(id: number, data: CategoryData) {
+    const category = await prisma.tb_category.findUnique({
+      where: {
+        id
+      }
+    });
+
+    if(!category) createError("id tidak ditemukan", 404);
+
+    return prisma.tb_category.update({
+      where: {
+        id
+      },
+      data
+    })
+  },
+
   async deleteCategoriesById(id: number) {
     const category = await prisma.tb_category.findUnique({
       where: {
