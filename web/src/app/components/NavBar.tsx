@@ -253,17 +253,27 @@ export default function NavBar() {
           <div className="relative">
             <button
               onClick={() => setOpenLang((prev: boolean) => !prev)}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm border transition-all duration-200
-      ${
-        scrolled
-          ? "text-gray-800 border-gray-400 bg-white"
-          : "text-white border-white bg-white/20 backdrop-blur-md"
-      }
-      hover:scale-105
-    `}
+              className={`gap-1 flex items-center px-2 py-1 rounded-full transition-all duration-200
+    ${scrolled ? "text-gray-700" : "text-white"}
+    hover:scale-105
+  `}
             >
-              <span className="text-lg">{language === "id" ? "🇮🇩" : "🇺🇸"}</span>
-              {language.toUpperCase()}
+              <span className="transition-transform duration-200">
+                {language.toUpperCase()}
+              </span>
+
+              {/* ICON PANAH */}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-4 h-4 transition-transform duration-200"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                />
+              </svg>
             </button>
 
             {/* DROPDOWN */}
