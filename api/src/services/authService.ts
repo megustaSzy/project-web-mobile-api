@@ -179,5 +179,18 @@ export const authService = {
     return "OTP Valid";
   },
 
-  
+  async resetPassword (email: string, newPassword: string) {
+    const hashed = await bcrypt.hash(newPassword, 10);
+
+    await prisma.tb_user.update({
+      where: {
+        email
+      },
+      data: {
+        password: hashed
+      }
+    });
+
+    return "Password berhasil dibuat"
+  }
 };
