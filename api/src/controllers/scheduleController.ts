@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from "express";
 import { scheduleService } from "../services/scheduleService";
-import { createError } from "../utilities/createError";
 import { ResponseData } from "../utilities/Response";
 
 export const scheduleController = {
@@ -8,7 +7,12 @@ export const scheduleController = {
   // Mengambil semua schedule dari database
   async getAllSchedules(req: Request, res: Response, next: NextFunction) {
     try {
-      const schedules = await scheduleService.getAllSchedules();
+
+      const page = Number(req.query.page) || 1;
+      const limit = Number(req.query.limit) || 10;
+
+      const schedules = await scheduleService.getAllSchedules(page, limit);
+
       return ResponseData.ok(
         res,
         schedules,
