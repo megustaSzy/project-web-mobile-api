@@ -4,29 +4,29 @@ import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 import { AuthData } from "../types/auth";
 import { sendEmail } from "../utilities/sendEmail";
-import { createError } from "../utilities/createError";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET!;
 
 export const authService = {
+
   async registerUser(data: AuthData) {
-    const existingUser = await prisma.tb_user.findUnique({
-      where: { email: data.email },
+    const existing = await prisma.tb_user.findUnique({
+      where: { email: data.email }
     });
 
-    if (existingUser) throw new Error("email sudah digunakan");
+    if (existing) throw new Error("email sudah digunakan");
 
-    const hashedPassword = await bcrypt.hash(data.password, 10);
+    const hash = await bcrypt.hash(data.password, 10);
 
     return prisma.tb_user.create({
       data: {
         name: data.name,
         email: data.email,
-        password: hashedPassword,
+        password: hash,
         role: data.role || "User",
         notelp: data.notelp || "",
-      },
+      }
     });
   },
 
@@ -46,8 +46,8 @@ export const authService = {
         token: refreshToken,
         tokenId,
         userId,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      },
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+      }
     });
 
     return { accessToken, refreshToken };
@@ -61,7 +61,7 @@ export const authService = {
     if (!isMatch) throw new Error("password salah");
 
     await prisma.tb_refreshToken.deleteMany({
-      where: { userId: user.id },
+      where: { userId: user.id }
     });
 
     const { accessToken, refreshToken } = await this.createTokens(user.id);
@@ -74,15 +74,14 @@ export const authService = {
     const payload: any = jwt.verify(refreshToken, JWT_REFRESH_SECRET);
 
     const stored = await prisma.tb_refreshToken.findUnique({
-      where: { tokenId: payload.tokenId },
+      where: { tokenId: payload.tokenId }
     });
 
     if (!stored) throw new Error("refresh token tidak terdaftar");
-    if (stored.expiresAt < new Date())
-      throw new Error("refresh token kadaluarsa");
+    if (stored.expiresAt < new Date()) throw new Error("refresh token kadaluarsa");
 
     const newAccessToken = jwt.sign({ id: payload.id }, JWT_SECRET, {
-      expiresIn: "1h",
+      expiresIn: "1h"
     });
 
     return newAccessToken;
@@ -91,12 +90,11 @@ export const authService = {
   async logoutUser(refreshToken: string) {
     try {
       const payload: any = jwt.verify(refreshToken, JWT_REFRESH_SECRET);
-
       await prisma.tb_refreshToken.deleteMany({
-        where: { tokenId: payload.tokenId },
+        where: { tokenId: payload.tokenId }
       });
     } catch {
-      // token invalid abaikan
+      // abaikan token invalid
     }
   },
 
@@ -104,9 +102,7 @@ export const authService = {
     const email = profile.emails[0].value;
     const name = profile.displayName;
 
-    let user = await prisma.tb_user.findUnique({
-      where: { email },
-    });
+    let user = await prisma.tb_user.findUnique({ where: { email } });
 
     if (!user) {
       user = await prisma.tb_user.create({
@@ -118,26 +114,19 @@ export const authService = {
           password: null,
           notelp: null,
           role: "User",
-        },
+        }
       });
     }
 
     const { accessToken, refreshToken } = await this.createTokens(user.id);
-
     return { user, accessToken, refreshToken };
   },
 
   async requestOtp(email: string) {
-    const user = await prisma.tb_user.findUnique({
-      where: {
-        email
-      }
-    });
-
-    if(!email) createError ("email tidak ditemukan", 404);
+    const user = await prisma.tb_user.findUnique({ where: { email } });
+    if (!user) throw new Error("email tidak ditemukan");
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-
     const expires = new Date(Date.now() + 5 * 60 * 1000);
 
     await prisma.tb_otp.create({
@@ -151,46 +140,34 @@ export const authService = {
     await sendEmail(
       email,
       "Kode OTP Reset Password",
-      `Kode OTP anda salah: ${otp}\nOTP hanya berlaku selama 5 menit`
+      `Kode OTP Anda: ${otp}\nKode berlaku selama 5 menit`
     );
 
-    return "Kode OTP berhasil dikirim ke email anda"
+    return "Kode OTP berhasil dikirim";
   },
 
   async verifyOtp(email: string, otp: string) {
     const record = await prisma.tb_otp.findFirst({
-      where: {
-        email, otp
-      },
-      orderBy: {
-        createdAt: "desc"
-      }
+      where: { email, otp },
+      orderBy: { createdAt: "desc" }
     });
-    
+
     if (!record) throw new Error("OTP salah");
     if (record.expiresAt < new Date()) throw new Error("OTP kadaluarsa");
 
-    await prisma.tb_otp.delete({
-      where: {
-        id: record.id
-      }
-    });
+    await prisma.tb_otp.delete({ where: { id: record.id } });
 
-    return "OTP Valid";
+    return "OTP valid";
   },
 
-  async resetPassword (email: string, newPassword: string) {
-    const hashed = await bcrypt.hash(newPassword, 10);
+  async resetPassword(email: string, newPassword: string) {
+    const hash = await bcrypt.hash(newPassword, 10);
 
     await prisma.tb_user.update({
-      where: {
-        email
-      },
-      data: {
-        password: hashed
-      }
+      where: { email },
+      data: { password: hash }
     });
 
-    return "Password berhasil dibuat"
+    return "password berhasil direset";
   }
 };
