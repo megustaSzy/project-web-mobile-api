@@ -155,5 +155,29 @@ export const authService = {
     );
 
     return "Kode OTP berhasil dikirim ke email anda"
-  }
+  },
+
+  async verifyOtp(email: string, otp: string) {
+    const record = await prisma.tb_otp.findFirst({
+      where: {
+        email, otp
+      },
+      orderBy: {
+        createdAt: "desc"
+      }
+    });
+    
+    if (!record) throw new Error("OTP salah");
+    if (record.expiresAt < new Date()) throw new Error("OTP kadaluarsa");
+
+    await prisma.tb_otp.delete({
+      where: {
+        id: record.id
+      }
+    });
+
+    return "OTP Valid";
+  },
+
+  
 };
