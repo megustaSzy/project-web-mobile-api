@@ -1,17 +1,44 @@
-import React from "react";
+/* eslint-disable @next/next/no-img-element */
+"use client";
+import React, { useEffect, useState } from "react";
+import { apiGet } from "@/helpers/api";
+
+type VisiMisiType = {
+  visi: string;
+  misi: string[];
+};
+
+type NilaiItem = {
+  judul: string;
+  deskripsi: string;
+};
+
+type NilaiUtamaResponse = {
+  nilai_utama: NilaiItem[];
+};
 
 export default function VisiMisiSection() {
+  const [data, setData] = useState<VisiMisiType | null>(null);
+  const [nilai, setNilai] = useState<NilaiItem[]>([]);
+
+  useEffect(() => {
+    apiGet<VisiMisiType>("/about/visimisi").then(setData);
+
+    apiGet<NilaiUtamaResponse>("/about/nilai-utama")
+      .then((res) => setNilai(res.nilai_utama))
+      .catch(() => setNilai([]));
+  }, []);
+
   return (
     <section className="w-full py-20 bg-[linear-gradient(to_bottom,#bfd8f7,#ffffff,#bfd8f7)]">
-
       <div className="max-w-6xl mx-auto px-6 md:px-10">
+
         {/* Visi */}
         <div className="mb-16">
           <h2 className="text-4xl font-bold mb-6">Visi</h2>
           <div className="bg-white shadow-md rounded-2xl p-6 md:p-8 border border-gray-100">
             <p className="text-gray-700 leading-relaxed">
-              Menjadi platform wisata digital yang berperan aktif dalam membangun ekosistem
-              pariwisata Lampung yang maju, inklusif, dan berkelanjutan.
+              {data?.visi}
             </p>
           </div>
         </div>
@@ -20,20 +47,11 @@ export default function VisiMisiSection() {
         <div className="mb-20">
           <h2 className="text-4xl font-bold mb-6">Misi</h2>
           <div className="bg-white shadow-md rounded-2xl p-6 md:p-8 border border-gray-100 space-y-2">
-            <p className="text-gray-700 leading-relaxed">
-              Mengembangkan teknologi yang memudahkan wisatawan menemukan dan menjelajahi
-              destinasi di Lampung.
-            </p>
-            <p className="text-gray-700 leading-relaxed">
-              Mendorong kolaborasi antara wisatawan, pelaku lokal, dan pemerintah daerah.
-            </p>
-            <p className="text-gray-700 leading-relaxed">
-              Menyediakan layanan wisata yang aman, informatif, dan berorientasi pada kepuasan
-              pengguna.
-            </p>
-            <p className="text-gray-700 leading-relaxed">
-              Menumbuhkan kesadaran akan pentingnya pelestarian alam dan budaya lokal.
-            </p>
+            {data?.misi?.map((m, i) => (
+              <p key={i} className="text-gray-700 leading-relaxed">
+                {m}
+              </p>
+            ))}
           </div>
         </div>
 
@@ -43,49 +61,51 @@ export default function VisiMisiSection() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Inovatif */}
+
+          {/* INOVATIF */}
           <div className="bg-white shadow-md border border-gray-100 rounded-2xl p-6 flex items-start gap-4">
             <img src="/images/14.svg" alt="Inovatif" className="w-20 h-20" />
             <div>
-              <h3 className="font-semibold text-lg">Inovatif</h3>
+              <h3 className="font-semibold text-lg">{nilai[0]?.judul}</h3>
               <p className="text-gray-600 text-sm">
-                Selalu berinovasi untuk menciptakan pengalaman wisata yang relevan dengan perkembangan zaman.
+                {nilai[0]?.deskripsi}
               </p>
             </div>
           </div>
 
-          {/* Tanggung Jawab */}
+          {/* TANGGUNG JAWAB */}
           <div className="bg-white shadow-md border border-gray-100 rounded-2xl p-6 flex items-start gap-4">
             <img src="/images/15.svg" alt="Tanggung Jawab" className="w-20 h-20" />
             <div>
-              <h3 className="font-semibold text-lg">Tanggung Jawab</h3>
+              <h3 className="font-semibold text-lg">{nilai[1]?.judul}</h3>
               <p className="text-gray-600 text-sm">
-                Berkomitmen menjaga kepercayaan pengguna dan mendukung pariwisata berkelanjutan.
+                {nilai[1]?.deskripsi}
               </p>
             </div>
           </div>
 
-          {/* Kolaboratif */}
+          {/* KOLABORATIF */}
           <div className="bg-white shadow-md border border-gray-100 rounded-2xl p-6 flex items-start gap-4">
             <img src="/images/17.svg" alt="Kolaboratif" className="w-20 h-20" />
             <div>
-              <h3 className="font-semibold text-lg">Kolaboratif</h3>
+              <h3 className="font-semibold text-lg">{nilai[2]?.judul}</h3>
               <p className="text-gray-600 text-sm">
-                Membangun kerja sama dengan berbagai pihak demi kemajuan wisata daerah.
+                {nilai[2]?.deskripsi}
               </p>
             </div>
           </div>
 
-          {/* Cepat */}
+          {/* CEPAT */}
           <div className="bg-white shadow-md border border-gray-100 rounded-2xl p-6 flex items-start gap-4">
             <img src="/images/18.svg" alt="Cepat" className="w-20 h-20" />
             <div>
-              <h3 className="font-semibold text-lg">Cepat</h3>
+              <h3 className="font-semibold text-lg">{nilai[3]?.judul}</h3>
               <p className="text-gray-600 text-sm">
-                Memberikan layanan yang responsif dan efisien untuk setiap kebutuhan wisatawan.
+                {nilai[3]?.deskripsi}
               </p>
             </div>
           </div>
+
         </div>
       </div>
     </section>
