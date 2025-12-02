@@ -21,13 +21,6 @@ export const authController = {
         password
       );
 
-      res.cookie("accessToken", accessToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        maxAge: 60 * 60 * 1000,
-      });
-
       res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
@@ -53,14 +46,11 @@ export const authController = {
 
       const newAccessToken = await authService.refreshAccessToken(token);
 
-      res.cookie("accessToken", newAccessToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        maxAge: 60 * 60 * 1000,
-      });
-
-      return ResponseData.ok(res, null, "token diperbarui");
+      return ResponseData.ok(
+        res,
+        { accessToken: newAccessToken },
+        "token diperbarui"
+      );
     } catch (error: any) {
       return ResponseData.unauthorized(res, error.message);
     }
@@ -71,7 +61,6 @@ export const authController = {
       const token = req.cookies.refreshToken;
       if (token) await authService.logoutUser(token);
 
-      res.clearCookie("accessToken");
       res.clearCookie("refreshToken");
 
       return ResponseData.ok(res, null, "logout berhasil");
@@ -90,14 +79,6 @@ export const authController = {
 
       const { user, accessToken, refreshToken } =
         await authService.loginWithGoogle(profile);
-
-      // Simpan token ke cookie
-      res.cookie("accessToken", accessToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        maxAge: 60 * 60 * 1000, // 1 jam
-      });
 
       res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
