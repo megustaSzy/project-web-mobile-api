@@ -1,29 +1,37 @@
-import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
+import { NextFunction, Request, Response } from "express";
+import jwt from "jsonwebtoken"
 import prisma from "../lib/prisma";
 import { ResponseData } from "../utilities/Response";
+import { use } from "passport";
 
-export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
-  // Ambil token dari cookie ATAU header Authorization
-  const token =
-    req.cookies.accessToken ||
-    req.headers.authorization?.split(" ")[1];
+export const authMiddleware = async(req: Request, res: Response, next: NextFunction) => {
+  // ambil accessToken dari Authorization header: bearer token
+  const authHeader = req.headers.authorization;
 
-  if (!token) {
-    return ResponseData.notFound(res, "token tidak ditemukan")
+  const token = authHeader?.startsWith("Bearer ") ? authHeader.split(" ")[1] : null;
+
+  if(!token){
+    return ResponseData.unauthorized(res, "access token tidak ditemukan")
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: number };
 
     const user = await prisma.tb_user.findUnique({
-      where: { id: decoded.id },
-      select: { id: true, name: true, email: true, role: true },
+      where: {
+        id: decoded.id
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        notelp: true
+      }
     });
 
-    if (!user) {
-      return ResponseData.notFound(res, "user tidak ditemukan")
-    }
+    if(!user) {
+      return ResponseData.notFound(res, "user tidak ditemukan");
+    } 
 
     (req as any).user = user;
     next();
@@ -31,4 +39,4 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
   } catch (err) {
     return ResponseData.forbidden(res, "token tidak valid atau expired")
   }
-};
+}
