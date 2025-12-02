@@ -89,6 +89,14 @@ export const destinationService = {
 
 
   async editDestination(id: number, data: DestinationData) {
+    const existing = await prisma.tb_destinations.findUnique({
+      where: {
+        id
+      }
+    });
+
+    if(!existing) createError("destinasi tidak ditemukan", 404)
+
     return prisma.tb_destinations.update({
       where: { id },
       data: {
