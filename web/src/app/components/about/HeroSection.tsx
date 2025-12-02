@@ -1,5 +1,7 @@
 "use client";
 
+
+
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { apiGet } from "@/helpers/api";
@@ -9,7 +11,7 @@ export default function HeroSection() {
   const [data, setData] = useState<AboutType | null>(null);
 
   useEffect(() => {
-    apiGet<AboutType>("/about") // misal endpoint backend kamu /about
+    apiGet<AboutType>("/about/history") // misal endpoint backend kamu /about
       .then((res) => setData(res))
       .catch((err) => console.error("Error load about:", err));
   }, []);

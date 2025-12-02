@@ -1,4 +1,5 @@
 export const BASE_URL = process.env.NEXT_PUBLIC_API_URL as string;
+console.log(process.env.NEXT_PUBLIC_API_URL);
 
 // Tipe body bebas tapi tetap aman (unknown)
 type BodyType = Record<string, unknown>;
