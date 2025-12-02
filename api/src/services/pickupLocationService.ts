@@ -3,12 +3,10 @@ import { createError } from "../utilities/createError";
 import { PickupData } from "../types/pickup";
 import { Pagination } from "../utilities/Pagination";
 
-
 export const pickupLocationService = {
   // GET all pickup locations
   // Mengambil semua lokasi penjemputan
   async getAllPickups(page: number, limit: number) {
-
     const pagination = new Pagination(page, limit);
 
     const count = await prisma.tb_pickup_locations.count();
@@ -19,7 +17,7 @@ export const pickupLocationService = {
       orderBy: { id: "asc" },
     });
 
-    return pagination.paginate({ count, rows })
+    return pagination.paginate({ count, rows });
   },
 
   // GET pickup by ID
@@ -36,6 +34,14 @@ export const pickupLocationService = {
   // CREATE new pickup location
   // Menambahkan lokasi penjemputan baru
   async createPickupLocation(data: PickupData) {
+    const existing = await prisma.tb_pickup_locations.findFirst({
+      where: {
+        name: data.name,
+      },
+    });
+
+    if (existing) createError("nama kendaraan sudah ada", 400);
+
     return prisma.tb_pickup_locations.create({
       data: { name: data.name },
     });
