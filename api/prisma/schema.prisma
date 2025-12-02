@@ -93,7 +93,7 @@ model tb_orders {
   schedule        tb_schedules     @relation(fields: [scheduleId], references: [id])
   scheduleId      Int
 
-  tickets         Int
+  quantity         Int
   totalPrice      Int
 
   // snapshot field (diambil saat melakukan order)

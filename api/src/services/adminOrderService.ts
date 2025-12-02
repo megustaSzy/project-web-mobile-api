@@ -3,10 +3,8 @@ import { createError } from "../utilities/createError";
 import { Pagination } from "../utilities/Pagination";
 
 export const adminOrderService = {
-
   // Mengambil semua order
   async getAllOrders(page: number, limit: number) {
-
     const pagination = new Pagination(page, limit);
 
     const count = await prisma.tb_orders.count();
@@ -14,34 +12,44 @@ export const adminOrderService = {
     const rows = await prisma.tb_orders.findMany({
       skip: pagination.offset,
       take: pagination.limit,
-      orderBy: { 
-        id: "asc" 
+      orderBy: {
+        id: "desc", // biasanya admin ingin terbaru dulu
       },
+      // Bila ingin include user dan schedule asli:
+      // include: { user: true, schedule: true }
     });
 
-    return pagination.paginate({ count, rows })
+    return pagination.paginate({ count, rows });
   },
 
-
-  // Mengambil detail order berdasarkan ID
+  // Detail order (admin)
   async getOrderById(id: number) {
-    const order = await prisma.tb_orders.findUnique({ where: { id } });
-    if (!order) createError("order tidak ditemukan", 404);
+    const order = await prisma.tb_orders.findUnique({
+      where: { id },
+    });
+
+    if (!order) throw createError("order tidak ditemukan", 404);
 
     return order;
   },
 
-
-  // Menghapus order berdasarkan ID
+  // Hapus order (admin)
   async deleteById(id: number) {
-    const order = await prisma.tb_orders.findUnique({ 
-      where: { 
-        id 
-      } 
+    const existing = await prisma.tb_orders.findUnique({
+      where: { id },
     });
 
-    if (!order) createError("order tidak ditemukan", 404);
+    if (!existing) throw createError("order tidak ditemukan", 404);
 
-    return prisma.tb_orders.delete({ where: { id } });
+    try {
+      const deleted = await prisma.tb_orders.delete({ where: { id } });
+      return deleted;
+    } catch (err: any) {
+      // Jika ada FK constraint dari table lain
+      throw createError(
+        "order tidak dapat dihapus karena masih memiliki relasi",
+        409
+      );
+    }
   },
 };
