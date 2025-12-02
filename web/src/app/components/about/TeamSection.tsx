@@ -1,66 +1,61 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { apiGet } from "@/helpers/api";
+
+type TeamMember = {
+  name: string;
+  role: string;
+  photo: string; // backend kirim nama file atau url
+};
 
 export default function TeamSection() {
+  const [team, setTeam] = useState<TeamMember[]>([]);
+
+  useEffect(() => {
+    apiGet<TeamMember[]>("/about/team").then(setTeam);
+  }, []);
+
+  const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
   return (
-    <section className="w-full py-20 bg-gradient-to-b from-[#bfd8f7] to-[#0a1a35]">
+    <section className="w-full py-20 bg-linear-to-b from-[#bfd8f7] to-[#0a1a35]">
       <div className="max-w-6xl mx-auto px-6 md:px-10 text-center">
         <h2 className="text-4xl font-bold mb-12 text-black">Our Team</h2>
 
         {/* Team Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10 justify-center">
-          {/* Member 1 */}
-          <div className="flex flex-col items-center">
-            <div className="w-48 h-48 rounded-3xl overflow-hidden bg-yellow-400 flex justify-center items-center">
-              <img
-                src="/images/faiz.jpg"
-                alt="M. Arif Alfa’iz"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <h3 className="mt-4 text-xl font-semibold text-white">
-              M. Arif Alfa’iz
-            </h3>
-            <p className="text-gray-300 text-sm">
-              UIUX Design & Frontend Developer
-            </p>
-          </div>
+          {team.map((member, i) => {
+            
+            // Jika backend kirim URL lengkap → pakai langsung
+            const isFullURL = member.photo.startsWith("http");
 
-          {/* Member 2 */}
-          <div className="flex flex-col items-center">
-            <div className="w-48 h-48 rounded-3xl overflow-hidden bg-yellow-400 flex justify-center items-center">
-              <img
-                src="/images/faiz.jpg"
-                alt="Fadly Mustofainal A."
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <h3 className="mt-4 text-xl font-semibold text-white">
-              Fadly Mustofainal A.
-            </h3>
-            <p className="text-gray-300 text-sm">
-              UIUX Design & Frontend Developer
-            </p>
-          </div>
+            // Jika hanya nama file → gabungkan BASE_URL
+            const photoURL = isFullURL
+              ? member.photo
+              : `${BASE_URL}/uploads/team/${member.photo}`;
 
-          {/* Member 3 */}
-          <div className="flex flex-col items-center">
-            <div className="w-48 h-48 rounded-3xl overflow-hidden bg-gray-300 flex justify-center items-center">
-              <img
-                src="/images/faiz.jpg"
-                alt="Raditya Ahmad"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <h3 className="mt-4 text-xl font-semibold text-white">
-              Raditya Ahmad
-            </h3>
-            <p className="text-gray-300 text-sm">Backend Developer</p>
-          </div>
+            return (
+              <div key={i} className="flex flex-col items-center">
+                <div className="w-48 h-48 rounded-3xl overflow-hidden bg-yellow-400 flex justify-center items-center">
+                  <img
+                    src={photoURL}
+                    alt={member.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+
+                <h3 className="mt-4 text-xl font-semibold text-white">
+                  {member.name}
+                </h3>
+                <p className="text-gray-300 text-sm">{member.role}</p>
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      {/* Maps Section */}
+      {/* Maps */}
       <div className="max-w-6xl mx-auto px-6 md:px-10 mt-16">
         <div className="w-full h-80 rounded-3xl overflow-hidden shadow-lg">
           <iframe

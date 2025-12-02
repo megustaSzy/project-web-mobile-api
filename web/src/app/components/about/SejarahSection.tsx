@@ -1,11 +1,24 @@
 "use client";
 import Image from "next/image";
+import { useEffect, useState } from "react";
+import { apiGet } from "@/helpers/api";
+
+type CeritaType = {
+  title: string;
+  content: string;
+};
 
 export default function CeritaPage() {
+  const [data, setData] = useState<CeritaType | null>(null);
+
+  useEffect(() => {
+    apiGet<CeritaType>("/about/cerita").then(setData);
+  }, []);
+
   return (
     <section className="relative flex flex-col items-center justify-center overflow-hidden py-20">
       {/* Background gradasi */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-100 via-blue-200 to-blue-300"></div>
+      <div className="absolute inset-0 bg-linear-to-br from-blue-100 via-blue-200 to-blue-300"></div>
 
       {/* Tekstur garis samar */}
       <div className="absolute inset-0 opacity-20">
@@ -22,13 +35,13 @@ export default function CeritaPage() {
         
         {/* Kiri: Teks */}
         <div className="md:w-1/2 max-w-lg">
-          <h2 className="text-3xl font-bold mb-4">Sejarah LamiGo</h2>
-          <p className="text-gray-700 leading-relaxed">
-            LamiGo lahir dari semangat menghadirkan pengalaman berwisata yang
-            lebih terarah dan bermakna. Kami percaya bahwa setiap perjalanan bukan
-            hanya tentang tempat yang dikunjungi, tetapi juga cerita yang dibawa
-            pulang. Melalui inovasi digital, LamiGo menghubungkan keindahan alam
-            Lampung dengan generasi muda yang mencintai eksplorasi.
+          <h2 className="text-3xl font-bold mb-4">
+            {data?.title ?? "Loading..."}
+          </h2>
+
+          <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+            {data?.content ??
+              "Sedang memuat cerita LamiGo..."}
           </p>
         </div>
 
