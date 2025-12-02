@@ -59,6 +59,14 @@ export const destinationService = {
     const price = Number(data.price)
     const categoryId = Number(data.categoryId);
 
+    const existing = await prisma.tb_destinations.findFirst({
+      where: {
+        name: data.name
+      }
+    });
+
+    if(existing) createError("nama destinasi sudah ada", 400)
+
     const category = await prisma.tb_category.findUnique({
       where: { id: data.categoryId }
     });
