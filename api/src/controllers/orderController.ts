@@ -3,30 +3,31 @@ import { orderService } from "../services/orderService";
 import { ResponseData } from "../utilities/Response";
 
 export const orderController = {
-
   // POST /orders
   // Membuat order baru untuk user yang login
   async createOrder(req: Request, res: Response) {
     try {
       const userId = (req as any).user.id; // ambil dari middleware
-      const { scheduleId, tickets } = req.body;
+      const { scheduleId, quantity } = req.body;
 
-      if (!scheduleId || !tickets) {
-        return ResponseData.badRequest(res, "scheduleId dan tickets wajib diisi");
+      if (!scheduleId || !quantity) {
+        return ResponseData.badRequest(
+          res,
+          "scheduleId dan quantity wajib diisi"
+        );
       }
 
       const order = await orderService.createOrder(
         userId,
         Number(scheduleId),
-        Number(tickets)
+        Number(quantity)
       );
 
-      if(!order) {
+      if (!order) {
         return ResponseData.notFound(res, "user atau jadwal tidak ditemukan");
       }
 
       return ResponseData.created(res, order, "order berhasil dibuat");
-
     } catch (error) {
       return ResponseData.serverError(res, error);
     }
@@ -41,7 +42,6 @@ export const orderController = {
       const orders = await orderService.getOrdersByUser(userId);
 
       return ResponseData.ok(res, orders, "data order berhasil diambil");
-
     } catch (error) {
       return ResponseData.serverError(res, error);
     }
@@ -54,16 +54,14 @@ export const orderController = {
         return ResponseData.badRequest(res, "id tidak valid");
       }
 
-      const order = await orderService.getOrderById(id);
+      const userId = (req as any).user.id; // ambil dari middleware
 
-      if(!order) {
-        return ResponseData.notFound(res, "order tidak ditemukan");
-      }
+      // Panggil service dengan userId untuk cek kepemilikan order
+      const order = await orderService.getOrderById(id, userId);
 
       return ResponseData.ok(res, order, "data order berhasil diambil");
-
     } catch (error) {
       return ResponseData.serverError(res, error);
     }
-  }
-}
+  },
+};
