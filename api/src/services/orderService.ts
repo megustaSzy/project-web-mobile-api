@@ -17,11 +17,22 @@ export const orderService = {
       where: { id: scheduleId },
       include: { destination: true },
     });
-
     if (!schedule) throw createError("jadwal tidak ditemukan", 404);
 
-    // Opsional: Cek tanggal sudah lewat atau belum
-    if (new Date(schedule.date) < new Date()) {
+    const existingOrder = await prisma.tb_orders.findFirst({
+        where: {
+            userId,
+            scheduleId
+        }
+    });
+
+    if(existingOrder) throw createError("anda sudah memesan jadwal ini sebelumnya", 400)
+
+    // Cek jadwal sudah lewat
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const scheduleDate = new Date(schedule.date);
+    if (scheduleDate < today) {
       throw createError("jadwal sudah lewat", 400);
     }
 
@@ -55,21 +66,17 @@ export const orderService = {
 
   // Riwayat order user
   async getOrdersByUser(userId: number) {
-    const orders = await prisma.tb_orders.findMany({
+    return await prisma.tb_orders.findMany({
       where: { userId },
       orderBy: { id: "desc" },
     });
-
-    return orders;
   },
 
   // Order detail (user)
   async getOrderById(id: number, userId: number) {
     const order = await prisma.tb_orders.findUnique({ where: { id } });
-
     if (!order) throw createError("order tidak ditemukan", 404);
 
-    // Cek hanya pemilik yang boleh lihat
     if (order.userId !== userId) {
       throw createError("anda tidak memiliki akses ke order ini", 403);
     }
