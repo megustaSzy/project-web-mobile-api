@@ -40,6 +40,15 @@ export const categoryService = {
   },
 
   async addCategory(data: CategoryData) {
+
+    const existing = await prisma.tb_category.findFirst({
+      where: {
+        name: data.name
+      }
+    });
+
+    if(existing) createError("nama category sudah ada", 400)
+
     return prisma.tb_category.create({
       data: {
         name: data.name,

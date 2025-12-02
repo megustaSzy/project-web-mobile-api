@@ -4,17 +4,23 @@ import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 import { AuthData } from "../types/auth";
 import { sendEmail } from "../utilities/sendEmail";
+import { createError } from "../utilities/createError";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET!;
 
 export const authService = {
   async registerUser(data: AuthData) {
+    if(!data.name) createError ("nama wajib diisi", 409);
+    if(!data.email) createError("email wajib diisi", 400);
+    if(!data.email.includes("@")) createError("format email tidak valid", 400);
+    if(!data.password || data.password.length < 6) createError ("password minimal 6 karakter", 400)
+
     const existing = await prisma.tb_user.findUnique({
       where: { email: data.email },
     });
 
-    if (existing) throw new Error("email sudah digunakan");
+    if (existing) createError("email sudah digunakan", 409);
 
     const hash = await bcrypt.hash(data.password, 10);
 
@@ -99,6 +105,8 @@ export const authService = {
   },
 
   async loginWithGoogle(profile: any) {
+    if(!profile.emails || !profile.emails[0]) createError("email google tidak ditemukan", 404);
+
     const email = profile.emails[0].value;
     const name = profile.displayName;
 
@@ -123,8 +131,10 @@ export const authService = {
   },
 
   async requestOtp(email: string) {
+    if(!email) createError("email wajib diisi", 400);
+
     const user = await prisma.tb_user.findUnique({ where: { email } });
-    if (!user) throw new Error("email tidak ditemukan");
+    if (!user) createError("email tidak ditemukan", 404);
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const expires = new Date(Date.now() + 5 * 60 * 1000);
@@ -147,6 +157,8 @@ export const authService = {
   },
 
   async verifyOtp(email: string, otp: string) {
+    if(!email || !otp) createError("email dan otp wajib diisi", 400);
+
     const record = await prisma.tb_otp.findFirst({
       where: { email, otp },
       orderBy: { createdAt: "desc" },
@@ -161,6 +173,8 @@ export const authService = {
   },
 
   async resetPassword(email: string, newPassword: string) {
+    if(!newPassword || newPassword.length < 6) createError("password minimal 6 karakter", 400);
+    
     const hash = await bcrypt.hash(newPassword, 10);
 
     await prisma.tb_user.update({
