@@ -7,6 +7,9 @@
     "build": "tsc",
     "start": "node dist/server.js"
   },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "author": "Raditya Ahmad",
   "license": "ISC",
   "description": "",
