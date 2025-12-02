@@ -50,6 +50,10 @@ export const destinationController = {
         return ResponseData.badRequest(res, "price tidak valid");
       }
 
+      if(!req.file) {
+        return ResponseData.badRequest(res, "image wajib diupload")
+      }
+
       const image = req.file ? `/uploads/${req.file.filename}` : null;
 
       const destination = await destinationService.addDestination({
