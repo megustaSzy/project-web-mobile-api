@@ -4,7 +4,6 @@ import { StatusCodes } from 'http-status-codes'
 import { CONFIG } from '../config'
 
 
-
 export const ResponseData = {
   /**
    * Response 200 OK
