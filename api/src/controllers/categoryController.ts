@@ -35,7 +35,7 @@ export const categoryController = {
     try {
       const { name } = req.body;
 
-      if (!name) ResponseData.badRequest(res, "nama wajib diisi");
+      if (!name) return ResponseData.badRequest(res, "nama wajib diisi");
 
       const category = await categoryService.addCategory({ name });
 
@@ -64,7 +64,7 @@ export const categoryController = {
     try {
       const id = Number(req.params.id);
 
-      if (isNaN(id)) ResponseData.badRequest(res, "id tidak valid");
+      if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
 
       await categoryService.deleteCategoriesById(id);
 

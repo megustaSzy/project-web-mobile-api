@@ -105,7 +105,7 @@ export const scheduleService = {
   // DELETE
   async deleteSchedule(id: number) {
     const existing = await prisma.tb_schedules.findUnique({ where: { id } });
-    if (!existing) createError("ID schedule tidak ditemukan", 404);
+    if (!existing) createError("id schedule tidak ditemukan", 404);
 
     return prisma.tb_schedules.delete({ where: { id } });
   },

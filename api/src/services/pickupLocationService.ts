@@ -5,7 +5,6 @@ import { Pagination } from "../utilities/Pagination";
 
 export const pickupLocationService = {
   // GET all pickup locations
-  // Mengambil semua lokasi penjemputan
   async getAllPickups(page: number, limit: number) {
     const pagination = new Pagination(page, limit);
 
@@ -21,7 +20,6 @@ export const pickupLocationService = {
   },
 
   // GET pickup by ID
-  // Mengambil lokasi penjemputan berdasarkan ID
   async getPickupById(id: number) {
     const pickup = await prisma.tb_pickup_locations.findUnique({
       where: { id },
@@ -32,7 +30,6 @@ export const pickupLocationService = {
   },
 
   // CREATE new pickup location
-  // Menambahkan lokasi penjemputan baru
   async createPickupLocation(data: PickupData) {
     const existing = await prisma.tb_pickup_locations.findFirst({
       where: {
