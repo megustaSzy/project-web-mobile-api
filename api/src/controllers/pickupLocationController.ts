@@ -5,7 +5,6 @@ import { ResponseData } from "../utilities/Response";
 
 export const pickupLocationController = {
   // GET all pickup locations
-  // Mengambil semua lokasi penjemputan
   async getAllPickup(req: Request, res: Response) {
     try {
 
@@ -22,7 +21,6 @@ export const pickupLocationController = {
   },
 
   // GET pickup location by ID
-  // Mengambil lokasi penjemputan berdasarkan ID
   async getPickupById(req: Request, res: Response) {
     try {
       const id = Number(req.params.id);
@@ -37,7 +35,6 @@ export const pickupLocationController = {
   },
 
   // POST add new pickup location
-  // Menambahkan lokasi penjemputan baru
   async addPickup(req: Request, res: Response) {
     try {
       const pickup = await pickupLocationService.createPickupLocation(req.body);
@@ -49,7 +46,6 @@ export const pickupLocationController = {
   },
 
   // PUT update pickup location by ID
-  // Mengubah lokasi penjemputan berdasarkan ID
   async updatePickupLocation(req: Request, res: Response) {
     try {
       const id = Number(req.params.id);
@@ -67,7 +63,6 @@ export const pickupLocationController = {
   },
 
   // DELETE pickup location by ID
-  // Menghapus lokasi penjemputan berdasarkan ID
   async deletePickup(req: Request, res: Response) {
     try {
       const id = Number(req.params.id);

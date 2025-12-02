@@ -31,6 +31,9 @@ export const pickupLocationService = {
 
   // CREATE new pickup location
   async createPickupLocation(data: PickupData) {
+    if(!data.name || data.name.trim().length === 0)
+      createError("nama kendaraan wajib diisi", 400);
+
     const existing = await prisma.tb_pickup_locations.findFirst({
       where: {
         name: data.name,
@@ -45,12 +48,20 @@ export const pickupLocationService = {
   },
 
   // UPDATE pickup location by ID
-  // Mengubah lokasi penjemputan berdasarkan ID
   async editPickupLocation(id: number, data: PickupData) {
+
     const pickup = await prisma.tb_pickup_locations.findUnique({
       where: { id },
     });
     if (!pickup) createError("id tidak ditemukan", 404);
+
+    const existing = await prisma.tb_pickup_locations.findFirst({
+      where: {
+        name: data.name
+      }
+    });
+
+    if(existing) createError("nama kendaraan sudah ada", 400)
 
     return prisma.tb_pickup_locations.update({
       where: { id },
@@ -59,7 +70,6 @@ export const pickupLocationService = {
   },
 
   // DELETE pickup location by ID
-  // Menghapus lokasi penjemputan berdasarkan ID
   async deletePickupById(id: number) {
     const pickup = await prisma.tb_pickup_locations.findUnique({
       where: { id },
