@@ -1,3 +1,3 @@
-export interface CategoryData{
-    name: string
+export interface CategoryData {
+  name: string;
 }

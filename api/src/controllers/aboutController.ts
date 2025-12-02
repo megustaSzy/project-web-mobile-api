@@ -16,46 +16,6 @@ export const aboutController = {
         }
     },
     
-    // get history
-    async getHistory(req: Request, res: Response) {
-        try {
-            const data = await aboutService.getField("history");
-
-            if(!data) return ResponseData.notFound(res, "history tidak ditemukan");
-
-            return ResponseData.ok(res, data)
-        } catch (error) {
-            return ResponseData.serverError(res, error)
-        }
-    },
-
-
-    // get vision
-    async getVision(req: Request, res: Response) {
-        try {
-            const data = await aboutService.getField("vision");
-
-            if(!data) return ResponseData.notFound(res, "vision tidak ditemukan");
-
-            return ResponseData.ok(res, data)
-        } catch (error) {
-            return ResponseData.serverError(res, error)
-        }
-    },
-
-    // get mission
-    async getMission(req: Request, res: Response) {
-        try {
-            const data = await aboutService.getField("mission");
-
-            if(!data) return ResponseData.notFound(res, "mission tidak ditemukan");
-
-            return ResponseData.ok(res, data)
-        } catch (error) {
-            return ResponseData.serverError(res, error)
-        }
-    },
-    
     async createAbout(req: Request, res: Response) {
         try {
             const data = await aboutService.createAbout(req.body);

@@ -8,17 +8,7 @@ export const aboutService = {
     async getAbout() {
         return prisma.tb_about.findFirst();
     },
-
-    async getField(field: "history" | "vision" | "mission") {
-        const about = await prisma.tb_about.findFirst({
-            select: {
-                [field]: true
-            }
-        });
-
-        return about ? about[field]: null
-    },
-
+    
     async createAbout(data: AboutData) {
         return prisma.tb_about.create({
             data

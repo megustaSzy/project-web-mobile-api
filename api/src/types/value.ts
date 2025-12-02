@@ -1,4 +1,3 @@
-export interface CoreValueData {
-    value: string,
-    aboutId: number
+export interface ValueData {
+    name: string
 }
