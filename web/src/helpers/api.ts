@@ -1,48 +1,33 @@
-export const BASE_URL = process.env.NEXT_PUBLIC_API_URL as string;
-console.log(process.env.NEXT_PUBLIC_API_URL);
+export async function apiFetch<T>(endpoint: string, options: RequestInit = {}) {
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
 
-// Tipe body bebas tapi tetap aman (unknown)
-type BodyType = Record<string, unknown>;
-
-// GET Request
-export async function apiGet<T>(path: string): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`, {
-    method: "GET",
-    headers: { "Content-Type": "application/json" },
-    cache: "no-store",
-  });
-
-  if (!res.ok) {
-    throw new Error("GET API Error: " + res.statusText);
+  if (!baseUrl) {
+    throw new Error("❌ Environment NEXT_PUBLIC_API_URL tidak ditemukan.");
   }
 
-  return res.json() as Promise<T>;
-}
+  // Hindari double slash
+  const fullUrl = `${baseUrl.replace(/\/+$/, "")}${endpoint}`;
 
-// POST Request
-export async function apiPost<T>(path: string, body: BodyType): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
+  console.log("🌐 Fetching URL:", fullUrl);
 
-  if (!res.ok) {
-    throw new Error("POST API Error: " + res.statusText);
+  try {
+    const response = await fetch(fullUrl, {
+      method: options.method ?? "GET",
+      headers: {
+        "Content-Type": "application/json",
+        ...(options.headers || {}),
+      },
+      ...options,
+    });
+
+    if (!response.ok) {
+      throw new Error(`❌ HTTP Error ${response.status}: ${response.statusText}`);
+    }
+
+    const data = (await response.json()) as T;
+    return data;
+  } catch (error) {
+    console.error("🔥 API FETCH ERROR:", error);
+    throw error;
   }
-
-  return res.json() as Promise<T>;
-}
-
-// GET + Token
-export async function apiGetAuth<T>(path: string, token: string): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-
-  if (!res.ok) {
-    throw new Error("AUTH API Error: " + res.statusText);
-  }
-
-  return res.json() as Promise<T>;
 }

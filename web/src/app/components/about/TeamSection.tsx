@@ -1,58 +1,105 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
+
 import React, { useEffect, useState } from "react";
-import { apiGet } from "@/helpers/api";
+import { apiFetch } from "@/helpers/api";
 
 type TeamMember = {
   name: string;
   role: string;
-  photo: string; // backend kirim nama file atau url
+  photo: string;
 };
 
 export default function TeamSection() {
   const [team, setTeam] = useState<TeamMember[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
+
+  async function getTeamData(): Promise<void> {
+    try {
+      setLoading(true);
+      setErrorMsg(null);
+
+      const result = await apiFetch<TeamMember[]>("/about/team");
+
+      // Validasi data benar-benar array TeamMember[]
+      if (!Array.isArray(result)) {
+        throw new Error("Format API tidak mengembalikan array.");
+      }
+
+      const valid = result.every(
+        (item) =>
+          typeof item === "object" &&
+          item !== null &&
+          "name" in item &&
+          "role" in item &&
+          "photo" in item
+      );
+
+      if (!valid) {
+        throw new Error("Format data anggota tim tidak sesuai.");
+      }
+
+      setTeam(result);
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Gagal memuat data tim.";
+      setErrorMsg(message);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    apiGet<TeamMember[]>("/about/team").then(setTeam);
+    getTeamData();
   }, []);
-
-  const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
   return (
     <section className="w-full py-20 bg-linear-to-b from-[#bfd8f7] to-[#0a1a35]">
       <div className="max-w-6xl mx-auto px-6 md:px-10 text-center">
         <h2 className="text-4xl font-bold mb-12 text-black">Our Team</h2>
 
+        {/* Loading */}
+        {loading && (
+          <p className="text-white text-lg">Loading team members...</p>
+        )}
+
+        {/* Error */}
+        {!loading && errorMsg && (
+          <p className="text-red-400 text-lg">{errorMsg}</p>
+        )}
+
         {/* Team Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 justify-center">
-          {team.map((member, i) => {
-            
-            // Jika backend kirim URL lengkap → pakai langsung
-            const isFullURL = member.photo.startsWith("http");
+        {!loading && !errorMsg && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 justify-center">
+            {team.map((member, i) => {
+              const isFullURL = member.photo.startsWith("http");
 
-            // Jika hanya nama file → gabungkan BASE_URL
-            const photoURL = isFullURL
-              ? member.photo
-              : `${BASE_URL}/uploads/team/${member.photo}`;
+              const photoURL = isFullURL
+                ? member.photo
+                : `${BASE_URL}/uploads/team/${member.photo}`;
 
-            return (
-              <div key={i} className="flex flex-col items-center">
-                <div className="w-48 h-48 rounded-3xl overflow-hidden bg-yellow-400 flex justify-center items-center">
-                  <img
-                    src={photoURL}
-                    alt={member.name}
-                    className="w-full h-full object-cover"
-                  />
+              return (
+                <div key={i} className="flex flex-col items-center">
+                  <div className="w-48 h-48 rounded-3xl overflow-hidden bg-yellow-400 flex justify-center items-center">
+                    <img
+                      src={photoURL}
+                      alt={member.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+
+                  <h3 className="mt-4 text-xl font-semibold text-white">
+                    {member.name}
+                  </h3>
+                  <p className="text-gray-300 text-sm">{member.role}</p>
                 </div>
-
-                <h3 className="mt-4 text-xl font-semibold text-white">
-                  {member.name}
-                </h3>
-                <p className="text-gray-300 text-sm">{member.role}</p>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Maps */}
