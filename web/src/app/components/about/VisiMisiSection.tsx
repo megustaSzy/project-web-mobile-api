@@ -1,108 +1,139 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
+
 import React, { useEffect, useState } from "react";
-import { apiGet } from "@/helpers/api";
+import { apiFetch } from "@/helpers/api";
+import { ValueItem, ValueType } from "@/types/value";
 
-type VisiMisiType = {
-  visi: string;
-  misi: string[];
-};
+// TIPE VISI MISI
+export interface VisionType {
+  status: number;
+  message: string;
+  data: {
+    id: number;
+    title: string;
+    history: string;
+    vision: string;
+    mission: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
 
-type NilaiItem = {
-  judul: string;
-  deskripsi: string;
-};
+// TIPE NILAI UTAMA (Asli dari backend)
 
-type NilaiUtamaResponse = {
-  nilai_utama: NilaiItem[];
-};
 
-export default function VisiMisiSection() {
-  const [data, setData] = useState<VisiMisiType | null>(null);
-  const [nilai, setNilai] = useState<NilaiItem[]>([]);
+export default function VisionSection() {
+  const [data, setData] = useState<VisionType | null>(null);
+  const [value, setValue] = useState<ValueItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [, setErrorMsg] = useState<string | null>(null);
+
+  async function getData(): Promise<void> {
+    setLoading(true);
+    setErrorMsg(null);
+
+    try {
+      // GET VISI MISI
+      const result = await apiFetch<VisionType>("/about");
+      if (!result?.data) throw new Error("Format data visi tidak sesuai.");
+      setData(result);
+
+      // GET NILAI UTAMA
+      const valueResult = await apiFetch<ValueType>("/about/value");
+      console.log("🚀 Hasil:", valueResult);
+
+      if (!valueResult?.data?.items) {
+        throw new Error("Format data nilai utama tidak sesuai.");
+      }
+
+      setValue(valueResult.data.items);
+    } catch (error) {
+      const err = error instanceof Error ? error.message : "Terjadi kesalahan";
+      setErrorMsg(err);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    apiGet<VisiMisiType>("/about/visimisi").then(setData);
-
-    apiGet<NilaiUtamaResponse>("/about/nilai-utama")
-      .then((res) => setNilai(res.nilai_utama))
-      .catch(() => setNilai([]));
+    getData();
   }, []);
 
   return (
     <section className="w-full py-20 bg-[linear-gradient(to_bottom,#bfd8f7,#ffffff,#bfd8f7)]">
       <div className="max-w-6xl mx-auto px-6 md:px-10">
-
-        {/* Visi */}
+        {/* VISI */}
         <div className="mb-16">
-          <h2 className="text-4xl font-bold mb-6">Visi</h2>
-          <div className="bg-white shadow-md rounded-2xl p-6 md:p-8 border border-gray-100">
-            <p className="text-gray-700 leading-relaxed">
-              {data?.visi}
-            </p>
-          </div>
+          {loading ? (
+            <>
+              <h2 className="text-4xl font-bold mb-6">Loading...</h2>
+              <p className="text-gray-600">Mengambil data visi...</p>
+            </>
+          ) : (
+            <>
+              <h2 className="text-4xl font-bold mb-6">Visi</h2>
+              <div className="bg-white shadow-md rounded-2xl p-6 md:p-8 border border-gray-100">
+                <p className="text-gray-700 leading-relaxed">
+                  {data?.data.vision}
+                </p>
+              </div>
+            </>
+          )}
         </div>
 
-        {/* Misi */}
+        {/* MISI */}
         <div className="mb-20">
-          <h2 className="text-4xl font-bold mb-6">Misi</h2>
-          <div className="bg-white shadow-md rounded-2xl p-6 md:p-8 border border-gray-100 space-y-2">
-            {data?.misi?.map((m, i) => (
-              <p key={i} className="text-gray-700 leading-relaxed">
-                {m}
-              </p>
-            ))}
-          </div>
+          {!loading && (
+            <>
+              <h2 className="text-4xl font-bold mb-6">Misi</h2>
+              <div className="bg-white shadow-md rounded-2xl p-6 md:p-8 border border-gray-100 space-y-2">
+                {data?.data.mission.split(". ").map((m, i) => (
+                  <p key={i} className="text-gray-700 leading-relaxed">
+                    {m}
+                  </p>
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
-        {/* Nilai Utama */}
+        {/* NILAI UTAMA */}
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold">Nilai Utama LamiGo</h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-          {/* INOVATIF */}
+          {/* CARD 1 */}
           <div className="bg-white shadow-md border border-gray-100 rounded-2xl p-6 flex items-start gap-4">
-            <img src="/images/14.svg" alt="Inovatif" className="w-20 h-20" />
+            <img src="/images/14.svg" alt="Card 1" className="w-20 h-20" />
             <div>
-              <h3 className="font-semibold text-lg">{nilai[0]?.judul}</h3>
-              <p className="text-gray-600 text-sm">
-                {nilai[0]?.deskripsi}
-              </p>
+              <h3 className="font-semibold text-lg">{value[0]?.name}</h3>
             </div>
           </div>
 
-          {/* TANGGUNG JAWAB */}
+          {/* CARD 2 */}
           <div className="bg-white shadow-md border border-gray-100 rounded-2xl p-6 flex items-start gap-4">
-            <img src="/images/15.svg" alt="Tanggung Jawab" className="w-20 h-20" />
+            <img src="/images/15.svg" alt="Card 2" className="w-20 h-20" />
             <div>
-              <h3 className="font-semibold text-lg">{nilai[1]?.judul}</h3>
-              <p className="text-gray-600 text-sm">
-                {nilai[1]?.deskripsi}
-              </p>
+              <h3 className="font-semibold text-lg">{value[1]?.name}</h3>
             </div>
           </div>
 
-          {/* KOLABORATIF */}
+          {/* CARD 3 */}
           <div className="bg-white shadow-md border border-gray-100 rounded-2xl p-6 flex items-start gap-4">
-            <img src="/images/17.svg" alt="Kolaboratif" className="w-20 h-20" />
+            <img src="/images/17.svg" alt="Card 3" className="w-20 h-20" />
             <div>
-              <h3 className="font-semibold text-lg">{nilai[2]?.judul}</h3>
-              <p className="text-gray-600 text-sm">
-                {nilai[2]?.deskripsi}
-              </p>
+              <h3 className="font-semibold text-lg">{value[2]?.name}</h3>
             </div>
           </div>
 
-          {/* CEPAT */}
+          {/* CARD 4 */}
           <div className="bg-white shadow-md border border-gray-100 rounded-2xl p-6 flex items-start gap-4">
-            <img src="/images/18.svg" alt="Cepat" className="w-20 h-20" />
+            <img src="/images/18.svg" alt="Card 4" className="w-20 h-20" />
             <div>
-              <h3 className="font-semibold text-lg">{nilai[3]?.judul}</h3>
-              <p className="text-gray-600 text-sm">
-                {nilai[3]?.deskripsi}
-              </p>
+              <h3 className="font-semibold text-lg">{value[3]?.name}</h3>
             </div>
           </div>
 

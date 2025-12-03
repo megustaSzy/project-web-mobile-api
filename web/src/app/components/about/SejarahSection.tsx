@@ -1,32 +1,44 @@
 "use client";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { apiFetch } from "@/helpers/api";
+import { HistoryType } from "@/types/history";
 
-type SejarahType = {
-  title: string;
-  content: string;
-};
+// type SejarahType = {
+//   title: string;
+//   content: string;
+// };
+
 
 export default function SejarahSection() {
-  const [data, setData] = useState<SejarahType | null>(null);
+  const [data, setData] = useState<HistoryType | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [, setErrorMsg] = useState<string | null>(null);
 
-  async function getData() {
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/about/history`;
+  console.log("Data:", data);
+
+  async function getData(): Promise<void> {
+    setLoading(true);
+    setErrorMsg(null);
 
     try {
-      const response = await fetch(url, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
+      const endpoint = "/about";
+      console.log(" Memanggil:", endpoint);
 
-      if (!response.ok) {
-        throw new Error(`Response status: ${response.status}`);
+      const result = await apiFetch<HistoryType>(endpoint);
+      // console.log("🚀 Hasil:", );
+      // Validasi hasil tanpa any
+      if (result) {
+        setData(result);
+        setLoading(false);
+      } else {
+        throw new Error("Format data API tidak sesuai.");
       }
-
-      const result: SejarahType = await response.json();
-      setData(result);
     } catch (error) {
-      console.error("API ERROR:", error);
+      const err = error instanceof Error ? error.message : "Terjadi kesalahan";
+      setErrorMsg(err);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -51,16 +63,22 @@ export default function SejarahSection() {
 
       {/* Konten utama */}
       <div className="relative z-10 flex flex-col md:flex-row items-center justify-center w-full px-6 md:px-20 gap-10">
-        
         {/* Kiri: Teks */}
         <div className="md:w-1/2 max-w-lg">
-          <h2 className="text-3xl font-bold mb-4">
-            {data?.title ?? "Loading..."}
-          </h2>
+        {/* <p className="text-gray-700">{data?.data.history}</p> */}
+          {loading && (
+            <>
+              <h2 className="text-3xl font-bold mb-4">Loading...</h2>
+              <p className="text-gray-700">Sedang mengambil data sejarah...</p>
+            </>
+          )}
 
-          <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-            {data?.content ?? "Sedang memuat sejarah LamiGo..."}
-          </p>
+          {!loading && (
+            <>
+              <h2 className="text-3xl font-bold mb-4">Sejarah</h2>
+              <p className="text-gray-700">{data?.data.history}</p>
+            </>
+          )}
         </div>
 
         {/* Kanan: Gambar */}
@@ -75,7 +93,6 @@ export default function SejarahSection() {
             />
           </div>
         </div>
-
       </div>
     </section>
   );
