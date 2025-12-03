@@ -52,7 +52,7 @@ export default function HomeScreen() {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        style={{ marginTop: 10 }}
+        style={{ marginTop: 15, marginBottom: 10 }}
       >
         {Array(4)
           .fill(0)
@@ -72,47 +72,110 @@ export default function HomeScreen() {
       </ScrollView>
 
       {/* Daftar Destinasi */}
-      <Text style={[styles.sectionTitle, { marginTop: 20 }]}>
-        Daftar Destinasi
+      <Text style={styles.sectionTitle}>Tujuan Wisata Favorit</Text>
+      <ScrollView 
+  horizontal 
+  showsHorizontalScrollIndicator={false} 
+  style={{ marginTop: 10 }}
+>
+  {/* CARD 1 */}
+  <View style={styles.destCard}>
+    <Image
+      source={require("../../assets/images/favorite/21.png")}
+      style={styles.destImage}
+    />
+
+    <View style={{ flex: 1, marginLeft: 12 }}>
+      <Text style={styles.destTitle}>Kabupaten Tanggamus</Text>
+      <Text style={styles.destCount}>12 Destinasi</Text>
+      <Text style={styles.destDesc}>
+        Temukan Berbagai Wisata di Kabupaten Tanggamus
       </Text>
 
-      <View style={styles.destCard}>
-        <Image
-          source={require("../../assets/images/hero1.jpg")}
-          style={styles.destImage}
-        />
+      <TouchableOpacity style={{ marginTop: 6 }}>
+        <Text style={styles.link}>Lihat Detail</Text>
+      </TouchableOpacity>
+    </View>
+  </View>
 
-        <View style={{ flex: 1, marginLeft: 12 }}>
-          <Text style={styles.destTitle}>Kabupaten Tanggamus</Text>
-          <Text style={styles.destCount}>12 Destinasi</Text>
-          <Text style={styles.destDesc}>
-            Temukan Berbagai Wisata di Kabupaten Tanggamus
-          </Text>
+  {/* CARD 2 */}
+  <View style={styles.destCard}>
+    <Image
+      source={require("../../assets/images/favorite/24.png")}
+      style={styles.destImage}
+    />
 
-          <TouchableOpacity style={{ marginTop: 6 }}>
-            <Text style={styles.link}>Lihat Detail</Text>
-          </TouchableOpacity>
+    <View style={{ flex: 1, marginLeft: 12 }}>
+      <Text style={styles.destTitle}>Kabupaten Tanggamus</Text>
+      <Text style={styles.destCount}>10 Destinasi</Text>
+      <Text style={styles.destDesc}>
+        Temukan Berbagai Wisata di Kabupaten Tanggamus
+      </Text>
+
+      <TouchableOpacity style={{ marginTop: 6 }}>
+        <Text style={styles.link}>Lihat Detail</Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+</ScrollView>
+
+      {/* ====================== */}
+      {/* Section Berita */}
+      {/* ====================== */}
+
+      <Text style={[styles.sectionTitle, { marginTop: 25 }]}>Berita</Text>
+
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={{ marginTop: 10, marginBottom: 30 }}
+      >
+        {/* Card 1 */}
+        <View style={styles.newsCard}>
+          <Image
+            source={require("../../assets/images/hero1.jpg")}
+            style={styles.newsImage}
+          />
+          <View style={styles.newsTextBox}>
+            <Text style={styles.newsTitle}>New Destinasi</Text>
+            <View style={styles.rowCenter}>
+              <Ionicons name="location-outline" size={14} />
+              <Text style={styles.newsLocation}>Aceh</Text>
+            </View>
+          </View>
         </View>
-      </View>
 
-      <View style={styles.destCard}>
-        <Image
-          source={require("../../assets/images/hero1.jpg")}
-          style={styles.destImage}
-        />
-
-        <View style={{ flex: 1, marginLeft: 12 }}>
-          <Text style={styles.destTitle}>Kabupaten Tanggamus</Text>
-          <Text style={styles.destCount}>10 Destinasi</Text>
-          <Text style={styles.destDesc}>
-            Temukan Berbagai Wisata di Kabupaten Tanggamus
-          </Text>
-
-          <TouchableOpacity style={{ marginTop: 6 }}>
-            <Text style={styles.link}>Lihat Detail</Text>
-          </TouchableOpacity>
+        {/* Card 2 */}
+        <View style={styles.newsCard}>
+          <Image
+            source={require("../../assets/images/hero1.jpg")}
+            style={styles.newsImage}
+          />
+          <View style={styles.newsTextBox}>
+            <Text style={styles.newsTitle}>Destinasi Terbengkalai</Text>
+            <View style={styles.rowCenter}>
+              <Ionicons name="location-outline" size={14} />
+              <Text style={styles.newsLocation}>Sibolga</Text>
+            </View>
+          </View>
         </View>
-      </View>
+
+        {/* Card 3 */}
+        <View style={styles.newsCard}>
+          <Image
+            source={require("../../assets/images/hero1.jpg")}
+            style={styles.newsImage}
+          />
+          <View style={styles.newsTextBox}>
+            <Text style={styles.newsTitle}>Goa Baru Viral</Text>
+            <View style={styles.rowCenter}>
+              <Ionicons name="location-outline" size={14} />
+              <Text style={styles.newsLocation}>Lampung</Text>
+            </View>
+          </View>
+        </View>
+      </ScrollView>
+
     </ScrollView>
   );
 }
@@ -268,5 +331,39 @@ const styles = StyleSheet.create({
   link: {
     color: "#007BFF",
     fontWeight: "700",
+  },
+
+  /* ================== */
+  /*   BERITA SECTION   */
+  /* ================== */
+
+  newsCard: {
+    width: 260,
+    backgroundColor: "#fff",
+    borderRadius: 15,
+    marginLeft: 20,
+    padding: 10,
+    elevation: 3,
+    flexDirection: "column",
+  },
+
+  newsImage: {
+    width: "100%",
+    height: 120,
+    borderRadius: 12,
+  },
+
+  newsTextBox: {
+    marginTop: 10,
+  },
+
+  newsTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+  },
+
+  newsLocation: {
+    fontSize: 12,
+    marginLeft: 4,
   },
 });
