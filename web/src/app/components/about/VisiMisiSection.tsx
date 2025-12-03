@@ -105,7 +105,7 @@ export default function VisionSection() {
 
               <div>
                 <h1 className="font-semibold text-lg">{item.header}</h1>
-                <p className="font-semibold text-lg">{item.name}</p>
+                <p className="font-regular text-lg">{item.name}</p>
               </div>
             </div>
           ))}
