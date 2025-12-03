@@ -1,7 +1,7 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
-import ForgotPasswordForm from "../../components/register/ForgotPasswordForm";
-import ResetPasswordForm from "../../components/register/ResetPasswordForm";
+import ForgotPasswordForm from "./ForgotPasswordForm";
+import ResetPasswordForm from "./ResetPasswordForm";
 
 const Stack = createNativeStackNavigator();
 
