@@ -96,7 +96,7 @@ model tb_orders {
   quantity   Int
   totalPrice Int
 
-  // snapshot field (diambil saat melakukan order)
+  // snapshot field (diambil saat order)
   userName         String
   userPhone        String
   destinationName  String
@@ -109,8 +109,16 @@ model tb_orders {
   ticketUrl       String?
   isPaid          Boolean @default(false)
 
+  // PAYMENT GATEWAY (Midtrans)
+  paymentStatus     String   @default("pending") // pending, paid, failed, expired
+  paymentMethod     String?                      // qris, bank_transfer, gopay, etc
+  transactionId     String?                      // dari Midtrans
+  snapToken         String?                      // token Snap
+  snapRedirectUrl   String?                      // URL pembayaran Snap
+
   createdAt DateTime @default(now())
 }
+
 
 model tb_category {
   id           Int               @id @default(autoincrement())
