@@ -37,6 +37,7 @@ export const valueService = {
     async createValue(data: ValueData) {
         return prisma.tb_values.create({
             data: {
+                header: data.header,
                 name: data.name
             }
         })

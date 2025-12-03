@@ -1,3 +1,4 @@
 export interface ValueData {
-    name: string
+  header: string;
+  name: string;
 }
