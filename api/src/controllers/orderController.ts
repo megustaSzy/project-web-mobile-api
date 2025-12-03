@@ -4,7 +4,6 @@ import { ResponseData } from "../utilities/Response";
 
 export const orderController = {
   // POST /orders
-  // Membuat order baru untuk user yang login
   async createOrder(req: Request, res: Response) {
     try {
       const userId = (req as any).user.id; // ambil dari middleware
@@ -23,10 +22,6 @@ export const orderController = {
         Number(quantity)
       );
 
-      if (!order) {
-        return ResponseData.notFound(res, "user atau jadwal tidak ditemukan");
-      }
-
       return ResponseData.created(res, order, "order berhasil dibuat");
     } catch (error) {
       return ResponseData.serverError(res, error);
@@ -34,7 +29,6 @@ export const orderController = {
   },
 
   // GET /orders/my
-  // Mengambil riwayat order milik user yang login
   async getMyOrders(req: Request, res: Response) {
     try {
       const userId = (req as any).user.id;
@@ -64,4 +58,36 @@ export const orderController = {
       return ResponseData.serverError(res, error);
     }
   },
+
+  async getTicketDetail(req: Request, res: Response) {
+    try {
+      const id = Number(req.params.id);
+      if(isNaN(id)) {
+        return ResponseData.badRequest(res, "id tidak valid");
+      }
+
+      const userId = (req as any).user.id;
+
+      const order = await orderService.getOrderById(id, userId);
+
+      const ticketData = {
+        ticketCode: order.ticketCode,
+        isPaid: order.isPaid,
+        userName: order.userName,
+        userPhone: order.userPhone,
+        destinationName: order.destinationName,
+        destinationPrice: order.destinationPrice,
+        quantity: order.quantity,
+        totalPrice: order.totalPrice,
+        date: order.date,
+        time: order.time,
+        createdAt: order.createdAt
+      };
+
+      return ResponseData.ok(res, ticketData, "data tiket berhasil ditambah");
+
+    } catch (error) {
+      return ResponseData.serverError(res, error)
+    }
+  }
 };
