@@ -84,7 +84,7 @@ export default function SejarahSection() {
         <div className="md:w-1/2 flex justify-center">
           <div className="w-full max-w-[450px]">
             <Image
-              src="/images/16.svg"
+              src="/images/18.svg"
               alt="Traveler"
               width={700}
               height={700}

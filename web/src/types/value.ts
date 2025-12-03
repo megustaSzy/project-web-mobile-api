@@ -1,5 +1,6 @@
 export interface ValueItem {
   id: number;
+  header: string;
   name: string;
   createdAt: string;
   updatedAt: string;
