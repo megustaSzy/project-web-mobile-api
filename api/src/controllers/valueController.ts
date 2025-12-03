@@ -1,4 +1,4 @@
-import { Request, response, Response } from "express"
+import { Request, Response } from "express"
 import { valueService } from "../services/valueService";
 import { ResponseData } from "../utilities/Response";
 
@@ -57,7 +57,7 @@ export const valueController = {
         }
     },
 
-    async deleteByiD(req: Request, res: Response) {
+    async deleteById(req: Request, res: Response) {
         try {
             const id = Number(req.params.id);
     
