@@ -4,28 +4,13 @@
 import React, { useEffect, useState } from "react";
 import { apiFetch } from "@/helpers/api";
 import { ValueItem, ValueType } from "@/types/value";
-
-// TIPE VISI MISI
-export interface VisionType {
-  status: number;
-  message: string;
-  data: {
-    id: number;
-    title: string;
-    history: string;
-    vision: string;
-    mission: string;
-    createdAt: string;
-    updatedAt: string;
-  };
-}
-
-// TIPE NILAI UTAMA (Asli dari backend)
-
+import { VisionType } from "@/types/vision";
+import { MissionType } from "@/types/mission";
 
 export default function VisionSection() {
   const [data, setData] = useState<VisionType | null>(null);
   const [value, setValue] = useState<ValueItem[]>([]);
+  const [mission, setMission] = useState<MissionType | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [, setErrorMsg] = useState<string | null>(null);
 
@@ -39,14 +24,17 @@ export default function VisionSection() {
       if (!result?.data) throw new Error("Format data visi tidak sesuai.");
       setData(result);
 
+      // GET MISI
+      const missionResult = await apiFetch<MissionType>("/about");
+      if (!missionResult?.data)
+        throw new Error("Format data misi tidak sesuai.");
+      setMission(missionResult);
+
       // GET NILAI UTAMA
       const valueResult = await apiFetch<ValueType>("/about/value");
-      console.log("🚀 Hasil:", valueResult);
-
       if (!valueResult?.data?.items) {
         throw new Error("Format data nilai utama tidak sesuai.");
       }
-
       setValue(valueResult.data.items);
     } catch (error) {
       const err = error instanceof Error ? error.message : "Terjadi kesalahan";
@@ -88,7 +76,7 @@ export default function VisionSection() {
             <>
               <h2 className="text-4xl font-bold mb-6">Misi</h2>
               <div className="bg-white shadow-md rounded-2xl p-6 md:p-8 border border-gray-100 space-y-2">
-                {data?.data.mission.split(". ").map((m, i) => (
+                {mission?.data.mission.split(". ").map((m, i) => (
                   <p key={i} className="text-gray-700 leading-relaxed">
                     {m}
                   </p>
@@ -97,46 +85,30 @@ export default function VisionSection() {
             </>
           )}
         </div>
-
+      
         {/* NILAI UTAMA */}
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold">Nilai Utama LamiGo</h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {value.map((item, i) => (
+            <div
+              key={item.id}
+              className="bg-white shadow-md border border-gray-100 rounded-2xl p-6 flex items-start gap-4"
+            >
+              <img
+                src={`/images/${14 + i}.svg`}
+                alt={`Card ${i + 1}`}
+                className="w-20 h-20"
+              />
 
-          {/* CARD 1 */}
-          <div className="bg-white shadow-md border border-gray-100 rounded-2xl p-6 flex items-start gap-4">
-            <img src="/images/14.svg" alt="Card 1" className="w-20 h-20" />
-            <div>
-              <h3 className="font-semibold text-lg">{value[0]?.name}</h3>
+              <div>
+                <h1 className="font-semibold text-lg">{item.header}</h1>
+                <p className="font-semibold text-lg">{item.name}</p>
+              </div>
             </div>
-          </div>
-
-          {/* CARD 2 */}
-          <div className="bg-white shadow-md border border-gray-100 rounded-2xl p-6 flex items-start gap-4">
-            <img src="/images/15.svg" alt="Card 2" className="w-20 h-20" />
-            <div>
-              <h3 className="font-semibold text-lg">{value[1]?.name}</h3>
-            </div>
-          </div>
-
-          {/* CARD 3 */}
-          <div className="bg-white shadow-md border border-gray-100 rounded-2xl p-6 flex items-start gap-4">
-            <img src="/images/17.svg" alt="Card 3" className="w-20 h-20" />
-            <div>
-              <h3 className="font-semibold text-lg">{value[2]?.name}</h3>
-            </div>
-          </div>
-
-          {/* CARD 4 */}
-          <div className="bg-white shadow-md border border-gray-100 rounded-2xl p-6 flex items-start gap-4">
-            <img src="/images/18.svg" alt="Card 4" className="w-20 h-20" />
-            <div>
-              <h3 className="font-semibold text-lg">{value[3]?.name}</h3>
-            </div>
-          </div>
-
+          ))}
         </div>
       </div>
     </section>
