@@ -1,10 +1,10 @@
-export interface TitleType {
+export interface VisionType {
   status: number;
   message: string;
-  data: TitleData;
+  data: VisionData;
 }
 
-export interface TitleData {
+export interface VisionData {
   id: number;
   title: string;
   history: string;

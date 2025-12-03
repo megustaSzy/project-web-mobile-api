@@ -1,56 +1,55 @@
+// /* eslint-disable @next/next/no-img-element */
 "use client";
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import type { AboutType } from "@/types/about";
+import { apiFetch } from "@/helpers/api";
+import { TitleType } from "@/types/about";
 
 export default function HeroSection() {
-  const [data, setData] = useState<AboutType | null>(null);
+  const [data, setData] = useState<TitleType | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [, setErrorMsg] = useState<string | null>(null);
 
-  const BASE_URL = process.env.NEXT_PUBLIC_API_URL as string;
+  console.log("Data Hero:", data);
 
-  const getData = async () => {
+  async function getData(): Promise<void> {
+    setLoading(true);
+    setErrorMsg(null);
+
     try {
-      const res = await fetch(`${BASE_URL}/about/history`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        cache: "no-store", // biar gak ke-cache di Next.js
-      });
+      const endpoint = "/about";
+      // console.log("Memanggil:", endpoint);
 
-      if (!res.ok) {
-        throw new Error("Failed to fetch about data");
+      const result = await apiFetch<TitleType>(endpoint);
+      console.log("🚀 Hasil kntl:", result);
+
+      if (result) {
+        setData(result);
+      } else {
+        throw new Error("Format data API tidak sesuai.");
       }
-
-      const json: AboutType = await res.json();
-      setData(json);
-
-    } catch (err) {
-      console.error("Fetch Error:", err);
+    } catch (error) {
+      const err = error instanceof Error ? error.message : "Terjadi kesalahan";
+      setErrorMsg(err);
+    } finally {
+      setLoading(false);
     }
-  };
+  }
 
   useEffect(() => {
     getData();
   }, []);
 
-  // Pastikan image URL benar
-  const imageURL = data?.image
-    ? data.image.startsWith("http")
-      ? data.image
-      : `${BASE_URL}/uploads/about/${data.image}`
-    : "/images/boute.jpg";
-
   return (
     <div className="relative w-full h-[420px] overflow-hidden shadow-lg rounded-b-none">
-      {/* Background Image */}
+      {/* Background Image default dari frontend */}
       <Image
-        src={imageURL}
-        alt={data?.title ?? "Hero Image"}
+        src="/images/boute.jpg"
+        alt="Hero Image"
         fill
-        className="object-cover"
         priority
+        className="object-cover"
       />
 
       {/* Overlay */}
@@ -58,14 +57,20 @@ export default function HeroSection() {
 
       {/* Text Content */}
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white px-4">
-        <h1 className="text-3xl font-semibold mb-2">
-          {data?.title ?? "About Us"}
-        </h1>
+        {loading ? (
+          <>
+            <h1 className="text-3xl font-semibold mb-2">Loading...</h1>
+            <p className="max-w-xl text-sm opacity-90">
+              Sedang mengambil data…
+            </p>
+          </>
+        ) : (
+          <>
+            <h2 className="text-4xl font-bold mb-6">About</h2>
 
-        <p className="max-w-xl text-sm opacity-90">
-          {data?.description ??
-            "Temukan destinasi terbaik, atur perjalanan impianmu, dan pesan tiket dengan mudah."}
-        </p>
+            <p className="max-w-xl text-sm opacity-90">{data?.data.title}</p>
+          </>
+        )}
       </div>
     </div>
   );

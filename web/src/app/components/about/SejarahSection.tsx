@@ -9,7 +9,6 @@ import { HistoryType } from "@/types/history";
 //   content: string;
 // };
 
-
 export default function SejarahSection() {
   const [data, setData] = useState<HistoryType | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -65,7 +64,7 @@ export default function SejarahSection() {
       <div className="relative z-10 flex flex-col md:flex-row items-center justify-center w-full px-6 md:px-20 gap-10">
         {/* Kiri: Teks */}
         <div className="md:w-1/2 max-w-lg">
-        {/* <p className="text-gray-700">{data?.data.history}</p> */}
+          {/* <p className="text-gray-700">{data?.data.history}</p> */}
           {loading && (
             <>
               <h2 className="text-3xl font-bold mb-4">Loading...</h2>

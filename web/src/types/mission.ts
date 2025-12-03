@@ -1,10 +1,10 @@
-export interface TitleType {
+export interface MissionType {
   status: number;
   message: string;
-  data: TitleData;
+  data: MissionData;
 }
 
-export interface TitleData {
+export interface MissionData {
   id: number;
   title: string;
   history: string;
