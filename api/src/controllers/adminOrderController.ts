@@ -3,8 +3,26 @@ import { adminOrderService } from "../services/adminOrderService";
 import { ResponseData } from "../utilities/Response";
 
 export const adminOrderController = {
-  // GET all orders
-  // Mengambil semua data orders
+  async createOrder(req: Request, res: Response) {
+    try {
+      const { userId, scheduleId, quantity } = req.body;
+
+      const order = await adminOrderService.createOrder(
+        Number(userId),
+        Number(scheduleId),
+        Number(quantity)
+      );
+
+      return ResponseData.created(
+        res,
+        order,
+        "order berhasil dibuat oleh admin"
+      );
+    } catch (error) {
+      return ResponseData.serverError(res, error);
+    }
+  },
+
   async getAllOrders(req: Request, res: Response) {
     try {
       const page = Number(req.query.page) || 1;
@@ -18,8 +36,6 @@ export const adminOrderController = {
     }
   },
 
-  // GET order by ID
-  // Mengambil detail order berdasarkan ID
   async getOrderById(req: Request, res: Response) {
     try {
       const id = Number(req.params.id);
@@ -33,8 +49,6 @@ export const adminOrderController = {
     }
   },
 
-  // DELETE order by ID
-  // Menghapus order berdasarkan ID
   async deleteOrderById(req: Request, res: Response) {
     try {
       const id = Number(req.params.id);

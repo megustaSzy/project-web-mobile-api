@@ -1,15 +1,22 @@
 import prisma from "../lib/prisma";
 import { createError } from "../utilities/createError";
+import { v4 as uuidv4 } from "uuid";
 
 export const orderService = {
   // Membuat order baru
   async createOrder(userId: number, scheduleId: number, quantity: number) {
+
     if (quantity <= 0) {
       throw createError("quantity minimal 1", 400);
     }
 
     // Cek user
-    const user = await prisma.tb_user.findUnique({ where: { id: userId } });
+    const user = await prisma.tb_user.findUnique({ 
+      where: { 
+        id: userId 
+      } 
+    });
+
     if (!user) throw createError("user tidak ditemukan", 404);
 
     // Cek jadwal + destinasi
@@ -31,6 +38,7 @@ export const orderService = {
     // Cek jadwal sudah lewat
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+
     const scheduleDate = new Date(schedule.date);
     if (scheduleDate < today) {
       throw createError("jadwal sudah lewat", 400);
@@ -38,6 +46,10 @@ export const orderService = {
 
     // Hitung total
     const totalPrice = schedule.destination.price * quantity;
+
+    const ticketCode = `TICKET-${Date.now()}-${uuidv4()
+      .slice(0.6)
+      .toUpperCase()}`;
 
     // Buat order + snapshot data
     const order = await prisma.tb_orders.create({
@@ -58,6 +70,11 @@ export const orderService = {
         // snapshot schedule
         date: schedule.date,
         time: schedule.time,
+
+        // ticket snapshot
+        ticketCode,
+        isPaid: false,
+        ticketUrl: null
       },
     });
 
@@ -74,6 +91,7 @@ export const orderService = {
 
   // Order detail (user)
   async getOrderById(id: number, userId: number) {
+    
     const order = await prisma.tb_orders.findUnique({ where: { id } });
     if (!order) throw createError("order tidak ditemukan", 404);
 

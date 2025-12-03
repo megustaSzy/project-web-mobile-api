@@ -104,6 +104,11 @@ model tb_orders {
   date             DateTime
   time             String
 
+  // tiket
+  ticketCode      String @unique
+  ticketUrl       String?
+  isPaid          Boolean @default(false)
+
   createdAt DateTime @default(now())
 }
 
@@ -133,6 +138,7 @@ model tb_otp {
 
 model tb_values {
   id        Int       @id @default(autoincrement())
+  header    String?
   name      String
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt

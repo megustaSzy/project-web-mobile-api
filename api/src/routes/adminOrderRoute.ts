@@ -5,7 +5,8 @@ import { adminOrderController } from "../controllers/adminOrderController";
 
 const router = Router();
 
-// ADMIN ONLY
+router.post("/", authMiddleware, authorizeRoles("Admin"), adminOrderController.createOrder);
+
 router.get("/", authMiddleware, authorizeRoles("Admin"), adminOrderController.getAllOrders);
 
 router.get("/:id", authMiddleware, authorizeRoles("Admin"), adminOrderController.getOrderById);

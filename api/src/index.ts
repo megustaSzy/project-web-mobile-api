@@ -40,6 +40,15 @@ app.use(cookieParser());
 // Passport
 app.use(passport.initialize());
 
+app.get("/", (req, res) => {
+  res.json({
+    status: 200,
+    message: "Welcome Server API",
+    success: true
+  })
+})
+
+
 // ROUTES
 app.use("/api/users", userRoute);
 app.use("/api/auth", authRoute);
