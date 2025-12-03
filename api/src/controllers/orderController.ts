@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { orderService } from "../services/orderService";
 import { ResponseData } from "../utilities/Response";
+import { ticketService } from "../services/ticketService";
 
 export const orderController = {
   // POST /orders
@@ -62,7 +63,7 @@ export const orderController = {
   async getTicketDetail(req: Request, res: Response) {
     try {
       const id = Number(req.params.id);
-      if(isNaN(id)) {
+      if (isNaN(id)) {
         return ResponseData.badRequest(res, "id tidak valid");
       }
 
@@ -81,13 +82,25 @@ export const orderController = {
         totalPrice: order.totalPrice,
         date: order.date,
         time: order.time,
-        createdAt: order.createdAt
+        createdAt: order.createdAt,
       };
 
       return ResponseData.ok(res, ticketData, "data tiket berhasil ditambah");
+    } catch (error) {
+      return ResponseData.serverError(res, error);
+    }
+  },
+
+  async getTicketPDF(req: Request, res: Response) {
+    try {
+      const id = Number(req.params.id);
+
+      const userId = (req as any).user.id;
+
+      await ticketService.generateTicketPDF(id, userId, res);
 
     } catch (error) {
       return ResponseData.serverError(res, error)
     }
-  }
+  },
 };

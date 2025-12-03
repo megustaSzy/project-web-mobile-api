@@ -27,7 +27,6 @@ export const aboutController = {
         }
     },
 
-
     async updateAbout(req: Request, res: Response) {
         try {
             const id = Number(req.params.id);
