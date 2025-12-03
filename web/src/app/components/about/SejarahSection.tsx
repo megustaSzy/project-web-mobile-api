@@ -1,18 +1,37 @@
 "use client";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { apiGet } from "@/helpers/api";
 
-type CeritaType = {
+type SejarahType = {
   title: string;
   content: string;
 };
 
-export default function CeritaPage() {
-  const [data, setData] = useState<CeritaType | null>(null);
+export default function SejarahSection() {
+  const [data, setData] = useState<SejarahType | null>(null);
+
+  async function getData() {
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/about/history`;
+
+    try {
+      const response = await fetch(url, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Response status: ${response.status}`);
+      }
+
+      const result: SejarahType = await response.json();
+      setData(result);
+    } catch (error) {
+      console.error("API ERROR:", error);
+    }
+  }
 
   useEffect(() => {
-    apiGet<CeritaType>("/about/cerita").then(setData);
+    getData();
   }, []);
 
   return (
@@ -40,8 +59,7 @@ export default function CeritaPage() {
           </h2>
 
           <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-            {data?.content ??
-              "Sedang memuat cerita LamiGo..."}
+            {data?.content ?? "Sedang memuat sejarah LamiGo..."}
           </p>
         </div>
 
