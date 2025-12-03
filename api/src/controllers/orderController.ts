@@ -4,10 +4,9 @@ import { ResponseData } from "../utilities/Response";
 import { ticketService } from "../services/ticketService";
 
 export const orderController = {
-  // POST /orders
   async createOrder(req: Request, res: Response) {
     try {
-      const userId = (req as any).user.id; // ambil dari middleware
+      const userId = (req as any).user.id;
       const { scheduleId, quantity } = req.body;
 
       if (!scheduleId || !quantity) {
@@ -29,13 +28,10 @@ export const orderController = {
     }
   },
 
-  // GET /orders/my
   async getMyOrders(req: Request, res: Response) {
     try {
       const userId = (req as any).user.id;
-
       const orders = await orderService.getOrdersByUser(userId);
-
       return ResponseData.ok(res, orders, "data order berhasil diambil");
     } catch (error) {
       return ResponseData.serverError(res, error);
@@ -45,15 +41,11 @@ export const orderController = {
   async getOrderById(req: Request, res: Response) {
     try {
       const id = Number(req.params.id);
-      if (isNaN(id)) {
-        return ResponseData.badRequest(res, "id tidak valid");
-      }
+      if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
 
-      const userId = (req as any).user.id; // ambil dari middleware
+      const userId = (req as any).user.id;
 
-      // Panggil service dengan userId untuk cek kepemilikan order
       const order = await orderService.getOrderById(id, userId);
-
       return ResponseData.ok(res, order, "data order berhasil diambil");
     } catch (error) {
       return ResponseData.serverError(res, error);
@@ -63,9 +55,7 @@ export const orderController = {
   async getTicketDetail(req: Request, res: Response) {
     try {
       const id = Number(req.params.id);
-      if (isNaN(id)) {
-        return ResponseData.badRequest(res, "id tidak valid");
-      }
+      if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
 
       const userId = (req as any).user.id;
 
@@ -85,7 +75,7 @@ export const orderController = {
         createdAt: order.createdAt,
       };
 
-      return ResponseData.ok(res, ticketData, "data tiket berhasil ditambah");
+      return ResponseData.ok(res, ticketData, "data tiket berhasil diambil");
     } catch (error) {
       return ResponseData.serverError(res, error);
     }
@@ -94,13 +84,12 @@ export const orderController = {
   async getTicketPDF(req: Request, res: Response) {
     try {
       const id = Number(req.params.id);
-
       const userId = (req as any).user.id;
 
       await ticketService.generateTicketPDF(id, userId, res);
-
+      // (Tidak perlu return ResponseData karena PDF langsung dikirim)
     } catch (error) {
-      return ResponseData.serverError(res, error)
+      return ResponseData.serverError(res, error);
     }
   },
 };
