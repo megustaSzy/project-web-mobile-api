@@ -8,7 +8,7 @@ export const authMiddleware = async (
   res: Response,
   next: NextFunction
 ) => {
-  // Ambil token dari cookie ATAU header Authorization
+  // Ambil token dari header Authorization
   const token = req.headers.authorization?.split(" ")[1];
 
   if (!token) {
@@ -18,7 +18,20 @@ export const authMiddleware = async (
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
       id: number;
+      tokenId: string;
     };
+
+    // Cek apakah accessToken valid
+    const tokenExists = await prisma.tb_accessToken.findFirst({
+      where: { tokenId: decoded.tokenId },
+    });
+
+    if (!tokenExists) {
+      return ResponseData.forbidden(
+        res,
+        "token sudah tidak valid (sudah logout)"
+      );
+    }
 
     const user = await prisma.tb_user.findUnique({
       where: { id: decoded.id },
