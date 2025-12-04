@@ -11,23 +11,24 @@ import {
 import Modal from "react-native-modal";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
-
+import { RootStackParamList } from "../types"; // import tipe route
+import { useRouter } from "expo-router";
+// Ketik navigation untuk Login screen
+type LoginScreenProp = NativeStackNavigationProp<RootStackParamList, "Login">;
 
 export default function LoginForm() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<LoginScreenProp>();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const [modalVisible, setModalVisible] = useState(false);
-  const [modalStatus, setModalStatus] = useState<"success" | "error" | null>(
-    null
-  );
+  const [modalStatus, setModalStatus] = useState<"success" | "error" | null>(null);
   const [modalMessage, setModalMessage] = useState("");
-
-  // 👍 Fungsi Login
+  const router = useRouter();
   const handleLogin = async () => {
     if (!email || !password) {
       setModalStatus("error");
@@ -49,7 +50,6 @@ export default function LoginForm() {
 
       if (res.ok) {
         const token = data.accessToken || data.token;
-
         if (token) {
           await AsyncStorage.setItem("token", token);
         }
@@ -60,7 +60,7 @@ export default function LoginForm() {
 
         setTimeout(() => {
           setModalVisible(false);
-          navigation.navigate("Home");
+          navigation.navigate("Home"); // navigation sudah tipe aman
         }, 1500);
       } else {
         setModalStatus("error");
@@ -78,7 +78,6 @@ export default function LoginForm() {
 
   return (
     <View style={styles.container}>
-      {/* Card */}
       <View style={styles.card}>
         <Image
           source={require("../../../assets/images/logo.png")}
@@ -88,7 +87,6 @@ export default function LoginForm() {
         <Text style={styles.title}>Login Akun</Text>
         <Text style={styles.subtitle}>Masuk ke akun kamu untuk melanjutkan</Text>
 
-        {/* Input Email */}
         <Text style={styles.label}>Email</Text>
         <TextInput
           style={styles.input}
@@ -97,7 +95,6 @@ export default function LoginForm() {
           onChangeText={setEmail}
         />
 
-        {/* Input Password */}
         <Text style={styles.label}>Password</Text>
         <TextInput
           style={styles.input}
@@ -107,29 +104,29 @@ export default function LoginForm() {
           onChangeText={setPassword}
         />
 
-        {/* Tombol Login */}
+        <TouchableOpacity
+          onPress={() => router.push("../forgot-password/page")}
+          style={{ alignSelf: "flex-end", marginTop: 5 }}
+        >
+          <Text style={styles.footerText}>Lupa Password?</Text>
+        </TouchableOpacity>
+
         <TouchableOpacity
           style={styles.button}
           onPress={handleLogin}
           disabled={loading}
         >
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.buttonText}>Login</Text>
-          )}
+          {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Login</Text>}
         </TouchableOpacity>
 
-        {/* Garis OR */}
         <View style={styles.orContainer}>
           <View style={styles.line} />
           <Text style={styles.orText}>atau</Text>
           <View style={styles.line} />
         </View>
 
-        {/* Google Button */}
         <TouchableOpacity style={styles.googleBtn}>
-          <Icon name="logo-google" size={20} color="#DB4437" />
+          <Ionicons name="logo-google" size={20} color="#DB4437" />
           <Text style={styles.googleText}>Login dengan Google</Text>
         </TouchableOpacity>
 
@@ -137,14 +134,13 @@ export default function LoginForm() {
           Belum punya akun?{" "}
           <Text
             style={styles.signup}
-            onPress={() => navigation.navigate("Signup")}
+            onPress={() => router.push("../signup/page")}
           >
             Daftar sekarang
           </Text>
         </Text>
       </View>
 
-      {/* Popup Modal */}
       <Modal
         isVisible={modalVisible}
         onBackdropPress={() => setModalVisible(false)}
@@ -159,7 +155,7 @@ export default function LoginForm() {
               : { backgroundColor: "#FEF2F2" },
           ]}
         >
-          <Icon
+          <Ionicons
             name={modalStatus === "success" ? "checkmark-circle" : "close-circle"}
             size={60}
             color={modalStatus === "success" ? "#059669" : "#DC2626"}
@@ -167,9 +163,7 @@ export default function LoginForm() {
           <Text
             style={[
               styles.modalTitle,
-              modalStatus === "success"
-                ? { color: "#059669" }
-                : { color: "#DC2626" },
+              modalStatus === "success" ? { color: "#059669" } : { color: "#DC2626" },
             ]}
           >
             {modalStatus === "success" ? "Berhasil!" : "Gagal!"}
@@ -180,6 +174,9 @@ export default function LoginForm() {
     </View>
   );
 }
+
+// ...styles sama seperti sebelumnya
+
 
 const styles = StyleSheet.create({
   container: {

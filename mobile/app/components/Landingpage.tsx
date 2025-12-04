@@ -22,8 +22,8 @@ const destinations = [
 export default function HomeScreen() {
   const router = useRouter();
 
-  const [searchText, setSearchText] = useState("");
-  const [history, setHistory] = useState([]);
+  const [searchText, setSearchText] = useState<string>("");
+  const [history, setHistory] = useState<string[]>([]);
   const [showHistory, setShowHistory] = useState(false); // untuk toggle tampil history
 
   const handleSearch = (textInput: string) => {
@@ -107,31 +107,28 @@ export default function HomeScreen() {
   showsHorizontalScrollIndicator={false}
   style={{ marginTop: 15, marginBottom: 10 }}
 >
-  {Array(4)
-  .fill(0)
-  .map((_, i) => (
+  {destinations.map((dest) => (
     <TouchableOpacity
-      key={i}
+      key={dest.id}
       style={styles.favCard}
       onPress={() =>
         router.push({
           pathname: "/pesan/page",
-          params: { id: i + 1 }, // contoh id, bisa sesuaikan
+          params: { id: dest.id },
         })
       }
     >
-      <Image
-        source={require("../../assets/images/hero1.jpg")}
-        style={styles.favImage}
-      />
-      <Text style={styles.favText}>Green Elty Krakatoa</Text>
-      <View style={styles.rowCenter}>
-        <Ionicons name="location-outline" size={14} />
-        <Text style={styles.favLocation}>Kalianda</Text>
+      <Image source={dest.image} style={styles.favImage} />
+
+      <View style={styles.favTextBox}>
+        <Text style={styles.favTitle}>{dest.name}</Text>
+        <Text style={styles.favDesc} numberOfLines={1}>
+          Pantai indah dengan pasir putih, cocok untuk liburan keluarga.
+        </Text>
+        <Text style={styles.favPrice}>Rp 50.000 / orang</Text>
       </View>
     </TouchableOpacity>
   ))}
-
 </ScrollView>
 
 
@@ -229,7 +226,7 @@ export default function HomeScreen() {
         </View>
 
         {/* Card 3 */}
-        <View style={styles.newsCard}>
+        <View style={styles.newsCard }>
           <Image
             source={require("../../assets/images/hero1.jpg")}
             style={styles.newsImage}
@@ -327,22 +324,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
 
-  favCard: {
-    marginLeft: 20,
-    width: 150,
-    backgroundColor: "#fff",
-    borderRadius: 15,
-    paddingBottom: 10,
-    marginRight: 10,
-    elevation: 3,
-  },
-
-  favImage: {
-    width: "100%",
-    height: 90,
-    borderTopLeftRadius: 15,
-    borderTopRightRadius: 15,
-  },
 
   favText: {
     marginTop: 8,
@@ -434,4 +415,51 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginLeft: 4,
   },
+
+favCard: {
+  marginLeft: 20,
+  width: 200,
+  backgroundColor: "#fff",
+  borderRadius: 15,
+  paddingBottom: 10,
+  marginRight: 15,
+  elevation: 3,
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 1 },
+  shadowOpacity: 0.1,
+  shadowRadius: 2,
+  overflow: "hidden",
+},
+
+favImage: {
+  width: "100%",
+  height: 100,
+  borderTopLeftRadius: 15,
+  borderTopRightRadius: 15,
+},
+
+
+
+favTextBox: {
+  padding: 8,
+},
+
+favTitle: {
+  fontSize: 14,
+  fontWeight: "700",
+},
+
+favDesc: {
+  fontSize: 12,
+  color: "#555",
+  marginTop: 4,
+},
+
+favPrice: {
+  fontSize: 12,
+  fontWeight: "600",
+  color: "#007BFF",
+  marginTop: 4,
+},
+
 });
