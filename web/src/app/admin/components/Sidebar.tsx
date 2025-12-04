@@ -65,18 +65,19 @@ export default function Sidebar({ isOpen }: { isOpen: boolean }) {
   return (
     <aside
       className={`
-        fixed left-0 top-0 h-full z-40 
-        bg-blue-700 text-white p-5 shadow-lg w-64
-        transition-transform duration-300 ease-in-out
-        ${isOpen ? "translate-x-0" : "-translate-x-full"}
-      `}
+    fixed left-0 top-0 h-full z-40 
+    bg-blue-700 text-white p-5 shadow-lg w-64
+    transition-transform duration-300 ease-in-out
+    ${isOpen ? "translate-x-0" : "-translate-x-full"}
+    flex flex-col
+  `}
     >
       <div className="mb-6 text-center">
         <h1 className="text-2xl font-bold">Admin Panel</h1>
         <p className="text-xs opacity-80">LamiGo</p>
       </div>
 
-      <nav className="flex flex-col gap-2">
+      <nav className="flex-1 flex flex-col gap-2">
         {menu.map((m) => (
           <Link
             key={m.href}
@@ -91,9 +92,10 @@ export default function Sidebar({ isOpen }: { isOpen: boolean }) {
         ))}
       </nav>
 
+      {/* Logout button tetap di bawah */}
       <div className="mt-auto">
         <button
-          onClick={handleLogout} // tambahkan event handler
+          onClick={handleLogout}
           className="w-full bg-red-500 text-white px-3 py-2 rounded-lg font-medium hover:opacity-90"
         >
           Logout
