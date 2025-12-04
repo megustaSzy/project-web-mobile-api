@@ -13,6 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -134,10 +135,10 @@ export function LoginForm({
         setTimeout(() => {
           setModalOpen(false);
 
-          if (role === "admin") {
-            router.push("/api/admin");
+          if (role === "Admin") {
+            router.push("/admin");
           } else {
-            router.push("/dashboard");
+            router.push("/");
           }
         }, 1500);
       } else {
@@ -157,9 +158,6 @@ export function LoginForm({
     }
   };
 
-  /* -----------------------------------------
-     RENDER LOGIN FORM
-  ------------------------------------------ */
   return (
     <>
       <section
