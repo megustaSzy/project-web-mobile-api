@@ -13,7 +13,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -23,20 +22,11 @@ import { CheckCircle, XCircle } from "lucide-react";
 /* -----------------------------------------
    POPUP ANIMASI
 ------------------------------------------ */
-function AuthModal({
-  open,
-  status,
-  message,
-}: {
-  open: boolean;
-  status: "success" | "error" | null;
-  message: string;
-}) {
+function AuthModal({ open, status, message }: { open: boolean; status: "success" | "error" | null; message: string }) {
   return (
     <AnimatePresence>
       {open && (
         <motion.div
-          key="modal"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
@@ -57,11 +47,7 @@ function AuthModal({
               <XCircle className="w-12 h-12 mx-auto text-red-600 mb-3" />
             )}
 
-            <h3
-              className={`text-lg font-semibold mb-1 ${
-                status === "success" ? "text-green-700" : "text-red-700"
-              }`}
-            >
+            <h3 className={`text-lg font-semibold mb-1 ${status === "success" ? "text-green-700" : "text-red-700"}`}>
               {status === "success" ? "Berhasil!" : "Gagal!"}
             </h3>
 
@@ -74,33 +60,24 @@ function AuthModal({
 }
 
 /* -----------------------------------------
-   LOGIN FORM (USER & ADMIN)
+   LOGIN FORM
 ------------------------------------------ */
-export function LoginForm({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  const [modalStatus, setModalStatus] = useState<"success" | "error" | null>(
-    null
-  );
+  const [modalStatus, setModalStatus] = useState<"success" | "error" | null>(null);
   const [modalMessage, setModalMessage] = useState("");
 
-  // -----------------------------------------
-  // FUNGSI LOGIN
-  // -----------------------------------------
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const email = (document.getElementById("email") as HTMLInputElement)?.value;
-    const password = (document.getElementById("password") as HTMLInputElement)
-      ?.value;
+    const password = (document.getElementById("password") as HTMLInputElement)?.value;
 
     if (!email || !password) {
       setModalStatus("error");
-      setModalMessage("Masukkan email dan password terlebih dahulu!");
+      setModalMessage("Masukkan email dan password!");
       setModalOpen(true);
       setTimeout(() => setModalOpen(false), 1800);
       return;
@@ -109,44 +86,45 @@ export function LoginForm({
     try {
       setLoading(true);
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        }
-      );
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
       const data = await response.json();
-      console.log("Respon API:", data);
+      console.log("RESPON LOGIN:", data);
 
-      if (response.ok) {
-        const token = data.accessToken || data.token;
-        const role = data.user?.role || "user"; // "admin" | "user"
-
-        if (token) localStorage.setItem("token", token);
-
-        // tampilkan popup berhasil
-        setModalStatus("success");
-        setModalMessage(`Login berhasil sebagai ${role}!`);
-        setModalOpen(true);
-
-        setTimeout(() => {
-          setModalOpen(false);
-
-          if (role === "Admin") {
-            router.push("/admin");
-          } else {
-            router.push("/");
-          }
-        }, 1500);
-      } else {
+      if (!response.ok) {
         setModalStatus("error");
         setModalMessage(data.message || "Email atau password salah.");
         setModalOpen(true);
         setTimeout(() => setModalOpen(false), 1800);
+        return;
       }
+
+      // SIMPAN TOKEN
+      const token = data.accessToken || data.token;
+      if (token) localStorage.setItem("token", token);
+
+      // ROLE FIX
+      const role = (data.user?.role || "").toLowerCase();
+      console.log("ROLE DARI SERVER =", role);
+
+      setModalStatus("success");
+      setModalMessage(`Login berhasil sebagai ${data.user?.role}`);
+      setModalOpen(true);
+
+      setTimeout(() => {
+        setModalOpen(false);
+
+        // 🟢 FIX ROUTING
+        if (role === "admin") {
+          router.push("/admin");        // masuk folder admin
+        } else {
+          router.push("/");             // user masuk ke halaman utama web
+        }
+      }, 1200);
     } catch (error) {
       console.error("Login error:", error);
       setModalStatus("error");
@@ -160,25 +138,11 @@ export function LoginForm({
 
   return (
     <>
-      <section
-        className={cn(
-          "flex flex-col items-center justify-center min-h-screen px-4",
-          className
-        )}
-        {...props}
-      >
+      <section className={cn("flex flex-col items-center justify-center min-h-screen px-4", className)} {...props}>
         <Card className="w-full max-w-md shadow-lg border border-gray-100 rounded-2xl bg-white/80 backdrop-blur">
           <CardHeader className="text-center pb-2 flex flex-col items-center">
-            <Image
-              src="/images/logo.png"
-              alt="Logo"
-              width={61}
-              height={61}
-              className="w-16 h-16 object-contain mb-3"
-            />
-            <CardTitle className="text-2xl font-bold text-gray-800">
-              Login Akun
-            </CardTitle>
+            <Image src="/images/logo.png" alt="Logo" width={61} height={61} className="w-16 h-16 object-contain mb-3" />
+            <CardTitle className="text-2xl font-bold text-gray-800">Login Akun</CardTitle>
             <CardDescription className="text-gray-500">
               Masuk ke akun kamu untuk melanjutkan
             </CardDescription>
@@ -187,28 +151,17 @@ export function LoginForm({
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-5">
               <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                   Email
                 </label>
                 <Input id="email" type="email" placeholder="you@example.com" />
               </div>
 
               <div>
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
                   Password
                 </label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  required
-                />
+                <Input id="password" type="password" placeholder="••••••••" />
               </div>
 
               <Button
@@ -226,13 +179,12 @@ export function LoginForm({
                 </span>
               </div>
 
-              {/* Login Google */}
               <Button
                 variant="outline"
                 type="button"
-                onClick={() => {
-                  window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google`;
-                }}
+                onClick={() =>
+                  (window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/google`)
+                }
                 className="w-full border-gray-300 hover:bg-gray-50 py-2 rounded-lg flex items-center justify-center gap-2"
               >
                 <FcGoogle size={20} />
@@ -250,7 +202,6 @@ export function LoginForm({
         </Card>
       </section>
 
-      {/* Popup */}
       <AuthModal open={modalOpen} status={modalStatus} message={modalMessage} />
     </>
   );

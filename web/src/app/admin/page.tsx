@@ -15,7 +15,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     // === GET STATISTICS ===
-    fetch("http://localhost:3001/dashboard/stats")
+    fetch("/api/count")
       .then((res) => res.json())
       .then((json: StatsResponse) => {
         setStats({
@@ -26,7 +26,7 @@ export default function AdminDashboard() {
       });
 
     // === GET ACTIVITIES ===
-    fetch("http://localhost:3001/dashboard/activities")
+    fetch("/api/count")
       .then((res) => res.json())
       .then((json: StatsResponse) => {
         setActivities(json.data.items || []);
