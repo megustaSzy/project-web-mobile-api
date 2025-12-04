@@ -20,18 +20,18 @@ export default function VisionSection() {
 
     try {
       // GET VISI MISI
-      const result = await apiFetch<VisionType>("/about");
+      const result = await apiFetch<VisionType>("/api/about");
       if (!result?.data) throw new Error("Format data visi tidak sesuai.");
       setData(result);
 
       // GET MISI
-      const missionResult = await apiFetch<MissionType>("/about");
+      const missionResult = await apiFetch<MissionType>("/api/about");
       if (!missionResult?.data)
         throw new Error("Format data misi tidak sesuai.");
       setMission(missionResult);
 
       // GET NILAI UTAMA
-      const valueResult = await apiFetch<ValueType>("/about/value");
+      const valueResult = await apiFetch<ValueType>("/api/about/value");
       if (!valueResult?.data?.items) {
         throw new Error("Format data nilai utama tidak sesuai.");
       }

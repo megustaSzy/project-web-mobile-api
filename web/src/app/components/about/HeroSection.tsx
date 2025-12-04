@@ -18,7 +18,7 @@ export default function HeroSection() {
     setErrorMsg(null);
 
     try {
-      const endpoint = "/about";
+      const endpoint = "/api/about";
       // console.log("Memanggil:", endpoint);
 
       const result = await apiFetch<TitleType>(endpoint);
