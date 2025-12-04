@@ -65,3 +65,5 @@ app.use("/api/about", aboutRoute);
 app.use("/uploads", express.static("public/uploads"));
 
 export default app;
+
+// total dest, kategori, pengguna, 
