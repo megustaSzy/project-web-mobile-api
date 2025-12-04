@@ -100,19 +100,22 @@ export function LoginForm({
 
     try {
       setLoading(true);
-      const response = await fetch("http://10.93.86.50:3001/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+        }
+      );
 
       const data = await response.json();
       console.log("Respon API:", data);
 
       if (response.ok) {
-        // ✅ Simpan token dari API (pastikan nama field benar)
+        //  Simpan token dari API (pastikan nama field benar)
         const token = data.accessToken || data.token;
 
         if (token) {
@@ -120,7 +123,7 @@ export function LoginForm({
           console.log("Token disimpan:", token);
         }
 
-        // ✅ Tampilkan popup sukses
+        //  Tampilkan popup sukses
         setModalStatus("success");
         setModalMessage("Login berhasil! Selamat datang kembali 👋");
         setModalOpen(true);
