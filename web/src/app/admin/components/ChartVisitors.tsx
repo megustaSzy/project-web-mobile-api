@@ -10,7 +10,7 @@ export default function VisitorsChart() {
       </CardHeader>
 
       <CardContent>
-        <div className="h-48 bg-gradient-to-b from-slate-200 to-slate-100 rounded-lg flex items-end p-4 text-sm text-slate-600">
+        <div className="h-48 bg-linear-to-b from-slate-200 to-slate-100 rounded-lg flex items-end p-4 text-sm text-slate-600">
           * Grafik Placeholder (ganti dengan Recharts)
         </div>
       </CardContent>

@@ -57,8 +57,8 @@ export default function Sidebar({ isOpen }: { isOpen: boolean }) {
       </nav>
 
       <div className="mt-auto">
-        <button className="w-full bg-white text-blue-700 px-3 py-2 rounded-lg font-medium hover:opacity-90">
-          Sign Out
+        <button className="w-full bg-red-500 text-white px-3 py-2 rounded-lg font-medium hover:opacity-90">
+          Logout
         </button>
       </div>
     </aside>
