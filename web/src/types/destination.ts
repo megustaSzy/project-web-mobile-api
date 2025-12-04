@@ -28,9 +28,9 @@ export interface ApiDestinationsResponse {
 // ─────────────────────────────────────────────────────────────
 // Tipe yang dipakai UI (hasil mapping)
 export interface DestinationsType {
-  id: number;
+  id: number; 
   name: string;
-  imageUrl: string | null; // <── dipakai di FE
+  imageUrl: string | null; 
   desc: string;
   price: number;
   category: string;

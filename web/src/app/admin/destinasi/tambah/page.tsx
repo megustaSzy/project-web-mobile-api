@@ -1,162 +1,54 @@
+// app/admin/destinasi/tambah/page.tsx
 "use client";
-
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import React from "react";
+import { useRouter } from "next/navigation";
 
-export default function Page() {
-  const [form, setForm] = useState({
-    name: "",
-    harga: "",
-    kabupaten: "",
-    kategori: "",
-    deskripsi: "",
-    image: null as File | null,
-  });
+export default function TambahDestinasi() {
+  const [name, setName] = useState("");
+  const [desc, setDesc] = useState("");
+  const [price, setPrice] = useState<number | "">("");
+  const [categoryId, setCategoryId] = useState<number | "">("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const router = useRouter();
 
-  const kabupatenList = [
-    "Bandar Lampung",
-    "Metro",
-    "Lampung Selatan",
-    "Lampung Timur",
-    "Lampung Tengah",
-    "Lampung Utara",
-    "Pesawaran",
-    "Pringsewu",
-    "Tanggamus",
-    "Pesisir Barat",
-    "Way Kanan",
-    "Tulang Bawang",
-    "Tulang Bawang Barat",
-    "Mesuji",
-  ];
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    try {
+      const fd = new FormData();
+      fd.append("name", name);
+      fd.append("description", desc);
+      fd.append("price", String(price));
+      fd.append("categoryId", String(categoryId));
+      if (imageFile) fd.append("image", imageFile);
 
-  const kategoriList = ["Pantai", "Gunung", "Bukit", "Pulau", "Air Terjun"];
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/destinations`, {
+        method: "POST",
+        body: fd,
+      });
 
-  function handleInput(
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
-  ) {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  }
-
-  function handleImage(e: React.ChangeEvent<HTMLInputElement>) {
-    if (e.target.files && e.target.files[0]) {
-      setForm({ ...form, image: e.target.files[0] });
+      router.push("/admin/destinasi");
+    } catch (err) {
+      console.error(err);
+      alert("Gagal menambah destinasi");
     }
   }
 
-  function handleSubmit() {
-    console.log("Data disimpan:", form);
-    alert("Destinasi berhasil disimpan (dummy)");
-  }
-
   return (
-  <div className="p-6 max-w-4xl mx-auto">
-    <h1 className="text-2xl font-semibold mb-6">Tambah Destinasi</h1>
-
-    <div className="space-y-6 bg-white p-6 rounded-xl border shadow-sm">
-
-      {/* ROW 1: NAMA & HARGA */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* NAMA DESTINASI */}
-        <div>
-          <label className="font-medium">Nama Destinasi</label>
-          <input
-            type="text"
-            name="name"
-            value={form.name}
-            onChange={handleInput}
-            className="w-full mt-1 border rounded-lg px-3 py-2"
-            placeholder="Masukkan nama destinasi"
-          />
+    <div>
+      <h2 className="text-xl font-semibold text-blue-700 mb-4">Tambah Destinasi</h2>
+      <form className="bg-white p-6 rounded-xl shadow" onSubmit={handleSubmit}>
+        <div className="grid gap-4">
+          <input value={name} onChange={(e)=>setName(e.target.value)} className="border p-2 rounded" placeholder="Nama destinasi" required />
+          <textarea value={desc} onChange={(e)=>setDesc(e.target.value)} className="border p-2 rounded" placeholder="Deskripsi" rows={4} required/>
+          <input value={price} onChange={(e)=>setPrice(Number(e.target.value))} type="number" className="border p-2 rounded" placeholder="Harga" />
+          <input value={categoryId} onChange={(e)=>setCategoryId(Number(e.target.value))} type="number" className="border p-2 rounded" placeholder="Category ID" />
+          <input type="file" onChange={(e)=>setImageFile(e.target.files?.[0] ?? null)} className="border p-2 rounded"/>
+          <div className="flex gap-2">
+            <button className="px-4 py-2 bg-blue-600 text-white rounded">Simpan</button>
+            <button type="button" onClick={()=>router.back()} className="px-4 py-2 bg-gray-100 rounded">Batal</button>
+          </div>
         </div>
-
-        {/* HARGA */}
-        <div>
-          <label className="font-medium">Harga Tiket</label>
-          <input
-            type="text"
-            name="harga"
-            value={form.harga}
-            onChange={handleInput}
-            className="w-full mt-1 border rounded-lg px-3 py-2"
-            placeholder="Contoh: Rp25.000"
-          />
-        </div>
-      </div>
-
-      {/* ROW 2: KABUPATEN & KATEGORI */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* KABUPATEN */}
-        <div>
-          <label className="font-medium">Kabupaten</label>
-          <select
-            name="kabupaten"
-            value={form.kabupaten}
-            onChange={handleInput}
-            className="w-full mt-1 border rounded-lg px-3 py-2"
-          >
-            <option value="">Pilih Kabupaten</option>
-            {kabupatenList.map((kab, idx) => (
-              <option key={idx} value={kab}>
-                {kab}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* KATEGORI */}
-        <div>
-          <label className="font-medium">Kategori Wisata</label>
-          <select
-            name="kategori"
-            value={form.kategori}
-            onChange={handleInput}
-            className="w-full mt-1 border rounded-lg px-3 py-2"
-          >
-            <option value="">Pilih Kategori</option>
-            {kategoriList.map((kat, idx) => (
-              <option key={idx} value={kat}>
-                {kat}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      {/* DESKRIPSI */}
-      <div>
-        <label className="font-medium">Deskripsi</label>
-        <textarea
-          name="deskripsi"
-          value={form.deskripsi}
-          onChange={handleInput}
-          rows={4}
-          className="w-full mt-1 border rounded-lg px-3 py-2"
-          placeholder="Tulis deskripsi destinasi..."
-        />
-      </div>
-
-      {/* UPLOAD GAMBAR */}
-      <div>
-        <label className="font-medium">Upload Gambar</label>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleImage}
-          className="w-full mt-1 border rounded-lg px-3 py-2"
-        />
-      </div>
-
-      {/* BUTTON */}
-      <div className="flex justify-end gap-3 pt-4">
-        <Button variant="outline">Batal</Button>
-        <Button onClick={handleSubmit}>Simpan</Button>
-      </div>
+      </form>
     </div>
-  </div>
-);
-
+  );
 }

@@ -1,17 +1,15 @@
-"use client";
-
+// app/admin/layout.tsx
 import Sidebar from "./components/Sidebar";
 import TopBar from "./components/TopBar";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen w-full bg-[#f5f6f8] flex text-slate-800">
+    <div className="flex min-h-screen bg-[#f4f8ff]">
       <Sidebar />
-
-      <main className="flex-1 p-6 space-y-6">
+      <div className="flex-1 flex flex-col">
         <TopBar />
-        {children}
-      </main>
+        <main className="p-6 md:p-8">{children}</main>
+      </div>
     </div>
   );
 }

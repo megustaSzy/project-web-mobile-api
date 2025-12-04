@@ -1,151 +1,36 @@
+// app/admin/kategori-kabupaten/page.tsx
 "use client";
-
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-export default function KategoriKabupatenPage() {
-
+export default function KategoriKabupaten() {
   const [kabupaten, setKabupaten] = useState([
     { id: 1, name: "Bandar Lampung" },
     { id: 2, name: "Lampung Selatan" },
     { id: 3, name: "Lampung Timur" },
-    { id: 4, name: "Metro" },
-    { id: 5, name: "Pesawaran" },
   ]);
-
-  const [newKabupaten, setNewKabupaten] = useState("");
-  const [editId, setEditId] = useState<number | null>(null);
-  const [editName, setEditName] = useState("");
-
-  // Tambah kabupaten
-  function handleAdd() {
-    if (!newKabupaten.trim()) return;
-
-    const newItem = {
-      id: kabupaten.length + 1,
-      name: newKabupaten,
-    };
-
-    setKabupaten([...kabupaten, newItem]);
-    setNewKabupaten("");
+  const [newName, setNewName] = useState("");
+  function add() {
+    if(!newName.trim()) return;
+    setKabupaten([...kabupaten, { id: kabupaten.length+1, name: newName }]);
+    setNewName("");
   }
-
-  // Simpan edit
-  function handleEdit() {
-    if (!editName.trim()) return;
-
-    setKabupaten(
-      kabupaten.map((item) =>
-        item.id === editId ? { ...item, name: editName } : item
-      )
-    );
-
-    setEditId(null);
-    setEditName("");
-  }
-
-  // Hapus
-  function handleDelete(id: number) {
-    setKabupaten(kabupaten.filter((item) => item.id !== id));
-  }
-
+  function remove(id:number){ setKabupaten(kabupaten.filter(k=>k.id!==id)); }
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-semibold mb-6">Kategori Kabupaten</h1>
-
-      {/* Tombol tambah kabupaten */}
-      <Dialog>
-        <DialogTrigger asChild>
-          <Button className="mb-4">+ Tambah Kabupaten</Button>
-        </DialogTrigger>
-
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Tambah Kabupaten Baru</DialogTitle>
-          </DialogHeader>
-
-          <Input
-            placeholder="Nama Kabupaten (contoh: Pesawaran)"
-            value={newKabupaten}
-            onChange={(e) => setNewKabupaten(e.target.value)}
-          />
-
-          <DialogFooter>
-            <Button variant="outline">Batal</Button>
-            <Button onClick={handleAdd}>Simpan</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Tabel kabupaten */}
-      <div className="bg-white rounded-xl border shadow-sm mt-4">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-16">ID</TableHead>
-              <TableHead>Nama Kabupaten</TableHead>
-              <TableHead className="text-right pr-4">Aksi</TableHead>
-            </TableRow>
-          </TableHeader>
-
-          <TableBody>
-            {kabupaten.map((item) => (
-              <TableRow key={item.id}>
-                <TableCell>{item.id}</TableCell>
-                <TableCell>{item.name}</TableCell>
-
-                <TableCell className="text-right space-x-2">
-
-                  {/* Edit modal */}
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          setEditId(item.id);
-                          setEditName(item.name);
-                        }}
-                      >
-                        Edit
-                      </Button>
-                    </DialogTrigger>
-
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Edit Kabupaten</DialogTitle>
-                      </DialogHeader>
-
-                      <Input
-                        value={editName}
-                        onChange={(e) => setEditName(e.target.value)}
-                      />
-
-                      <DialogFooter>
-                        <Button variant="outline">Batal</Button>
-                        <Button onClick={handleEdit}>Simpan</Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-
-                  {/* Delete */}
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => handleDelete(item.id)}
-                  >
-                    Hapus
-                  </Button>
-
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-
-        </Table>
+    <div>
+      <h2 className="text-xl font-semibold text-blue-700 mb-4">Kategori Kabupaten</h2>
+      <div className="bg-white p-4 rounded shadow">
+        <div className="flex gap-2 mb-4">
+          <input value={newName} onChange={e=>setNewName(e.target.value)} className="border p-2 rounded" placeholder="Nama kabupaten"/>
+          <button onClick={add} className="px-3 py-2 bg-blue-600 text-white rounded">Tambah</button>
+        </div>
+        <ul className="space-y-2">
+          {kabupaten.map(k=>(
+            <li key={k.id} className="flex justify-between">
+              <span>{k.name}</span>
+              <button onClick={()=>remove(k.id)} className="text-sm text-red-500">Hapus</button>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );
