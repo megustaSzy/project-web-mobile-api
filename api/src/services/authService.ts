@@ -24,15 +24,19 @@ export const authService = {
 
     const hash = await bcrypt.hash(data.password, 10);
 
-    return prisma.tb_user.create({
+    const user = await prisma.tb_user.create({
       data: {
         name: data.name,
         email: data.email,
         password: hash,
         role: data.role || "User",
-        notelp: data.notelp || "",
+        notelp: data.notelp || null,
+        provider: 'local',
+        providerId: null
       },
     });
+    const { password: _, ...safeUser } = user as any;
+    return safeUser;
   },
 
   async createTokens(userId: number) {
