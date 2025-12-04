@@ -6,9 +6,7 @@ import { createError } from "../utilities/createError";
 
 export const ticketService = {
   async generateTicketPDF(orderId: number, userId: number, res: Response) {
-    // =============================
-    // VALIDATE & FETCH ORDER
-    // =============================
+
     const order = await prisma.tb_orders.findUnique({
       where: { id: orderId },
     });
@@ -20,9 +18,6 @@ export const ticketService = {
     const qrDataUrl = await QRCode.toDataURL(order.ticketCode);
     const qrBase64 = qrDataUrl.replace(/^data:image\/png;base64,/, "");
 
-    // =============================
-    // INIT PDF
-    // =============================
     const doc = new PDFDocument({ size: "A4", margin: 0 });
 
     res.setHeader("Content-Type", "application/pdf");
@@ -47,9 +42,6 @@ export const ticketService = {
       boxBorder: "#bfdbfe",
     };
 
-    // =============================
-    // HEADER SECTION
-    // =============================
     doc.rect(0, 0, pageWidth, 180).fill(colors.primary);
     doc.rect(0, 160, pageWidth, 20).fill("#3b82f6");
 
@@ -90,9 +82,6 @@ export const ticketService = {
 
     y = 220;
 
-    // =============================
-    // CUSTOMER SECTION
-    // =============================
     doc.font("Helvetica-Bold")
       .fontSize(16)
       .fillColor(colors.primary)
@@ -127,9 +116,6 @@ export const ticketService = {
 
     y += infoBoxHeight + 30;
 
-    // =============================
-    // DESTINATION SECTION
-    // =============================
     doc.font("Helvetica-Bold")
       .fontSize(16)
       .fillColor(colors.primary)
@@ -184,9 +170,6 @@ export const ticketService = {
 
     y += destBoxHeight + 30;
 
-    // =============================
-    // PRICING SECTION
-    // =============================
     const boxWidth = (pageWidth - marginX * 2) / 2 - 10;
 
     // Quantity
@@ -219,9 +202,6 @@ export const ticketService = {
 
     y += 120;
 
-    // =============================
-    // QR CODE SECTION
-    // =============================
     doc.font("Helvetica-Bold")
       .fontSize(14)
       .fillColor(colors.primary)
@@ -244,9 +224,6 @@ export const ticketService = {
       height: qrSize,
     });
 
-    // =============================
-    // FOOTER
-    // =============================
     const footerY = pageHeight - 60;
 
     doc.font("Helvetica")

@@ -28,6 +28,7 @@ model tb_user {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  accessTokens  tb_accessToken[]
   refreshTokens tb_refreshToken[]
   orders        tb_orders[]
 }
@@ -35,6 +36,16 @@ model tb_user {
 enum Role {
   Admin
   User
+}
+
+model tb_accessToken {
+  id        Int      @id @default(autoincrement())
+  token     String
+  tokenId   String?  @unique
+  user      tb_user  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  expiresAt DateTime
+  createdAt DateTime @default(now())
 }
 
 model tb_refreshToken {
@@ -46,6 +57,7 @@ model tb_refreshToken {
   expiresAt DateTime
   createdAt DateTime @default(now())
 }
+
 
 model tb_destinations {
   id          Int    @id @default(autoincrement())
@@ -96,7 +108,7 @@ model tb_orders {
   quantity   Int
   totalPrice Int
 
-  // snapshot field (diambil saat melakukan order)
+  // snapshot field (diambil saat order)
   userName         String
   userPhone        String
   destinationName  String
@@ -109,8 +121,16 @@ model tb_orders {
   ticketUrl       String?
   isPaid          Boolean @default(false)
 
+  // PAYMENT GATEWAY (Midtrans)
+  paymentStatus     String   @default("pending") // pending, paid, failed, expired
+  paymentMethod     String?                      // qris, bank_transfer, gopay, etc
+  transactionId     String?                      // dari Midtrans
+  snapToken         String?                      // token Snap
+  snapRedirectUrl   String?                      // URL pembayaran Snap
+
   createdAt DateTime @default(now())
 }
+
 
 model tb_category {
   id           Int               @id @default(autoincrement())

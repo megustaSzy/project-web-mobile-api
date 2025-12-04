@@ -11,36 +11,52 @@ const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET!;
 
 export const authService = {
   async registerUser(data: AuthData) {
-    if(!data.name) createError ("nama wajib diisi", 409);
-    if(!data.email) createError("email wajib diisi", 400);
-    if(!data.email.includes("@")) createError("format email tidak valid", 400);
-    if(!data.password || data.password.length < 6) createError ("password minimal 6 karakter", 400)
+
+    if(!data.name)throw createError ("nama wajib diisi", 400);
+    if(!data.email) throw createError("email wajib diisi", 400);
+    if(!data.email.includes("@"))throw createError("format email tidak valid", 400);
+    if(!data.password || data.password.length < 6) createError ("password minimal 6 karakter", 400);
+
+    const email = data.email.toLocaleLowerCase();
 
     const existing = await prisma.tb_user.findUnique({
-      where: { email: data.email },
+      where: { email },
     });
 
-    if (existing) createError("email sudah digunakan", 409);
+    if (existing) throw createError("email sudah digunakan", 409);
 
     const hash = await bcrypt.hash(data.password, 10);
 
-    return prisma.tb_user.create({
+    const user = await prisma.tb_user.create({
       data: {
         name: data.name,
         email: data.email,
         password: hash,
         role: data.role || "User",
-        notelp: data.notelp || "",
+        notelp: data.notelp || null,
+        provider: 'local',
+        providerId: null
       },
     });
+    const { password: _, ...safeUser } = user as any;
+    return safeUser;
   },
 
   async createTokens(userId: number) {
     const tokenId = uuidv4();
 
     const accessToken = jwt.sign({ id: userId }, JWT_SECRET, {
-      expiresIn: "1h",
+      expiresIn: "1d",
     });
+
+    await prisma.tb_accessToken.create({
+      data: {
+        token: accessToken,
+        tokenId,
+        userId,
+        expiresAt: new Date(Date.now() + 1 * 24 * 60 * 1000),
+      }
+    })
 
     const refreshToken = jwt.sign({ id: userId, tokenId }, JWT_REFRESH_SECRET, {
       expiresIn: "7d",
