@@ -31,7 +31,6 @@ export default function AdminDashboard() {
 
   return (
     <div className="p-6 space-y-6">
-
       {/* === STAT CARDS === */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <StatsCard title="Total Destinasi" value={stats.total_destinasi} />
@@ -41,7 +40,6 @@ export default function AdminDashboard() {
 
       {/* === CONTENT === */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
         {/* LEFT: RECENT ACTIVITIES */}
         <div className="md:col-span-2 bg-white shadow rounded-xl p-6">
           <h2 className="text-lg font-semibold mb-4">Recent Activities</h2>
@@ -81,7 +79,6 @@ export default function AdminDashboard() {
             </button>
           </div>
         </div>
-
       </div>
     </div>
   );
