@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { statService } from "../services/statsService";
+import { statService } from "../services/statService";
 import { ResponseData } from "../utilities/Response";
 
 export const statController = {
