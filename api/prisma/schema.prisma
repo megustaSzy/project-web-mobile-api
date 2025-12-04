@@ -58,7 +58,6 @@ model tb_refreshToken {
   createdAt DateTime @default(now())
 }
 
-
 model tb_destinations {
   id          Int    @id @default(autoincrement())
   name        String
@@ -117,20 +116,19 @@ model tb_orders {
   time             String
 
   // tiket
-  ticketCode      String @unique
-  ticketUrl       String?
-  isPaid          Boolean @default(false)
+  ticketCode String  @unique
+  ticketUrl  String?
+  isPaid     Boolean @default(false)
 
   // PAYMENT GATEWAY (Midtrans)
-  paymentStatus     String   @default("pending") // pending, paid, failed, expired
-  paymentMethod     String?                      // qris, bank_transfer, gopay, etc
-  transactionId     String?                      // dari Midtrans
-  snapToken         String?                      // token Snap
-  snapRedirectUrl   String?                      // URL pembayaran Snap
+  paymentStatus   String  @default("pending") // pending, paid, failed, expired
+  paymentMethod   String? // qris, bank_transfer, gopay, etc
+  transactionId   String? // dari Midtrans
+  snapToken       String? // token Snap
+  snapRedirectUrl String? // URL pembayaran Snap
 
   createdAt DateTime @default(now())
 }
-
 
 model tb_category {
   id           Int               @id @default(autoincrement())
@@ -157,9 +155,9 @@ model tb_otp {
 }
 
 model tb_values {
-  id        Int       @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   header    String?
   name      String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

@@ -18,6 +18,7 @@ import orderRoute from "./routes/orderRoute";
 import adminOrderRoute from "./routes/adminOrderRoute";
 import categoryRoute from "./routes/categoryRoute";
 import aboutRoute from "./routes/aboutRoute";
+import statRoute from "./routes/statRoute";
 
 const app = express();
 
@@ -60,8 +61,11 @@ app.use("/api/orders", orderRoute);
 app.use("/api/admin/orders", adminOrderRoute);
 app.use("/api/category", categoryRoute);
 app.use("/api/about", aboutRoute);
+app.use("/api/count", statRoute);
 
 // Public upload folder
 app.use("/uploads", express.static("public/uploads"));
 
 export default app;
+
+// total dest, kategori, pengguna, 
