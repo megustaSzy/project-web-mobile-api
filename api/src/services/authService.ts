@@ -11,11 +11,12 @@ const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET!;
 
 export const authService = {
   async registerUser(data: AuthData) {
-
-    if(!data.name)throw createError ("nama wajib diisi", 400);
-    if(!data.email) throw createError("email wajib diisi", 400);
-    if(!data.email.includes("@"))throw createError("format email tidak valid", 400);
-    if(!data.password || data.password.length < 6) createError ("password minimal 6 karakter", 400);
+    if (!data.name) throw createError("nama wajib diisi", 400);
+    if (!data.email) throw createError("email wajib diisi", 400);
+    if (!data.email.includes("@"))
+      throw createError("format email tidak valid", 400);
+    if (!data.password || data.password.length < 6)
+      createError("password minimal 6 karakter", 400);
 
     const email = data.email.toLocaleLowerCase();
 
@@ -34,18 +35,18 @@ export const authService = {
         password: hash,
         role: data.role || "User",
         notelp: data.notelp || null,
-        provider: 'local',
-        providerId: null
+        provider: "local",
+        providerId: null,
       },
     });
-    const { password: _, ...safeUser } = user as any;
+    const { password: _, ...safeUser } = user;
     return safeUser;
   },
 
   async createTokens(userId: number) {
     const tokenId = uuidv4();
 
-    const accessToken = jwt.sign({ id: userId }, JWT_SECRET, {
+    const accessToken = jwt.sign({ id: userId, tokenId }, JWT_SECRET, {
       expiresIn: "1d",
     });
 
@@ -55,8 +56,8 @@ export const authService = {
         tokenId,
         userId,
         expiresAt: new Date(Date.now() + 1 * 24 * 60 * 1000),
-      }
-    })
+      },
+    });
 
     const refreshToken = jwt.sign({ id: userId, tokenId }, JWT_REFRESH_SECRET, {
       expiresIn: "7d",
@@ -75,11 +76,17 @@ export const authService = {
   },
 
   async loginUser(email: string, password: string) {
+    if(!email || !password) throw createError("email & password wajib diisi", 400);
+
     const user = await prisma.tb_user.findUnique({ where: { email } });
     if (!user) throw new Error("email tidak ditemukan");
 
     const isMatch = await bcrypt.compare(password, user.password!);
     if (!isMatch) throw new Error("password salah");
+
+    await prisma.tb_accessToken.deleteMany({ 
+      where: { userId: user.id,},
+    });
 
     await prisma.tb_refreshToken.deleteMany({
       where: { userId: user.id },
@@ -98,14 +105,28 @@ export const authService = {
       where: { tokenId: payload.tokenId },
     });
 
-    if (!stored) throw new Error("refresh token tidak terdaftar");
+    if (!stored) throw createError("refresh token tidak terdaftar", 401);
     if (stored.expiresAt < new Date())
-      throw new Error("refresh token kadaluarsa");
+      throw createError("refresh token kadaluarsa", 401);
 
     const newAccessToken = jwt.sign({ id: payload.id }, JWT_SECRET, {
-      expiresIn: "1h",
+      expiresIn: "1d",
     });
 
+    await prisma.tb_accessToken.deleteMany({
+      where: {
+        tokenId: payload.tokenId
+      }
+    });
+
+    await prisma.tb_accessToken.create({
+      data: {
+        token: newAccessToken,
+        tokenId: payload.tokenId,
+        userId: payload.id,
+        expiresAt: new Date(Date.now() + 1 * 24 * 60 * 1000)
+      }
+    })
     return newAccessToken;
   },
 
@@ -121,7 +142,8 @@ export const authService = {
   },
 
   async loginWithGoogle(profile: any) {
-    if(!profile.emails || !profile.emails[0]) createError("email google tidak ditemukan", 404);
+    if (!profile.emails || !profile.emails[0])
+      createError("email google tidak ditemukan", 404);
 
     const email = profile.emails[0].value;
     const name = profile.displayName;
@@ -147,7 +169,7 @@ export const authService = {
   },
 
   async requestOtp(email: string) {
-    if(!email) createError("email wajib diisi", 400);
+    if (!email) createError("email wajib diisi", 400);
 
     const user = await prisma.tb_user.findUnique({ where: { email } });
     if (!user) createError("email tidak ditemukan", 404);
@@ -173,7 +195,7 @@ export const authService = {
   },
 
   async verifyOtp(email: string, otp: string) {
-    if(!email || !otp) createError("email dan otp wajib diisi", 400);
+    if (!email || !otp) createError("email dan otp wajib diisi", 400);
 
     const record = await prisma.tb_otp.findFirst({
       where: { email, otp },
@@ -189,8 +211,9 @@ export const authService = {
   },
 
   async resetPassword(email: string, newPassword: string) {
-    if(!newPassword || newPassword.length < 6) createError("password minimal 6 karakter", 400);
-    
+    if (!newPassword || newPassword.length < 6)
+      createError("password minimal 6 karakter", 400);
+
     const hash = await bcrypt.hash(newPassword, 10);
 
     await prisma.tb_user.update({
