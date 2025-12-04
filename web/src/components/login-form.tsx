@@ -18,9 +18,9 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle, XCircle } from "lucide-react";
 
-/* -----------------------------------------
-   POPUP ANIMASI
------------------------------------------- */
+// /* -----------------------------------------
+//    POPUP ANIMASI
+// ------------------------------------------ */
 function AuthModal({
   open,
   status,
