@@ -9,7 +9,8 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Menu, X } from "lucide-react-native";
+import { Menu as MenuIcon, X as CloseIcon } from 'lucide-react-native';
+
 
 export default function NavBarMobile() {
   const router = useRouter();
@@ -131,7 +132,7 @@ export default function NavBarMobile() {
 
           {/* Burger */}
           <TouchableOpacity onPress={() => setOpen(!open)}>
-            {open ? <X size={26} color="#000" /> : <Menu size={26} color="#000" />}
+            {open ? <CloseIcon size={26} color="#000" /> : <MenuIcon size={26} color="#000" />}
           </TouchableOpacity>
         </View>
       </Animated.View>

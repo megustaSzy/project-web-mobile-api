@@ -9,12 +9,12 @@ import {
   Alert 
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-
+import { useRouter } from "expo-router";
 export default function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
-
+  const router = useRouter();
   const registeredEmails = [
     "test@example.com",
     "faiz@gmail.com",
@@ -30,9 +30,10 @@ export default function ForgotPasswordForm() {
     setLoading(true);
 
     setTimeout(() => {
-      if (registeredEmails.includes(email.trim().toLowerCase())) {
-        navigation.navigate("ResetPassword");
-      } else {
+     if (registeredEmails.includes(email.toLowerCase())) {
+             Alert.alert("Berhasil", "Link reset password telah dikirim ke email Anda.");
+             router.push("../reset-password/page"); // navigasi ke halaman reset-password
+           } else {
         Alert.alert("Email tidak valid", "Email belum terdaftar.");
       }
       setLoading(false);

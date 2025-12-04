@@ -11,10 +11,10 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
-
+import { useRouter } from "expo-router";
 export default function SignupForm() {
   const navigation = useNavigation();
-
+  const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -40,10 +40,11 @@ export default function SignupForm() {
 
       const data = await response.json();
 
-      if (response.ok) {
-        setMessage("Pendaftaran berhasil! Silakan login.");
-        setTimeout(() => navigation.navigate("Login"), 1500);
-      } else {
+     if (response.ok) {
+  setMessage("Pendaftaran berhasil! Silakan login.");
+  setTimeout(() => router.push("../login/page"), 1500);
+}
+ else {
         setMessage(data.message || "Pendaftaran gagal. Coba lagi.");
       }
     } catch (error) {
@@ -57,7 +58,7 @@ export default function SignupForm() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.card}>
-        <Image source={require("../../assets/images/logo.png")} style={styles.logo} />
+        <Image source={require("../../../assets/images/logo.png")} style={styles.logo} />
 
         <Text style={styles.title}>Create an Account</Text>
         <Text style={styles.subtitle}>Enter your information to get started</Text>
@@ -116,7 +117,7 @@ export default function SignupForm() {
 
         <Text style={styles.footerText}>
           Already have an account?{" "}
-          <Text style={styles.signup} onPress={() => navigation.navigate("Login")}>
+          <Text style={styles.signup} onPress={() => router.push("../login/page")}>
             Sign in
           </Text>
         </Text>

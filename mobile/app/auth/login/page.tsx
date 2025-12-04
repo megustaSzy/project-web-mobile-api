@@ -12,9 +12,9 @@ import Modal from "react-native-modal";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import Icon from "react-native-vector-icons/Ionicons";
-import { RootStackParamList } from "../types"; // import tipe route
-
+import { Ionicons } from "@expo/vector-icons";
+import { RootStackParamList } from "../../types"; // import tipe route
+import { useRouter } from "expo-router";
 // Ketik navigation untuk Login screen
 type LoginScreenProp = NativeStackNavigationProp<RootStackParamList, "Login">;
 
@@ -28,7 +28,7 @@ export default function LoginForm() {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalStatus, setModalStatus] = useState<"success" | "error" | null>(null);
   const [modalMessage, setModalMessage] = useState("");
-
+  const router = useRouter();
   const handleLogin = async () => {
     if (!email || !password) {
       setModalStatus("error");
@@ -105,7 +105,7 @@ export default function LoginForm() {
         />
 
         <TouchableOpacity
-          onPress={() => navigation.navigate("ForgotPassword")}
+          onPress={() => router.push("../forgot-password/page")}
           style={{ alignSelf: "flex-end", marginTop: 5 }}
         >
           <Text style={styles.footerText}>Lupa Password?</Text>
@@ -126,7 +126,7 @@ export default function LoginForm() {
         </View>
 
         <TouchableOpacity style={styles.googleBtn}>
-          <Icon name="logo-google" size={20} color="#DB4437" />
+          <Ionicons name="logo-google" size={20} color="#DB4437" />
           <Text style={styles.googleText}>Login dengan Google</Text>
         </TouchableOpacity>
 
@@ -134,7 +134,7 @@ export default function LoginForm() {
           Belum punya akun?{" "}
           <Text
             style={styles.signup}
-            onPress={() => navigation.navigate("Signup")}
+            onPress={() => router.push("../signup/page")}
           >
             Daftar sekarang
           </Text>
@@ -155,7 +155,7 @@ export default function LoginForm() {
               : { backgroundColor: "#FEF2F2" },
           ]}
         >
-          <Icon
+          <Ionicons
             name={modalStatus === "success" ? "checkmark-circle" : "close-circle"}
             size={60}
             color={modalStatus === "success" ? "#059669" : "#DC2626"}

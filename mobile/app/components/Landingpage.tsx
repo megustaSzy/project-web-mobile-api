@@ -22,8 +22,8 @@ const destinations = [
 export default function HomeScreen() {
   const router = useRouter();
 
-  const [searchText, setSearchText] = useState("");
-  const [history, setHistory] = useState([]);
+  const [searchText, setSearchText] = useState<string>("");
+  const [history, setHistory] = useState<string[]>([]);
   const [showHistory, setShowHistory] = useState(false); // untuk toggle tampil history
 
   const handleSearch = (textInput: string) => {
@@ -324,22 +324,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
 
-  favCard: {
-    marginLeft: 20,
-    width: 150,
-    backgroundColor: "#fff",
-    borderRadius: 15,
-    paddingBottom: 10,
-    marginRight: 10,
-    elevation: 3,
-  },
-
-  favImage: {
-    width: "100%",
-    height: 90,
-    borderTopLeftRadius: 15,
-    borderTopRightRadius: 15,
-  },
 
   favText: {
     marginTop: 8,
@@ -432,14 +416,14 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
 
-// Card favorit
 favCard: {
   marginLeft: 20,
   width: 200,
   backgroundColor: "#fff",
-  borderRadius: 12,
+  borderRadius: 15,
+  paddingBottom: 10,
   marginRight: 15,
-  elevation: 2,
+  elevation: 3,
   shadowColor: "#000",
   shadowOffset: { width: 0, height: 1 },
   shadowOpacity: 0.1,
@@ -447,11 +431,13 @@ favCard: {
   overflow: "hidden",
 },
 
-// Image favorit
 favImage: {
   width: "100%",
   height: 100,
+  borderTopLeftRadius: 15,
+  borderTopRightRadius: 15,
 },
+
 
 
 favTextBox: {

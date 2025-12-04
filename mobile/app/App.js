@@ -4,10 +4,10 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 // Import semua screen
 import PesananTour from "./pesanantour/page";
-import LoginForm from "./auth/login/page";
+import Login from "./auth/login/page";
 import ForgotPassword from "./auth/forgot-password/page";
 import ResetPassword from "./auth/reset-password/page";
-import SignupForm from "./auth/signup/page";
+import Signup from "./auth/signup/page";
 import HomeScreen from "./components/Landingpage"; // Pastikan file HomeScreen ada
 
 const Stack = createNativeStackNavigator();
@@ -18,12 +18,12 @@ export default function App() {
       <Stack.Navigator initialRouteName="Login">
         <Stack.Screen
           name="Login"
-          component={LoginForm}
+          component={Login}
           options={{ headerShown: false }}
         />
         <Stack.Screen
           name="Signup"
-          component={SignupForm}
+          component={Signup}
           options={{ title: "Daftar Akun" }}
         />
         <Stack.Screen

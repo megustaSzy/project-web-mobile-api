@@ -8,13 +8,14 @@ import {
   StyleSheet,
   Alert 
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useRouter } from "expo-router";
 
 export default function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const navigation = useNavigation();
+  const router = useRouter();
 
+  // Contoh email yang terdaftar
   const registeredEmails = [
     "test@example.com",
     "faiz@gmail.com",
@@ -29,9 +30,11 @@ export default function ForgotPasswordForm() {
 
     setLoading(true);
 
+    // Simulasi cek email dengan timeout
     setTimeout(() => {
-      if (registeredEmails.includes(email.trim().toLowerCase())) {
-        navigation.navigate("ResetPassword");
+      if (registeredEmails.includes(email.toLowerCase())) {
+        Alert.alert("Berhasil", "Link reset password telah dikirim ke email Anda.");
+        router.push("../reset-password/page"); // navigasi ke halaman reset-password
       } else {
         Alert.alert("Email tidak valid", "Email belum terdaftar.");
       }
@@ -42,7 +45,6 @@ export default function ForgotPasswordForm() {
   return (
     <View style={styles.container}>
       <View style={styles.card}>
-
         {/* Logo */}
         <Image
           source={require("../../../assets/images/logo.png")}
