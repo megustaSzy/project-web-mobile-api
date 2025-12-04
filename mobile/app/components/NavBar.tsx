@@ -119,16 +119,7 @@ export default function NavBarMobile() {
             <Text style={styles.lang}>{language.toUpperCase()}</Text>
           </TouchableOpacity>
 
-          {/* Profile */}
-          {isLoggedIn ? (
-            <TouchableOpacity onPress={() => router.push("/profile")}>
-              <Image source={userData.avatar} style={styles.profilePic} />
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity onPress={() => router.push("/auth/login")}>
-              <Text style={styles.loginBtn}>{t.login}</Text>
-            </TouchableOpacity>
-          )}
+          
 
           {/* Burger */}
           <TouchableOpacity onPress={() => setOpen(!open)}>
@@ -160,12 +151,12 @@ export default function NavBarMobile() {
                 <Text style={styles.menuItem}>{t.editProfile}</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity
+              {/* <TouchableOpacity
                 onPress={handleLogout}
                 style={styles.logoutBtn}
               >
                 <Text style={styles.logoutTxt}>{t.logout}</Text>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </>
           ) : (
             <>
