@@ -1,11 +1,22 @@
 export interface StatsResponse {
-  total_destinasi: number;
-  total_kategori: number;
-  total_pengguna: number;
+  status: number;
+  message: string;
+  data: {
+    total_items: number;
+    total_pages: number;
+    current_page: number;
+    limit: number;
+    items: StatItem[];
+    links: {
+      prev: string | null;
+      next: string | null;
+    };
+  };
 }
 
-export interface ActivityItem {
+export interface StatItem {
   id: number;
-  title: string;
-  time: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
 }

@@ -2,30 +2,34 @@
 
 import { useEffect, useState } from "react";
 import StatsCard from "./components/StatsCard";
-import { ActivityItem, StatsResponse } from "@/types/dashboard";
+import { StatItem, StatsResponse } from "@/types/dashboard";
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<StatsResponse>({
+  const [stats, setStats] = useState({
     total_destinasi: 0,
     total_kategori: 0,
     total_pengguna: 0,
   });
 
-  const [activities, setActivities] = useState<ActivityItem[]>([]);
+  const [activities, setActivities] = useState<StatItem[]>([]);
 
   useEffect(() => {
-    // Statistik
-    fetch("/api/stats")
+    // === GET STATISTICS ===
+    fetch("http://localhost:3001/dashboard/stats")
       .then((res) => res.json())
       .then((json: StatsResponse) => {
-        setStats(json);
+        setStats({
+          total_destinasi: json.data.total_items || 0,
+          total_kategori: json.data.total_pages || 0, // sesuaikan jika berbeda
+          total_pengguna: json.data.limit || 0,       // ganti sesuai field backend
+        });
       });
 
-    // Recent Activities
-    fetch("/api/activities")
+    // === GET ACTIVITIES ===
+    fetch("http://localhost:3001/dashboard/activities")
       .then((res) => res.json())
-      .then((json: ActivityItem[]) => {
-        setActivities(json);
+      .then((json: StatsResponse) => {
+        setActivities(json.data.items || []);
       });
   }, []);
 
@@ -40,7 +44,7 @@ export default function AdminDashboard() {
 
       {/* === CONTENT === */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* LEFT: RECENT ACTIVITIES */}
+        {/* Recent Activities */}
         <div className="md:col-span-2 bg-white shadow rounded-xl p-6">
           <h2 className="text-lg font-semibold mb-4">Recent Activities</h2>
 
@@ -53,15 +57,15 @@ export default function AdminDashboard() {
                   key={item.id}
                   className="p-3 border rounded-lg bg-gray-50 hover:bg-gray-100 transition"
                 >
-                  <p className="font-medium">{item.title}</p>
-                  <p className="text-xs text-gray-500">{item.time}</p>
+                  <p className="font-medium">{item.name}</p>
+                  <p className="text-xs text-gray-500">{item.createdAt}</p>
                 </li>
               ))}
             </ul>
           )}
         </div>
 
-        {/* RIGHT: QUICK ACTIONS */}
+        {/* Quick Actions */}
         <div className="bg-white shadow rounded-xl p-6">
           <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
 
