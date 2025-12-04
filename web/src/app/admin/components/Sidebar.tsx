@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation"; // tambahkan useRouter
 import {
   LayoutDashboard,
   Mountain,
@@ -14,18 +14,53 @@ import {
 
 export default function Sidebar({ isOpen }: { isOpen: boolean }) {
   const path = usePathname();
+  const router = useRouter(); // inisialisasi router
 
   const menu = [
     { title: "Dashboard", href: "/admin", icon: <LayoutDashboard size={16} /> },
-    { title: "Destinasi", href: "/admin/destinasi", icon: <Mountain size={16} /> },
-    { title: "Kategori Wisata", href: "/admin/kategori-wisata", icon: <Tags size={16} /> },
-    { title: "Kategori Kabupaten", href: "/admin/kategori-kabupaten", icon: <MapPin size={16} /> },
-    { title: "Pickup", href: "/admin/pickup-penjemputan", icon: <MapPin size={16} /> },
-    { title: "Pemesanan", href: "/admin/pesanan", icon: <ShoppingCart size={16} /> },
-    { title: "Pengguna", href: "/admin/manajement-pengguna", icon: <Users size={16} /> },
+    {
+      title: "Destinasi",
+      href: "/admin/destinasi",
+      icon: <Mountain size={16} />,
+    },
+    {
+      title: "Kategori Wisata",
+      href: "/admin/kategori-wisata",
+      icon: <Tags size={16} />,
+    },
+    {
+      title: "Kategori Kabupaten",
+      href: "/admin/kategori-kabupaten",
+      icon: <MapPin size={16} />,
+    },
+    {
+      title: "Pickup",
+      href: "/admin/pickup-penjemputan",
+      icon: <MapPin size={16} />,
+    },
+    {
+      title: "Pemesanan",
+      href: "/admin/pesanan",
+      icon: <ShoppingCart size={16} />,
+    },
+    {
+      title: "Pengguna",
+      href: "/admin/manajement-pengguna",
+      icon: <Users size={16} />,
+    },
     { title: "Laporan", href: "/admin/laporan", icon: <FileText size={16} /> },
-    { title: "Pengaturan", href: "/admin/pengaturan", icon: <Settings size={16} /> },
+    {
+      title: "Pengaturan",
+      href: "/admin/pengaturan",
+      icon: <Settings size={16} />,
+    },
   ];
+
+  // fungsi logout
+  const handleLogout = () => {
+    localStorage.removeItem("token"); // hapus token login jika ada
+    router.push("/login"); // redirect ke halaman login
+  };
 
   return (
     <aside
@@ -57,7 +92,10 @@ export default function Sidebar({ isOpen }: { isOpen: boolean }) {
       </nav>
 
       <div className="mt-auto">
-        <button className="w-full bg-red-500 text-white px-3 py-2 rounded-lg font-medium hover:opacity-90">
+        <button
+          onClick={handleLogout} // tambahkan event handler
+          className="w-full bg-red-500 text-white px-3 py-2 rounded-lg font-medium hover:opacity-90"
+        >
           Logout
         </button>
       </div>
