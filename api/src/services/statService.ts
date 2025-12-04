@@ -1,16 +1,22 @@
 import prisma from "../lib/prisma";
 
-
 export const statService = {
-    async getCounts () {
-        const users = await prisma.tb_user.count();
-        const destinations = await prisma.tb_destinations.count();
-        const categories = await prisma.tb_category.count();
+  async getStats() {
+    const totalUsers = await prisma.tb_user.count();
+    const totalDestinations = await prisma.tb_destinations.count();
+    const totalCategories = await prisma.tb_category.count();
 
-        return {
-            users,
-            destinations,
-            categories
-        }
-    }
-}
+    return {
+      counts: {
+        totalUsers,
+        totalDestinations,
+        totalCategories,
+      },
+      chartData: [
+        { name: "Users", value: totalUsers },
+        { name: "Destinations", value: totalDestinations },
+        { name: "Categories", value: totalCategories },
+      ],
+    };
+  },
+};
