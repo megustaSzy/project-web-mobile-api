@@ -9,8 +9,15 @@ import {
   ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { useLocalSearchParams } from "expo-router/build/hooks";
+
+
+
 
 export default function HomeScreen() {
+  const router = useRouter();
+  const params = useLocalSearchParams();
   return (
     <ScrollView style={styles.container}>
       
@@ -50,26 +57,37 @@ export default function HomeScreen() {
       <Text style={styles.sectionTitle}>Tujuan Wisata Favorit</Text>
 
       <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={{ marginTop: 15, marginBottom: 10 }}
-      >
-        {Array(4)
-          .fill(0)
-          .map((_, i) => (
-            <View key={i} style={styles.favCard}>
-              <Image
-                source={require("../../assets/images/hero1.jpg")}
-                style={styles.favImage}
-              />
-              <Text style={styles.favText}>Green Elty Krakatoa</Text>
-              <View style={styles.rowCenter}>
-                <Ionicons name="location-outline" size={14} />
-                <Text style={styles.favLocation}>Kalianda</Text>
-              </View>
-            </View>
-          ))}
-      </ScrollView>
+  horizontal
+  showsHorizontalScrollIndicator={false}
+  style={{ marginTop: 15, marginBottom: 10 }}
+>
+  {Array(4)
+  .fill(0)
+  .map((_, i) => (
+    <TouchableOpacity
+      key={i}
+      style={styles.favCard}
+      onPress={() =>
+        router.push({
+          pathname: "/pesan/page",
+          params: { id: i + 1 }, // contoh id, bisa sesuaikan
+        })
+      }
+    >
+      <Image
+        source={require("../../assets/images/hero1.jpg")}
+        style={styles.favImage}
+      />
+      <Text style={styles.favText}>Green Elty Krakatoa</Text>
+      <View style={styles.rowCenter}>
+        <Ionicons name="location-outline" size={14} />
+        <Text style={styles.favLocation}>Kalianda</Text>
+      </View>
+    </TouchableOpacity>
+  ))}
+
+</ScrollView>
+
 
       {/* Daftar Destinasi */}
       <Text style={styles.sectionTitle}>Tujuan Wisata Favorit</Text>
@@ -92,7 +110,8 @@ export default function HomeScreen() {
         Temukan Berbagai Wisata di Kabupaten Tanggamus
       </Text>
 
-      <TouchableOpacity style={{ marginTop: 6 }}>
+      <TouchableOpacity style={{ marginTop: 6 }}
+  onPress={() => router.push("../pesanantour/page")}>
         <Text style={styles.link}>Lihat Detail</Text>
       </TouchableOpacity>
     </View>
@@ -112,9 +131,12 @@ export default function HomeScreen() {
         Temukan Berbagai Wisata di Kabupaten Tanggamus
       </Text>
 
-      <TouchableOpacity style={{ marginTop: 6 }}>
-        <Text style={styles.link}>Lihat Detail</Text>
-      </TouchableOpacity>
+      <TouchableOpacity
+  style={{ marginTop: 6 }}
+  onPress={() => router.push("../pesanantour/page")}
+>
+  <Text style={styles.link}>Lihat Detail</Text>
+</TouchableOpacity>
     </View>
   </View>
 </ScrollView>

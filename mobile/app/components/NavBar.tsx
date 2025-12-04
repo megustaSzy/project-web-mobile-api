@@ -25,7 +25,7 @@ export default function NavBarMobile() {
     avatar: require("../../assets/images/faiz.jpg"),
   });
 
-  // === Scroll Shadow Effect ===
+  // Scroll Shadow Effect
   useEffect(() => {
     const listener = scrollY.addListener(({ value }) => {
       setScrolled(value > 10);
@@ -33,7 +33,7 @@ export default function NavBarMobile() {
     return () => scrollY.removeListener(listener);
   }, [scrollY]);
 
-  // === Load Language ===
+  // Load Language
   useEffect(() => {
     (async () => {
       const lang = await AsyncStorage.getItem("language");
@@ -46,7 +46,7 @@ export default function NavBarMobile() {
     await AsyncStorage.setItem("language", lang);
   };
 
-  // === Load Token & Profile ===
+  // Load Token & Profile
   const loadProfile = async () => {
     const token = await AsyncStorage.getItem("token");
     const profile = await AsyncStorage.getItem("profile");
@@ -91,12 +91,12 @@ export default function NavBarMobile() {
   };
 
   return (
-    <View>
+    <View style={{ zIndex: 50 }}>
       {/* NAVBAR FIXED */}
       <Animated.View
         style={[
           styles.header,
-          scrolled ? styles.headerScrolled : styles.headerTransparent,
+          scrolled ? styles.header : {},
         ]}
       >
         {/* Logo */}
@@ -121,10 +121,7 @@ export default function NavBarMobile() {
           {/* Profile */}
           {isLoggedIn ? (
             <TouchableOpacity onPress={() => router.push("/profile")}>
-              <Image
-                source={userData.avatar}
-                style={styles.profilePic}
-              />
+              <Image source={userData.avatar} style={styles.profilePic} />
             </TouchableOpacity>
           ) : (
             <TouchableOpacity onPress={() => router.push("/auth/login")}>
@@ -134,11 +131,7 @@ export default function NavBarMobile() {
 
           {/* Burger */}
           <TouchableOpacity onPress={() => setOpen(!open)}>
-            {open ? (
-              <X size={26} color={scrolled ? "#000" : "#FFF"} />
-            ) : (
-              <Menu size={26} color={scrolled ? "#000" : "#FFF"} />
-            )}
+            {open ? <X size={26} color="#000" /> : <Menu size={26} color="#000" />}
           </TouchableOpacity>
         </View>
       </Animated.View>
@@ -206,16 +199,14 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 0,
     zIndex: 50,
-  },
-
-  headerTransparent: {
-    backgroundColor: "rgba(255,255,255,0)",
-  },
-
-  headerScrolled: {
     backgroundColor: "#fff",
     borderBottomWidth: 1,
     borderColor: "#ddd",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
   },
 
   left: {
