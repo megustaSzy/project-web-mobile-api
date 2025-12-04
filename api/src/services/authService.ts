@@ -42,6 +42,15 @@ export const authService = {
       expiresIn: "1d",
     });
 
+    await prisma.tb_accessToken.create({
+      data: {
+        token: accessToken,
+        tokenId,
+        userId,
+        expiresAt: new Date(Date.now() + 1 * 24 * 60 * 1000),
+      }
+    })
+
     const refreshToken = jwt.sign({ id: userId, tokenId }, JWT_REFRESH_SECRET, {
       expiresIn: "7d",
     });
