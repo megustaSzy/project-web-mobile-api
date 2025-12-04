@@ -1,25 +1,41 @@
-// app/admin/components/Sidebar.tsx
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Mountain, Tags, MapPin, Users, FileText, ShoppingCart, Settings } from "lucide-react";
+import {
+  LayoutDashboard,
+  Mountain,
+  Tags,
+  MapPin,
+  Users,
+  FileText,
+  ShoppingCart,
+  Settings,
+} from "lucide-react";
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen }: { isOpen: boolean }) {
   const path = usePathname();
+
   const menu = [
-    { title: "Dashboard", href: "/admin", icon: <LayoutDashboard size={16}/> },
-    { title: "Destinasi", href: "/admin/destinasi", icon: <Mountain size={16}/> },
-    { title: "Kategori Wisata", href: "/admin/kategori-wisata", icon: <Tags size={16}/> },
-    { title: "Kategori Kabupaten", href: "/admin/kategori-kabupaten", icon: <MapPin size={16}/> },
-    { title: "Pickup", href: "/admin/pickup-penjemputan", icon: <MapPin size={16}/> },
-    { title: "Pemesanan", href: "/admin/pesanan", icon: <ShoppingCart size={16}/> },
-    { title: "Pengguna", href: "/admin/manajement-pengguna", icon: <Users size={16}/> },
-    { title: "Laporan", href: "/admin/laporan", icon: <FileText size={16}/> },
-    { title: "Pengaturan", href: "/admin/pengaturan", icon: <Settings size={16}/> },
+    { title: "Dashboard", href: "/admin", icon: <LayoutDashboard size={16} /> },
+    { title: "Destinasi", href: "/admin/destinasi", icon: <Mountain size={16} /> },
+    { title: "Kategori Wisata", href: "/admin/kategori-wisata", icon: <Tags size={16} /> },
+    { title: "Kategori Kabupaten", href: "/admin/kategori-kabupaten", icon: <MapPin size={16} /> },
+    { title: "Pickup", href: "/admin/pickup-penjemputan", icon: <MapPin size={16} /> },
+    { title: "Pemesanan", href: "/admin/pesanan", icon: <ShoppingCart size={16} /> },
+    { title: "Pengguna", href: "/admin/manajement-pengguna", icon: <Users size={16} /> },
+    { title: "Laporan", href: "/admin/laporan", icon: <FileText size={16} /> },
+    { title: "Pengaturan", href: "/admin/pengaturan", icon: <Settings size={16} /> },
   ];
 
   return (
-    <aside className="w-64 bg-blue-700 text-white p-5 shadow-lg">
+    <aside
+      className={`
+        fixed left-0 top-0 h-full z-40 
+        bg-blue-700 text-white p-5 shadow-lg w-64
+        transition-transform duration-300 ease-in-out
+        ${isOpen ? "translate-x-0" : "-translate-x-full"}
+      `}
+    >
       <div className="mb-6 text-center">
         <h1 className="text-2xl font-bold">Admin Panel</h1>
         <p className="text-xs opacity-80">LamiGo</p>
@@ -27,7 +43,13 @@ export default function Sidebar() {
 
       <nav className="flex flex-col gap-2">
         {menu.map((m) => (
-          <Link key={m.href} href={m.href} className={`flex items-center gap-3 px-3 py-2 rounded-lg transition ${path === m.href ? "bg-blue-500 shadow" : "hover:bg-blue-600"}`}>
+          <Link
+            key={m.href}
+            href={m.href}
+            className={`flex items-center gap-3 px-3 py-2 rounded-lg transition ${
+              path === m.href ? "bg-blue-500 shadow" : "hover:bg-blue-600"
+            }`}
+          >
             {m.icon}
             <span className="text-sm">{m.title}</span>
           </Link>
@@ -35,7 +57,9 @@ export default function Sidebar() {
       </nav>
 
       <div className="mt-auto">
-        <button className="w-full bg-white text-blue-700 px-3 py-2 rounded-lg font-medium hover:opacity-90">Sign Out</button>
+        <button className="w-full bg-white text-blue-700 px-3 py-2 rounded-lg font-medium hover:opacity-90">
+          Sign Out
+        </button>
       </div>
     </aside>
   );

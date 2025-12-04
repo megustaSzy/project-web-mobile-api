@@ -1,17 +1,28 @@
 /* eslint-disable @next/next/no-img-element */
-// app/admin/components/TopBar.tsx
 "use client";
-export default function TopBar() {
+import { Menu } from "lucide-react";
+
+export default function TopBar({ toggleSidebar }: { toggleSidebar: () => void }) {
   return (
     <header className="w-full bg-white shadow-sm px-6 py-4 flex justify-between items-center">
-      <div>
-        <h2 className="text-lg font-semibold text-gray-700">Admin Dashboard</h2>
-        <p className="text-sm text-gray-400">Welcome back</p>
+      <div className="flex items-center gap-3">
+        <button onClick={toggleSidebar} className="text-gray-700">
+          <Menu size={22} />
+        </button>
+
+        <input
+          type="search"
+          placeholder="Search..."
+          className="border rounded-lg px-3 py-2 text-sm w-64"
+        />
       </div>
 
       <div className="flex items-center gap-4">
-        <input type="search" placeholder="Search..." className="hidden md:inline-block border rounded-lg px-3 py-2 text-sm" />
-        <img src="/images/user-default.png" alt="User" className="w-9 h-9 rounded-full border" />
+        <img
+          src="/images/user-default.png"
+          alt="User"
+          className="w-10 h-10 rounded-full border"
+        />
       </div>
     </header>
   );
