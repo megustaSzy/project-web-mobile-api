@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -7,20 +7,55 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { useLocalSearchParams } from "expo-router/build/hooks";
 
-
-
+// Contoh daftar destinasi
+const destinations = [
+  { id: 1, name: "Rio The Beach", location: "Kalianda", image: require("../../assets/images/hero1.jpg") },
+  { id: 2, name: "Senaya Beach", location: "Kalianda", image: require("../../assets/images/hero2.jpg") },
+  { id: 3, name: "Green Elty Krakatoa", location: "Kalianda", image: require("../../assets/images/hero3.jpg") },
+];
 
 export default function HomeScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams();
+
+  const [searchText, setSearchText] = useState("");
+  const [history, setHistory] = useState([]);
+  const [showHistory, setShowHistory] = useState(false); // untuk toggle tampil history
+
+  const handleSearch = (textInput: string) => {
+    const query = (textInput ? textInput : searchText).trim();
+    if (!query) return;
+
+    // update history
+    setHistory(prevHistory => {
+      const arr = Array.isArray(prevHistory) ? prevHistory : [];
+      return arr.includes(query) ? arr : [query, ...arr];
+    });
+
+    // cari destinasi
+    const results = destinations.filter(dest =>
+      dest.name.toLowerCase().includes(query.toLowerCase())
+    );
+
+    if (results.length > 0) {
+      router.push({
+        pathname: "/pesan/page",
+        params: { id: results[0].id },
+      });
+    } else {
+      Alert.alert("Destinasi tidak ditemukan", "Coba kata kunci lain.");
+    }
+
+    setShowHistory(false); // sembunyikan history setelah search
+  };
+
+
   return (
     <ScrollView style={styles.container}>
-      
       {/* Blue Header */}
       <View style={styles.headerBg} />
 
@@ -31,26 +66,37 @@ export default function HomeScreen() {
 
         <Text style={[styles.label, { marginTop: 15 }]}>Tujuan</Text>
 
-        {/* Input tujuan */}
         <View style={styles.inputWrapper}>
           <Ionicons name="location-outline" size={20} color="#888" />
           <TextInput
             style={styles.input}
             placeholder="Kalianda"
             placeholderTextColor="#777"
+            value={searchText}
+            onChangeText={setSearchText}
           />
         </View>
 
-        {/* Buttons */}
         <View style={styles.rowBetween}>
-          <TouchableOpacity style={styles.searchBtn}>
+          <TouchableOpacity style={styles.searchBtn} onPress={() => handleSearch(searchText)}>
             <Text style={styles.searchText}>Search</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => setShowHistory(!showHistory)}>
             <Text style={styles.historyBtn}>Cari Histori ➜</Text>
           </TouchableOpacity>
         </View>
+
+        {/* Tampilkan history hanya jika showHistory true */}
+        {showHistory && history.length > 0 && (
+          <View style={{ marginTop: 10, padding: 10, backgroundColor: "#f1f1f1", borderRadius: 10 }}>
+            {history.map((h, i) => (
+              <TouchableOpacity key={i} onPress={() => handleSearch(h)}>
+                <Text style={{ color: "#555", fontSize: 14, paddingVertical: 4 }}>• {h}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
       </View>
 
       {/* Tujuan Wisata Favorit */}
@@ -90,7 +136,7 @@ export default function HomeScreen() {
 
 
       {/* Daftar Destinasi */}
-      <Text style={styles.sectionTitle}>Tujuan Wisata Favorit</Text>
+      <Text style={styles.sectionTitle}>Daftar Destinasi Kabupaten</Text>
       <ScrollView 
   horizontal 
   showsHorizontalScrollIndicator={false} 
