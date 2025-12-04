@@ -15,18 +15,10 @@ export const authController = {
   async login(req: Request, res: Response) {
     try {
       const { email, password } = req.body;
-
       const { user, accessToken, refreshToken } = await authService.loginUser(
         email,
         password
       );
-
-      // res.cookie("refreshToken", refreshToken, {
-      //   httpOnly: true,
-      //   secure: process.env.NODE_ENV === "production",
-      //   sameSite: "strict",
-      //   maxAge: 7 * 24 * 60 * 60 * 1000,
-      // });
 
       return ResponseData.ok(
         res,
@@ -40,11 +32,13 @@ export const authController = {
 
   async refreshToken(req: Request, res: Response) {
     try {
-      const token = req.cookies.refreshToken;
-      if (!token)
-        return ResponseData.unauthorized(res, "refresh token tidak ditemukan");
+      const { refreshToken } = req.body;
 
-      const newAccessToken = await authService.refreshAccessToken(token);
+      if (!refreshToken) {
+        return ResponseData.unauthorized(res, "refresh token tidak ditemukan");
+      }
+
+      const newAccessToken = await authService.refreshAccessToken(refreshToken);
 
       return ResponseData.ok(
         res,
@@ -58,21 +52,21 @@ export const authController = {
 
   async logout(req: Request, res: Response) {
     try {
-      const token = req.cookies.refreshToken;
-      if (token) await authService.logoutUser(token);
+      const { refreshToken } = req.body;
 
-      res.clearCookie("refreshToken");
+      if (refreshToken) {
+        await authService.logoutUser(refreshToken);
+      }
 
       return ResponseData.ok(res, null, "logout berhasil");
     } catch (error: any) {
-      return ResponseData.serverError(res, error);
+      return ResponseData.serverError(res, error.message);
     }
   },
 
   async googleCallback(req: Request, res: Response) {
     try {
       const profile = (req as any).user;
-
       if (!profile) {
         return ResponseData.unauthorized(res, "Profil Google tidak ditemukan");
       }
@@ -80,14 +74,6 @@ export const authController = {
       const { user, accessToken, refreshToken } =
         await authService.loginWithGoogle(profile);
 
-      // res.cookie("refreshToken", refreshToken, {
-      //   httpOnly: true,
-      //   secure: process.env.NODE_ENV === "production",
-      //   sameSite: "strict",
-      //   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 hari
-      // });
-
-      // Kembalikan JSON karena belum ada frontend
       return ResponseData.ok(
         res,
         { user, accessToken, refreshToken },
@@ -102,66 +88,28 @@ export const authController = {
     try {
       const message = await authService.requestOtp(req.body.email);
       return ResponseData.ok(res, message, "OTP dikirim");
-    } catch (error) {
-      return ResponseData.serverError(res, error);
+    } catch (error: any) {
+      return ResponseData.serverError(res, error.message);
     }
   },
 
   async verifyOtp(req: Request, res: Response) {
     try {
       const { email, otp } = req.body;
-
       const message = await authService.verifyOtp(email, otp);
-
       return ResponseData.ok(res, message, "OTP Valid");
-    } catch (error) {
-      return ResponseData.serverError(res, error);
+    } catch (error: any) {
+      return ResponseData.serverError(res, error.message);
     }
   },
 
   async resetPassword(req: Request, res: Response) {
     try {
       const { email, newPassword } = req.body;
-
       const message = await authService.resetPassword(email, newPassword);
-
       return ResponseData.ok(res, message, "password berhasil diperbarui");
-    } catch (error) {
-      return ResponseData.serverError(res, error);
+    } catch (error: any) {
+      return ResponseData.serverError(res, error.message);
     }
   },
-
-  // async googleCallback(req: Request, res: Response) {
-  //   try {
-  //     const profile = (req as any).user;
-
-  //     if (!profile) {
-  //       return ResponseData.unauthorized(res, "Profil Google tidak ditemukan");
-  //     }
-
-  //     const { user, accessToken, refreshToken } =
-  //       await authService.loginWithGoogle(profile);
-
-  //     // set cookie
-  //     res.cookie("accessToken", accessToken, {
-  //       httpOnly: true,
-  //       secure: process.env.NODE_ENV === "production",
-  //       sameSite: "lax",
-  //       maxAge: 60 * 60 * 1000
-  //     });
-
-  //     res.cookie("refreshToken", refreshToken, {
-  //       httpOnly: true,
-  //       secure: process.env.NODE_ENV === "production",
-  //       sameSite: "strict",
-  //       maxAge: 7 * 24 * 60 * 60 * 1000
-  //     });
-
-  //     // ⬅️ redirect ke frontend, token tetap dikirim via cookie
-  //     return res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
-
-  //   } catch (err: any) {
-  //     return ResponseData.serverError(res, err.message);
-  //   }
-  // }
 };
