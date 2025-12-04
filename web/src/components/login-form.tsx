@@ -12,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -19,7 +20,9 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle, XCircle } from "lucide-react";
 
-/*  Komponen popup animasi */
+/* -----------------------------------------
+   POPUP ANIMASI
+------------------------------------------ */
 function AuthModal({
   open,
   status,
@@ -70,6 +73,9 @@ function AuthModal({
   );
 }
 
+/* -----------------------------------------
+   LOGIN FORM (USER & ADMIN)
+------------------------------------------ */
 export function LoginForm({
   className,
   ...props
@@ -82,7 +88,9 @@ export function LoginForm({
   );
   const [modalMessage, setModalMessage] = useState("");
 
-  // ✅ Fungsi Login
+  // -----------------------------------------
+  // FUNGSI LOGIN
+  // -----------------------------------------
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -100,13 +108,12 @@ export function LoginForm({
 
     try {
       setLoading(true);
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password }),
         }
       );
@@ -115,23 +122,24 @@ export function LoginForm({
       console.log("Respon API:", data);
 
       if (response.ok) {
-        //  Simpan token dari API (pastikan nama field benar)
         const token = data.accessToken || data.token;
+        const role = data.user?.role || "user"; // "admin" | "user"
 
-        if (token) {
-          localStorage.setItem("token", token);
-          console.log("Token disimpan:", token);
-        }
+        if (token) localStorage.setItem("token", token);
 
-        //  Tampilkan popup sukses
+        // tampilkan popup berhasil
         setModalStatus("success");
-        setModalMessage("Login berhasil! Selamat datang kembali 👋");
+        setModalMessage(`Login berhasil sebagai ${role}!`);
         setModalOpen(true);
 
-        // Tutup otomatis + redirect
         setTimeout(() => {
           setModalOpen(false);
-          router.push("/");
+
+          if (role === "Admin") {
+            router.push("/admin");
+          } else {
+            router.push("/");
+          }
         }, 1500);
       } else {
         setModalStatus("error");
@@ -185,13 +193,7 @@ export function LoginForm({
                 >
                   Email
                 </label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  className="w-full"
-                  required
-                />
+                <Input id="email" type="email" placeholder="you@example.com" />
               </div>
 
               <div>
@@ -205,14 +207,13 @@ export function LoginForm({
                   id="password"
                   type="password"
                   placeholder="••••••••"
-                  className="w-full"
                   required
                 />
               </div>
 
               <Button
                 type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition-all duration-200"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg"
                 disabled={loading}
               >
                 {loading ? "Sedang masuk..." : "Login"}
@@ -225,6 +226,7 @@ export function LoginForm({
                 </span>
               </div>
 
+              {/* Login Google */}
               <Button
                 variant="outline"
                 type="button"
@@ -239,10 +241,7 @@ export function LoginForm({
 
               <p className="text-center text-sm text-gray-500 pt-2">
                 Belum punya akun?{" "}
-                <a
-                  href="/signup"
-                  className="text-blue-600 hover:underline font-medium"
-                >
+                <a href="/signup" className="text-blue-600 hover:underline">
                   Daftar sekarang
                 </a>
               </p>
@@ -251,7 +250,7 @@ export function LoginForm({
         </Card>
       </section>
 
-      {/*  Popup otomatis */}
+      {/* Popup */}
       <AuthModal open={modalOpen} status={modalStatus} message={modalMessage} />
     </>
   );

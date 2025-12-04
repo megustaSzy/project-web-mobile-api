@@ -1,66 +1,65 @@
 "use client";
-
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import {
+  LayoutDashboard,
+  Mountain,
+  Tags,
+  MapPin,
+  Users,
+  FileText,
+  ShoppingCart,
+  Settings,
+} from "lucide-react";
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen }: { isOpen: boolean }) {
+  const path = usePathname();
+
+  const menu = [
+    { title: "Dashboard", href: "/admin", icon: <LayoutDashboard size={16} /> },
+    { title: "Destinasi", href: "/admin/destinasi", icon: <Mountain size={16} /> },
+    { title: "Kategori Wisata", href: "/admin/kategori-wisata", icon: <Tags size={16} /> },
+    { title: "Kategori Kabupaten", href: "/admin/kategori-kabupaten", icon: <MapPin size={16} /> },
+    { title: "Pickup", href: "/admin/pickup-penjemputan", icon: <MapPin size={16} /> },
+    { title: "Pemesanan", href: "/admin/pesanan", icon: <ShoppingCart size={16} /> },
+    { title: "Pengguna", href: "/admin/manajement-pengguna", icon: <Users size={16} /> },
+    { title: "Laporan", href: "/admin/laporan", icon: <FileText size={16} /> },
+    { title: "Pengaturan", href: "/admin/pengaturan", icon: <Settings size={16} /> },
+  ];
+
   return (
-    <aside className="w-64 h-screen bg-white border-r shadow-sm p-4 hidden md:flex flex-col">
-      <h1 className="text-xl font-semibold mb-6">Studio Admin</h1>
-
-      <Button className="w-full mb-4">+ Quick Create</Button>
-
-      <div className="flex flex-col gap-1 text-sm">
-        <span className="text-xs font-semibold text-slate-500 px-2">Kelola</span>
-
-        <Link href="/admin">
-  <Button variant="ghost" className="justify-start w-full">Beranda</Button>
-</Link>
-
-<Link href="/admin/manajment-pengguna">
-  <Button variant="ghost" className="justify-start w-full">
-    Manajement Pengguna
-  </Button>
-</Link>
-
-
-
-       <Link href="/admin/manajment-destinasi">
-  <Button variant="ghost" className="justify-start w-full">
-    Manajement Destinasi
-  </Button>
-</Link>
-
-            <Link href="/admin/kategori-wisata">
-  <Button variant="ghost" className="justify-start w-full">
-    Kategori Wisata
-  </Button>
-</Link>
-             <Link href="/admin/kategori-kabupaten">
-  <Button variant="ghost" className="justify-start w-full">
-    Kategori Kabupaten
-  </Button>
-</Link>
-        <Link href="/admin/tiket">
-  <Button variant="ghost" className="justify-start w-full">
-    Tiket
-  </Button>
-</Link>
+    <aside
+      className={`
+        fixed left-0 top-0 h-full z-40 
+        bg-blue-700 text-white p-5 shadow-lg w-64
+        transition-transform duration-300 ease-in-out
+        ${isOpen ? "translate-x-0" : "-translate-x-full"}
+      `}
+    >
+      <div className="mb-6 text-center">
+        <h1 className="text-2xl font-bold">Admin Panel</h1>
+        <p className="text-xs opacity-80">LamiGo</p>
       </div>
 
-      <div className="mt-auto pt-4">
-        <div className="flex items-center gap-3 p-2 border rounded-lg">
-          <Avatar className="h-10 w-10">
-            <AvatarImage src="/images/logo.png" />
-            <AvatarFallback>LG</AvatarFallback>
-          </Avatar>
+      <nav className="flex flex-col gap-2">
+        {menu.map((m) => (
+          <Link
+            key={m.href}
+            href={m.href}
+            className={`flex items-center gap-3 px-3 py-2 rounded-lg transition ${
+              path === m.href ? "bg-blue-500 shadow" : "hover:bg-blue-600"
+            }`}
+          >
+            {m.icon}
+            <span className="text-sm">{m.title}</span>
+          </Link>
+        ))}
+      </nav>
 
-          <div className="text-sm">
-            <p className="font-medium">LamiGo</p>
-            <p className="text-xs text-slate-500">LamiGo@Yahoo.com</p>
-          </div>
-        </div>
+      <div className="mt-auto">
+        <button className="w-full bg-white text-blue-700 px-3 py-2 rounded-lg font-medium hover:opacity-90">
+          Sign Out
+        </button>
       </div>
     </aside>
   );

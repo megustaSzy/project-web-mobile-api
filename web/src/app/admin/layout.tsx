@@ -1,17 +1,28 @@
 "use client";
-
+import { useState } from "react";
 import Sidebar from "./components/Sidebar";
 import TopBar from "./components/TopBar";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="min-h-screen w-full bg-[#f5f6f8] flex text-slate-800">
-      <Sidebar />
+  const [open, setOpen] = useState(true);
 
-      <main className="flex-1 p-6 space-y-6">
-        <TopBar />
-        {children}
-      </main>
+  return (
+    <div className="flex">
+
+      {/* SIDEBAR */}
+      <Sidebar isOpen={open} />
+
+      {/* MAIN CONTENT */}
+      <div
+        className={`
+          w-full min-h-screen bg-gray-50
+          transition-all duration-300 ease-in-out
+          ${open ? "ml-64" : "ml-0"}
+        `}
+      >
+        <TopBar toggleSidebar={() => setOpen(!open)} />
+        <main className="p-6">{children}</main>
+      </div>
     </div>
   );
 }

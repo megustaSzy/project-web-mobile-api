@@ -1,26 +1,28 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
+import { Menu } from "lucide-react";
 
-import { Input } from "@/components/ui/input";
-import { Search, Bell, Settings } from "lucide-react";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-
-export default function TopBar() {
+export default function TopBar({ toggleSidebar }: { toggleSidebar: () => void }) {
   return (
-    <header className="flex items-center justify-between">
-      {/* SEARCH */}
-      <div className="relative">
-        <Search className="absolute left-2 top-2.5 h-4 w-4 text-slate-400" />
-        <Input placeholder="Search..." className="pl-8 w-64" />
+    <header className="w-full bg-white shadow-sm px-6 py-4 flex justify-between items-center">
+      <div className="flex items-center gap-3">
+        <button onClick={toggleSidebar} className="text-gray-700">
+          <Menu size={22} />
+        </button>
+
+        <input
+          type="search"
+          placeholder="Search..."
+          className="border rounded-lg px-3 py-2 text-sm w-64"
+        />
       </div>
 
-      {/* ICONS */}
       <div className="flex items-center gap-4">
-        <Bell className="text-slate-500" />
-        <Settings className="text-slate-500" />
-        <Avatar>
-          <AvatarImage src="/avatar.png" />
-          <AvatarFallback>AK</AvatarFallback>
-        </Avatar>
+        <img
+          src="/images/user-default.png"
+          alt="User"
+          className="w-10 h-10 rounded-full border"
+        />
       </div>
     </header>
   );
