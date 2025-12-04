@@ -39,7 +39,7 @@ export const authService = {
     const tokenId = uuidv4();
 
     const accessToken = jwt.sign({ id: userId }, JWT_SECRET, {
-      expiresIn: "1h",
+      expiresIn: "1d",
     });
 
     const refreshToken = jwt.sign({ id: userId, tokenId }, JWT_REFRESH_SECRET, {
