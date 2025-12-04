@@ -169,13 +169,13 @@ export default function NavBarMobile() {
           ) : (
             <>
               <TouchableOpacity
-                onPress={() => router.push("/auth/login")}
+                onPress={() => router.push("../auth/login/page")}
                 style={styles.loginBtnFull}
               >
                 <Text style={styles.loginTxtWhite}>{t.login}</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => router.push("/auth/signup")}
+                onPress={() => router.push("../auth/signup/page")}
                 style={styles.signupBtn}
               >
                 <Text style={styles.signupTxt}>{t.signup}</Text>

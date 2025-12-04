@@ -57,7 +57,7 @@ export default function SignupForm() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.card}>
-        <Image source={require("../../../assets/images/logo.png")} style={styles.logo} />
+        <Image source={require("../../assets/images/logo.png")} style={styles.logo} />
 
         <Text style={styles.title}>Create an Account</Text>
         <Text style={styles.subtitle}>Enter your information to get started</Text>
