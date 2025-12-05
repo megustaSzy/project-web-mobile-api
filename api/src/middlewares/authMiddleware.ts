@@ -8,12 +8,13 @@ export const authMiddleware = async (
   res: Response,
   next: NextFunction
 ) => {
-  // Ambil token dari header Authorization
-  const token = req.headers.authorization?.split(" ")[1];
+  const authHeader = req.headers.authorization;
 
-  if (!token) {
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return ResponseData.unauthorized(res, "token tidak ditemukan");
   }
+
+  const token = authHeader.split(" ")[1];
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
@@ -21,8 +22,8 @@ export const authMiddleware = async (
       tokenId: string;
     };
 
-    // Cek apakah accessToken valid
-    const tokenExists = await prisma.tb_accessToken.findFirst({
+    // cek apakah tokenId masih ada (belum logout)
+    const tokenExists = await prisma.tb_accessToken.findUnique({
       where: { tokenId: decoded.tokenId },
     });
 
@@ -33,6 +34,7 @@ export const authMiddleware = async (
       );
     }
 
+    // ambil data user
     const user = await prisma.tb_user.findUnique({
       where: { id: decoded.id },
       select: { id: true, name: true, email: true, role: true },
@@ -43,8 +45,13 @@ export const authMiddleware = async (
     }
 
     (req as any).user = user;
-    next();
-  } catch (err) {
-    return ResponseData.forbidden(res, "token tidak valid atau expired");
+    return next();
+
+  } catch (err: any) {
+    if (err.name === "TokenExpiredError") {
+      return ResponseData.unauthorized(res, "token expired, silakan login kembali");
+    }
+
+    return ResponseData.forbidden(res, "token tidak valid");
   }
 };
