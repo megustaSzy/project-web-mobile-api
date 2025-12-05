@@ -7,10 +7,13 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  Pressable,
   Alert,
+  Platform,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { useLocalSearchParams } from "expo-router";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 const destinations = [
   {
@@ -18,7 +21,7 @@ const destinations = [
     name: "Rio The Beach",
     location: "Kalianda",
     image: require("../../assets/images/hero1.jpg"),
-    desc: "Pantai Rio The Beach menghadirkan keindahan pasir putih dan ombak tenang, cocok untuk bersantai dan menikmati suasana laut.",
+    desc: "Pantai Rio The Beach menghadirkan keindahan pasir putih dan ombak tenang.",
     price: 120000,
   },
   {
@@ -26,7 +29,7 @@ const destinations = [
     name: "Senaya Beach",
     location: "Kalianda",
     image: require("../../assets/images/hero2.jpg"),
-    desc: "Senaya Beach menawarkan panorama laut biru dan angin sejuk, tempat ideal untuk bersantai dan menikmati keindahan alam.",
+    desc: "Senaya Beach menawarkan panorama laut biru dan angin sejuk.",
     price: 120000,
   },
   {
@@ -34,155 +37,263 @@ const destinations = [
     name: "Green Elty Krakatoa",
     location: "Kalianda",
     image: require("../../assets/images/hero3.jpg"),
-    desc: "Green Elty Krakatoa menyajikan pemandangan laut yang menakjubkan dengan suasana tenang dan fasilitas nyaman untuk berlibur.",
+    desc: "Green Elty Krakatoa menyajikan pemandangan laut yang menakjubkan.",
     price: 120000,
   },
 ];
 
+const formatRupiah = (value: number) =>
+  new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+  }).format(value);
+
 export default function PesanPage() {
   const params = useLocalSearchParams();
-  const destId = Number(params.id); // ubah ke number
-  const selectedDest = destinations.find((d) => d.id === destId);
+  const destId = Number(params.id);
+  const selected = destinations.find((d) => d.id === destId);
 
-  const [pickup, setPickup] = useState("");
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
-  const [people, setPeople] = useState("1");
+  const [pickup, setPickup] = useState<string>("");
+  const [date, setDate] = useState<string>("");
+  const [time, setTime] = useState<string>("");
+  const [people, setPeople] = useState<string>("1");
+
+  // show pickers
+  const [showDate, setShowDate] = useState<boolean>(false);
+  const [showTime, setShowTime] = useState<boolean>(false);
+
+  // for controlled DateTimePicker value
+  const [tempDate, setTempDate] = useState<Date>(new Date());
+  const [tempTime, setTempTime] = useState<Date>(new Date());
 
   const handleSubmit = () => {
-    Alert.alert("Pesanan Berhasil!", "Pesananmu telah dikonfirmasi 🎉");
+    // basic validation
+    if (!pickup) {
+      Alert.alert("Lengkapi data", "Pilih lokasi penjemputan.");
+      return;
+    }
+    if (!date) {
+      Alert.alert("Lengkapi data", "Pilih tanggal penjemputan.");
+      return;
+    }
+    if (!time) {
+      Alert.alert("Lengkapi data", "Pilih jam penjemputan.");
+      return;
+    }
+    if (!people || Number(people) <= 0) {
+      Alert.alert("Jumlah tiket tidak valid", "Masukkan jumlah tiket minimal 1.");
+      return;
+    }
+
+    Alert.alert("Berhasil!", "Pesanan kamu telah dikonfirmasi 🎉");
   };
 
-  if (!selectedDest) {
+  // date picker handler
+  const onChangeDate = (_event: any, selectedDate?: Date) => {
+    setShowDate(Platform.OS === "ios"); // keep open on iOS, close on Android
+    if (selectedDate) {
+      setTempDate(selectedDate);
+      const iso = selectedDate.toISOString().split("T")[0]; // YYYY-MM-DD
+      setDate(iso);
+    }
+  };
+
+  // time picker handler
+  const onChangeTime = (_event: any, selectedTime?: Date) => {
+    setShowTime(Platform.OS === "ios");
+    if (selectedTime) {
+      setTempTime(selectedTime);
+      const hh = selectedTime.getHours().toString().padStart(2, "0");
+      const mm = selectedTime.getMinutes().toString().padStart(2, "0");
+      setTime(`${hh}:${mm}`);
+    }
+  };
+
+  if (!selected) {
     return (
       <View style={styles.center}>
-        <Text style={styles.title}>🚫 Destinasi tidak ditemukan</Text>
-        <Text style={styles.text}>Silakan kembali ke halaman utama untuk memilih destinasi.</Text>
+        <Text style={styles.title}>Destinasi tidak ditemukan</Text>
       </View>
     );
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {/* HEADER */}
+    <ScrollView style={{ backgroundColor: "#fff" }}>
       <View style={styles.header}>
-        <Image source={selectedDest.image} style={styles.image} />
-        <Text style={styles.name}>{selectedDest.name}</Text>
-        <Text style={styles.location}>{selectedDest.location}</Text>
-        <Text style={styles.desc}>{selectedDest.desc}</Text>
+        <Image source={selected.image} style={styles.image} />
+
+        <Text style={styles.name}>{selected.name}</Text>
+        <Text style={styles.location}>{selected.location}</Text>
+
+        <Text style={styles.price}>{formatRupiah(selected.price)}</Text>
+
+        <Text style={styles.desc}>{selected.desc}</Text>
       </View>
 
       {/* FORM */}
       <View style={styles.form}>
-        <Text style={styles.label}>Lokasi Penjemputan</Text>
-        <View style={styles.inputWrapper}>
-          <Picker
-            selectedValue={pickup}
-            onValueChange={(itemValue) => setPickup(itemValue)}
-          >
-            <Picker.Item label="Pilih lokasi" value="" />
-            <Picker.Item label="Terminal Rajabasa" value="Terminal Rajabasa" />
-            <Picker.Item label="Terminal Kemiling" value="Terminal Kemiling" />
-            <Picker.Item label="Stasiun Tanjung Karang" value="Stasiun Tanjung Karang" />
-          </Picker>
+        {/* ROW 1 — Pickup & People */}
+        <View style={styles.row}>
+          <View style={styles.col}>
+            <Text style={styles.label}>Lokasi Penjemputan</Text>
+            <View style={styles.selectBox}>
+              <Picker
+                selectedValue={pickup}
+                onValueChange={(itemValue) => setPickup(String(itemValue))}
+                style={{ height: 45 }}
+              >
+                <Picker.Item label="Pilih lokasi" value="" />
+                <Picker.Item label="Terminal Rajabasa" value="Terminal Rajabasa" />
+                <Picker.Item label="Terminal Kemiling" value="Terminal Kemiling" />
+                <Picker.Item label="Stasiun Tanjung Karang" value="Stasiun Tanjung Karang" />
+              </Picker>
+            </View>
+          </View>
+
+          <View style={styles.col}>
+            <Text style={styles.label}>Jumlah Tiket</Text>
+            <TextInput
+              style={styles.input}
+              keyboardType="numeric"
+              value={people}
+              onChangeText={(v) => setPeople(v.replace(/[^0-9]/g, ""))}
+              placeholder="1"
+            />
+          </View>
         </View>
 
-        <Text style={styles.label}>Tanggal</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="YYYY-MM-DD"
-          value={date}
-          onChangeText={setDate}
-        />
+        {/* ROW 2 — Date & Time */}
+        <View style={styles.row}>
+          <View style={styles.col}>
+            <Text style={styles.label}>Tanggal</Text>
 
-        <Text style={styles.label}>Jam</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="07.00 - 16.00"
-          value={time}
-          onChangeText={setTime}
-        />
+            <TouchableOpacity style={styles.input} onPress={() => setShowDate(true)}>
+              <Text style={{ color: date ? "#111" : "#9CA3AF" }}>{date || "Pilih Tanggal"}</Text>
+            </TouchableOpacity>
 
-        <Text style={styles.label}>Jumlah Tiket</Text>
-        <TextInput
-          style={styles.input}
-          keyboardType="numeric"
-          value={people}
-          onChangeText={setPeople}
-        />
+            {showDate && (
+              <DateTimePicker
+                value={tempDate}
+                mode="date"
+                display={Platform.OS === "ios" ? "spinner" : "calendar"}
+                onChange={onChangeDate}
+              />
+            )}
+          </View>
 
-        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+          <View style={styles.col}>
+            <Text style={styles.label}>Jam</Text>
+
+            <TouchableOpacity style={styles.input} onPress={() => setShowTime(true)}>
+              <Text style={{ color: time ? "#111" : "#9CA3AF" }}>{time || "Pilih Jam"}</Text>
+            </TouchableOpacity>
+
+            {showTime && (
+              <DateTimePicker
+                value={tempTime}
+                mode="time"
+                is24Hour={true}
+                display={Platform.OS === "ios" ? "spinner" : "clock"}
+                onChange={onChangeTime}
+              />
+            )}
+          </View>
+        </View>
+
+        {/* KONFIRMASI */}
+        <Pressable
+          style={({ pressed }) => [
+            styles.button,
+            { backgroundColor: pressed ? "#1F67BB" : "#0080FF" },
+          ]}
+          onPress={handleSubmit}
+        >
           <Text style={styles.buttonText}>Konfirmasi Pesanan</Text>
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 20,
-    backgroundColor: "#e0f2ff",
-  },
   header: {
     alignItems: "center",
-    marginBottom: 20,
+    padding: 20,
+    backgroundColor: "#fff",
   },
   image: {
-    width: 180,
-    height: 180,
+    width: 350,
+    height: 150,
     borderRadius: 20,
-    marginBottom: 10,
+    marginBottom: 15,
   },
   name: {
     fontSize: 22,
-    fontWeight: "600",
-    color: "#1f2937",
+    fontWeight: "700",
+    color: "#111",
   },
   location: {
     fontSize: 14,
-    color: "#6b7280",
+    color: "#6B7280",
+  },
+  price: {
+    marginTop: 6,
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1F67BB",
   },
   desc: {
     fontSize: 14,
-    color: "#4b5563",
-    marginTop: 5,
+    color: "#4B5563",
     textAlign: "center",
+    marginTop: 10,
+    lineHeight: 20,
   },
   form: {
-    marginTop: 10,
+    padding: 20,
+    backgroundColor: "#fff",
+  },
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  col: {
+    width: "48%",
   },
   label: {
     fontSize: 14,
-    fontWeight: "500",
-    marginTop: 10,
-    marginBottom: 5,
+    fontWeight: "600",
+    marginTop: 12,
+    marginBottom: 6,
+    color: "#111",
   },
-  inputWrapper: {
+  selectBox: {
     borderWidth: 1,
-    borderColor: "#d1d5db",
+    borderColor: "#DDE3EA",
     borderRadius: 12,
     marginBottom: 10,
+    overflow: "hidden",
   },
   input: {
     borderWidth: 1,
-    borderColor: "#d1d5db",
+    borderColor: "#DDE3EA",
     borderRadius: 12,
-    padding: 10,
-    marginBottom: 10,
+    padding: 12,
     fontSize: 14,
-    color: "#1f2937",
+    marginBottom: 10,
+    justifyContent: "center",
   },
   button: {
-    backgroundColor: "#2563eb",
     padding: 15,
     borderRadius: 12,
     alignItems: "center",
-    marginTop: 10,
+    marginTop: 18,
   },
   buttonText: {
     color: "#fff",
-    fontWeight: "600",
+    fontWeight: "700",
+    fontSize: 16,
   },
   center: {
     flex: 1,
@@ -191,13 +302,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   title: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "600",
-    marginBottom: 10,
-  },
-  text: {
-    fontSize: 14,
-    color: "#6b7280",
-    textAlign: "center",
   },
 });

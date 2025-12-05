@@ -86,7 +86,7 @@ export default function LoginForm() {
 
         <Text style={styles.title}>Login Akun</Text>
         <Text style={styles.subtitle}>
-          Masuk ke akun kamu untuk melanjutkan
+          Masuk ke akun kamu untuk melanjutkan pemesanan destinasi bersama LamiGo
         </Text>
 
         <Text style={styles.label}>Email</Text>

@@ -44,10 +44,15 @@ const destinations = [
   },
 ];
 
-const formatRupiah = (value) =>
-  new Intl.NumberFormat("id-ID", {
-    style: "decimal",
-  }).format(value);
+const formatRupiah = (value: string | number | bigint): string => {
+  const number = Number(String(value).replace(/[^\d]/g, ""));
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0
+  }).format(number);
+};
+
 
 export default function DetailPage() {
   const router = useRouter();

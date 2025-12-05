@@ -16,8 +16,15 @@ import { Feather, Umbrella, Mountain, Layers, MapPin, Droplet } from "lucide-rea
 // ===========================================================================
 // ✔ FORMAT RUPIAH FIX
 // ===========================================================================
-const formatRupiah = (value: string | number | bigint) =>
-  new Intl.NumberFormat("id-ID", { style: "decimal" }).format(value);
+const formatRupiah = (value: string | number | bigint): string => {
+  const number = Number(String(value).replace(/[^\d]/g, ""));
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0
+  }).format(number);
+};
+
 
 // ===========================================================================
 // ✔ DESTINASI + HARGA DITAMBAHKAN (WAJIB AGAR TIDAK ERROR)
