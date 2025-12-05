@@ -8,26 +8,23 @@ export const paymentService = {
         order_id: `ORDER-${order.id}`,
         gross_amount: order.totalPrice,
       },
-
       customer_details: {
         first_name: order.userName,
         email: order.userEmail || "",
       },
-      enable_payments: ["gopay", "bank_transfer", "qris", "credit_card"],
+      enabled_payments: ["gopay", "bank_transfer", "qris", "credit_card"],
     };
 
     const transaction = await snap.createTransaction(params);
 
     await orderService.updateOrderPaymentData(order.id, {
-        snapToken: transaction.token,
-        snapRedirectUrl: transaction.redirect_url
+      snapToken: transaction.token,
+      snapRedirectUrl: transaction.redirect_url,
     });
 
-
     return {
-        snapToken: transaction.token,
-        redirectUrl: transaction.redirect_url
-    }
+      snapToken: transaction.token,
+      redirectUrl: transaction.redirect_url,
+    };
   },
-
 };
