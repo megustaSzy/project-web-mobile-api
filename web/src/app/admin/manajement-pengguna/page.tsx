@@ -62,7 +62,7 @@ export default function UsersPage() {
           Manajemen Pengguna
         </h2>
 
-        <Button className="flex items-center gap-2">
+        <Button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white">
           <Plus size={16} />
           Tambah Pengguna
         </Button>
@@ -72,7 +72,7 @@ export default function UsersPage() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b bg-gray-50 text-gray-600">
-              <th className="p-3 text-left">#</th>
+              <th className="p-3 text-left">No</th>
               <th className="p-3 text-left">Nama</th>
               <th className="p-3 text-left">Email</th>
               <th className="p-3 text-left">Role</th>
@@ -120,12 +120,11 @@ export default function UsersPage() {
 
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>
-                          Hapus Pengguna?
-                        </AlertDialogTitle>
+                        <AlertDialogTitle>Hapus Pengguna?</AlertDialogTitle>
 
                         <AlertDialogDescription>
-                          Tindakan ini tidak dapat dibatalkan. Pengguna yang dihapus tidak bisa dikembalikan.
+                          Tindakan ini tidak dapat dibatalkan. Pengguna yang
+                          dihapus tidak bisa dikembalikan.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
 
