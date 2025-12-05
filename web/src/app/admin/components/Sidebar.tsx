@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation"; // tambahkan useRouter
 import {
   LayoutDashboard,
   Mountain,
@@ -14,34 +14,70 @@ import {
 
 export default function Sidebar({ isOpen }: { isOpen: boolean }) {
   const path = usePathname();
+  const router = useRouter(); // inisialisasi router
 
   const menu = [
     { title: "Dashboard", href: "/admin", icon: <LayoutDashboard size={16} /> },
-    { title: "Destinasi", href: "/admin/destinasi", icon: <Mountain size={16} /> },
-    { title: "Kategori Wisata", href: "/admin/kategori-wisata", icon: <Tags size={16} /> },
-    { title: "Kategori Kabupaten", href: "/admin/kategori-kabupaten", icon: <MapPin size={16} /> },
-    { title: "Pickup", href: "/admin/pickup-penjemputan", icon: <MapPin size={16} /> },
-    { title: "Pemesanan", href: "/admin/pesanan", icon: <ShoppingCart size={16} /> },
-    { title: "Pengguna", href: "/admin/manajement-pengguna", icon: <Users size={16} /> },
+    {
+      title: "Destinasi",
+      href: "/admin/destinasi",
+      icon: <Mountain size={16} />,
+    },
+    {
+      title: "Kategori Wisata",
+      href: "/admin/kategori-wisata",
+      icon: <Tags size={16} />,
+    },
+    {
+      title: "Kategori Kabupaten",
+      href: "/admin/kategori-kabupaten",
+      icon: <MapPin size={16} />,
+    },
+    {
+      title: "Pickup",
+      href: "/admin/pickup-penjemputan",
+      icon: <MapPin size={16} />,
+    },
+    {
+      title: "Pemesanan",
+      href: "/admin/pesanan",
+      icon: <ShoppingCart size={16} />,
+    },
+    {
+      title: "Pengguna",
+      href: "/admin/manajement-pengguna",
+      icon: <Users size={16} />,
+    },
     { title: "Laporan", href: "/admin/laporan", icon: <FileText size={16} /> },
-    { title: "Pengaturan", href: "/admin/pengaturan", icon: <Settings size={16} /> },
+    {
+      title: "Pengaturan",
+      href: "/admin/pengaturan",
+      icon: <Settings size={16} />,
+    },
   ];
+
+  // fungsi logout
+  const handleLogout = () => {
+    localStorage.removeItem("token"); // hapus token login jika ada
+    router.push("/login"); // redirect ke halaman login
+  };
 
   return (
     <aside
       className={`
-        fixed left-0 top-0 h-full z-40 
-        bg-blue-700 text-white p-5 shadow-lg w-64
-        transition-transform duration-300 ease-in-out
-        ${isOpen ? "translate-x-0" : "-translate-x-full"}
-      `}
+    fixed left-0 top-0 h-full z-40 
+    bg-blue-700 text-white p-5 shadow-lg w-64
+    transition-transform duration-300 ease-in-out
+    ${isOpen ? "translate-x-0" : "-translate-x-full"}
+    flex flex-col
+  `}
     >
       <div className="mb-6 text-center">
         <h1 className="text-2xl font-bold">Admin Panel</h1>
         <p className="text-xs opacity-80">LamiGo</p>
       </div>
 
-      <nav className="flex flex-col gap-2">
+      <nav className="flex-1 flex flex-col gap-2">
         {menu.map((m) => (
           <Link
             key={m.href}
@@ -56,9 +92,13 @@ export default function Sidebar({ isOpen }: { isOpen: boolean }) {
         ))}
       </nav>
 
+      {/* Logout button tetap di bawah */}
       <div className="mt-auto">
-        <button className="w-full bg-white text-blue-700 px-3 py-2 rounded-lg font-medium hover:opacity-90">
-          Sign Out
+        <button
+          onClick={handleLogout}
+          className="w-full bg-red-500 text-white px-3 py-2 rounded-lg font-medium hover:opacity-90"
+        >
+          Logout
         </button>
       </div>
     </aside>

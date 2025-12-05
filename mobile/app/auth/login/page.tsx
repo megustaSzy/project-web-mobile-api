@@ -10,25 +10,22 @@ import {
 } from "react-native";
 import Modal from "react-native-modal";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
-import { RootStackParamList } from "../../types"; // import tipe route
 import { useRouter } from "expo-router";
-// Ketik navigation untuk Login screen
-type LoginScreenProp = NativeStackNavigationProp<RootStackParamList, "Login">;
 
 export default function LoginForm() {
-  const navigation = useNavigation<LoginScreenProp>();
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const [modalVisible, setModalVisible] = useState(false);
-  const [modalStatus, setModalStatus] = useState<"success" | "error" | null>(null);
+  const [modalStatus, setModalStatus] = useState<"success" | "error" | null>(
+    null
+  );
   const [modalMessage, setModalMessage] = useState("");
+
   const router = useRouter();
+
   const handleLogin = async () => {
     if (!email || !password) {
       setModalStatus("error");
@@ -40,11 +37,14 @@ export default function LoginForm() {
     try {
       setLoading(true);
 
-      const res = await fetch("http://10.93.86.50:3001/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+      const res = await fetch(
+        "http://192.168.100.141:3001/api/auth/login", // ✅ API kamu
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        }
+      );
 
       const data = await res.json();
 
@@ -60,7 +60,7 @@ export default function LoginForm() {
 
         setTimeout(() => {
           setModalVisible(false);
-          navigation.navigate("Home"); // navigation sudah tipe aman
+          router.replace("/components/Landingpage"); // ⬅️ Expo Router
         }, 1500);
       } else {
         setModalStatus("error");
@@ -85,7 +85,9 @@ export default function LoginForm() {
         />
 
         <Text style={styles.title}>Login Akun</Text>
-        <Text style={styles.subtitle}>Masuk ke akun kamu untuk melanjutkan</Text>
+        <Text style={styles.subtitle}>
+          Masuk ke akun kamu untuk melanjutkan
+        </Text>
 
         <Text style={styles.label}>Email</Text>
         <TextInput
@@ -105,7 +107,7 @@ export default function LoginForm() {
         />
 
         <TouchableOpacity
-          onPress={() => router.push("../forgot-password/page")}
+          onPress={() => router.push("/auth/forgot-password/page")}
           style={{ alignSelf: "flex-end", marginTop: 5 }}
         >
           <Text style={styles.footerText}>Lupa Password?</Text>
@@ -116,7 +118,11 @@ export default function LoginForm() {
           onPress={handleLogin}
           disabled={loading}
         >
-          {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Login</Text>}
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Login</Text>
+          )}
         </TouchableOpacity>
 
         <View style={styles.orContainer}>
@@ -132,10 +138,7 @@ export default function LoginForm() {
 
         <Text style={styles.footerText}>
           Belum punya akun?{" "}
-          <Text
-            style={styles.signup}
-            onPress={() => router.push("../signup/page")}
-          >
+          <Text style={styles.signup} onPress={() => router.push("/auth/signup/page")}>
             Daftar sekarang
           </Text>
         </Text>
@@ -156,14 +159,18 @@ export default function LoginForm() {
           ]}
         >
           <Ionicons
-            name={modalStatus === "success" ? "checkmark-circle" : "close-circle"}
+            name={
+              modalStatus === "success" ? "checkmark-circle" : "close-circle"
+            }
             size={60}
             color={modalStatus === "success" ? "#059669" : "#DC2626"}
           />
           <Text
             style={[
               styles.modalTitle,
-              modalStatus === "success" ? { color: "#059669" } : { color: "#DC2626" },
+              modalStatus === "success"
+                ? { color: "#059669" }
+                : { color: "#DC2626" },
             ]}
           >
             {modalStatus === "success" ? "Berhasil!" : "Gagal!"}
@@ -174,9 +181,6 @@ export default function LoginForm() {
     </View>
   );
 }
-
-// ...styles sama seperti sebelumnya
-
 
 const styles = StyleSheet.create({
   container: {

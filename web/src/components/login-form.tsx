@@ -13,16 +13,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle, XCircle } from "lucide-react";
 
-/* -----------------------------------------
-   POPUP ANIMASI
------------------------------------------- */
+// /* -----------------------------------------
+//    POPUP ANIMASI
+// ------------------------------------------ */
 function AuthModal({
   open,
   status,
@@ -73,9 +71,7 @@ function AuthModal({
   );
 }
 
-/* -----------------------------------------
-   LOGIN FORM (USER & ADMIN)
------------------------------------------- */
+//  LOGIN FORM (USER & ADMIN)
 export function LoginForm({
   className,
   ...props
@@ -88,9 +84,6 @@ export function LoginForm({
   );
   const [modalMessage, setModalMessage] = useState("");
 
-  // -----------------------------------------
-  // FUNGSI LOGIN
-  // -----------------------------------------
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -122,12 +115,18 @@ export function LoginForm({
       console.log("Respon API:", data);
 
       if (response.ok) {
-        const token = data.accessToken || data.token;
-        const role = data.user?.role || "user"; // "admin" | "user"
+        // ambil role dari data.data.user
+        const role = (data.data?.user?.role || "user").toLowerCase().trim();
 
+        const token = data.data?.accessToken;
+
+        // Simpan token & role
         if (token) localStorage.setItem("token", token);
+        localStorage.setItem("role", role);
 
-        // tampilkan popup berhasil
+        document.cookie = `token=${token}; path=/; max-age=86400`;
+        document.cookie = `role=${role}; path=/; max-age=86400`;
+
         setModalStatus("success");
         setModalMessage(`Login berhasil sebagai ${role}!`);
         setModalOpen(true);
@@ -135,8 +134,9 @@ export function LoginForm({
         setTimeout(() => {
           setModalOpen(false);
 
-          if (role === "Admin") {
-            router.push("/admin");
+          // redirect admin
+          if (role === "admin") {
+            router.push("/admin/dashboard");
           } else {
             router.push("/");
           }
@@ -226,12 +226,11 @@ export function LoginForm({
                 </span>
               </div>
 
-              {/* Login Google */}
               <Button
                 variant="outline"
                 type="button"
                 onClick={() => {
-                  window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google`;
+                  window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/google`;
                 }}
                 className="w-full border-gray-300 hover:bg-gray-50 py-2 rounded-lg flex items-center justify-center gap-2"
               >
