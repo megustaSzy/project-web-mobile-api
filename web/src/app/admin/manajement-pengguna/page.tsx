@@ -5,6 +5,18 @@ import { apiFetch } from "@/helpers/api";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2, Plus } from "lucide-react";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+
 type UserType = {
   id: number;
   name: string;
@@ -14,6 +26,7 @@ type UserType = {
 
 export default function UsersPage() {
   const [users, setUsers] = useState<UserType[]>([]);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
 
   useEffect(() => {
     apiFetch<{
@@ -28,14 +41,18 @@ export default function UsersPage() {
     // TODO: buka modal edit
   };
 
-  const handleDelete = (id: number) => {
-    console.log("Delete user:", id);
-    // TODO: konfirmasi + API delete
-  };
+  const handleDeleteConfirm = async () => {
+    if (!selectedId) return;
 
-  const handleAdd = () => {
-    console.log("Tambah user baru");
-    // TODO: buka modal tambah user
+    console.log("Delete user:", selectedId);
+
+    // TODO: Panggil API delete
+    // await apiFetch(`/api/users/${selectedId}`, { method: "DELETE" });
+
+    // Hapus dari UI tanpa reload
+    setUsers((prev) => prev.filter((u) => u.id !== selectedId));
+
+    setSelectedId(null);
   };
 
   return (
@@ -45,10 +62,7 @@ export default function UsersPage() {
           Manajemen Pengguna
         </h2>
 
-        <Button
-          onClick={handleAdd}
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
-        >
+        <Button className="flex items-center gap-2">
           <Plus size={16} />
           Tambah Pengguna
         </Button>
@@ -58,7 +72,7 @@ export default function UsersPage() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b bg-gray-50 text-gray-600">
-              <th className="p-3 text-left">No</th>
+              <th className="p-3 text-left">#</th>
               <th className="p-3 text-left">Nama</th>
               <th className="p-3 text-left">Email</th>
               <th className="p-3 text-left">Role</th>
@@ -74,6 +88,7 @@ export default function UsersPage() {
                     {index + 1}
                   </span>
                 </td>
+
                 <td className="p-3">{u.name}</td>
                 <td className="p-3">{u.email}</td>
                 <td className="p-3">{u.role}</td>
@@ -89,15 +104,43 @@ export default function UsersPage() {
                     Edit
                   </Button>
 
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    className="flex items-center gap-1"
-                    onClick={() => handleDelete(u.id)}
-                  >
-                    <Trash2 size={14} />
-                    Delete
-                  </Button>
+                  {/* DELETE WITH CONFIRMATION */}
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        className="flex items-center gap-1"
+                        onClick={() => setSelectedId(u.id)}
+                      >
+                        <Trash2 size={14} />
+                        Delete
+                      </Button>
+                    </AlertDialogTrigger>
+
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          Hapus Pengguna?
+                        </AlertDialogTitle>
+
+                        <AlertDialogDescription>
+                          Tindakan ini tidak dapat dibatalkan. Pengguna yang dihapus tidak bisa dikembalikan.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Batal</AlertDialogCancel>
+
+                        <AlertDialogAction
+                          onClick={handleDeleteConfirm}
+                          className="bg-red-600 hover:bg-red-700"
+                        >
+                          Hapus
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </td>
               </tr>
             ))}
