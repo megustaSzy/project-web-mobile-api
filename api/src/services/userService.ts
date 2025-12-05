@@ -14,6 +14,9 @@ export const userService = {
     const rows = await prisma.tb_user.findMany({
       skip: pagination.offset,
       take: pagination.limit,
+      where: {
+        role: 'User'
+      },
       orderBy: {
         id: "asc",
       },
