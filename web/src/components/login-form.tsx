@@ -17,10 +17,9 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle, XCircle } from "lucide-react";
-
-// /* -----------------------------------------
-//    POPUP ANIMASI
-// ------------------------------------------ */
+/* -----------------------------------------
+   POPUP ANIMASI
+------------------------------------------ */
 function AuthModal({
   open,
   status,
@@ -71,18 +70,27 @@ function AuthModal({
   );
 }
 
-//  LOGIN FORM (USER & ADMIN)
+/* -----------------------------------------
+   LOGIN FORM (USER & ADMIN)
+------------------------------------------ */
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+
+  // Modal state
   const [modalOpen, setModalOpen] = useState(false);
-  const [modalStatus, setModalStatus] = useState<"success" | "error" | null>(
-    null
-  );
+  const [modalStatus, setModalStatus] =
+    useState<"success" | "error" | null>(null);
   const [modalMessage, setModalMessage] = useState("");
+
+  // Helper: baca cookies
+  function setCookie(name: string, value: string, days = 1) {
+    const expires = new Date(Date.now() + days * 864e5).toUTCString();
+    document.cookie = `${name}=${value}; path=/; expires=${expires}; SameSite=Lax`;
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,7 +103,7 @@ export function LoginForm({
       setModalStatus("error");
       setModalMessage("Masukkan email dan password terlebih dahulu!");
       setModalOpen(true);
-      setTimeout(() => setModalOpen(false), 1800);
+      setTimeout(() => setModalOpen(false), 1500);
       return;
     }
 
@@ -108,24 +116,19 @@ export function LoginForm({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password }),
+          credentials: "include",
         }
       );
 
       const data = await response.json();
-      console.log("Respon API:", data);
 
       if (response.ok) {
-        // ambil role dari data.data.user
-        const role = (data.data?.user?.role || "user").toLowerCase().trim();
-
+        const role = (data.data?.user?.role || "user").toLowerCase();
         const token = data.data?.accessToken;
 
-        // Simpan token & role
-        if (token) localStorage.setItem("token", token);
-        localStorage.setItem("role", role);
-
-        document.cookie = `token=${token}; path=/; max-age=86400`;
-        document.cookie = `role=${role}; path=/; max-age=86400`;
+        // simpan token ke cookies
+        setCookie("accessToken", token);
+        setCookie("role", role);
 
         setModalStatus("success");
         setModalMessage(`Login berhasil sebagai ${role}!`);
@@ -134,25 +137,21 @@ export function LoginForm({
         setTimeout(() => {
           setModalOpen(false);
 
-          // redirect admin
-          if (role === "admin") {
-            router.push("/admin/dashboard");
-          } else {
-            router.push("/");
-          }
-        }, 1500);
+          if (role === "admin") router.push("/admin/dashboard");
+          else router.push("/");
+        }, 1300);
       } else {
         setModalStatus("error");
         setModalMessage(data.message || "Email atau password salah.");
         setModalOpen(true);
-        setTimeout(() => setModalOpen(false), 1800);
+        setTimeout(() => setModalOpen(false), 1500);
       }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      console.error("Login error:", error);
       setModalStatus("error");
       setModalMessage("Tidak dapat terhubung ke server.");
       setModalOpen(true);
-      setTimeout(() => setModalOpen(false), 1800);
+      setTimeout(() => setModalOpen(false), 1500);
     } finally {
       setLoading(false);
     }
