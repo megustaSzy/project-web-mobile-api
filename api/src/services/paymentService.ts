@@ -1,22 +1,33 @@
 import { snap } from "../config/midtrans";
+import { orderService } from "./orderService";
 
 export const paymentService = {
+  async createTransaction(order: any) {
+    const params = {
+      transaction_details: {
+        order_id: `ORDER-${order.id}`,
+        gross_amount: order.totalPrice,
+      },
 
-    async createTransaction (order: any) {
-        const params = {
-            transaction_details: {
-                order_id: "ORDER-" + Date.now(),
-                gross_amount: order.total,
-            },
+      customer_details: {
+        first_name: order.userName,
+        email: order.userEmail || "",
+      },
+      enable_payments: ["gopay", "bank_transfer", "qris", "credit_card"],
+    };
 
-            customer_details: {
-                first_name: order.user.name,
-                email: order.user.email
-            },
-        };
+    const transaction = await snap.createTransaction(params);
 
-        const transaction = await snap.createTransaction(params);
-        return transaction
+    await orderService.updateOrderPaymentData(order.id, {
+        snapToken: transaction.token,
+        snapRedirectUrl: transaction.redirect_url
+    });
+
+
+    return {
+        snapToken: transaction.token,
+        redirectUrl: transaction.redirect_url
     }
+  },
 
-}
+};

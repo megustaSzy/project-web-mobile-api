@@ -6,9 +6,7 @@ export const orderService = {
   // Membuat order baru
   async createOrder(userId: number, scheduleId: number, quantity: number) {
 
-    if (quantity <= 0) {
-      throw createError("quantity minimal 1", 400);
-    }
+    if (quantity <= 0) throw createError("quantity minimal 1", 400);
 
     // Cek user
     const user = await prisma.tb_user.findUnique({ 
@@ -38,18 +36,12 @@ export const orderService = {
     // Cek jadwal sudah lewat
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-
-    const scheduleDate = new Date(schedule.date);
-    if (scheduleDate < today) {
-      throw createError("jadwal sudah lewat", 400);
-    }
+    if(new Date(schedule.date) < today) throw createError("jadwal sudah lewat", 400);
 
     // Hitung total
     const totalPrice = schedule.destination.price * quantity;
 
-    const ticketCode = `TICKET-${Date.now()}-${uuidv4()
-      .slice(0.6)
-      .toUpperCase()}`;
+    const ticketCode = `TICKET-${Date.now()}-${uuidv4().slice(0, 6).toUpperCase()}`;
 
     // Buat order + snapshot data
     const order = await prisma.tb_orders.create({
@@ -74,7 +66,7 @@ export const orderService = {
         // ticket snapshot
         ticketCode,
         isPaid: false,
-        ticketUrl: null
+        paymentStatus: "pending"
       },
     });
 
@@ -95,10 +87,32 @@ export const orderService = {
     const order = await prisma.tb_orders.findUnique({ where: { id } });
     if (!order) throw createError("order tidak ditemukan", 404);
 
-    if (order.userId !== userId) {
-      throw createError("anda tidak memiliki akses ke order ini", 403);
-    }
+    if (order.userId !== userId) throw createError("anda tidak memiliki akses ke order ini", 403);
 
     return order;
   },
+
+
+  async markOrderAsPaid(orderId: number, transactionId: number) {
+    return await prisma.tb_orders.update({
+      where: {
+        id: orderId
+      },
+      data: {
+        isPaid: true,
+        paymentStatus: "paid",
+        transactionId: String(transactionId),
+        paidAt: new Date(),
+      }
+    })
+  },
+
+  async updateOrderPaymentData(orderId: number, data: { snapToken?: string; snapRedirectUrl?: string }) {
+    return await prisma.tb_orders.update({
+      where: {
+        id: orderId
+      },
+      data
+    })
+  }
 };
