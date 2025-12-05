@@ -19,6 +19,7 @@ import adminOrderRoute from "./routes/adminOrderRoute";
 import categoryRoute from "./routes/categoryRoute";
 import aboutRoute from "./routes/aboutRoute";
 import statRoute from "./routes/statRoute";
+import paymentRoute from "./routes/paymentRoute";
 
 const app = express();
 
@@ -62,6 +63,7 @@ app.use("/api/admin/orders", adminOrderRoute);
 app.use("/api/category", categoryRoute);
 app.use("/api/about", aboutRoute);
 app.use("/api/count", statRoute);
+app.use("/api/payment", paymentRoute);
 
 // Public upload folder
 app.use("/uploads", express.static("public/uploads"));
