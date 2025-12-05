@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,26 +8,107 @@ import {
   Image,
   ScrollView,
   Alert,
+  Animated,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { Feather, Umbrella, Mountain, Layers, MapPin, Droplet } from "lucide-react-native";
+import {
+  Feather,
+  Umbrella,
+  Mountain,
+  Layers,
+  MapPin,
+  Droplet,
+} from "lucide-react-native";
 
 // ===========================================================================
 // ✔ FORMAT RUPIAH FIX
 // ===========================================================================
-const formatRupiah = (value: string | number | bigint) =>
-  new Intl.NumberFormat("id-ID", { style: "decimal" }).format(value);
+const formatRupiah = (value: string | number | bigint): string => {
+  const number = Number(String(value).replace(/[^\d]/g, ""));
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+  }).format(number);
+};
 
 // ===========================================================================
-// ✔ DESTINASI + HARGA DITAMBAHKAN (WAJIB AGAR TIDAK ERROR)
+// ✔ DESTINASI DATA
 // ===========================================================================
 const destinations = [
-  { id: 1, name: "Rio The Beach", location: "Kalianda", price: 20000, image: require("../../assets/images/hero1.jpg") },
-  { id: 2, name: "Senaya Beach", location: "Kalianda", price: 18000, image: require("../../assets/images/hero2.jpg") },
-  { id: 3, name: "Green Elty Krakatoa", location: "Kalianda", price: 25000, image: require("../../assets/images/hero3.jpg") },
+  {
+    id: 1,
+    name: "Rio The Beach",
+    location: "Kalianda",
+    price: 20000,
+    image: require("../../assets/images/hero1.jpg"),
+  },
+  {
+    id: 2,
+    name: "Senaya Beach",
+    location: "Kalianda",
+    price: 18000,
+    image: require("../../assets/images/hero2.jpg"),
+  },
+  {
+    id: 3,
+    name: "Green Elty Krakatoa",
+    location: "Kalianda",
+    price: 25000,
+    image: require("../../assets/images/hero3.jpg"),
+  },
 ];
 
+// ===========================================================================
+// ✔ TYPING HEADER (FIXED)
+// ===========================================================================
+const TypingHeader = () => {
+  const words = ["Hi, Selamat Datang", "mau kemana kamu?"];
+  const typingSpeed = 70;
+
+  const [displayText, setDisplayText] = useState(""); // teks yang ditampilkan
+  const [currentWordIndex, setCurrentWordIndex] = useState(0);
+
+  useEffect(() => {
+    let timeout: number;
+
+    const type = (word: string, index: number) => {
+      if (index <= word.length) {
+        setDisplayText(word.slice(0, index));
+        timeout = setTimeout(() => type(word, index + 1), typingSpeed);
+      } else {
+        // tunggu sebentar sebelum ganti kata
+        timeout = setTimeout(() => {
+          setCurrentWordIndex((prev) => (prev + 1) % words.length);
+        }, 1200);
+      }
+    };
+
+    type(words[currentWordIndex], 0);
+
+    return () => clearTimeout(timeout);
+  }, [currentWordIndex]);
+
+  return (
+    <View style={{ position: "absolute", top: 75, left: 40 }}>
+      <Text
+        style={{
+          fontSize: 40,
+          fontWeight: "700",
+          color: "white",
+        }}
+      >
+        {displayText}
+      </Text>
+    </View>
+  );
+};
+
+
+// ===========================================================================
+// ✔ HOME SCREEN
+// ===========================================================================
 export default function HomeScreen() {
   const router = useRouter();
 
@@ -47,8 +128,8 @@ export default function HomeScreen() {
     const query = (textInput ? textInput : searchText).trim();
     if (!query) return;
 
-    setHistory((prevHistory) => {
-      const arr = Array.isArray(prevHistory) ? prevHistory : [];
+    setHistory((prev) => {
+      const arr = Array.isArray(prev) ? prev : [];
       return arr.includes(query) ? arr : [query, ...arr];
     });
 
@@ -70,9 +151,11 @@ export default function HomeScreen() {
 
   return (
     <ScrollView style={styles.container}>
-
       {/* BLUE HEADER */}
       <View style={styles.headerBg} />
+
+      {/* TYPING HEADER */}
+      <TypingHeader />
 
       {/* MAIN CARD */}
       <View style={styles.cardBox}>
@@ -117,7 +200,7 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* Search + History */}
+        {/* Search */}
         <View style={styles.rowBetween}>
           <TouchableOpacity style={styles.searchBtn}>
             <Text style={styles.searchText}>Search</Text>
@@ -130,7 +213,11 @@ export default function HomeScreen() {
       </View>
 
       {/* CATEGORY CHIPS */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 15 }}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={{ marginTop: 15 }}
+      >
         {categories.map((cat, index) => {
           const Icon = cat.icon;
           return (
@@ -145,7 +232,11 @@ export default function HomeScreen() {
       {/* FAVORIT */}
       <Text style={styles.sectionTitle}>Tujuan Wisata Favorit</Text>
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 10 }}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={{ marginTop: 10 }}
+      >
         {destinations.map((dest) => (
           <TouchableOpacity
             key={dest.id}
@@ -162,9 +253,18 @@ export default function HomeScreen() {
             <View style={styles.favTextBox}>
               <Text style={styles.favTitle}>{dest.name}</Text>
 
-              <View style={{ flexDirection: "row", alignItems: "center", marginTop: 4 }}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginTop: 4,
+                }}
+              >
                 <Ionicons name="location-outline" size={12} color="#777" />
-                <Text numberOfLines={1} style={[styles.favDesc, { marginLeft: 2 }]}>
+                <Text
+                  numberOfLines={1}
+                  style={[styles.favDesc, { marginLeft: 2 }]}
+                >
                   {dest.location}
                 </Text>
               </View>
@@ -181,28 +281,48 @@ export default function HomeScreen() {
       {/* DESTINASI KABUPATEN */}
       <Text style={styles.sectionTitle}>Daftar Destinasi Kabupaten</Text>
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 10 }}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={{ marginTop: 10 }}
+      >
         <View style={styles.destCard}>
-          <Image source={require("../../assets/images/favorite/21.png")} style={styles.destImage} />
+          <Image
+            source={require("../../assets/images/favorite/21.png")}
+            style={styles.destImage}
+          />
           <View style={{ flex: 1, marginLeft: 12 }}>
             <Text style={styles.destTitle}>Kabupaten Tanggamus</Text>
             <Text style={styles.destCount}>12 Destinasi</Text>
-            <Text style={styles.destDesc}>Temukan Berbagai Wisata di Kabupaten Tanggamus</Text>
+            <Text style={styles.destDesc}>
+              Temukan Berbagai Wisata di Kabupaten Tanggamus
+            </Text>
 
-            <TouchableOpacity style={{ marginTop: 6 }} onPress={() => router.push("../pesanantour/page")}>
+            <TouchableOpacity
+              style={{ marginTop: 6 }}
+              onPress={() => router.push("../pesanantour/page")}
+            >
               <Text style={styles.link}>Lihat Detail</Text>
             </TouchableOpacity>
           </View>
         </View>
 
         <View style={styles.destCard}>
-          <Image source={require("../../assets/images/favorite/24.png")} style={styles.destImage} />
+          <Image
+            source={require("../../assets/images/favorite/24.png")}
+            style={styles.destImage}
+          />
           <View style={{ flex: 1, marginLeft: 12 }}>
             <Text style={styles.destTitle}>Kabupaten Tanggamus</Text>
             <Text style={styles.destCount}>10 Destinasi</Text>
-            <Text style={styles.destDesc}>Temukan Berbagai Wisata di Kabupaten Tanggamus</Text>
+            <Text style={styles.destDesc}>
+              Temukan Berbagai Wisata di Kabupaten Tanggamus
+            </Text>
 
-            <TouchableOpacity style={{ marginTop: 6 }} onPress={() => router.push("../pesanantour/page")}>
+            <TouchableOpacity
+              style={{ marginTop: 6 }}
+              onPress={() => router.push("../pesanantour/page")}
+            >
               <Text style={styles.link}>Lihat Detail</Text>
             </TouchableOpacity>
           </View>
@@ -212,9 +332,16 @@ export default function HomeScreen() {
       {/* BERITA */}
       <Text style={[styles.sectionTitle, { marginTop: 25 }]}>Berita</Text>
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 10, marginBottom: 30 }}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={{ marginTop: 10, marginBottom: 30 }}
+      >
         <View style={styles.newsCard}>
-          <Image source={require("../../assets/images/hero1.jpg")} style={styles.newsImage} />
+          <Image
+            source={require("../../assets/images/hero1.jpg")}
+            style={styles.newsImage}
+          />
           <View style={styles.newsTextBox}>
             <Text style={styles.newsTitle}>New Destinasi</Text>
             <View style={styles.rowCenter}>
@@ -225,7 +352,10 @@ export default function HomeScreen() {
         </View>
 
         <View style={styles.newsCard}>
-          <Image source={require("../../assets/images/hero1.jpg")} style={styles.newsImage} />
+          <Image
+            source={require("../../assets/images/hero1.jpg")}
+            style={styles.newsImage}
+          />
           <View style={styles.newsTextBox}>
             <Text style={styles.newsTitle}>Destinasi Terbengkalai</Text>
             <View style={styles.rowCenter}>
@@ -236,7 +366,10 @@ export default function HomeScreen() {
         </View>
 
         <View style={styles.newsCard}>
-          <Image source={require("../../assets/images/hero1.jpg")} style={styles.newsImage} />
+          <Image
+            source={require("../../assets/images/hero1.jpg")}
+            style={styles.newsImage}
+          />
           <View style={styles.newsTextBox}>
             <Text style={styles.newsTitle}>Goa Baru Viral</Text>
             <View style={styles.rowCenter}>
@@ -253,7 +386,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F7F7F7" },
 
-  headerBg: { height: 180, backgroundColor: "#007BFF" },
+  headerBg: { height: 200, backgroundColor: "#007BFF" },
 
   cardBox: {
     backgroundColor: "#fff",
@@ -306,7 +439,12 @@ const styles = StyleSheet.create({
 
   row: { flexDirection: "row", justifyContent: "space-between", marginTop: 15 },
 
-  sectionTitle: { marginLeft: 20, marginTop: 20, fontSize: 18, fontWeight: "700" },
+  sectionTitle: {
+    marginLeft: 20,
+    marginTop: 20,
+    fontSize: 18,
+    fontWeight: "700",
+  },
 
   categoryChip: {
     flexDirection: "row",
@@ -407,5 +545,10 @@ const styles = StyleSheet.create({
 
   newsLocation: { fontSize: 12, marginLeft: 4 },
 
-  rowCenter: { flexDirection: "row", alignItems: "center", marginLeft: 8, marginTop: 4 },
+  rowCenter: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginLeft: 8,
+    marginTop: 4,
+  },
 });
