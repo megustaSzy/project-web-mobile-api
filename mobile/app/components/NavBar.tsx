@@ -131,7 +131,7 @@ export default function NavBarMobile() {
       {/* MENU MOBILE */}
       {open && (
         <View style={styles.menu}>
-          <TouchableOpacity onPress={() => router.push("/")}>
+          {/* <TouchableOpacity onPress={() => router.push("/")}>
             <Text style={styles.menuItem}>{t.home}</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push("/about")}>
@@ -139,8 +139,8 @@ export default function NavBarMobile() {
           </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push("/tourlist")}>
             <Text style={styles.menuItem}>{t.tour}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => router.push("/tiket")}>
+          </TouchableOpacity> */}
+          <TouchableOpacity onPress={() => router.push("../tiket/page")}>
             <Text style={styles.menuItem}>{t.ticket}</Text>
           </TouchableOpacity>
 
