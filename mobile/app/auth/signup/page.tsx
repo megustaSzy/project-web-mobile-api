@@ -5,51 +5,68 @@ import {
   TextInput,
   TouchableOpacity,
   Image,
-  ActivityIndicator,
   ScrollView,
   StyleSheet,
+  ActivityIndicator,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import Modal from "react-native-modal";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+
 export default function SignupForm() {
-  const navigation = useNavigation();
   const router = useRouter();
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
+
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+
+  // Modal States
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalStatus, setModalStatus] = useState<"success" | "error" | null>(
+    null
+  );
+  const [modalMessage, setModalMessage] = useState("");
 
   const handleSignup = async () => {
     if (!name || !email || !password || !phone) {
-      setMessage("Semua field harus diisi!");
+      setModalStatus("error");
+      setModalMessage("Semua field harus diisi!");
+      setModalVisible(true);
       return;
     }
 
     try {
       setLoading(true);
-      setMessage("");
 
-      const response = await fetch("http://10.93.86.50:3001/api/auth/register", {
+      const res = await fetch("http://192.168.100.141:3001/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password, phone }),
       });
 
-      const data = await response.json();
+      const data = await res.json();
 
-     if (response.ok) {
-  setMessage("Pendaftaran berhasil! Silakan login.");
-  setTimeout(() => router.push("../login/page"), 1500);
-}
- else {
-        setMessage(data.message || "Pendaftaran gagal. Coba lagi.");
+      if (res.ok) {
+        setModalStatus("success");
+        setModalMessage("Pendaftaran berhasil! Silakan login.");
+        setModalVisible(true);
+
+        setTimeout(() => {
+          setModalVisible(false);
+          router.push("../login/page");
+        }, 1500);
+      } else {
+        setModalStatus("error");
+        setModalMessage(data.message || "Pendaftaran gagal.");
+        setModalVisible(true);
       }
     } catch (error) {
-      console.error(error);
-      setMessage("Tidak dapat terhubung ke server.");
+      setModalStatus("error");
+      setModalMessage("Tidak dapat terhubung ke server.");
+      setModalVisible(true);
     } finally {
       setLoading(false);
     }
@@ -58,12 +75,15 @@ export default function SignupForm() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.card}>
-        <Image source={require("../../../assets/images/logo.png")} style={styles.logo} />
+        <Image
+          source={require("../../../assets/images/logo.png")}
+          style={styles.logo}
+        />
 
-        <Text style={styles.title}>Create an Account</Text>
-        <Text style={styles.subtitle}>Enter your information to get started</Text>
+        <Text style={styles.title}>Buat Akun Baru</Text>
+        <Text style={styles.subtitle}>Isi data kamu untuk mendaftar</Text>
 
-        <Text style={styles.label}>Full Name</Text>
+        <Text style={styles.label}>Nama Lengkap</Text>
         <TextInput
           style={styles.input}
           value={name}
@@ -76,7 +96,7 @@ export default function SignupForm() {
           style={styles.input}
           value={email}
           onChangeText={setEmail}
-          placeholder="LamiGo@gmail.com"
+          placeholder="email@example.com"
           keyboardType="email-address"
         />
 
@@ -89,7 +109,7 @@ export default function SignupForm() {
           placeholder="••••••••"
         />
 
-        <Text style={styles.label}>Phone</Text>
+        <Text style={styles.label}>Nomor Telepon</Text>
         <TextInput
           style={styles.input}
           value={phone}
@@ -98,8 +118,16 @@ export default function SignupForm() {
           placeholder="08xxxxxxxxxx"
         />
 
-        <TouchableOpacity style={styles.button} onPress={handleSignup} disabled={loading}>
-          {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Create Account</Text>}
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleSignup}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Daftar</Text>
+          )}
         </TouchableOpacity>
 
         <View style={styles.orContainer}>
@@ -110,18 +138,59 @@ export default function SignupForm() {
 
         <TouchableOpacity style={styles.googleBtn}>
           <Ionicons name="logo-google" size={20} color="#DB4437" />
-          <Text style={styles.googleText}>Sign up with Google</Text>
+          <Text style={styles.googleText}>Daftar dengan Google</Text>
         </TouchableOpacity>
 
-        {message ? <Text style={styles.footerText}>{message}</Text> : null}
-
         <Text style={styles.footerText}>
-          Already have an account?{" "}
-          <Text style={styles.signup} onPress={() => router.push("../login/page")}>
-            Sign in
+          Sudah punya akun?{" "}
+          <Text
+            style={styles.signup}
+            onPress={() => router.push("../login/page")}
+          >
+            Login Sekarang
           </Text>
         </Text>
       </View>
+
+      {/* MODAL */}
+      <Modal
+        isVisible={modalVisible}
+        onBackdropPress={() => setModalVisible(false)}
+        animationIn="zoomIn"
+        animationOut="zoomOut"
+      >
+        <View
+          style={[
+            styles.modalBox,
+            modalStatus === "success"
+              ? { backgroundColor: "#ECFDF5" }
+              : { backgroundColor: "#FEF2F2" },
+          ]}
+        >
+          <Ionicons
+            name={
+              modalStatus === "success"
+                ? "checkmark-circle"
+                : "close-circle"
+            }
+            size={60}
+            color={modalStatus === "success" ? "#059669" : "#DC2626"}
+          />
+
+          <Text
+            style={[
+              styles.modalTitle,
+              modalStatus === "success"
+                ? { color: "#059669" }
+                : { color: "#DC2626" },
+            ]}
+          >
+            {modalStatus === "success" ? "Berhasil!" : "Gagal!"}
+          </Text>
+
+          <Text style={styles.modalMessage}>{modalMessage}</Text>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -130,107 +199,128 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     justifyContent: "center",
-    alignItems: "center",
-    padding: 16,
-    backgroundColor: "#f7f7f7",
+    padding: 20,
+    backgroundColor: "#ffffff",
   },
+
   card: {
     width: "100%",
-    maxWidth: 400,
-    backgroundColor: "#fff",
+    maxWidth: 360,
+    padding: 25,
     borderRadius: 20,
-    padding: 20,
+    backgroundColor: "white",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 5,
+    shadowRadius: 10,
     elevation: 5,
   },
+
   logo: {
-    width: 80,
-    height: 80,
-    resizeMode: "contain",
+    width: 70,
+    height: 70,
     alignSelf: "center",
-    marginBottom: 16,
+    marginBottom: 10,
   },
+
   title: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#1f2937",
+    fontSize: 24,
+    fontWeight: "bold",
     textAlign: "center",
+    color: "#1F2937",
   },
+
   subtitle: {
-    fontSize: 14,
-    color: "#6b7280",
     textAlign: "center",
+    color: "#6B7280",
     marginBottom: 20,
+    fontSize: 13,
   },
+
   label: {
+    marginTop: 10,
+    marginBottom: 5,
     fontSize: 14,
     color: "#374151",
-    marginBottom: 6,
-    marginTop: 12,
   },
+
   input: {
-    width: "100%",
-    height: 45,
     borderWidth: 1,
-    borderColor: "#d1d5db",
+    borderColor: "#D1D5DB",
     borderRadius: 10,
-    paddingHorizontal: 10,
-    backgroundColor: "#f9fafb",
-    color: "#111827",
+    padding: 10,
+    fontSize: 14,
+    backgroundColor: "#F9FAFB",
   },
+
   button: {
-    marginTop: 20,
-    backgroundColor: "#3b82f6",
+    backgroundColor: "#2563EB",
     paddingVertical: 12,
     borderRadius: 10,
+    marginTop: 20,
     alignItems: "center",
   },
+
   buttonText: {
-    color: "#fff",
-    fontWeight: "600",
+    color: "white",
     fontSize: 16,
+    fontWeight: "600",
   },
+
   orContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginVertical: 16,
+    marginVertical: 15,
   },
   line: {
     flex: 1,
     height: 1,
-    backgroundColor: "#d1d5db",
+    backgroundColor: "#E5E7EB",
   },
   orText: {
     marginHorizontal: 10,
-    color: "#6b7280",
+    color: "#9CA3AF",
     fontSize: 12,
   },
+
   googleBtn: {
     flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
     borderWidth: 1,
-    borderColor: "#d1d5db",
-    paddingVertical: 10,
+    borderColor: "#D1D5DB",
+    padding: 12,
     borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
     gap: 10,
   },
   googleText: {
-    color: "#111827",
     fontSize: 14,
-    fontWeight: "500",
+    color: "#374151",
   },
+
   footerText: {
     textAlign: "center",
-    color: "#6b7280",
-    fontSize: 12,
-    marginTop: 10,
+    marginTop: 15,
+    color: "#6B7280",
   },
   signup: {
-    color: "#3b82f6",
+    color: "#2563EB",
     fontWeight: "600",
+  },
+
+  modalBox: {
+    padding: 25,
+    borderRadius: 20,
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    marginTop: 10,
+  },
+  modalMessage: {
+    fontSize: 14,
+    color: "#4B5563",
+    textAlign: "center",
+    marginTop: 5,
   },
 });
