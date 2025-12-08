@@ -101,12 +101,19 @@ export default function NavBarMobile() {
         ]}
       >
         {/* Logo */}
-        <View style={styles.left}>
-          <Image
-            source={require("../../assets/images/logo.png")}
-            style={{ width: 40, height: 40 }}
-          />
-        </View>
+       <View style={styles.left}>
+  <Image
+    source={require("../../assets/images/logo.png")}
+    style={{ width: 40, height: 40 }}
+  />
+
+  {/* TEKS SELAMAT DATANG + NAMA USER */}
+  <View style={styles.welcomeBox}>
+    <Text style={styles.welcomeText}>Hi, Selamat Datang</Text>
+    <Text style={styles.userName}>{userData.name}</Text>
+  </View>
+</View>
+
 
         {/* Right Menu */}
         <View style={styles.right}>
@@ -285,4 +292,21 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontWeight: "600",
   },
+
+  welcomeBox: {
+  marginLeft: 8,
+},
+
+welcomeText: {
+  fontSize: 12,
+  color: "#555",
+},
+
+userName: {
+  fontSize: 14,
+  fontWeight: "700",
+  color: "#000",
+  marginTop: -2,
+},
+
 });

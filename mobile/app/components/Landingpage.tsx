@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 
 // ============================
 // FORMAT RUPIAH
@@ -35,16 +36,16 @@ const destinations = [
   },
   {
     id: 2,
-    name: "Green Elty Krakatoa",
-    location: "Kalianda",
-    price: 25000,
+    name: "Pantai Sari Ringgung",
+    location: "Pesawaran",
+    price: 15000,
     image: require("../../assets/images/hero3.jpg"),
   },
   {
     id: 3,
-    name: "Green Elty Krakatoa",
-    location: "Kalianda",
-    price: 25000,
+    name: "Pahawang Island",
+    location: "Pesawaran",
+    price: 50000,
     image: require("../../assets/images/hero3.jpg"),
   },
 ];
@@ -73,11 +74,14 @@ const kabupatenList = [
   },
 ];
 
+const CATEGORIES = ["Pantai", "Gunung", "Pulau", "Air Terjun"];
+
 export default function HomeScreen() {
   const [kategori, setKategori] = useState("");
   const [daerah, setDaerah] = useState("");
   const [historyModal, setHistoryModal] = useState(false);
   const [historyList, setHistoryList] = useState([]);
+  const [activeCategory, setActiveCategory] = useState(null);
 
   // LOAD HISTORY
   useEffect(() => {
@@ -85,8 +89,12 @@ export default function HomeScreen() {
   }, []);
 
   const loadHistory = async () => {
-    const data = await AsyncStorage.getItem("searchHistory");
-    if (data) setHistoryList(JSON.parse(data));
+    try {
+      const data = await AsyncStorage.getItem("searchHistory");
+      if (data) setHistoryList(JSON.parse(data));
+    } catch (e) {
+      console.log("loadHistory error", e);
+    }
   };
 
   // SAVE HISTORY
@@ -102,9 +110,23 @@ export default function HomeScreen() {
     const updated = [newData, ...historyList];
     setHistoryList(updated);
 
-    await AsyncStorage.setItem("searchHistory", JSON.stringify(updated));
+    try {
+      await AsyncStorage.setItem("searchHistory", JSON.stringify(updated));
+      alert("Pencarian disimpan ke history!");
+    } catch (e) {
+      console.log("saveHistory error", e);
+    }
+  };
 
-    alert("Pencarian disimpan ke history!");
+  const handleCategoryPress = (cat) => {
+    // toggle: jika klik kategori yang sama, batalkan
+    if (activeCategory === cat) {
+      setActiveCategory(null);
+      setKategori("");
+    } else {
+      setActiveCategory(cat);
+      setKategori(cat);
+    }
   };
 
   return (
@@ -130,7 +152,11 @@ export default function HomeScreen() {
               <TextInput
                 placeholder="Pantai"
                 value={kategori}
-                onChangeText={setKategori}
+                onChangeText={(t) => {
+                  setKategori(t);
+                  // jika user ketik manual, reset activeCategory
+                  if (activeCategory && activeCategory !== t) setActiveCategory(null);
+                }}
                 style={styles.input}
               />
             </View>
@@ -161,13 +187,36 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      {/* CATEGORY */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 15 }}>
-        {["Pantai", "Gunung", "Pulau", "Air Terjun"].map((cat, i) => (
-          <View key={i} style={styles.categoryChip}>
-            <Text style={styles.categoryChipText}>{cat}</Text>
-          </View>
-        ))}
+      {/* CATEGORY (horizontal) */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={{ marginTop: 15, paddingLeft: 12 }}
+      >
+        {CATEGORIES.map((cat, i) => {
+          const isActive = activeCategory === cat;
+          return (
+            <TouchableOpacity
+              key={i}
+              onPress={() => handleCategoryPress(cat)}
+              style={[
+                styles.categoryChip,
+                isActive
+                  ? { backgroundColor: "white", borderWidth: 2, borderColor: "#007BFF" }
+                  : { backgroundColor: "#DDEBFF", borderWidth: 0 },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.categoryChipText,
+                  isActive ? { color: "#007BFF" } : { color: "#007BFF" },
+                ]}
+              >
+                {cat}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
       </ScrollView>
 
       {/* KABUPATEN */}
@@ -182,11 +231,12 @@ export default function HomeScreen() {
           <View key={item.id} style={styles.kabupatenCardHorizontal}>
             <Image source={item.image} style={styles.kabupatenImageH} />
 
-<View style={{ flex: 1 }}>
-  <Text style={styles.kabupatenTitleH}>{item.name}</Text>
-  <Text numberOfLines={2} style={styles.kabupatenDescH}>{item.desc}</Text>
-</View>
-
+            <View style={{ flex: 1 }}>
+              <Text style={styles.kabupatenTitleH}>{item.name}</Text>
+              <Text numberOfLines={2} style={styles.kabupatenDescH}>
+                {item.desc}
+              </Text>
+            </View>
 
             <View style={styles.kabupatenCountBoxH}>
               <Text style={styles.kabupatenCount}>{item.count}</Text>
@@ -200,11 +250,25 @@ export default function HomeScreen() {
 
       {destinations.map((d) => (
         <View key={d.id} style={styles.popularCard}>
+          {/* image fixed height */}
           <Image source={d.image} style={styles.popularImage} />
-          <View style={{ marginLeft: 12 }}>
+
+          {/* gradient overlay: from RIGHT (white) -> LEFT (transparent) */}
+          <LinearGradient
+            colors={["rgba(255,255,255,1)", "rgba(255,255,255,0)"]}
+            start={{ x: 1, y: 0 }}
+            end={{ x: 0, y: 0 }}
+            style={styles.gradientOverlay}
+          />
+
+          <View style={styles.popularInfo}>
             <Text style={styles.popularName}>{d.name}</Text>
             <Text style={styles.popularLocation}>{d.location}</Text>
-            <Text style={styles.popularPrice}>{formatRupiah(d.price)}</Text>
+
+            {/* include text */}
+            <Text style={styles.popularInclude}>
+              Include: Tiket masuk | Travel Lamigo | Snack
+            </Text>
           </View>
         </View>
       ))}
@@ -248,20 +312,16 @@ const styles = StyleSheet.create({
   header: {
     height: 230,
     backgroundColor: "#007BFF",
-    position: "relative",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    paddingBottom: 10,
   },
 
-headerMainImage: {
-  width: 350,
-  height: 190,
-  resizeMode: "contain",   // ⬅️ AGAR TIDAK TERPOTONG
-  position: "absolute",
-  bottom: 0,
-  left: "35%",
-  transform: [{ translateX: -100 }], // - (width / 2)
-},
-
-
+  headerMainImage: {
+    width: 300,
+    height: 180,
+    resizeMode: "contain",
+  },
 
   cardBox: {
     backgroundColor: "#fff",
@@ -311,16 +371,6 @@ headerMainImage: {
 
   historyBtn: { fontSize: 14, fontWeight: "600" },
 
-  categoryChip: {
-    backgroundColor: "#DDEBFF",
-    paddingVertical: 8,
-    paddingHorizontal: 20,
-    borderRadius: 20,
-    marginLeft: 12,
-  },
-
-  categoryChipText: { fontSize: 14, fontWeight: "700", color: "#007BFF" },
-
   sectionTitle: {
     fontSize: 20,
     marginTop: 20,
@@ -328,26 +378,23 @@ headerMainImage: {
     fontWeight: "700",
   },
 
-kabupatenCardHorizontal: {
-  backgroundColor: "white",
-  width: 360,
-  marginRight: 19,
-  borderRadius: 15,
-  padding: 1,
-  elevation: 3,
+  kabupatenCardHorizontal: {
+    backgroundColor: "white",
+    width: 360,
+    marginRight: 19,
+    borderRadius: 15,
+    padding: 10,
+    elevation: 3,
+    flexDirection: "row",
+    alignItems: "flex-start",
+  },
 
-  flexDirection: "row",      // ⬅️ TAMBAHKAN INI
-  alignItems: "flex-start",  // ⬅️ rapikan posisi
-},
-
-
- kabupatenImageH: {
-  width: 90,
-  height: 90,
-  borderRadius: 10,
-  marginRight: 15,   // ⬅️ beri jarak dengan teks
-},
-
+  kabupatenImageH: {
+    width: 90,
+    height: 90,
+    borderRadius: 10,
+    marginRight: 15,
+  },
 
   kabupatenTitleH: { fontSize: 15, fontWeight: "700" },
   kabupatenDescH: { fontSize: 12, color: "#555", marginTop: 4 },
@@ -366,22 +413,54 @@ kabupatenCardHorizontal: {
 
   kabupatenCount: { color: "#007BFF", fontWeight: "700", fontSize: 18 },
 
+  /* POPULAR CARD */
   popularCard: {
     backgroundColor: "white",
     width: "90%",
     alignSelf: "center",
-    padding: 12,
-    borderRadius: 15,
-    marginTop: 15,
+    borderRadius: 0,
+    marginTop: 10,
     flexDirection: "row",
+    position: "relative",
+    overflow: "hidden",
+    height: 90, // fixed height so gradient & image align
+    padding: 0,
   },
 
-  popularImage: { width: 90, height: 80, borderRadius: 12 },
+  popularImage: {
+    width: 110,
+    height: "100%",
+    borderTopLeftRadius: 15,
+    borderBottomLeftRadius: 15,
+    resizeMode: "cover",
+  },
+
+  gradientOverlay: {
+    position: "absolute",
+    right: 255,
+    top: 0,
+    bottom: 0,
+    width: "20%",
+    // LinearGradient paints the actual gradient
+  },
+
+  popularInfo: {
+    marginLeft: 12,
+    flex: 1,
+    justifyContent: "center",
+    paddingRight: 12,
+  },
+
   popularName: { fontSize: 16, fontWeight: "700" },
   popularLocation: { fontSize: 13, color: "#777" },
   popularPrice: { fontSize: 14, marginTop: 4, color: "#007BFF", fontWeight: "700" },
 
-  // MODAL
+  popularInclude: {
+    fontSize: 11,
+    color: "#555",
+    marginTop: 4,
+  },
+
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.5)",
@@ -414,5 +493,19 @@ kabupatenCardHorizontal: {
     borderRadius: 10,
     alignItems: "center",
   },
-});
 
+  categoryChip: {
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    marginLeft: 12,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  categoryChipText: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#007BFF",
+  },
+});
