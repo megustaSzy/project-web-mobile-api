@@ -1,26 +1,42 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { MapPin, Calendar, Clock, Users } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { MapPin } from "lucide-react";
+
+// ========================
+//  TYPE DEFINITIONS
+// ========================
+interface Category {
+  id: number;
+  nama: string;
+}
+
+interface Area {
+  id: number;
+  nama: string;
+}
+
+interface ReverseGeocodeResponse {
+  address?: {
+    city?: string;
+    town?: string;
+    village?: string;
+    state?: string;
+  };
+}
+
 export default function SearchCard() {
-  const [location, setLocation] = useState("Mendeteksi lokasi...");
-  const [date, setDate] = useState("");
-  const [displayDate, setDisplayDate] = useState("Pilih tanggal");
-  const [time, setTime] = useState("");
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [people, setPeople] = useState(1);
+  const [location, setLocation] = useState<string>("Mendeteksi lokasi...");
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [areas, setAreas] = useState<Area[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [selectedArea, setSelectedArea] = useState<string>("");
 
-  const [pickupLocation, setPickupLocation] = useState("");
-  const [tourDestination, setTourDestination] = useState("");
-
-  const dateInputRef = useRef<HTMLInputElement | null>(null);
-  const timeInputRef = useRef<HTMLInputElement | null>(null);
-
-  const displayTime = time || "--:--";
-
+  // =====================================================
+  // DETEKSI LOKASI
+  // =====================================================
   useEffect(() => {
-    if (typeof window !== "undefined" && "geolocation" in navigator) {
+    if (typeof window !== "undefined" && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         async (pos) => {
           const { latitude, longitude } = pos.coords;
@@ -29,241 +45,131 @@ export default function SearchCard() {
             const res = await fetch(
               `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
             );
-            const data = await res.json();
+            const data: ReverseGeocodeResponse = await res.json();
 
             const city =
               data.address?.city ||
               data.address?.town ||
               data.address?.village ||
               "Lokasi tidak diketahui";
+
             const state = data.address?.state || "";
 
-            setTimeout(() => {
-              setLocation(`${city}, ${state}`);
-            }, 0);
+            setLocation(`${city}, ${state}`);
           } catch {
-            setTimeout(() => {
-              setLocation("Gagal mendeteksi lokasi");
-            }, 0);
+            setLocation("Gagal mendeteksi lokasi");
           }
         },
-
-        () => {
-          setTimeout(() => {
-            setLocation("Izin lokasi ditolak");
-          }, 0);
-        }
+        () => setLocation("Izin lokasi ditolak")
       );
-    } else {
-      setTimeout(() => {
-        setLocation("Perangkat tidak mendukung geolokasi");
-      }, 0);
     }
   }, []);
 
-  // Format tanggal Indonesia
-  const formatDate = (value: string) => {
-    if (!value) return "Pilih tanggal";
-    const dt = new Date(value);
-    return dt
-      .toLocaleDateString("id-ID", {
-        weekday: "short",
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      })
-      .replaceAll(".", "");
-  };
+  // =====================================================
+  // FETCH KATEGORI
+  // =====================================================
+  useEffect(() => {
+    async function load() {
+      const res = await fetch("https://api.example.com/kategori"); // ganti API
+      const data: { data: Category[] } = await res.json();
+      setCategories(data.data);
+    }
+    load();
+  }, []);
 
-  // Klik area tanggal
-  const handleCalendarClick = () => {
-    dateInputRef.current?.showPicker?.();
-  };
-
-  // Saat memilih tanggal
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setDate(value);
-    setDisplayDate(formatDate(value));
-  };
-
-    const handleSearch = () => {
-    console.log("Searching tiket...");
-    console.log("Jumlah:", people);
-    console.log("Tanggal:", date);
-    console.log("Waktu:", time);
-  };
+  // =====================================================
+  // FETCH DAERAH BERDASARKAN KATEGORI
+  // =====================================================
+  useEffect(() => {
+    if (!selectedCategory) return;
+    async function load() {
+      const res = await fetch(
+        `https://api.example.com/daerah?kategori=${selectedCategory}`
+      );
+      const data: { data: Area[] } = await res.json();
+      setAreas(data.data);
+    }
+    load();
+  }, [selectedCategory]);
 
   return (
-    <div className="bg-white rounded-2xl shadow-md p-6 w-full max-w-5xl mx-auto border border-gray-100">
-      {/* Header */}
+    <div className="bg-white rounded-[22px] shadow-sm p-6 w-full max-w-5xl mx-auto border border-gray-200">
+      {/* HEADER */}
       <div className="flex items-center justify-between border-b pb-3">
         <div>
           <p className="text-sm text-gray-400">Lokasi Kamu</p>
-          <h2 className="text-lg font-semibold text-gray-800">{location}</h2>
+          <h2 className="text-xl font-semibold text-gray-800">{location}</h2>
         </div>
 
-        <button className="text-sm text-gray-500 hover:text-blue-600 transition">
+        <button className="h-10 flex items-end text-sm text-gray-500 hover:text-blue-600 transition font-medium">
           Cari Histori &gt;
         </button>
       </div>
 
-     {/* FORM GRID */}
-     <div
-  className="
-    mt-4 
-    grid grid-cols-1
-    sm:grid-cols-2
-    md:grid-cols-5
-    lg:grid-cols-5 
-    gap-6 md:gap-8 
-    items-center
-  "
->
+      {/* FORM GRID */}
+      <div className="mt-5 grid grid-cols-1 md:grid-cols-5 gap-6 items-center">
+        {/* KATEGORI */}
+        <div className="md:col-span-2 flex flex-col">
+          <label className="text-xs text-gray-400 mb-1">Kategori Wisata</label>
+          <div className="flex items-center gap-2 border border-gray-300 rounded-full px-4 py-2 bg-white">
+            <MapPin className="text-gray-500 w-4 h-4" />
 
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="text-gray-700 text-sm bg-transparent outline-none w-full"
+            >
+              <option value="">Pilih Kategori</option>
 
-  {/* Penjemputan */}
-  <div className="flex flex-col w-full">
-    <label className="text-xs text-gray-400 mb-1">Lokasi Penjemputan</label>
-    <div className="flex items-center gap-2 border rounded-full px-4 py-2 bg-white w-full">
-      <MapPin className="text-gray-500 w-4 h-4" />
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id.toString()}>
+                  {cat.nama}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
 
-      <select
-        value={pickupLocation}
-        onChange={(e) => setPickupLocation(e.target.value)}
-        className="text-gray-700 text-sm bg-transparent outline-none w-full"
-      >
-        <option value="">Pilih Penjemputan</option>
-        <option value="Terminal Rajabasa">Terminal Rajabasa</option>
-        <option value="Terminal Kemiling">Terminal Kemiling</option>
-        <option value="Stasiun Tanjung Karang">Stasiun Tanjung Karang</option>
-      </select>
-    </div>
-  </div>
+        {/* DAERAH */}
+        <div className="md:col-span-2 flex flex-col">
+          <label className="text-xs text-gray-400 mb-1">Daerah</label>
+          <div className="flex items-center gap-2 border border-gray-300 rounded-full px-4 py-2 bg-white">
+            <MapPin className="text-gray-500 w-4 h-4" />
 
-  {/* Tujuan Wisata */}
-  <div className="flex flex-col w-full">
-    <label className="text-xs text-gray-400 mb-1">Tujuan Wisata</label>
-    <div className="flex items-center gap-2 border rounded-full px-4 py-2 bg-white w-full">
-      <MapPin className="text-gray-500 w-4 h-4" />
+            <select
+              value={selectedArea}
+              onChange={(e) => setSelectedArea(e.target.value)}
+              className="text-gray-700 text-sm bg-transparent outline-none w-full"
+            >
+              <option value="">Pilih Daerah</option>
 
-      <select
-        value={tourDestination}
-        onChange={(e) => setTourDestination(e.target.value)}
-        className="text-gray-700 text-sm bg-transparent outline-none w-full"
-      >
-        <option value="">Pilih Tujuan</option>
+              {areas.map((a) => (
+                <option key={a.id} value={a.id.toString()}>
+                  {a.nama}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
 
-        <optgroup label="Pantai">
-          <option value="Pantai Mutun">Pantai Mutun</option>
-          <option value="Pantai Sari Ringgung">Pantai Sari Ringgung</option>
-          <option value="Pantai Kelagian">Pantai Kelagian</option>
-          <option value="Pantai Tanjung Setia">Pantai Tanjung Setia</option>
-          <option value="Pantai Klara">Pantai Klara</option>
-          <option value="Pantai Marina">Pantai Marina</option>
-          <option value="Pantai Sebalang">Pantai Sebalang</option>
-        </optgroup>
+        {/* SEARCH BUTTON */}
+        <div className="flex flex-col justify-end">
+          <label className="text-xs text-transparent mb-1">.</label>
 
-        <optgroup label="Pulau">
-          <option value="Pulau Pahawang">Pulau Pahawang</option>
-          <option value="Pulau Tegal Mas">Pulau Tegal Mas</option>
-          <option value="Pulau Kelagian Lunik">Pulau Kelagian Lunik</option>
-          <option value="Pulau Mahitam">Pulau Mahitam</option>
-          <option value="Pulau Balak">Pulau Balak</option>
-        </optgroup>
-
-        <optgroup label="Gunung">
-          <option value="Gunung Rajabasa">Gunung Rajabasa</option>
-          <option value="Gunung Pesawaran">Gunung Pesawaran</option>
-          <option value="Gunung Seminung">Gunung Seminung</option>
-        </optgroup>
-
-        <optgroup label="Bukit">
-          <option value="Bukit Pangonan">Bukit Pangonan</option>
-          <option value="Bukit Sakura">Bukit Sakura</option>
-          <option value="Bukit Aslan">Bukit Aslan</option>
-          <option value="Bukit Kumbang">Bukit Kumbang</option>
-        </optgroup>
-
-        <optgroup label="Air Terjun">
-          <option value="Air Terjun Putri Malu">Air Terjun Putri Malu</option>
-          <option value="Air Terjun Curup Gangsa">Air Terjun Curup Gangsa</option>
-          <option value="Air Terjun Lembah Pelangi">Air Terjun Lembah Pelangi</option>
-          <option value="Air Terjun Ciupang">Air Terjun Ciupang</option>
-          <option value="Air Terjun Way Lalaan">Air Terjun Way Lalaan</option>
-        </optgroup>
-      </select>
-    </div>
-  </div>
-
-  {/* Tanggal */}
-  <div className="flex flex-col w-full relative">
-    <label className="text-xs text-gray-400 mb-1">Tanggal</label>
-
-    <div
-      onClick={handleCalendarClick}
-      className="flex items-center gap-2 border rounded-full px-4 py-2 bg-white w-full relative cursor-pointer"
-    >
-      <Calendar className="text-gray-500 w-4 h-4" />
-      <span className="text-gray-700 text-sm select-none">{displayDate}</span>
-
-      <input
-        ref={dateInputRef}
-        type="date"
-        value={date}
-        onChange={handleDateChange}
-        className="absolute inset-0 opacity-0 cursor-pointer"
-      />
-    </div>
-  </div>
-
-  {/* Waktu */}
-  <div className="flex flex-col w-full relative">
-    <label className="text-xs text-gray-400 mb-1">Waktu</label>
-
-    <div
-      onClick={() => timeInputRef.current?.showPicker?.()}
-      className="flex items-center gap-2 border rounded-full px-4 py-2 bg-white w-full relative cursor-pointer"
-    >
-      <Clock className="text-gray-500 w-4 h-4" />
-
-      <span className="text-gray-700 text-sm select-none flex-1">
-        {displayTime}
-      </span>
-
-      <input
-        ref={timeInputRef}
-        type="time"
-        value={time}
-        min="07:00"
-        max="16:00"
-        onChange={(e) => setTime(e.target.value)}
-        className="absolute inset-0 opacity-0 cursor-pointer"
-      />
-    </div>
-  </div>
-
- {/* Search Button – lebar pendek */}
-<div className="flex flex-col md:w-auto justify-end">
-  <label className="text-xs text-transparent mb-1">.</label>
-
-  <button
-    onClick={handleSearch}
-    className="
-      bg-blue-500 text-white
-      px-4 py-2
-      rounded-full text-sm
-      font-medium
-      shadow-sm hover:bg-blue-600
-      active:scale-95 transition-all
-      w-[90px]          /* ← LEBAR dibuat pendek */
-      md:ml-10
-    "
-  >
-    Search
-  </button>
-</div>
-
+          <button
+            className="
+              bg-blue-500 text-white
+              px-5 py-2.5
+              rounded-full text-sm
+              font-medium
+              shadow-sm hover:bg-blue-600
+              active:scale-95 transition-all
+              w-full
+            "
+          >
+            Search
+          </button>
+        </div>
       </div>
     </div>
   );
