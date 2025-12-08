@@ -34,4 +34,37 @@ export const teamService = {
         })
     },
 
+    async editTeam(id: number, data: TeamData) {
+        const team = await prisma.tb_ourTeam.findUnique({
+            where: {
+                id
+            }
+        });
+
+        if(!team) throw createError("id tidak ditemukan", 404);
+
+        return prisma.tb_ourTeam.update({
+            where: {
+                id
+            },
+            data
+        });
+    },
+
+    async deleteIdTeam(id: number) {
+        const team = await prisma.tb_ourTeam.findUnique({
+            where: {
+                id
+            },
+        });
+
+        if(!team) throw createError("id tidak ditemukan", 404);
+
+        return prisma.tb_ourTeam.delete({
+            where: {
+                id
+            }
+        })
+    }
+
 }
