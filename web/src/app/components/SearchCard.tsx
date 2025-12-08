@@ -94,7 +94,6 @@ export default function SearchCard() {
 
   return (
     <div className="bg-white rounded-[22px] shadow-sm p-6 w-full max-w-5xl mx-auto border border-gray-200">
-      
       {/* HEADER */}
       <div className="flex items-center justify-between border-b pb-3">
         <div>
@@ -102,16 +101,13 @@ export default function SearchCard() {
           <h2 className="text-xl font-semibold text-gray-800">{location}</h2>
         </div>
 
-        <button
-          className="text-sm text-gray-500 hover:text-blue-600 transition font-medium"
-        >
+        <button className="h-10 flex items-end text-sm text-gray-500 hover:text-blue-600 transition font-medium">
           Cari Histori &gt;
         </button>
       </div>
 
       {/* FORM GRID */}
       <div className="mt-5 grid grid-cols-1 md:grid-cols-5 gap-6 items-center">
-        
         {/* KATEGORI */}
         <div className="md:col-span-2 flex flex-col">
           <label className="text-xs text-gray-400 mb-1">Kategori Wisata</label>
@@ -174,7 +170,6 @@ export default function SearchCard() {
             Search
           </button>
         </div>
-
       </div>
     </div>
   );
