@@ -64,48 +64,47 @@ export const authController = {
     }
   },
 
-  async googleCallback(req: Request, res: Response) {
-    try {
-      const profile = (req as any).user;
-      if (!profile) {
-        return ResponseData.unauthorized(res, "Profil Google tidak ditemukan");
-      }
-
-      const { user, accessToken, refreshToken } =
-        await authService.loginWithGoogle(profile);
-
-      return ResponseData.ok(
-        res,
-        { user, accessToken, refreshToken },
-        "login google berhasil"
-      );
-    } catch (err: any) {
-      return ResponseData.serverError(res, err.message);
-    }
-  },
-
   // async googleCallback(req: Request, res: Response) {
   //   try {
   //     const profile = (req as any).user;
-
   //     if (!profile) {
   //       return ResponseData.unauthorized(res, "Profil Google tidak ditemukan");
   //     }
 
-  //     // login atau register user
   //     const { user, accessToken, refreshToken } =
   //       await authService.loginWithGoogle(profile);
 
-  //     // Redirect ke frontend + bawa token
-  //     const redirectUrl =
-  //       `${process.env.FRONTEND_URL}/auth/callback` +
-  //       `?accessToken=${accessToken}&refreshToken=${refreshToken}`;
-
-  //     return res.redirect(redirectUrl);
+  //     return ResponseData.ok(
+  //       res,
+  //       { user, accessToken, refreshToken },
+  //       "login google berhasil"
+  //     );
   //   } catch (err: any) {
   //     return ResponseData.serverError(res, err.message);
   //   }
   // },
+
+  async googleCallback(req: Request, res: Response) {
+    try {
+      const profile = (req as any).user;
+
+      if (!profile) {
+        return ResponseData.unauthorized(res, "Profil Google tidak ditemukan");
+      }
+
+      // login atau register user
+      const { user, accessToken, refreshToken } =
+        await authService.loginWithGoogle(profile);
+
+      // Redirect ke frontend + bawa token
+      const redirectUrl = `${process.env.FRONTEND_URL}/login?accessToken=${accessToken}&refreshToken=${refreshToken}`;
+      return res.redirect(redirectUrl);
+
+      
+    } catch (err: any) {
+      return ResponseData.serverError(res, err.message);
+    }
+  },
 
   async forgotPassword(req: Request, res: Response) {
     try {
