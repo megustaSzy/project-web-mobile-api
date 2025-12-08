@@ -9,7 +9,7 @@ export const teamController = {
         try {
             const team = await teamService.getTeam();
 
-            return ResponseData.ok(res, team);
+            return ResponseData.ok(res, team, "berhasil mengambil team");
         } catch (error) {
             return ResponseData.serverError(res, error)
         }
@@ -35,11 +35,41 @@ export const teamController = {
         try {
             const team = await teamService.createTeam(req.body);
 
-            return ResponseData.created(res, team)
+            return ResponseData.created(res, team, "berhasil membuat team")
         } catch (error) {
             return ResponseData.serverError(res, error)
         }
 
+    },
+
+    async editTeam(req: Request, res: Response) {
+        try {
+            const id = Number(req.params.id);
+    
+            if(isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
+    
+            const team = await teamService.editTeam(id, req.body);
+    
+            return ResponseData.ok(res, team, "data team berhasil diperbarui");
+            
+        } catch (error) {
+            return ResponseData.serverError(res, error)
+        }
+    },
+
+    async deleteTeamById(req: Request, res: Response) {
+        try {
+            
+            const id = Number(req.params.id);
+    
+            if(isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
+    
+            const team = await teamService.deleteIdTeam(id);
+    
+            return ResponseData.ok(res, team, "berhasil menghapus team");
+        } catch (error) {
+            return ResponseData.serverError(res, error)
+        }
     }
 
 }
