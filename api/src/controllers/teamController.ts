@@ -33,9 +33,14 @@ export const teamController = {
     async createTeam(req: Request, res: Response) {
 
         try {
-            const team = await teamService.createTeam(req.body);
-
-            return ResponseData.created(res, team, "berhasil membuat team")
+            const image = req.file ? `/uploads/${req.file.filename}` : null;
+            
+                const team = await teamService.createTeam({
+                    ...req.body,
+                    imageUrl: image,
+                  });
+            
+                return ResponseData.created(res, team, "team berhasil ditambahkan");
         } catch (error) {
             return ResponseData.serverError(res, error)
         }
