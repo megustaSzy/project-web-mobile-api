@@ -68,6 +68,8 @@ app.use("/api/payment", paymentRoute);
 // Public upload folder
 app.use("/uploads", express.static("public/uploads"));
 
+// TESTING
+
 export default app;
 
 // total dest, kategori, pengguna, 
