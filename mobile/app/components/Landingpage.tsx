@@ -12,6 +12,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
 
 // ============================
 // FORMAT RUPIAH
@@ -76,14 +77,21 @@ const kabupatenList = [
 
 const CATEGORIES = ["Pantai", "Gunung", "Pulau", "Air Terjun"];
 
+// ===============================
+// MAIN COMPONENT
+// ===============================
 export default function HomeScreen() {
+  const router = useRouter();
+
   const [kategori, setKategori] = useState("");
   const [daerah, setDaerah] = useState("");
   const [historyModal, setHistoryModal] = useState(false);
   const [historyList, setHistoryList] = useState([]);
   const [activeCategory, setActiveCategory] = useState(null);
 
+  // ===============================
   // LOAD HISTORY
+  // ===============================
   useEffect(() => {
     loadHistory();
   }, []);
@@ -97,7 +105,9 @@ export default function HomeScreen() {
     }
   };
 
+  // ===============================
   // SAVE HISTORY
+  // ===============================
   const saveHistory = async () => {
     if (kategori.trim() === "" || daerah.trim() === "") return;
 
@@ -118,8 +128,10 @@ export default function HomeScreen() {
     }
   };
 
+  // ===============================
+  // HANDLE CATEGORY PRESS
+  // ===============================
   const handleCategoryPress = (cat) => {
-    // toggle: jika klik kategori yang sama, batalkan
     if (activeCategory === cat) {
       setActiveCategory(null);
       setKategori("");
@@ -129,6 +141,16 @@ export default function HomeScreen() {
     }
   };
 
+  // ===============================
+  // HANDLE DESTINATION CLICK
+  // ===============================
+  const handleDestinationPress = (d) => {
+    router.push(`/deskripsi/${d.id}`);
+  };
+
+  // ===============================
+  // RENDER
+  // ===============================
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       {/* HEADER */}
@@ -154,8 +176,8 @@ export default function HomeScreen() {
                 value={kategori}
                 onChangeText={(t) => {
                   setKategori(t);
-                  // jika user ketik manual, reset activeCategory
-                  if (activeCategory && activeCategory !== t) setActiveCategory(null);
+                  if (activeCategory && activeCategory !== t)
+                    setActiveCategory(null);
                 }}
                 style={styles.input}
               />
@@ -187,7 +209,7 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      {/* CATEGORY (horizontal) */}
+      {/* CATEGORY */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -249,11 +271,13 @@ export default function HomeScreen() {
       <Text style={styles.sectionTitle}>Populer Destination</Text>
 
       {destinations.map((d) => (
-        <View key={d.id} style={styles.popularCard}>
-          {/* image fixed height */}
+        <TouchableOpacity
+          key={d.id}
+          onPress={() => handleDestinationPress(d)}
+          style={styles.popularCard}
+        >
           <Image source={d.image} style={styles.popularImage} />
 
-          {/* gradient overlay: from RIGHT (white) -> LEFT (transparent) */}
           <LinearGradient
             colors={["rgba(255,255,255,1)", "rgba(255,255,255,0)"]}
             start={{ x: 1, y: 0 }}
@@ -264,13 +288,11 @@ export default function HomeScreen() {
           <View style={styles.popularInfo}>
             <Text style={styles.popularName}>{d.name}</Text>
             <Text style={styles.popularLocation}>{d.location}</Text>
-
-            {/* include text */}
             <Text style={styles.popularInclude}>
               Include: Tiket masuk | Travel Lamigo | Snack
             </Text>
           </View>
-        </View>
+        </TouchableOpacity>
       ))}
 
       {/* MODAL HISTORY */}
@@ -413,7 +435,6 @@ const styles = StyleSheet.create({
 
   kabupatenCount: { color: "#007BFF", fontWeight: "700", fontSize: 18 },
 
-  /* POPULAR CARD */
   popularCard: {
     backgroundColor: "white",
     width: "90%",
@@ -423,7 +444,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     position: "relative",
     overflow: "hidden",
-    height: 90, // fixed height so gradient & image align
+    height: 90,
     padding: 0,
   },
 
@@ -441,7 +462,6 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     width: "20%",
-    // LinearGradient paints the actual gradient
   },
 
   popularInfo: {
@@ -453,8 +473,6 @@ const styles = StyleSheet.create({
 
   popularName: { fontSize: 16, fontWeight: "700" },
   popularLocation: { fontSize: 13, color: "#777" },
-  popularPrice: { fontSize: 14, marginTop: 4, color: "#007BFF", fontWeight: "700" },
-
   popularInclude: {
     fontSize: 11,
     color: "#555",
