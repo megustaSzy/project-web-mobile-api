@@ -71,7 +71,7 @@ export const teamController = {
     
             const team = await teamService.deleteIdTeam(id);
     
-            return ResponseData.ok(res, team, "berhasil menghapus team");
+            return ResponseData.ok(res, "berhasil menghapus team");
         } catch (error) {
             return ResponseData.serverError(res, error)
         }

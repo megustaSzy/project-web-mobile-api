@@ -99,8 +99,6 @@ export const authController = {
       // Redirect ke frontend + bawa token
       const redirectUrl = `${process.env.FRONTEND_URL}/login?accessToken=${accessToken}&refreshToken=${refreshToken}`;
       return res.redirect(redirectUrl);
-
-      
     } catch (err: any) {
       return ResponseData.serverError(res, err.message);
     }
@@ -108,30 +106,34 @@ export const authController = {
 
   async forgotPassword(req: Request, res: Response) {
     try {
-      const message = await authService.requestOtp(req.body.email);
-      return ResponseData.ok(res, message, "OTP dikirim");
-    } catch (error: any) {
-      return ResponseData.serverError(res, error.message);
+      const { email } = req.body;
+
+      const data = await authService.requestOtp(email);
+      return ResponseData.ok(res, data, "OTP dikirim");
+    } catch (error) {
+      return ResponseData.serverError(res, error);
     }
   },
 
   async verifyOtp(req: Request, res: Response) {
     try {
-      const { email, otp } = req.body;
-      const message = await authService.verifyOtp(email, otp);
-      return ResponseData.ok(res, message, "OTP Valid");
-    } catch (error: any) {
-      return ResponseData.serverError(res, error.message);
+      const { sessionToken, otp } = req.body;
+
+      const data = await authService.verifyOtp(sessionToken, otp);
+      return ResponseData.ok(res, data, "OTP Valid");
+    } catch (error) {
+      return ResponseData.serverError(res, error);
     }
   },
 
   async resetPassword(req: Request, res: Response) {
     try {
-      const { email, newPassword } = req.body;
-      const message = await authService.resetPassword(email, newPassword);
-      return ResponseData.ok(res, message, "password berhasil diperbarui");
-    } catch (error: any) {
-      return ResponseData.serverError(res, error.message);
+      const { sessionToken, newPassword } = req.body;
+
+      const data = await authService.resetPassword(sessionToken, newPassword);
+      return ResponseData.ok(res, data, "Password berhasil diperbarui");
+    } catch (error) {
+      return ResponseData.serverError(res, error);
     }
   },
 };
