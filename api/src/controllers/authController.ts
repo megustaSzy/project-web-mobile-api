@@ -99,7 +99,6 @@ export const authController = {
       // Redirect ke frontend + bawa token
       const redirectUrl = `${process.env.FRONTEND_URL}/login?accessToken=${accessToken}&refreshToken=${refreshToken}`;
       return res.redirect(redirectUrl);
-
       
     } catch (err: any) {
       return ResponseData.serverError(res, err.message);
