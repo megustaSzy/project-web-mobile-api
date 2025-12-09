@@ -18,7 +18,7 @@ export default function ResetPasswordForm() {
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // 👉 Ambil email dari URL (wajib sesuai dengan BE kamu)
+  //  Ambil email dari URL (wajib sesuai dengan BE kamu)
   const params = new URLSearchParams(
     typeof window !== "undefined" ? window.location.search : ""
   );
@@ -70,7 +70,7 @@ export default function ResetPasswordForm() {
   };
 
   return (
-    <section className="flex flex-col items-center justify-center min-h-screen px-4 bg-gradient-to-b from-blue-50 to-white">
+    <section className="flex flex-col items-center justify-center min-h-screen px-4 bg-linear-to-b from-blue-50 to-white">
       <Card className="w-full max-w-md shadow-lg border border-gray-100 rounded-2xl bg-white/80 backdrop-blur">
         <CardHeader className="text-center pb-2 flex flex-col items-center">
           <Image

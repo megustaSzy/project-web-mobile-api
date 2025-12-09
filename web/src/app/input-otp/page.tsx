@@ -26,10 +26,10 @@ export default function Page() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  // 🔍 Ambil email dari query
+  //  Ambil email dari query
   const email = searchParams.get("email") || "";
 
-  // 🔥 Resend OTP
+  //  Resend OTP
   const handleResendOtp = async () => {
     setResendLoading(true);
 
@@ -47,6 +47,7 @@ export default function Page() {
       } else {
         alert(res.message || "Gagal mengirim ulang OTP");
       }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       alert("Terjadi kesalahan server");
     } finally {
@@ -54,7 +55,7 @@ export default function Page() {
     }
   };
 
-  // 🔥 Verify OTP
+  //  Verify OTP
   const handleVerify = async () => {
     if (otp.length < 6) return alert("OTP harus 6 digit!");
 
@@ -72,6 +73,7 @@ export default function Page() {
       } else {
         alert(res.message || "OTP salah!");
       }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       alert("Terjadi kesalahan server");
     } finally {
