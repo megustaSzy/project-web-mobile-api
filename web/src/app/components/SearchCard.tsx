@@ -5,10 +5,6 @@ import { MapPin } from "lucide-react";
 import { apiFetch } from "@/helpers/api";
 import { ApiCategoryResponse, CategoryItem } from "@/types/category";
 
-// ========================
-//  TYPE DEFINITIONS
-// ========================
-
 interface Area {
   id: number;
   nama: string;
@@ -30,9 +26,6 @@ export default function SearchCard() {
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [selectedArea, setSelectedArea] = useState<string>("");
 
-  // =====================================================
-  // DETEKSI LOKASI
-  // =====================================================
   useEffect(() => {
     if (typeof window !== "undefined" && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -63,9 +56,6 @@ export default function SearchCard() {
     }
   }, []);
 
-  // =====================================================
-  // FETCH KATEGORI
-  // =====================================================
   useEffect(() => {
     async function load() {
       try {
@@ -80,9 +70,7 @@ export default function SearchCard() {
     load();
   }, []);
 
-  // =====================================================
-  // FETCH DAERAH BERDASARKAN KATEGORI
-  // =====================================================
+
   useEffect(() => {
     if (!selectedCategory) return;
     async function load() {

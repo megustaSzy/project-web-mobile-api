@@ -17,6 +17,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle, XCircle } from "lucide-react";
+import Link from "next/link";
 
 /* ============================================================
    MODAL STATUS
@@ -284,6 +285,12 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                   placeholder="••••••••"
                   required
                 />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <Link href="/forgot-password" className="text-sm text-gray-500">
+                  Lupa password?
+                </Link>
               </div>
 
               <Button

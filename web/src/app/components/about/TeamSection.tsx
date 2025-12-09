@@ -10,39 +10,52 @@ type TeamMember = {
   photo: string;
 };
 
+// Type sesuai struktur API
+type TeamAPIItem = {
+  id: number;
+  name: string;
+  job: string;
+  imageUrl: string;
+};
+
+type TeamAPIResponse = {
+  status: number;
+  message: string;
+  data: TeamAPIItem[];
+};
+
 export default function TeamSection() {
   const [team, setTeam] = useState<TeamMember[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
 
-  async function getTeamData(): Promise<void> {
+  async function getTeamData() {
     try {
       setLoading(true);
       setErrorMsg(null);
 
-      const result = await apiFetch<TeamMember[]>("/about/team");
+      const response = await apiFetch<TeamAPIResponse>("/api/team");
 
-      // Validasi data benar-benar array TeamMember[]
-      if (!Array.isArray(result)) {
-        throw new Error("Format API tidak mengembalikan array.");
+      if (!response || response.status !== 200) {
+        throw new Error(response?.message || "Gagal memuat data tim.");
       }
 
-      const valid = result.every(
-        (item) =>
-          typeof item === "object" &&
-          item !== null &&
-          "name" in item &&
-          "role" in item &&
-          "photo" in item
+      if (!Array.isArray(response.data)) {
+        throw new Error("Format data tim tidak valid.");
+      }
+
+      // Mapping dari API → TeamMember
+      const mappedTeam: TeamMember[] = response.data.map(
+        (item: TeamAPIItem) => ({
+          name: item.name,
+          role: item.job,
+          photo: item.imageUrl,
+        })
       );
 
-      if (!valid) {
-        throw new Error("Format data anggota tim tidak sesuai.");
-      }
-
-      setTeam(result);
+      setTeam(mappedTeam);
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Gagal memuat data tim.";
@@ -75,15 +88,13 @@ export default function TeamSection() {
         {!loading && !errorMsg && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 justify-center">
             {team.map((member, i) => {
-              const isFullURL = member.photo.startsWith("http");
-
-              const photoURL = isFullURL
+              const photoURL = member.photo.startsWith("http")
                 ? member.photo
-                : `${BASE_URL}/uploads/team/${member.photo}`;
+                : `${BASE_URL}${member.photo}`;
 
               return (
                 <div key={i} className="flex flex-col items-center">
-                  <div className="w-48 h-48 rounded-3xl overflow-hidden bg-yellow-400 flex justify-center items-center">
+                  <div className="w-48 h-48 rounded-3xl overflow-hidden bg-yellow-400 flex justify-center items-center shadow-md">
                     <img
                       src={photoURL}
                       alt={member.name}

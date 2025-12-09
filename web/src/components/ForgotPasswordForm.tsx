@@ -11,36 +11,66 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import Image from "next/image";
-import { useRouter } from "next/navigation"; // ✅ untuk navigasi antar halaman
 
-export default function ForgotPasswordForm() {
-  const [email, setEmail] = useState("");
+export default function ResetPasswordForm() {
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
-  // 🔹 Simulasi database user yang terdaftar
-  const registeredEmails = ["test@example.com", "faiz@gmail.com", "user123@mail.com"];
+  //  Ambil email dari URL (wajib sesuai dengan BE kamu)
+  const params = new URLSearchParams(
+    typeof window !== "undefined" ? window.location.search : ""
+  );
+  const email = params.get("email");
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) return alert("Masukkan email Anda!");
+
+    if (password !== confirm) {
+      alert("Password tidak sama!");
+      return;
+    }
+
+    if (!email) {
+      alert("Email tidak ditemukan di URL!");
+      return;
+    }
+
     setLoading(true);
 
-    // 🔹 Simulasi pengecekan ke database
-    setTimeout(() => {
-      if (registeredEmails.includes(email.trim().toLowerCase())) {
-        // ✅ Jika email terdaftar → arahkan ke halaman reset password
-        router.push("/reset-password");
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/reset-password`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: email,
+            newPassword: password,
+          }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setSuccess(true);
       } else {
-        // ❌ Jika tidak terdaftar → tampilkan pesan error
-        alert("Email tidak valid atau belum terdaftar.");
+        alert(data.message || "Gagal reset password");
       }
-      setLoading(false);
-    }, 1000);
+    } catch (err) {
+      console.error(err);
+      alert("Terjadi kesalahan server");
+    }
+
+    setLoading(false);
   };
 
   return (
-    <section className="flex flex-col items-center justify-center min-h-screen px-4 bg-gradient-to-b from-blue-50 to-white">
+    <section className="flex flex-col items-center justify-center min-h-screen px-4 bg-linear-to-b from-blue-50 to-white">
       <Card className="w-full max-w-md shadow-lg border border-gray-100 rounded-2xl bg-white/80 backdrop-blur">
         <CardHeader className="text-center pb-2 flex flex-col items-center">
           <Image
@@ -51,41 +81,73 @@ export default function ForgotPasswordForm() {
             className="w-16 h-16 object-contain mb-3"
           />
           <CardTitle className="text-2xl font-bold text-gray-800">
-            Lupa Password
+            Reset Password
           </CardTitle>
           <CardDescription className="text-gray-500">
-            Masukkan email Anda untuk menerima link reset password
+            Buat password baru untuk akun Anda
           </CardDescription>
         </CardHeader>
 
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Email
-              </label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                className="w-full"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
+          {!success ? (
+            <form onSubmit={handleReset} className="space-y-5">
+              <div>
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Password Baru
+                </label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  className="w-full"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
 
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition-all duration-200"
-            >
-              {loading ? "Memeriksa..." : "Kirim Link Reset"}
-            </Button>
-          </form>
+              <div>
+                <label
+                  htmlFor="confirm"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Konfirmasi Password
+                </label>
+                <Input
+                  id="confirm"
+                  type="password"
+                  placeholder="••••••••"
+                  className="w-full"
+                  required
+                  value={confirm}
+                  onChange={(e) => setConfirm(e.target.value)}
+                />
+              </div>
+
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition-all duration-200"
+              >
+                {loading ? "Menyimpan..." : "Simpan Password Baru"}
+              </Button>
+            </form>
+          ) : (
+            <div className="text-center space-y-4 py-6">
+              <p className="text-gray-600 text-sm">
+                Password kamu berhasil diubah! 🎉
+              </p>
+              <a
+                href="/login"
+                className="text-blue-600 text-sm hover:underline font-medium"
+              >
+                Kembali ke Login
+              </a>
+            </div>
+          )}
         </CardContent>
       </Card>
     </section>
