@@ -4,6 +4,22 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
+import { apiFetch } from "@/helpers/api"; // <-- pastikan helper ini tersedia
+
+// ========================
+// TIPE PROFILE DARI API
+// ========================
+export type ApiProfileResponse = {
+  status: number;
+  message: string;
+  data: {
+    id: number;
+    name: string;
+    email: string;
+    role: string;
+    avatar?: string | null;
+  };
+};
 
 interface UserProfile {
   name?: string;
@@ -35,6 +51,7 @@ export default function NavBar() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [openLang, setOpenLang] = useState(false);
 
+  // default profile (keamanan jika API gagal)
   const [userData, setUserData] = useState<UserProfile>({
     name: "User",
     avatar: "/images/profile.jpg",
@@ -57,9 +74,71 @@ export default function NavBar() {
   const [translations, setTranslations] =
     useState<TranslationMap>(translationSource);
 
-  const loadLocalProfile = (): void => {
+  /* =========================
+     FETCH PROFILE FROM API
+     ========================= */
+  const fetchProfileFromAPI = async () => {
+    try {
+      const res = await apiFetch<ApiProfileResponse>("/api/users/profile");
+      if (res && res.data) {
+        setUserData({
+          name: res.data.name ?? "User",
+          avatar: res.data.avatar ?? "/images/profile.jpg",
+        });
+        setIsLoggedIn(true);
+        // simpan ke localStorage sebagai cache cepat (opsional)
+        try {
+          if (typeof window !== "undefined")
+            localStorage.setItem(
+              "profile",
+              JSON.stringify({
+                name: res.data.name,
+                avatar: res.data.avatar ?? "/images/profile.jpg",
+              })
+            );
+        } catch {}
+      } else {
+        // jika response tidak memuat data, treat as not logged
+        setIsLoggedIn(false);
+      }
+    } catch (err) {
+      console.error("Gagal mengambil profil:", err);
+      // jika fetch error (mis. 401), pastikan flag login false
+      setIsLoggedIn(false);
+    }
+  };
+
+  /* =========================
+     Load initial data (language, translations, profile)
+     ========================= */
+  useEffect(() => {
     if (typeof window === "undefined") return;
 
+    // language (safe fallback)
+    const savedLang = localStorage.getItem("language") ?? "id";
+    setLanguage(savedLang);
+
+    // translations
+    const savedTrans = localStorage.getItem("translations");
+    if (savedTrans) {
+      try {
+        setTranslations(JSON.parse(savedTrans) as TranslationMap);
+      } catch {
+        setTranslations(translationSource);
+      }
+    } else {
+      // jika belum ada translations dan bahasa bukan id, fetch translations in background
+      if (savedLang !== "id") {
+        translateWithGoogle(savedLang).then((t) => {
+          setTranslations(t);
+          localStorage.setItem("translations", JSON.stringify(t));
+        });
+      } else {
+        setTranslations(translationSource);
+      }
+    }
+
+    // load profile: prefer localStorage cache untuk render cepat
     const token = localStorage.getItem("token");
     const storedProfile = localStorage.getItem("profile");
 
@@ -73,12 +152,77 @@ export default function NavBar() {
           avatar: parsed?.avatar ?? "/images/profile.jpg",
         });
       } catch (err) {
-        // jika parsing gagal, tetap gunakan default
         console.warn("Gagal parsing profile dari localStorage:", err);
       }
     }
+
+    // jika token ada, ambil versi paling up-to-date dari API
+    if (token) {
+      fetchProfileFromAPI();
+    }
+
+    // storage listener untuk detect perubahan di tab lain
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "profile") {
+        const newVal = e.newValue;
+        if (!newVal) {
+          setUserData({ name: "User", avatar: "/images/profile.jpg" });
+          setIsLoggedIn(false);
+        } else {
+          try {
+            const parsed = JSON.parse(newVal) as UserProfile;
+            setUserData({
+              name: parsed?.name ?? "User",
+              avatar: parsed?.avatar ?? "/images/profile.jpg",
+            });
+            // apabila profile di storage berubah biasanya karena login/logout di tab lain
+            setIsLoggedIn(Boolean(localStorage.getItem("token")));
+          } catch {}
+        }
+      }
+      if (e.key === "language") {
+        const newLang = e.newValue ?? "id";
+        setLanguage(newLang);
+      }
+      if (e.key === "token" && e.newValue === null) {
+        // token dihapus di tab lain => logout
+        setIsLoggedIn(false);
+        setUserData({ name: "User", avatar: "/images/profile.jpg" });
+      }
+    };
+
+    window.addEventListener("storage", handleStorage);
+
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+    };
+    // NOTE: intentionally empty deps so runs once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Scroll effect
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  /* =========================
+     LOGOUT
+     ========================= */
+  const handleLogout = (): void => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("token");
+      localStorage.removeItem("profile");
+    }
+    setIsLoggedIn(false);
+    setUserData({ name: "User", avatar: "/images/profile.jpg" });
   };
 
+  /* =========================
+     TRANSLATE HELPERS (SAMA DENGAN SEMULA)
+     ========================= */
   const translateWithGoogle = async (
     target: string
   ): Promise<TranslationMap> => {
@@ -140,76 +284,9 @@ export default function NavBar() {
       localStorage.setItem("translations", JSON.stringify(newTrans));
   };
 
-  // Load initial data (language, translations, profile)
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    // language (safe fallback)
-    const savedLang = localStorage.getItem("language") ?? "id";
-    setLanguage(savedLang);
-
-    // translations
-    const savedTrans = localStorage.getItem("translations");
-    if (savedTrans) {
-      try {
-        setTranslations(JSON.parse(savedTrans) as TranslationMap);
-      } catch {
-        setTranslations(translationSource);
-      }
-    } else {
-      // jika belum ada translations dan bahasa bukan id, fetch translations
-      if (savedLang !== "id") {
-        // panggil tapi jangan block rendering pertama
-        translateWithGoogle(savedLang).then((t) => {
-          setTranslations(t);
-          localStorage.setItem("translations", JSON.stringify(t));
-        });
-      } else {
-        setTranslations(translationSource);
-      }
-    }
-
-    // load profile
-    loadLocalProfile();
-
-    // storage listener untuk detect perubahan di tab lain
-    const handleStorage = (e: StorageEvent) => {
-      if (e.key === "profile") loadLocalProfile();
-      if (e.key === "language") {
-        const newLang = e.newValue ?? "id";
-        setLanguage(newLang);
-      }
-    };
-
-    window.addEventListener("storage", handleStorage);
-
-    return () => {
-      window.removeEventListener("storage", handleStorage);
-    };
-    // NOTE: intentionally empty deps so runs once on mount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Scroll effect
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
   /* =========================
-     LOGOUT
+     RETURN (JSX ASLI TANPA PERUBAHAN)
      ========================= */
-  const handleLogout = (): void => {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("token");
-      localStorage.removeItem("profile");
-    }
-    setIsLoggedIn(false);
-    setUserData({ name: "User", avatar: "/images/profile.jpg" });
-  };
-
   return (
     <header
       className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
@@ -376,9 +453,7 @@ export default function NavBar() {
             <Link href="/tiket" onClick={() => setOpen(false)}>
               {translations.ticket}
             </Link>
-            <button onClick={() => setOpen(false)}>
-              {translations.contact}
-            </button>
+            <button onClick={() => setOpen(false)}>{translations.contact}</button>
 
             {isLoggedIn ? (
               <>

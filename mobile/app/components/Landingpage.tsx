@@ -13,6 +13,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
+// import { wisata } from "../data/wisata";
+
+
 
 // ============================
 // FORMAT RUPIAH
@@ -64,6 +67,7 @@ const kabupatenList = [
     name: "Kabupaten Lampung Selatan",
     desc: "Destinasi pantai & gunung populer...",
     image: require("../../assets/images/favorite/21.png"),
+    imageUri: "../../assets/images/favorite/21.png",
     count: 18,
   },
   {
@@ -71,6 +75,7 @@ const kabupatenList = [
     name: "Kabupaten Pesawaran",
     desc: "Pulau-pulau cantik dan snorkeling...",
     image: require("../../assets/images/favorite/21.png"),
+    imageUri: "../../assets/images/favorite/21.png",
     count: 22,
   },
 ];
@@ -145,7 +150,7 @@ export default function HomeScreen() {
   // HANDLE DESTINATION CLICK
   // ===============================
   const handleDestinationPress = (d) => {
-    router.push(`/deskripsi/${d.id}`);
+    router.push(`../deskripsi/${d.id}`);
   };
 
   // ===============================
@@ -245,27 +250,42 @@ export default function HomeScreen() {
       <Text style={styles.sectionTitle}>Daerah Wisata</Text>
 
       <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={{ marginTop: 10, paddingLeft: 20 }}
-      >
-        {kabupatenList.map((item) => (
-          <View key={item.id} style={styles.kabupatenCardHorizontal}>
-            <Image source={item.image} style={styles.kabupatenImageH} />
+  horizontal
+  showsHorizontalScrollIndicator={false}
+  style={{ marginTop: 10, paddingLeft: 20 }}
+>
+  {kabupatenList.map((item) => (
+    <TouchableOpacity
+      key={item.id}
+      style={styles.kabupatenCardHorizontal}
+      onPress={() =>
+        router.push({
+          pathname: "../daerah/[id]",
+          params: {
+            id: item.id.toString(),
+            name: item.name,
+            desc: item.desc,
+            image: item.imageUri, // jika pakai require tidak bisa dikirim
+          },
+        })
+      }
+    >
+      <Image source={item.image} style={styles.kabupatenImageH} />
 
-            <View style={{ flex: 1 }}>
-              <Text style={styles.kabupatenTitleH}>{item.name}</Text>
-              <Text numberOfLines={2} style={styles.kabupatenDescH}>
-                {item.desc}
-              </Text>
-            </View>
+      <View style={{ flex: 1 }}>
+        <Text style={styles.kabupatenTitleH}>{item.name}</Text>
+        <Text numberOfLines={2} style={styles.kabupatenDescH}>
+          {item.desc}
+        </Text>
+      </View>
 
-            <View style={styles.kabupatenCountBoxH}>
-              <Text style={styles.kabupatenCount}>{item.count}</Text>
-            </View>
-          </View>
-        ))}
-      </ScrollView>
+      <View style={styles.kabupatenCountBoxH}>
+        <Text style={styles.kabupatenCount}>{item.count}</Text>
+      </View>
+    </TouchableOpacity>
+  ))}
+</ScrollView>
+
 
       {/* POPULAR */}
       <Text style={styles.sectionTitle}>Populer Destination</Text>
@@ -369,7 +389,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderWidth: 1,
     borderColor: "#ddd",
-    borderRadius: 22,
+    borderRadius: 15,
     paddingHorizontal: 10,
     paddingVertical: 1,
   },
@@ -402,18 +422,19 @@ const styles = StyleSheet.create({
 
   kabupatenCardHorizontal: {
     backgroundColor: "white",
-    width: 360,
+    width: 370,
     marginRight: 19,
-    borderRadius: 15,
-    padding: 10,
-    elevation: 3,
+    borderRadius: 10,
+    padding: 0,
+    paddingTop: 10,
+    elevation: 2,
     flexDirection: "row",
     alignItems: "flex-start",
   },
 
   kabupatenImageH: {
-    width: 90,
-    height: 90,
+    width: 70,
+    height: 70,
     borderRadius: 10,
     marginRight: 15,
   },
@@ -451,8 +472,8 @@ const styles = StyleSheet.create({
   popularImage: {
     width: 110,
     height: "100%",
-    borderTopLeftRadius: 15,
-    borderBottomLeftRadius: 15,
+    borderTopLeftRadius: 5,
+    borderBottomLeftRadius: 5,
     resizeMode: "cover",
   },
 

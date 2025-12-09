@@ -14,12 +14,13 @@ import {
 } from "@/components/ui/card";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle, XCircle } from "lucide-react";
-/* -----------------------------------------
-   POPUP ANIMASI
------------------------------------------- */
+
+/* ============================================================
+   MODAL STATUS
+============================================================= */
 function AuthModal({
   open,
   status,
@@ -70,28 +71,98 @@ function AuthModal({
   );
 }
 
-/* -----------------------------------------
-   LOGIN FORM (USER & ADMIN)
------------------------------------------- */
-export function LoginForm({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+/* ============================================================
+    LOGIN FORM
+============================================================= */
+export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
 
-  // Modal state
+  const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  const [modalStatus, setModalStatus] =
-    useState<"success" | "error" | null>(null);
+  const [modalStatus, setModalStatus] = useState<"success" | "error" | null>(
+    null
+  );
   const [modalMessage, setModalMessage] = useState("");
 
-  // Helper: baca cookies
+  /* --- Save cookie (untuk BEARER) --- */
   function setCookie(name: string, value: string, days = 1) {
     const expires = new Date(Date.now() + days * 864e5).toUTCString();
-    document.cookie = `${name}=${value}; path=/; expires=${expires}; SameSite=Lax`;
+    document.cookie = `${name}=${value}; path=/; expires=${expires}`;
   }
 
+  /* --- Handle OAuth Google Callback --- */
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code");
+    const accessToken = params.get("accessToken");
+    const refreshToken = params.get("refreshToken");
+
+    // Jika backend redirect membawa token langsung → simpan
+    if (accessToken && refreshToken) {
+      setCookie("accessToken", accessToken);
+      setCookie("refreshToken", refreshToken);
+
+      setModalStatus("success");
+      setModalMessage("Login Google berhasil!");
+      setModalOpen(true);
+
+      router.replace("/login");
+
+      setTimeout(() => {
+        setModalOpen(false);
+        router.push("/");
+      }, 1200);
+
+      return;
+    }
+
+    // Jika hanya membawa kode Google OAuth
+    if (code) {
+      (async () => {
+        try {
+          const res = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/auth/google/callback?code=${code}`
+          );
+
+          const data = await res.json();
+
+          if (!res.ok) {
+            setModalStatus("error");
+            setModalMessage(data.message || "Gagal memproses login Google.");
+            setModalOpen(true);
+            setTimeout(() => setModalOpen(false), 1500);
+            return;
+          }
+
+          // Backend menggunakan Bearer → simpan ke cookie
+          setCookie("accessToken", data.data?.accessToken);
+          setCookie("refreshToken", data.data?.refreshToken);
+
+          setModalStatus("success");
+          setModalMessage("Login Google berhasil!");
+          setModalOpen(true);
+
+          window.history.replaceState({}, "", "/login");
+
+          setTimeout(() => {
+            setModalOpen(false);
+            router.push("/");
+          }, 1200);
+        } catch {
+          setModalStatus("error");
+          setModalMessage("Tidak dapat terhubung ke server Google.");
+          setModalOpen(true);
+          setTimeout(() => setModalOpen(false), 1500);
+        }
+      })();
+    }
+  }, [router]);
+
+  /* ============================================================
+        LOGIN MANUAL EMAIL + PASSWORD
+  ============================================================= */
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -101,7 +172,7 @@ export function LoginForm({
 
     if (!email || !password) {
       setModalStatus("error");
-      setModalMessage("Masukkan email dan password terlebih dahulu!");
+      setModalMessage("Masukkan email dan password!");
       setModalOpen(true);
       setTimeout(() => setModalOpen(false), 1500);
       return;
@@ -116,7 +187,6 @@ export function LoginForm({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password }),
-          credentials: "include",
         }
       );
 
@@ -124,10 +194,9 @@ export function LoginForm({
 
       if (response.ok) {
         const role = (data.data?.user?.role || "user").toLowerCase();
-        const token = data.data?.accessToken;
 
-        // simpan token ke cookies
-        setCookie("accessToken", token);
+        // Simpan token (Bearer)
+        setCookie("accessToken", data.data?.accessToken);
         setCookie("role", role);
 
         setModalStatus("success");
@@ -136,18 +205,15 @@ export function LoginForm({
 
         setTimeout(() => {
           setModalOpen(false);
-
-          if (role === "admin") router.push("/admin/dashboard");
-          else router.push("/");
-        }, 1300);
+          router.push(role === "admin" ? "/admin/dashboard" : "/");
+        }, 1200);
       } else {
         setModalStatus("error");
         setModalMessage(data.message || "Email atau password salah.");
         setModalOpen(true);
         setTimeout(() => setModalOpen(false), 1500);
       }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
+    } catch {
       setModalStatus("error");
       setModalMessage("Tidak dapat terhubung ke server.");
       setModalOpen(true);
@@ -157,6 +223,16 @@ export function LoginForm({
     }
   };
 
+  /* ============================================================
+        LOGIN GOOGLE BUTTON
+  ============================================================= */
+  const handleGoogleLogin = () => {
+    router.push(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/google`);
+  };
+
+  /* ============================================================
+        UI
+  ============================================================= */
   return (
     <>
       <section
@@ -228,9 +304,7 @@ export function LoginForm({
               <Button
                 variant="outline"
                 type="button"
-                onClick={() => {
-                  window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/google`;
-                }}
+                onClick={handleGoogleLogin}
                 className="w-full border-gray-300 hover:bg-gray-50 py-2 rounded-lg flex items-center justify-center gap-2"
               >
                 <FcGoogle size={20} />
@@ -248,7 +322,6 @@ export function LoginForm({
         </Card>
       </section>
 
-      {/* Popup */}
       <AuthModal open={modalOpen} status={modalStatus} message={modalMessage} />
     </>
   );
