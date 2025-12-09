@@ -8,6 +8,7 @@ import { createError } from "../utilities/createError";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET!;
+const MAX_ATTEMPS = 5;
 
 export const authService = {
   async registerUser(data: AuthData) {
@@ -136,7 +137,7 @@ export const authService = {
 
       // hapus semua token milik user
       await prisma.tb_accessToken.deleteMany({ where: { userId: payload.id } });
-      
+
       await prisma.tb_refreshToken.deleteMany({
         where: { userId: payload.id },
       });
@@ -181,18 +182,19 @@ export const authService = {
     if (!user) createError("email tidak ditemukan", 404);
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpHash = await bcrypt.hash(otp, 10);
     const expires = new Date(Date.now() + 5 * 60 * 1000);
 
     await prisma.tb_otp.deleteMany({
       where: {
-        email
-      }
-    })
+        email,
+      },
+    });
 
     await prisma.tb_otp.create({
       data: {
         email,
-        otp,
+        otpHash,
         expiresAt: expires,
       },
     });
@@ -207,15 +209,32 @@ export const authService = {
   },
 
   async verifyOtp(email: string, otp: string) {
-    if (!email || !otp) createError("email dan otp wajib diisi", 400);
+    if (!email || !otp) createError("otp wajib diisi", 400);
 
     const record = await prisma.tb_otp.findFirst({
-      where: { email, otp },
+      where: { email },
       orderBy: { createdAt: "desc" },
     });
 
-    if (!record) throw createError("OTP salah", 400);
-    if (record.expiresAt < new Date()) throw createError("OTP kadaluarsa", 401);
+    if (!record) throw createError("OTP tidak ditemukan", 404);
+
+    if(record.expiresAt < new Date()) {
+      await prisma.tb_otp.delete({
+        where: {
+          id: record.id
+        }
+      });
+      throw createError("OTP Kadaluarsa", 401);
+    }
+
+    if(record.attempts >= MAX_ATTEMPS) {
+      await prisma.tb_otp.delete({
+        where: {
+          id: record.id
+        }
+      });
+      throw createError("terlalu banyak percobaan", 429);
+    }
 
     await prisma.tb_otp.delete({ where: { id: record.id } });
 
@@ -223,8 +242,12 @@ export const authService = {
   },
 
   async resetPassword(email: string, newPassword: string) {
+    if (!email) createError("email wajib diisi", 400);
     if (!newPassword || newPassword.length < 6)
       createError("password minimal 6 karakter", 400);
+
+    const user = await prisma.tb_user.findUnique({ where: { email } });
+    if (!user) createError("email tidak ditemukan", 404);
 
     const hash = await bcrypt.hash(newPassword, 10);
 

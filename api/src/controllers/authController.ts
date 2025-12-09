@@ -99,11 +99,11 @@ export const authController = {
       // Redirect ke frontend + bawa token
       const redirectUrl = `${process.env.FRONTEND_URL}/login?accessToken=${accessToken}&refreshToken=${refreshToken}`;
       return res.redirect(redirectUrl);
-      
     } catch (err: any) {
       return ResponseData.serverError(res, err.message);
     }
   },
+
 
   async forgotPassword(req: Request, res: Response) {
     try {
@@ -127,6 +127,7 @@ export const authController = {
   async resetPassword(req: Request, res: Response) {
     try {
       const { email, newPassword } = req.body;
+
       const message = await authService.resetPassword(email, newPassword);
       return ResponseData.ok(res, message, "password berhasil diperbarui");
     } catch (error: any) {
