@@ -2,14 +2,12 @@
 
 import React, { useState, useEffect } from "react";
 import { MapPin } from "lucide-react";
+import { apiFetch } from "@/helpers/api";
+import { ApiCategoryResponse, CategoryItem } from "@/types/category";
 
 // ========================
 //  TYPE DEFINITIONS
 // ========================
-interface Category {
-  id: number;
-  nama: string;
-}
 
 interface Area {
   id: number;
@@ -27,7 +25,7 @@ interface ReverseGeocodeResponse {
 
 export default function SearchCard() {
   const [location, setLocation] = useState<string>("Mendeteksi lokasi...");
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<CategoryItem[]>([]);
   const [areas, setAreas] = useState<Area[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [selectedArea, setSelectedArea] = useState<string>("");
@@ -70,10 +68,15 @@ export default function SearchCard() {
   // =====================================================
   useEffect(() => {
     async function load() {
-      const res = await fetch("https://api.example.com/kategori"); // ganti API
-      const data: { data: Category[] } = await res.json();
-      setCategories(data.data);
+      try {
+        const res = await apiFetch<ApiCategoryResponse>("/api/category");
+
+        setCategories(res.data.items);
+      } catch (err) {
+        console.error("Gagal load kategori:", err);
+      }
     }
+
     load();
   }, []);
 
@@ -123,7 +126,7 @@ export default function SearchCard() {
 
               {categories.map((cat) => (
                 <option key={cat.id} value={cat.id.toString()}>
-                  {cat.nama}
+                  {cat.name}
                 </option>
               ))}
             </select>
