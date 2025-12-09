@@ -183,6 +183,12 @@ export const authService = {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const expires = new Date(Date.now() + 5 * 60 * 1000);
 
+    await prisma.tb_otp.deleteMany({
+      where: {
+        email
+      }
+    })
+
     await prisma.tb_otp.create({
       data: {
         email,
