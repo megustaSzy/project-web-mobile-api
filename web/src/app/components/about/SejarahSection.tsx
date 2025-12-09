@@ -14,19 +14,15 @@ export default function SejarahSection() {
   const [loading, setLoading] = useState<boolean>(true);
   const [, setErrorMsg] = useState<string | null>(null);
 
-  console.log("Data:", data);
-
   async function getData(): Promise<void> {
     setLoading(true);
     setErrorMsg(null);
 
     try {
       const endpoint = "/api/about";
-      console.log(" Memanggil:", endpoint);
 
       const result = await apiFetch<HistoryType>(endpoint);
-      // console.log("🚀 Hasil:", );
-      // Validasi hasil tanpa any
+
       if (result) {
         setData(result);
         setLoading(false);

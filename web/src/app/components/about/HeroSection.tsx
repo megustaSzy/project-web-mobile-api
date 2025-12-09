@@ -11,8 +11,6 @@ export default function HeroSection() {
   const [loading, setLoading] = useState<boolean>(true);
   const [, setErrorMsg] = useState<string | null>(null);
 
-  console.log("Data Hero:", data);
-
   async function getData(): Promise<void> {
     setLoading(true);
     setErrorMsg(null);
@@ -22,7 +20,6 @@ export default function HeroSection() {
       // console.log("Memanggil:", endpoint);
 
       const result = await apiFetch<TitleType>(endpoint);
-      console.log("🚀 Hasil kntl:", result);
 
       if (result) {
         setData(result);
