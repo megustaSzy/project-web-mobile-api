@@ -171,12 +171,12 @@ model tb_about {
 }
 
 model tb_otp {
-  id        Int      @id @default(autoincrement())
-  email     String   
-  otpHash   String
-  attempts  Int      @default(0)
-  expiresAt DateTime
-  createdAt DateTime @default(now())
+  id           Int      @id @default(autoincrement())
+  email        String
+  otpHash      String
+  attempts     Int      @default(0)
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
 
   @@index([email])
 }
