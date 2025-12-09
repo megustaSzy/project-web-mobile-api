@@ -1,30 +1,47 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 import { useState, useEffect } from "react";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import Image from "next/image";
 import { MapPin } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/helpers/api";
 import { ApiDestinationsResponse, DestinationsType } from "@/types/destination";
+import { ApiCategoryResponse, CategoryItem } from "@/types/category";
 
 export default function DestinasiSection() {
   const [data, setData] = useState<DestinationsType[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
+  const [categories, setCategories] = useState<CategoryItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeCategory, setActiveCategory] = useState("");
+  const [activeCategory, setActiveCategory] = useState<string>("");
   const router = useRouter();
 
-  async function getData() {
+  // ======================================
+  // 1. AMBIL CATEGORY DARI API CATEGORY
+  // ======================================
+  async function loadCategories() {
+    try {
+      const res = await apiFetch<ApiCategoryResponse>("/api/category");
+      setCategories(res.data.items);
+
+      // Set kategori awal
+      if (res.data.items.length > 0) {
+        setActiveCategory(res.data.items[0].name);
+      }
+    } catch (err) {
+      console.error("Gagal fetch kategori:", err);
+      setCategories([]);
+    }
+  }
+
+  // ======================================
+  // 2. AMBIL DATA DESTINASI
+  // ======================================
+  async function getDestinations() {
     setLoading(true);
     try {
       const res = await apiFetch<ApiDestinationsResponse>("/api/destinations");
 
-      console.log("RAW API /destinations:", res);
-
       const items = res?.data?.items ?? [];
 
-      // Mapping destinasi
       const mapped: DestinationsType[] = items.map((it) => ({
         id: it.id,
         name: it.name ?? "Tanpa Nama",
@@ -35,18 +52,6 @@ export default function DestinasiSection() {
       }));
 
       setData(mapped);
-
-      //  Ambil kategori unik
-      const uniqueCategories = Array.from(
-        new Set(items.map((it) => it.category?.name ?? "Umum"))
-      );
-
-      setCategories(uniqueCategories);
-
-      // Set kategori awal
-      if (uniqueCategories.length > 0) {
-        setActiveCategory(uniqueCategories[0]);
-      }
     } catch (err) {
       console.error("Gagal fetch destinations:", err);
       setData([]);
@@ -55,10 +60,9 @@ export default function DestinasiSection() {
     }
   }
 
-  console.log("DATA DESTINASI:", `${process.env.NEXT_PUBLIC_API_URL}/${data[0]?.imageUrl}`);
-
   useEffect(() => {
-    getData();
+    loadCategories();
+    getDestinations();
   }, []);
 
   return (
@@ -74,27 +78,27 @@ export default function DestinasiSection() {
           Tujuan Wisata Favorit
         </h2>
 
-        {/* Kategori Dinamis */}
+        {/* KATEGORI DARI API CATEGORY */}
         <div className="flex justify-center flex-wrap gap-4 md:gap-8 mb-12">
           {categories.map((cat) => {
-            const isActive = activeCategory === cat;
+            const isActive = activeCategory === cat.name;
             return (
               <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
+                key={cat.id}
+                onClick={() => setActiveCategory(cat.name)}
                 className={`px-8 py-2 rounded-full border text-sm font-medium transition-all duration-300 ${
                   isActive
                     ? "bg-blue-500 border-blue-500 text-white shadow-md scale-105"
                     : "bg-white border-gray-300 text-gray-700 hover:bg-blue-100 hover:border-blue-400 hover:text-blue-600"
                 }`}
               >
-                {cat}
+                {cat.name}
               </button>
             );
           })}
         </div>
 
-        {/* GRID */}
+        {/* GRID DESTINASI */}
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {loading ? (
             <p className="text-center col-span-3 text-gray-600">Loading...</p>
@@ -108,13 +112,16 @@ export default function DestinasiSection() {
                 >
                   <div className="relative w-full h-48">
                     <img
-                      src={d.imageUrl ? process.env.NEXT_PUBLIC_API_URL+d.imageUrl : "/images/default.jpg"}
+                      src={
+                        d.imageUrl
+                          ? process.env.NEXT_PUBLIC_API_URL + d.imageUrl
+                          : "/images/default.jpg"
+                      }
                       alt={d.name}
                       className="object-cover w-full h-full"
                     />
                   </div>
 
-                  {/* Isi */}
                   <div className="p-5 text-left">
                     <h3 className="text-lg font-semibold text-black mb-1">
                       {d.name}
