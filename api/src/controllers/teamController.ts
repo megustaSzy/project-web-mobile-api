@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { teamService } from "../services/teamService";
 import { ResponseData } from "../utilities/Response";
 
-
+// testing
 export const teamController = {
 
     async getTeam(req: Request, res: Response) {
