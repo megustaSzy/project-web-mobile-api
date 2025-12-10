@@ -1,7 +1,7 @@
 import prisma from "../src/lib/prisma"
 import bcrypt from "bcryptjs"
 
-// seeder testing
+// seeder testing testttt
 
 async function main() {
     const hashedPassword = await bcrypt.hash("admin123", 10);
