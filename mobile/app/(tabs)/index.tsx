@@ -9,11 +9,11 @@ import { Platform, ScrollView } from 'react-native';
 // import Footer from "@/app/compo/Footer";
 import Landingpage from "@/app/components/Landingpage";
 import NavBar from "@/app/components/NavBar";
-
+import BottomNavbar from "@/app/components/BottomNavbar";
 export default function HomeScreen() {
   return (
     <ScrollView>
-      <NavBar/>
+      {/* <NavBar/> */}
       {/* <Hero />
       <Destinasi />
       <ChooseUs />
@@ -21,6 +21,7 @@ export default function HomeScreen() {
       <InputTestimoni /> */}
       <Landingpage/>
       {/* <Footer /> */}
+      {/* <BottomNavbar/> */}
     </ScrollView>
   );
 }

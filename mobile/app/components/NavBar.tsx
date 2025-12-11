@@ -130,7 +130,7 @@ export default function NavBarMobile() {
 
           {/* Burger */}
           <TouchableOpacity onPress={() => setOpen(!open)}>
-            {open ? <CloseIcon size={26} color="#000" /> : <MenuIcon size={26} color="#000" />}
+            {open ? <CloseIcon size={26} color="#000" /> : <MenuIcon size={26} color="#fff" />}
           </TouchableOpacity>
         </View>
       </Animated.View>
@@ -188,25 +188,26 @@ export default function NavBarMobile() {
 }
 
 const styles = StyleSheet.create({
-  header: {
-    width: "100%",
-    height: 65,
-    paddingHorizontal: 20,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    position: "absolute",
-    top: 0,
-    zIndex: 50,
-    backgroundColor: "#fff",
-    borderBottomWidth: 1,
-    borderColor: "#ddd",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
-  },
+header: {
+  width: "100%",
+  height: 65,
+  paddingHorizontal: 20,
+  paddingTop:40,
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "space-between",
+  position: "absolute",
+  top: 0,
+  zIndex: 50,
+
+  // 🔥 Transparan
+  backgroundColor: "rgba(0,0,0,0)",
+
+  borderBottomWidth: 0,
+  shadowOpacity: 0,
+  elevation: 0,
+},
+
 
   left: {
     flexDirection: "row",
@@ -220,10 +221,21 @@ const styles = StyleSheet.create({
     gap: 15,
   },
 
+welcomeText: {
+  fontSize: 12,
+  color: "#fff",   // putih
+},
+userName: {
+  fontSize: 14,
+  fontWeight: "700",
+  color: "#fff",   // putih
+  marginTop: -2,
+},
+
   lang: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#007AFF",
+    color: "#fff",   // putih
   },
 
   profilePic: {
@@ -244,13 +256,15 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
   },
 
-  menuItem: {
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    fontSize: 16,
-    borderBottomWidth: 1,
-    borderColor: "#eee",
-  },
+menuItem: {
+  paddingVertical: 12,
+  paddingHorizontal: 20,
+  fontSize: 16,
+  borderBottomWidth: 1,
+  borderColor: "#444",
+  color: "#000",     // 🔥 putih
+},
+
 
   logoutBtn: {
     backgroundColor: "#ff4444",
@@ -295,18 +309,6 @@ const styles = StyleSheet.create({
 
   welcomeBox: {
   marginLeft: 8,
-},
-
-welcomeText: {
-  fontSize: 12,
-  color: "#555",
-},
-
-userName: {
-  fontSize: 14,
-  fontWeight: "700",
-  color: "#000",
-  marginTop: -2,
 },
 
 });
