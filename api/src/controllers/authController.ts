@@ -108,32 +108,11 @@ export const authController = {
     try {
       const { email } = req.body;
 
-      const data = await authService.requestOtp(email);
-      return ResponseData.ok(res, data, "OTP dikirim");
+      const result = await authService.requestForgotPassword(email);
+
+      return ResponseData.ok(res, result, "link password telah dikirim");
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      return ResponseData.serverError(res, error)
     }
-  },
-
-  async verifyOtp(req: Request, res: Response) {
-    try {
-      const { sessionToken, otp } = req.body;
-
-      const data = await authService.verifyOtp(sessionToken, otp);
-      return ResponseData.ok(res, data, "OTP Valid");
-    } catch (error) {
-      return ResponseData.serverError(res, error);
-    }
-  },
-
-  async resetPassword(req: Request, res: Response) {
-    try {
-      const { sessionToken, newPassword } = req.body;
-
-      const data = await authService.resetPassword(sessionToken, newPassword);
-      return ResponseData.ok(res, data, "Password berhasil diperbarui");
-    } catch (error) {
-      return ResponseData.serverError(res, error);
-    }
-  },
+  }
 };
