@@ -98,7 +98,9 @@ export const authController = {
 
       // Redirect ke frontend + bawa token
       const redirectUrl = `${process.env.FRONTEND_URL}/login?accessToken=${accessToken}&refreshToken=${refreshToken}`;
+
       return res.redirect(redirectUrl);
+      
     } catch (err: any) {
       return ResponseData.serverError(res, err.message);
     }
@@ -108,21 +110,23 @@ export const authController = {
     try {
       const { email } = req.body;
 
-      const data = await authService.requestOtp(email);
-      return ResponseData.ok(res, data, "OTP dikirim");
+      const result = await authService.requestForgotPassword(email);
+
+      return ResponseData.ok(res, result, "link password telah dikirim");
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      return ResponseData.serverError(res, error)
     }
   },
 
-  async verifyOtp(req: Request, res: Response) {
+  async verifyResetSession(req: Request, res: Response) {
     try {
-      const { sessionToken, otp } = req.body;
+      // fe kirim query
+      const sessionToken = req.query.sessionToken as string;
 
-      const data = await authService.verifyOtp(sessionToken, otp);
-      return ResponseData.ok(res, data, "OTP Valid");
+      const result = await authService.verifySession(sessionToken);
+      return ResponseData.ok(res, result, "token valid");
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      return ResponseData.serverError(res, error)
     }
   },
 
@@ -130,10 +134,11 @@ export const authController = {
     try {
       const { sessionToken, newPassword } = req.body;
 
-      const data = await authService.resetPassword(sessionToken, newPassword);
-      return ResponseData.ok(res, data, "Password berhasil diperbarui");
+      const result = await authService.resetPassword(sessionToken, newPassword);
+
+      return ResponseData.ok(res, result, "password berhasil direset")
     } catch (error) {
       return ResponseData.serverError(res, error);
     }
-  },
+  }
 };

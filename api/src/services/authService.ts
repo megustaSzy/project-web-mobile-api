@@ -1,14 +1,17 @@
 import prisma from "../lib/prisma";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4, validate } from "uuid";
 import { AuthData } from "../types/auth";
 import { sendEmail } from "../utilities/sendEmail";
 import { createError } from "../utilities/createError";
+import {
+  createSessionToken,
+  decodeSessionToken,
+} from "../utilities/sessionToken";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET!;
-const MAX_ATTEMPS = 5;
 
 export const authService = {
   async registerUser(data: AuthData) {
@@ -175,15 +178,133 @@ export const authService = {
     return { user, accessToken, refreshToken };
   },
 
-  async requestOtp(email: string) {
-    if (!email) createError("email wajib diisi", 400);
+  async requestForgotPassword(email: string) {
+    if (!email) throw createError("email wajib diisi", 400);
 
-    const user = await prisma.tb_user.findUnique({ where: { email } });
-    if (!user) createError("email tidak ditemukan", 404);
+    const user = await prisma.tb_user.findUnique({
+      where: {
+        email,
+      },
+    });
+
+    if (!user) throw createError("email tidak ditemukan", 404);
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpHash = await bcrypt.hash(otp, 10);
-    const expires = new Date(Date.now() + 5 * 60 * 1000);
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+
+    await prisma.tb_otp.create({
+      data: {
+        email,
+        otp,
+        expiresAt,
+      },
+    });
+
+    const session = {
+      email,
+      otp,
+      expiresAt: expiresAt.toISOString(),
+    };
+
+    const sessionToken = createSessionToken(session);
+
+    const resetLink = `${process.env.FRONTEND_URL}/reset-password?sessionToken=${sessionToken}`;
+
+    await sendEmail(
+      email,
+      "Reset Password Akun Anda",
+      `
+<html>
+<body>
+    <p>Halo,</p>
+    <p>Berikut adalah link untuk reset password Anda:</p>
+
+    <p>
+        <a href="${resetLink}" style="
+            display: inline-block;
+            padding: 10px 18px;
+            background-color: #4f46e5;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+        ">Reset Password</a>
+    </p>
+
+    <p style="margin-top: 24px;">
+        Link ini hanya berlaku selama <b>5 menit</b>.
+    </p>
+
+    <p>Terima kasih.</p>
+</body>
+</html>
+`
+    );
+
+    return {
+      message: "Link reset password telah dikirim lewat email",
+      resetLink,
+    };
+  },
+
+  async verifySession(sessionToken: string) {
+    if (!sessionToken) throw createError("token tidak ditemukan", 404);
+
+    const decoded = decodeSessionToken(sessionToken);
+    const { email, otp } = decoded;
+
+    // cek db
+    const record = await prisma.tb_otp.findFirst({
+      where: {
+        email,
+        otp,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    if (!record) throw createError("token tidak valid", 400);
+    if (record.expiresAt < new Date()) throw createError("token expired", 400);
+
+    return {
+      valid: true,
+      email,
+    };
+  },
+
+  async resetPassword(sessionToken: string, newPassword: string) {
+    if (!sessionToken) throw createError("token tidak ditemukan", 404);
+    if (!newPassword) throw createError("password wajib diisi", 400);
+
+    const decoded = decodeSessionToken(sessionToken);
+    const { email, otp } = decoded;
+
+    // cek db
+    const record = await prisma.tb_otp.findFirst({
+      where: {
+        email,
+        otp,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    if (!record) throw createError("token tidak valid", 400);
+    if (record.expiresAt < new Date()) throw createError("Token expired", 400);
+
+    // update password user
+
+    const hashed = await bcrypt.hash(newPassword, 10);
+
+    await prisma.tb_user.update({
+      where: {
+        email,
+      },
+      data: {
+        password: hashed,
+      },
+    });
 
     await prisma.tb_otp.deleteMany({
       where: {
@@ -191,121 +312,8 @@ export const authService = {
       },
     });
 
-    await prisma.tb_otp.create({
-      data: {
-        email,
-        otpHash,
-        expiresAt: expires,
-      },
-    });
-
-    const sessionToken = jwt.sign({ email }, process.env.JWT_OTP_SECRET!, {
-      expiresIn: "5m",
-    });
-
-    await sendEmail(
-      email,
-      "Kode OTP Reset Password",
-      `Kode OTP Anda: ${otp}\nKode berlaku selama 5 menit`
-    );
-
     return {
-      message: "Kode OTP berhasil dikirim",
-      sessionToken,
+      message: "password berhasil direset",
     };
-  },
-
-  async verifyOtp(sessionToken: string, otp: string) {
-    if (!sessionToken || !otp)
-      createError("OTP & session token wajib diisi", 400);
-
-    // --- Verify JWT session token ---
-    let payload;
-    try {
-      payload = jwt.verify(sessionToken, process.env.JWT_OTP_SECRET!);
-    } catch (err) {
-      throw createError("Session token tidak valid atau kadaluarsa", 401);
-    }
-
-    const email = (payload as any).email;
-
-    // Ambil OTP berdasarkan email
-    const record = await prisma.tb_otp.findFirst({
-      where: { email },
-      orderBy: { createdAt: "desc" },
-    });
-
-    // --- Early return agar TypeScript tidak complain ---
-    if (!record) {
-      throw createError("OTP tidak ditemukan", 404);
-    }
-
-    // --- Check expired ---
-    if (record.expiresAt < new Date()) {
-      await prisma.tb_otp.delete({ where: { id: record.id } });
-      throw createError("OTP kadaluarsa", 401);
-    }
-
-    // --- Attempt limit ---
-    if (record.attempts >= 3) {
-      await prisma.tb_otp.delete({ where: { id: record.id } });
-      throw createError("Terlalu banyak percobaan", 429);
-    }
-
-    // --- Compare OTP ---
-    const valid = await bcrypt.compare(otp, record.otpHash);
-    if (!valid) {
-      await prisma.tb_otp.update({
-        where: { id: record.id },
-        data: { attempts: record.attempts + 1 },
-      });
-      throw createError("OTP salah", 400);
-    }
-
-    return {
-      message: "OTP valid",
-      email,
-    };
-  },
-  async resetPassword(sessionToken: string, newPassword: string) {
-    if (!sessionToken) createError("session token wajib", 400);
-    if (!newPassword || newPassword.length < 6)
-      createError("password minimal 6 karakter", 400);
-
-    // --- Verify JWT ---
-    let payload;
-    try {
-      payload = jwt.verify(sessionToken, process.env.JWT_OTP_SECRET!);
-    } catch {
-      throw createError("Session token tidak valid atau kadaluarsa", 400);
-    }
-
-    const email = (payload as any).email;
-
-    // --- Cari record OTP berdasarkan email ---
-    const record = await prisma.tb_otp.findFirst({
-      where: { email },
-    });
-
-    // --- Early return supaya TS tidak komplain ---
-    if (!record) {
-      throw createError("OTP session tidak valid", 400);
-    }
-
-    // --- Hash password baru ---
-    const hash = await bcrypt.hash(newPassword, 10);
-
-    // --- Update password user ---
-    await prisma.tb_user.update({
-      where: { email },
-      data: { password: hash },
-    });
-
-    // --- Hapus OTP session ---
-    await prisma.tb_otp.delete({
-      where: { id: record.id },
-    });
-
-    return "password berhasil direset";
   },
 };
