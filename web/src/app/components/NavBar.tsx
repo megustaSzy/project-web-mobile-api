@@ -127,9 +127,6 @@ export default function NavBar() {
     setUserData({ name: "User", avatar: "/images/profile.jpg" });
   };
 
-  // ==========================
-  // JSX (NAVBAR)
-  // ==========================
   return (
     <header
       className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
@@ -139,7 +136,6 @@ export default function NavBar() {
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 flex items-center h-16">
-
         {/* LOGO */}
         <Image src="/images/logo.png" alt="Logo" width={40} height={40} />
 
@@ -167,7 +163,6 @@ export default function NavBar() {
 
         {/* RIGHT SIDE */}
         <div className="hidden md:flex gap-4 ml-auto items-center">
-
           {/* LANGUAGE */}
           <button
             onClick={() => setOpenLang(!openLang)}
@@ -265,7 +260,6 @@ export default function NavBar() {
       >
         <div className="bg-white border-t px-4 py-4 text-gray-800">
           <nav className="flex flex-col gap-4 text-center">
-
             <Link href="/" onClick={() => setOpen(false)}>
               {translations.home}
             </Link>
@@ -348,7 +342,6 @@ export default function NavBar() {
                 🇺🇸 EN
               </button>
             </div>
-
           </nav>
         </div>
       </div>

@@ -3,7 +3,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 // Import semua screen
-import PesananTour from "./pesanantour/page";
+// import PesananTour from "./pesanantour/page";
 import Login from "./auth/login/page";
 import ForgotPassword from "./auth/forgot-password/page";
 import ResetPassword from "./auth/reset-password/page";
@@ -41,11 +41,11 @@ export default function App() {
           component={HomeScreen}
           options={{ title: "Beranda" }}
         />
-        <Stack.Screen
+        {/* <Stack.Screen
           name="PesananTour"
           component={PesananTour}
           options={{ title: "Pesanan Tour" }}
-        />
+        /> */}
       </Stack.Navigator>
     </NavigationContainer>
   );
