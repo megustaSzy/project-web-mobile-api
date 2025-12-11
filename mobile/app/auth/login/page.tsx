@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,13 +7,18 @@ import {
   Image,
   StyleSheet,
   ActivityIndicator,
+  Linking,
 } from "react-native";
 import Modal from "react-native-modal";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
+const API_URL = "http://192.168.100.141:3001"; // 🔥 sesuaikan dengan backendmu
+
 export default function LoginForm() {
+  const router = useRouter();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -24,8 +29,44 @@ export default function LoginForm() {
   );
   const [modalMessage, setModalMessage] = useState("");
 
-  const router = useRouter();
+  /* ============================================================
+        HANDLE OAUTH GOOGLE CALLBACK (SETELAH REDIRECT)
+  ============================================================ */
+  useEffect(() => {
+    const handleDeepLink = async (event: { url: string }) => {
+      const url = event.url;
 
+      // Contoh URL: myapp://auth/google?accessToken=xxx&refreshToken=yyy
+      if (url.includes("auth/google")) {
+        const params = new URLSearchParams(url.split("?")[1]);
+
+        const accessToken = params.get("accessToken");
+        const refreshToken = params.get("refreshToken");
+
+        if (accessToken && refreshToken) {
+          await AsyncStorage.setItem("accessToken", accessToken);
+          await AsyncStorage.setItem("refreshToken", refreshToken);
+
+          setModalStatus("success");
+          setModalMessage("Login Google berhasil!");
+          setModalVisible(true);
+
+          setTimeout(() => {
+            setModalVisible(false);
+            router.replace("/");
+          }, 1200);
+        }
+      }
+    };
+
+    const subscription = Linking.addEventListener("url", handleDeepLink);
+
+    return () => subscription.remove();
+  }, []);
+
+  /* ============================================================
+        LOGIN MANUAL EMAIL + PASSWORD
+  ============================================================ */
   const handleLogin = async () => {
     if (!email || !password) {
       setModalStatus("error");
@@ -37,31 +78,30 @@ export default function LoginForm() {
     try {
       setLoading(true);
 
-      const res = await fetch(
-        "http://192.168.100.141:3001/api/auth/login", // ✅ API kamu
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        }
-      );
+      const res = await fetch(`${API_URL}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
       const data = await res.json();
 
       if (res.ok) {
-        const token = data.accessToken || data.token;
-        if (token) {
-          await AsyncStorage.setItem("token", token);
-        }
+        const accessToken = data.data?.accessToken;
+        const role = data.data?.user?.role?.toLowerCase() || "user";
+
+        await AsyncStorage.setItem("accessToken", accessToken);
+        await AsyncStorage.setItem("role", role);
 
         setModalStatus("success");
-        setModalMessage("Login berhasil! Selamat datang 👋");
+        setModalMessage("Login berhasil!");
         setModalVisible(true);
 
         setTimeout(() => {
           setModalVisible(false);
-          router.replace("/components/Landingpage"); // ⬅️ Expo Router
-        }, 1500);
+          router.replace("/landing");
+          }, 1500);
+
       } else {
         setModalStatus("error");
         setModalMessage(data.message || "Email atau password salah.");
@@ -76,6 +116,17 @@ export default function LoginForm() {
     }
   };
 
+  /* ============================================================
+        LOGIN GOOGLE
+  ============================================================ */
+  const handleGoogleLogin = () => {
+    const googleUrl = `${API_URL}/api/auth/google`;
+    Linking.openURL(googleUrl);
+  };
+
+  /* ============================================================
+        UI
+  ============================================================ */
   return (
     <View style={styles.container}>
       <View style={styles.card}>
@@ -131,14 +182,17 @@ export default function LoginForm() {
           <View style={styles.line} />
         </View>
 
-        <TouchableOpacity style={styles.googleBtn}>
+        <TouchableOpacity style={styles.googleBtn} onPress={handleGoogleLogin}>
           <Ionicons name="logo-google" size={20} color="#DB4437" />
           <Text style={styles.googleText}>Login dengan Google</Text>
         </TouchableOpacity>
 
         <Text style={styles.footerText}>
           Belum punya akun?{" "}
-          <Text style={styles.signup} onPress={() => router.push("/auth/signup/page")}>
+          <Text
+            style={styles.signup}
+            onPress={() => router.push("/auth/signup/page")}
+          >
             Daftar sekarang
           </Text>
         </Text>

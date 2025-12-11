@@ -44,7 +44,13 @@ export default function SignupForm() {
       const res = await fetch("http://192.168.100.141:3001/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, phone }),
+        body: JSON.stringify({
+        name,
+        email,
+        password,
+        notelp: phone,
+      }),
+
       });
 
       const data = await res.json();

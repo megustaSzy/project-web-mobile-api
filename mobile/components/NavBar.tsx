@@ -23,7 +23,7 @@ export default function NavBarMobile() {
   const [language, setLanguage] = useState("id");
   const [userData, setUserData] = useState({
     name: "User",
-    avatar: require("../../assets/images/faiz.jpg"),
+    avatar: require("../assets/images/faiz.jpg"),
   });
 
   // Tentukan warna berdasarkan halaman
@@ -67,7 +67,7 @@ export default function NavBarMobile() {
           name: parsed.name || "User",
           avatar: parsed.avatar
             ? { uri: parsed.avatar }
-            : require("../../assets/images/faiz.jpg"),
+            : require("../assets/images/faiz.jpg"),
         });
       } catch (e) {
         console.log("Profile error");
@@ -109,7 +109,7 @@ export default function NavBarMobile() {
         {/* Logo + Welcome */}
         <View style={styles.left}>
           <Image
-            source={require("../../assets/images/logo.png")}
+            source={require("../assets/images/logo.png")}
             style={{ width: 40, height: 40 }}
           />
           <View style={styles.welcomeBox}>

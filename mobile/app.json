@@ -11,6 +11,13 @@
     "ios": {
       "supportsTablet": true
     },
+
+    
+  "expo": {
+    "scheme": "myapp"
+  },
+
+
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",

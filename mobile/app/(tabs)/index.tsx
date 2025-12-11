@@ -7,9 +7,9 @@ import { Platform, ScrollView } from 'react-native';
 // import Testimoni from "@/app/compo/Testimoni";
 // import InputTestimoni from "@/app/compo/InputTestimoni";
 // import Footer from "@/app/compo/Footer";
-import Landingpage from "@/app/components/Landingpage";
-import NavBar from "@/app/components/NavBar";
-import BottomNavbar from "@/app/components/BottomNavbar";
+import Landingpage from "../../components/Landingpage";
+import NavBar from "../../components/NavBar";
+import BottomNavbar from "../../components/BottomNavbar";
 export default function HomeScreen() {
   return (
     <ScrollView>

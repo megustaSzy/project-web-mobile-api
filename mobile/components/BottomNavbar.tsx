@@ -10,7 +10,7 @@ export default function BottomNavbar() {
   const insets = useSafeAreaInsets(); // ambil safe area
 
   const menus = [
-    { name: "Beranda", icon: "home-outline", activeIcon: "home", path: "/components/Landingpage" },
+    { name: "Beranda", icon: "home-outline", activeIcon: "home", path: "/landing" },
     { name: "Destinasi", icon: "map-outline", activeIcon: "map", path: "/tourlist/page" },
     { name: "Tiket Saya", icon: "ticket-outline", activeIcon: "ticket", path: "/tiket/page" },
     { name: "Profil", icon: "person-outline", activeIcon: "person", path: "/profil/page" },
@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
     height: 62,
     alignItems: "center",
     zIndex: 999,
-    paddingTop : 10,
+    paddingTop : 20,
   },
   menuItem: {
     justifyContent: "center",
