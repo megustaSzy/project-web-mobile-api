@@ -168,8 +168,19 @@ export default function TiketScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: "#f5f5f5" },
-  title: { fontSize: 22, fontWeight: "600", marginBottom: 12 },
+  container: { 
+    flex: 1, 
+    padding: 16, 
+    backgroundColor: "#f5f5f5", 
+    paddingTop: 90,
+  },
+
+  title: { 
+    fontSize: 22, 
+    fontWeight: "600", 
+    marginBottom: 12 
+  },
+
   search: {
     padding: 12,
     backgroundColor: "#fff",
@@ -177,6 +188,7 @@ const styles = StyleSheet.create({
     borderColor: "#ddd",
     borderWidth: 1,
     marginBottom: 12,
+    marginTop: 2,
   },
   filterContainer: {
     flexDirection: "row",
