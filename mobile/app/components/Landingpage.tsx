@@ -14,16 +14,13 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-// import { wisata } from "../data/wisata";
 import { Dropdown } from "react-native-element-dropdown";
-
-
-
+import * as Location from "expo-location"; // ← Tambahan import
 
 // ============================
 // FORMAT RUPIAH
 // ============================
-const formatRupiah = (v) =>
+const formatRupiah = (v: any) =>
   new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
@@ -90,7 +87,6 @@ const CATEGORY_DATA = [
   { id: 4, name: "Pulau", icon: require("../../assets/images/kategori4.png") },
   { id: 5, name: "Air Terjun", icon: require("../../assets/images/kategori5.png") },
 ];
-const CATEGORIES = ["Pantai", "Gunung", "Pulau", "Air Terjun"];
 
 // Untuk Dropdown Kategori
 const kategoriList = [
@@ -120,11 +116,14 @@ export default function HomeScreen() {
   const [historyList, setHistoryList] = useState([]);
   const [activeCategory, setActiveCategory] = useState(null);
 
+  const [currentLocation, setCurrentLocation] = useState("Memuat lokasi..."); // ← state lokasi
+
   // ===============================
-  // LOAD HISTORY
+  // LOAD HISTORY & GET LOCATION
   // ===============================
   useEffect(() => {
     loadHistory();
+    getLocation(); // ← panggil fungsi lokasi
   }, []);
 
   const loadHistory = async () => {
@@ -133,6 +132,37 @@ export default function HomeScreen() {
       if (data) setHistoryList(JSON.parse(data));
     } catch (e) {
       console.log("loadHistory error", e);
+    }
+  };
+
+  // ===============================
+  // GET CURRENT LOCATION
+  // ===============================
+  const getLocation = async () => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        setCurrentLocation("Lokasi tidak tersedia");
+        return;
+      }
+
+      const loc = await Location.getCurrentPositionAsync({});
+      const { latitude, longitude } = loc.coords;
+
+      const reverseGeocode = await Location.reverseGeocodeAsync({
+        latitude,
+        longitude,
+      });
+
+      if (reverseGeocode.length > 0) {
+        const place = reverseGeocode[0];
+        setCurrentLocation(`${place.city || place.subregion || "Kota"}, ${place.region || ""}`);
+      } else {
+        setCurrentLocation("Lokasi tidak tersedia");
+      }
+    } catch (e) {
+      console.log("Lokasi error", e);
+      setCurrentLocation("Lokasi tidak tersedia");
     }
   };
 
@@ -162,7 +192,7 @@ export default function HomeScreen() {
   // ===============================
   // HANDLE CATEGORY PRESS
   // ===============================
-  const handleCategoryPress = (cat) => {
+  const handleCategoryPress = (cat: any) => {
     if (activeCategory === cat) {
       setActiveCategory(null);
       setKategori("");
@@ -175,7 +205,7 @@ export default function HomeScreen() {
   // ===============================
   // HANDLE DESTINATION CLICK
   // ===============================
-  const handleDestinationPress = (d) => {
+  const handleDestinationPress = (d: any) => {
     router.push(`../deskripsi/${d.id}`);
   };
 
@@ -185,86 +215,72 @@ export default function HomeScreen() {
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       {/* HEADER */}
-     <View style={styles.header}>
-  {/* Background Image */}
-  <Image
-    source={require("../../assets/images/hero3.jpg")}
-    style={styles.headerBg}
-  />
-
-  {/* Overlay warna biru tua */}
-  <View style={styles.headerOverlay} />
-</View>
-
+      <View style={styles.header}>
+        <Image
+          source={require("../../assets/images/hero3.jpg")}
+          style={styles.headerBg}
+        />
+        <View style={styles.headerOverlay} />
+      </View>
 
       {/* CARD */}
       <View style={styles.cardBox}>
         <Text style={styles.label}>Lokasi Kamu</Text>
-        <Text style={styles.location}>Kota Bandar Lampung , Lampung</Text>
+        <Text style={styles.location}>{currentLocation}</Text> {/* ← lokasi dynamic */}
 
+        <View style={styles.row}>
+          {/* Kategori Wisata */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Kategori Wisata</Text>
+            <Dropdown
+              style={styles.dropdown}
+              placeholderStyle={styles.placeholderStyle}
+              selectedTextStyle={styles.selectedTextStyle}
+              inputSearchStyle={styles.inputSearchStyle}
+              iconStyle={styles.iconStyle}
+              data={kategoriList}
+              search
+              maxHeight={300}
+              labelField="label"
+              valueField="value"
+              placeholder="Pilih Kategori"
+              searchPlaceholder="Cari kategori..."
+              value={kategori}
+              onChange={(item) => {
+                setKategori(item.value);
+                setActiveCategory(null);
+              }}
+            />
+          </View>
 
-<View style={styles.row}>
-
-  {/* Kategori Wisata */}
-  <View style={styles.inputGroup}>
-    <Text style={styles.inputLabel}>Kategori Wisata</Text>
-
-    <Dropdown
-      style={styles.dropdown}
-      placeholderStyle={styles.placeholderStyle}
-      selectedTextStyle={styles.selectedTextStyle}
-      inputSearchStyle={styles.inputSearchStyle}
-      iconStyle={styles.iconStyle}
-      data={kategoriList}        // ← dari API
-      search
-      maxHeight={300}
-      labelField="label"
-      valueField="value"
-      placeholder="Pilih Kategori"
-      searchPlaceholder="Cari kategori..."
-      value={kategori}
-      onChange={(item) => {
-        setKategori(item.value);
-        setActiveCategory(null);
-      }}
-    />
-  </View>
-
-  {/* Daerah */}
-  <View style={styles.inputGroup}>
-    <Text style={styles.inputLabel}>Daerah</Text>
-
-    <Dropdown
-      style={styles.dropdown}
-      placeholderStyle={styles.placeholderStyle}
-      selectedTextStyle={styles.selectedTextStyle}
-      inputSearchStyle={styles.inputSearchStyle}
-      iconStyle={styles.iconStyle}
-      data={daerahList}         // ← dari API
-      search
-      maxHeight={300}
-      labelField="label"
-      valueField="value"
-      placeholder="Pilih Daerah"
-      searchPlaceholder="Cari daerah..."
-      value={daerah}
-      onChange={(item) => {
-        setDaerah(item.value);
-      }}
-    />
-  </View>
-
-</View>
-
+          {/* Daerah */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Daerah</Text>
+            <Dropdown
+              style={styles.dropdown}
+              placeholderStyle={styles.placeholderStyle}
+              selectedTextStyle={styles.selectedTextStyle}
+              inputSearchStyle={styles.inputSearchStyle}
+              iconStyle={styles.iconStyle}
+              data={daerahList}
+              search
+              maxHeight={300}
+              labelField="label"
+              valueField="value"
+              placeholder="Pilih Daerah"
+              searchPlaceholder="Cari daerah..."
+              value={daerah}
+              onChange={(item) => {
+                setDaerah(item.value);
+              }}
+            />
+          </View>
+        </View>
 
         <View style={styles.rowBetween}>
           <TouchableOpacity style={styles.searchBtn} onPress={saveHistory}>
             <Text style={styles.searchText}>Cari</Text>
           </TouchableOpacity>
-
-          {/* <TouchableOpacity onPress={() => setHistoryModal(true)}>
-            <Text style={styles.historyBtn}>Histori</Text>
-          </TouchableOpacity> */}
         </View>
       </View>
 
@@ -275,110 +291,59 @@ export default function HomeScreen() {
         style={{ marginTop: 15, paddingLeft: 12 }}
       >
         {CATEGORY_DATA.map((cat) => {
-  const isActive = activeCategory === cat.name;
-  return (
-    <TouchableOpacity
-      key={cat.id}
-      onPress={() => handleCategoryPress(cat.name)}
-      style={[
-        styles.categoryChip,
-        isActive
-          ? { backgroundColor: "#007BFF20", borderColor: "#007BFF", borderWidth: 2 }
-          : { backgroundColor: "#fff" },
-      ]}
-    >
-      <Image source={cat.icon} style={styles.categoryIcon} />
-      <Text
-        style={[
-          styles.categoryChipText,
-          isActive ? { color: "#007BFF" } : { color: "#333" },
-        ]}
-      >
-        {cat.name}
-      </Text>
-    </TouchableOpacity>
-  );
-})}
-
+          const isActive = activeCategory === cat.name;
+          return (
+            <TouchableOpacity
+              key={cat.id}
+              onPress={() => handleCategoryPress(cat.name)}
+              style={[
+                styles.categoryChip,
+                isActive
+                  ? { backgroundColor: "#007BFF20", borderColor: "#007BFF", borderWidth: 2 }
+                  : { backgroundColor: "#fff" },
+              ]}
+            >
+              <Image source={cat.icon} style={styles.categoryIcon} />
+              <Text
+                style={[
+                  styles.categoryChipText,
+                  isActive ? { color: "#007BFF" } : { color: "#333" },
+                ]}
+              >
+                {cat.name}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
       </ScrollView>
-
-      {/* KABUPATEN
-      <Text style={styles.sectionTitle}>Daerah Wisata</Text>
-
-      <ScrollView
-  horizontal
-  showsHorizontalScrollIndicator={false}
-  style={{ marginTop: 10, paddingLeft: 20 }}
->
-  {kabupatenList.map((item) => (
-    <TouchableOpacity
-      key={item.id}
-      style={styles.kabupatenCardHorizontal}
-      onPress={() =>
-        router.push({
-          pathname: "../daerah/[id]",
-          params: {
-            id: item.id.toString(),
-            name: item.name,
-            desc: item.desc,
-            image: item.imageUri, // jika pakai require tidak bisa dikirim
-          },
-        })
-      }
-    >
-      <Image source={item.image} style={styles.kabupatenImageH} />
-
-      <View style={{ flex: 1 }}>
-        <Text style={styles.kabupatenTitleH}>{item.name}</Text>
-        <Text numberOfLines={2} style={styles.kabupatenDescH}>
-          {item.desc}
-        </Text>
-      </View>
-
-      <View style={styles.kabupatenCountBoxH}>
-        <Text style={styles.kabupatenCount}>{item.count}</Text>
-      </View>
-    </TouchableOpacity>
-  ))}
-</ScrollView> */}
-
 
       {/* POPULAR */}
       <Text style={styles.sectionTitle}>Populer Destination</Text>
-     <View style={styles.popularGrid}>
-  {destinations.map((d) => (
-    <TouchableOpacity
-      key={d.id}
-      onPress={() => handleDestinationPress(d)}
-      style={styles.popularItem}
-    >
-      {/* Background image */}
-      <Image source={d.image} style={styles.popularBG} />
-
-      {/* Overlay hitam */}
-      <View style={styles.popularOverlay} />
-
-      {/* Text content */}
-      <View style={styles.popularContent}>
-        <Text style={styles.popularTitle}>{d.name}</Text>
-
-        <View style={styles.popularLocationRow}>
-          <Ionicons name="location-sharp" size={14} color="#fff" />
-          <Text style={styles.popularLocationText}>{d.location}</Text>
-        </View>
+      <View style={styles.popularGrid}>
+        {destinations.map((d) => (
+          <TouchableOpacity
+            key={d.id}
+            onPress={() => handleDestinationPress(d)}
+            style={styles.popularItem}
+          >
+            <Image source={d.image} style={styles.popularBG} />
+            <View style={styles.popularOverlay} />
+            <View style={styles.popularContent}>
+              <Text style={styles.popularTitle}>{d.name}</Text>
+              <View style={styles.popularLocationRow}>
+                <Ionicons name="location-sharp" size={14} color="#fff" />
+                <Text style={styles.popularLocationText}>{d.location}</Text>
+              </View>
+            </View>
+          </TouchableOpacity>
+        ))}
       </View>
-    </TouchableOpacity>
-  ))}
-</View>
-
-
 
       {/* MODAL HISTORY */}
       <Modal visible={historyModal} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modalBox}>
             <Text style={styles.modalTitle}>Riwayat Pencarian</Text>
-
             <ScrollView style={{ maxHeight: 300 }}>
               {historyList.map((h, i) => (
                 <View key={i} style={styles.historyItem}>
@@ -389,7 +354,6 @@ export default function HomeScreen() {
                 </View>
               ))}
             </ScrollView>
-
             <TouchableOpacity
               style={styles.closeBtn}
               onPress={() => setHistoryModal(false)}
@@ -408,52 +372,29 @@ export default function HomeScreen() {
 // ============================
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F7F7F7" },
-
-header: {
-  height: 280,
-  width: "100%",
-  position: "relative",
-  justifyContent: "flex-end",
-  paddingBottom: 20,
-},
-
-headerBg: {
-  position: "absolute",
-  top: 0,
-  left: 0,
-  width: "100%",
-  height: "100%",
-  resizeMode: "cover",
-},
-
-headerOverlay: {
-  position: "absolute",
-  top: 0,
-  left: 0,
-  width: "100%",
-  height: "100%",
-  backgroundColor: "rgba(0, 27, 56, 0.72)",
-},
-
-
-headerContent: {
-  paddingLeft: 25,
-},
-
-headerHi: {
-  color: "#fff",
-  fontSize: 14,
-  opacity: 0.9,
-},
-
-headerName: {
-  color: "#fff",
-  fontSize: 18,
-  fontWeight: "700",
-  marginTop: 4,
-},
-
-
+  header: {
+    height: 280,
+    width: "100%",
+    position: "relative",
+    justifyContent: "flex-end",
+    paddingBottom: 20,
+  },
+  headerBg: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
+  },
+  headerOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    backgroundColor: "rgba(0, 27, 56, 0.72)",
+  },
   cardBox: {
     backgroundColor: "#fff",
     marginTop: -120,
@@ -463,232 +404,186 @@ headerName: {
     padding: 20,
     elevation: 4,
   },
-
-  label: { color: "#777", fontSize: 15 },
-  location: { fontSize: 20, fontWeight: "600", marginTop: 2 },
-
-  row: { flexDirection: "row", justifyContent: "space-between", marginTop: 15 },
-
-  inputGroup: { width: "48%" },
-  inputLabel: { fontSize: 15, color: "#666", marginBottom: 6 },
-
-  inputWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 15,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
+  label: { 
+    color: "#777", 
+    fontSize: 15 
   },
 
-  input: { flex: 1, marginLeft: 10 },
+  location: { 
+    fontSize: 20, 
+    fontWeight: "600", 
+    marginTop: 2 
+  },
 
-  rowBetween: {
-    flexDirection: "row",
+  row: { 
+    flexDirection: "row", 
+    justifyContent: "space-between", 
+    marginTop: 15 
+  },
+
+  inputGroup: { 
+    width: "48%" 
+  },
+
+  inputLabel: { 
+    fontSize: 15, 
+    color: "#666", 
+    marginBottom: 6 
+  },
+
+  rowBetween: { 
+    flexDirection: "row", 
     justifyContent: "space-between",
-    marginTop: 15,
+    marginTop: 15 
+    },
+
+  searchBtn: { 
+    backgroundColor: "#007BFF", 
+    paddingVertical: 12, 
+    paddingHorizontal: 150, 
+    borderRadius: 15, 
+    alignItems: "center" 
   },
 
-  searchBtn: {
-    backgroundColor: "#007BFF",
-    paddingVertical: 12,
-    paddingHorizontal: 150,
-    borderRadius: 15,
-    alignItems: "center",
+  searchText: { 
+    fontSize : 14, 
+    color: "#fff", 
+    fontWeight: "600" 
   },
 
-  searchText: { fontSize : 14, color: "#fff", fontWeight: "600" },
-
-  historyBtn: { fontSize: 14, fontWeight: "600" },
-
-  sectionTitle: {
-    fontSize: 20,
-    marginTop: 20,
-    marginLeft: 20,
-    fontWeight: "700",
+  sectionTitle: { 
+    fontSize: 20, 
+    marginTop: 20, 
+    marginLeft: 20, 
+    fontWeight: "700" 
   },
 
-  kabupatenCardHorizontal: {
-    backgroundColor: "white",
-    width: 370,
-    marginRight: 19,
-    borderRadius: 10,
-    padding: 0,
-    paddingTop: 10,
-    elevation: 2,
-    flexDirection: "row",
-    alignItems: "flex-start",
+  popularGrid: { 
+    flexDirection: "row", 
+    flexWrap: "wrap", 
+    justifyContent: "space-between", 
+    paddingHorizontal: 20, 
+    marginTop: 10 
   },
 
-  kabupatenImageH: {
-    width: 70,
-    height: 70,
-    borderRadius: 10,
-    marginRight: 15,
+  popularItem: { 
+    width: "48%", 
+    height: 190, 
+    borderRadius: 15, 
+    overflow: "hidden", 
+    marginBottom: 15, 
+    position: "relative", 
+    backgroundColor: "#000" 
   },
 
-  kabupatenTitleH: { fontSize: 15, fontWeight: "700" },
-  kabupatenDescH: { fontSize: 12, color: "#555", marginTop: 4 },
-
-  kabupatenCountBoxH: {
-    position: "absolute",
-    top: 10,
-    right: 10,
-    backgroundColor: "#EAF3FF",
-    width: 40,
-    height: 40,
-    borderRadius: 10,
-    justifyContent: "center",
-    alignItems: "center",
+  popularBG: { 
+    width: "100%", 
+    height: "100%", 
+    resizeMode: "cover", 
+    position: "absolute" 
   },
 
-  kabupatenCount: { color: "#007BFF", fontWeight: "700", fontSize: 18 },
-
-popularGrid: {
-  flexDirection: "row",
-  flexWrap: "wrap",
-  justifyContent: "space-between",
-  paddingHorizontal: 20,
-  marginTop: 10,
-},
-
-popularItem: {
-  width: "48%",
-  height: 190,
-  borderRadius: 15,
-  overflow: "hidden",
-  marginBottom: 15,
-  position: "relative",
-  backgroundColor: "#000",
-},
-
-popularBG: {
-  width: "100%",
-  height: "100%",
-  resizeMode: "cover",
-  position: "absolute",
-},
-
-popularOverlay: {
-  position: "absolute",
-  width: "100%",
-  height: "100%",
-  backgroundColor: "rgba(0,0,0,0.6)",
-},
-
-popularContent: {
-  position: "absolute",
-  bottom: 12,
-  left: 10,
-  right: 10,
-},
-
-popularTitle: {
-  color: "#fff",
-  fontSize: 15,
-  fontWeight: "700",
-},
-
-popularLocationRow: {
-  flexDirection: "row",
-  alignItems: "center",
-  marginTop: 3,
-},
-
-popularLocationText: {
-  color: "#fff",
-  marginLeft: 4,
-  fontSize: 13,
-},
-
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center",
-    alignItems: "center",
+  popularOverlay: { 
+    position: "absolute", 
+    width: "100%", 
+    height: "100%", 
+    backgroundColor: "rgba(0,0,0,0.6)" 
   },
 
-  modalBox: {
-    width: "85%",
-    backgroundColor: "white",
-    padding: 20,
-    borderRadius: 15,
+  popularContent: { 
+    position: "absolute", 
+    bottom: 12, 
+    left: 10, 
+    right: 10 
   },
 
+  popularTitle: { 
+    color: "#fff", 
+    fontSize: 15, 
+    fontWeight: "700" 
+  },
+
+  popularLocationRow: { 
+    flexDirection: "row", 
+    alignItems: "center", 
+    marginTop: 3 
+  },
+
+  popularLocationText: { 
+    color: "#fff", 
+    marginLeft: 4, 
+    fontSize: 13 },
+  categoryChip: { 
+    flexDirection: "row", 
+    alignItems: "center", 
+    paddingVertical: 8, 
+    paddingHorizontal: 15, 
+    borderRadius: 25, 
+    marginRight: 12, 
+    borderWidth: 1, 
+    borderColor: "#eee" 
+  },
+
+  categoryIcon: { 
+    width: 26, 
+    height: 26, 
+    resizeMode: "contain", 
+    marginRight: 8 
+  },
+
+  categoryChipText: { 
+    fontSize: 14, 
+    fontWeight: "600" 
+  },
+
+  dropdown: { 
+    height: 48, 
+    backgroundColor: "#fff", 
+    borderRadius: 8, 
+    paddingHorizontal: 12, 
+    borderWidth: 1, 
+    borderColor: "#ccc", 
+    marginTop: 4 
+  },
+
+  placeholderStyle: { 
+    fontSize: 14, 
+    color: "#888" 
+  },
+
+  selectedTextStyle: { 
+    fontSize: 14, 
+    color: "#000" 
+  },
+
+  inputSearchStyle: { 
+    height: 40, 
+    fontSize: 14, 
+    borderRadius: 8 
+  },
+
+  iconStyle: { 
+    width: 20, 
+    height: 20 
+  },
+
+  modalOverlay: { 
+    flex: 1, 
+    backgroundColor: "rgba(0,0,0,0.5)", 
+    justifyContent: "center", 
+    alignItems: "center" 
+  },
+
+  modalBox: { 
+    width: "85%", 
+    backgroundColor: "white", 
+    padding: 20, 
+    borderRadius: 15 
+  },
+  
   modalTitle: { fontSize: 18, fontWeight: "700", marginBottom: 10 },
-
-  historyItem: {
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderColor: "#ddd",
-  },
-
+  historyItem: { paddingVertical: 10, borderBottomWidth: 1, borderColor: "#ddd" },
   historyText: { fontSize: 15, fontWeight: "600" },
   historyDate: { fontSize: 12, color: "#777" },
-
-  closeBtn: {
-    marginTop: 15,
-    backgroundColor: "#007BFF",
-    paddingVertical: 10,
-    borderRadius: 10,
-    alignItems: "center",
-  },
-
-  categoryChip: {
-  flexDirection: "row",
-  alignItems: "center",
-  paddingVertical: 8,
-  paddingHorizontal: 15,
-  borderRadius: 25,
-  marginRight: 12,
-  borderWidth: 1,
-  borderColor: "#eee",
-},
-
-categoryIcon: {
-  width: 26,
-  height: 26,
-  resizeMode: "contain",
-  marginRight: 8,
-},
-
-categoryChipText: {
-  fontSize: 14,
-  fontWeight: "600",
-},
-
-dropdown: {
-  height: 48,
-  backgroundColor: "#fff",
-  borderRadius: 8,
-  paddingHorizontal: 12,
-  borderWidth: 1,
-  borderColor: "#ccc",
-  marginTop: 4,
-},
-
-placeholderStyle: {
-  fontSize: 14,
-  color: "#888",
-},
-
-selectedTextStyle: {
-  fontSize: 14,
-  color: "#000",
-},
-
-inputSearchStyle: {
-  height: 40,
-  fontSize: 14,
-  borderRadius: 8,
-},
-
-iconStyle: {
-  width: 20,
-  height: 20,
-},
-
-
+  closeBtn: { marginTop: 15, backgroundColor: "#007BFF", paddingVertical: 10, borderRadius: 10, alignItems: "center" },
 });

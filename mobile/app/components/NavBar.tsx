@@ -7,13 +7,13 @@ import {
   Animated,
   StyleSheet,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, usePathname } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Menu as MenuIcon, X as CloseIcon } from 'lucide-react-native';
 
-
 export default function NavBarMobile() {
   const router = useRouter();
+  const pathname = usePathname(); // <-- path saat ini
 
   const [open, setOpen] = useState(false);
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -25,6 +25,12 @@ export default function NavBarMobile() {
     name: "User",
     avatar: require("../../assets/images/faiz.jpg"),
   });
+
+  // Tentukan warna berdasarkan halaman
+  const blackPages = ["tiket/page", "profil/page"];
+  const whitePages = ["/", "Landingpage", "tourlist/page"];
+  const textColor = blackPages.some(p => pathname.includes(p)) ? "#000" : "#fff";
+  const iconColor = blackPages.some(p => pathname.includes(p)) ? "#000" : "#fff";
 
   // Scroll Shadow Effect
   useEffect(() => {
@@ -100,20 +106,17 @@ export default function NavBarMobile() {
           scrolled ? styles.header : {},
         ]}
       >
-        {/* Logo */}
-       <View style={styles.left}>
-  <Image
-    source={require("../../assets/images/logo.png")}
-    style={{ width: 40, height: 40 }}
-  />
-
-  {/* TEKS SELAMAT DATANG + NAMA USER */}
-  <View style={styles.welcomeBox}>
-    <Text style={styles.welcomeText}>Hi, Selamat Datang</Text>
-    <Text style={styles.userName}>{userData.name}</Text>
-  </View>
-</View>
-
+        {/* Logo + Welcome */}
+        <View style={styles.left}>
+          <Image
+            source={require("../../assets/images/logo.png")}
+            style={{ width: 40, height: 40 }}
+          />
+          <View style={styles.welcomeBox}>
+            <Text style={[styles.welcomeText, { color: textColor }]}>Hi, Selamat Datang</Text>
+            <Text style={[styles.userName, { color: textColor }]}>{userData.name}</Text>
+          </View>
+        </View>
 
         {/* Right Menu */}
         <View style={styles.right}>
@@ -123,14 +126,12 @@ export default function NavBarMobile() {
               handleChangeLanguage(language === "id" ? "en" : "id")
             }
           >
-            <Text style={styles.lang}>{language.toUpperCase()}</Text>
+            <Text style={[styles.lang, { color: textColor }]}>{language.toUpperCase()}</Text>
           </TouchableOpacity>
-
-          
 
           {/* Burger */}
           <TouchableOpacity onPress={() => setOpen(!open)}>
-            {open ? <CloseIcon size={26} color="#000" /> : <MenuIcon size={26} color="#fff" />}
+            {open ? <CloseIcon size={26} color={iconColor} /> : <MenuIcon size={26} color={iconColor} />}
           </TouchableOpacity>
         </View>
       </Animated.View>
@@ -138,32 +139,11 @@ export default function NavBarMobile() {
       {/* MENU MOBILE */}
       {open && (
         <View style={styles.menu}>
-          {/* <TouchableOpacity onPress={() => router.push("/")}>
-            <Text style={styles.menuItem}>{t.home}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => router.push("/about")}>
-            <Text style={styles.menuItem}>{t.about}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => router.push("/tourlist")}>
-            <Text style={styles.menuItem}>{t.tour}</Text>
-          </TouchableOpacity> */}
-          <TouchableOpacity onPress={() => router.push("../tiket/page")}>
-            <Text style={styles.menuItem}>{t.ticket}</Text>
-          </TouchableOpacity>
-
-          {/* Auth */}
           {isLoggedIn ? (
             <>
-              <TouchableOpacity onPress={() => router.push("/profile")}>
-                <Text style={styles.menuItem}>{t.editProfile}</Text>
+              <TouchableOpacity onPress={() => router.push("/profil/page")}>
+                <Text style={[styles.menuItem, { color: textColor }]}>{t.editProfile}</Text>
               </TouchableOpacity>
-
-              {/* <TouchableOpacity
-                onPress={handleLogout}
-                style={styles.logoutBtn}
-              >
-                <Text style={styles.logoutTxt}>{t.logout}</Text>
-              </TouchableOpacity> */}
             </>
           ) : (
             <>
@@ -188,127 +168,43 @@ export default function NavBarMobile() {
 }
 
 const styles = StyleSheet.create({
-header: {
-  width: "100%",
-  height: 65,
-  paddingHorizontal: 20,
-  paddingTop:40,
-  flexDirection: "row",
-  alignItems: "center",
-  justifyContent: "space-between",
-  position: "absolute",
-  top: 0,
-  zIndex: 50,
-
-  // 🔥 Transparan
-  backgroundColor: "rgba(0,0,0,0)",
-
-  borderBottomWidth: 0,
-  shadowOpacity: 0,
-  elevation: 0,
-},
-
-
+  header: {
+    width: "100%",
+    height: 65,
+    paddingHorizontal: 20,
+    paddingTop: 40,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    position: "absolute",
+    top: 0,
+    zIndex: 50,
+    backgroundColor: "rgba(0,0,0,0)",
+    borderBottomWidth: 0,
+    shadowOpacity: 0,
+    elevation: 0,
+  },
   left: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
   },
-
   right: {
     flexDirection: "row",
     alignItems: "center",
     gap: 15,
   },
-
-welcomeText: {
-  fontSize: 12,
-  color: "#fff",   // putih
-},
-userName: {
-  fontSize: 14,
-  fontWeight: "700",
-  color: "#fff",   // putih
-  marginTop: -2,
-},
-
-  lang: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#fff",   // putih
+  welcomeText: { 
+    fontSize: 12 
   },
-
-  profilePic: {
-    width: 35,
-    height: 35,
-    borderRadius: 50,
-  },
-
-  loginBtn: {
-    fontSize: 14,
-    color: "#007AFF",
-    fontWeight: "500",
-  },
-
-  menu: {
-    marginTop: 65,
-    backgroundColor: "#fff",
-    paddingVertical: 15,
-  },
-
-menuItem: {
-  paddingVertical: 12,
-  paddingHorizontal: 20,
-  fontSize: 16,
-  borderBottomWidth: 1,
-  borderColor: "#444",
-  color: "#000",     // 🔥 putih
-},
-
-
-  logoutBtn: {
-    backgroundColor: "#ff4444",
-    padding: 12,
-    margin: 20,
-    borderRadius: 8,
-  },
-
-  logoutTxt: {
-    color: "white",
-    textAlign: "center",
-    fontWeight: "600",
-  },
-
-  loginBtnFull: {
-    backgroundColor: "#007AFF",
-    marginHorizontal: 20,
-    padding: 12,
-    borderRadius: 8,
-  },
-
-  loginTxtWhite: {
-    color: "white",
-    textAlign: "center",
-    fontWeight: "600",
-  },
-
-  signupBtn: {
-    borderWidth: 1,
-    borderColor: "#007AFF",
-    marginHorizontal: 20,
-    marginTop: 10,
-    padding: 12,
-    borderRadius: 8,
-  },
-
-  signupTxt: {
-    color: "#007AFF",
-    textAlign: "center",
-    fontWeight: "600",
-  },
-
-  welcomeBox: {
-  marginLeft: 8,
-},
-
+  userName: { fontSize: 14, fontWeight: "700", marginTop: -2 },
+  lang: { fontSize: 14, fontWeight: "700" },
+  profilePic: { width: 35, height: 35, borderRadius: 50 },
+  menu: { marginTop: 65, backgroundColor: "#fff", paddingVertical: 15 },
+  menuItem: { paddingVertical: 12, paddingHorizontal: 20, fontSize: 16, borderBottomWidth: 1, borderColor: "#444" },
+  loginBtnFull: { backgroundColor: "#007AFF", marginHorizontal: 20, padding: 12, borderRadius: 8 },
+  loginTxtWhite: { color: "white", textAlign: "center", fontWeight: "600" },
+  signupBtn: { borderWidth: 1, borderColor: "#007AFF", marginHorizontal: 20, marginTop: 10, padding: 12, borderRadius: 8 },
+  signupTxt: { color: "#007AFF", textAlign: "center", fontWeight: "600" },
+  welcomeBox: { marginLeft: 8 },
 });

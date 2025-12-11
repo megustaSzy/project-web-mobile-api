@@ -156,7 +156,7 @@ export default function KabupatenDetail() {
 
 const styles = StyleSheet.create({
   heroImage: {
-    height: 300,
+    height: 400,
     justifyContent: "center",
   },
   overlay: {
@@ -184,14 +184,23 @@ const styles = StyleSheet.create({
   logo: {
     width: 300,
     height: 300,
+    marginTop : 40,
   },
-  content: {
-    marginTop: 0,
-    backgroundColor: "#fff",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
-  },
+
+ content: {
+  marginTop: -25, // agar menempel ke hero image
+  backgroundColor: "#fff",
+  borderTopLeftRadius: 35,   // radius top kiri
+  borderTopRightRadius: 35,  // radius top kanan
+  padding: 20,
+  // Tambahan shadow untuk efek card (opsional)
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.1,
+  shadowRadius: 4,
+  elevation: 3, // untuk Android
+},
+
   title: {
     fontSize: 22,
     fontWeight: "bold",
@@ -212,7 +221,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 8,
     paddingHorizontal: 15,
-    borderRadius: 25,
+    borderRadius: 35,
     marginRight: 12,
     borderWidth: 1,
     borderColor: "#eee",
