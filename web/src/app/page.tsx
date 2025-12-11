@@ -29,7 +29,7 @@ export default function Home() {
       </section>
 
       <section>
-       <Testimoni/>
+       <Testimoni user={undefined}/>
       </section>
 
       <section>
