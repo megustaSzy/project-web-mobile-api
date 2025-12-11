@@ -4,4 +4,5 @@ export interface UserData {
   password?: string; // opsional saat update
   notelp: string;
   role: "Admin" | "User";
+  avatar: string;
 }

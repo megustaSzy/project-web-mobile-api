@@ -42,12 +42,27 @@ export const authService = {
   },
 
   async createTokens(userId: number) {
+    const user = await prisma.tb_user.findFirst({
+      where: {
+        id: userId
+      },
+      select: {
+        name: true,
+        email: true
+      }
+    });
+
+    if(!user) throw createError("user tidak ditemukan", 404);
+
     const accessTokenId = uuidv4();
     const refreshTokenId = uuidv4();
 
     // access token 1 jam
     const accessToken = jwt.sign(
-      { id: userId, tokenId: accessTokenId },
+      { id: userId, 
+        name: user.name,
+        email: user.email,
+        tokenId: accessTokenId }, // add name, email
       JWT_SECRET,
       { expiresIn: "1h" }
     );
@@ -63,7 +78,11 @@ export const authService = {
 
     // refresh token 7 hari
     const refreshToken = jwt.sign(
-      { id: userId, tokenId: refreshTokenId },
+      { 
+        id: userId,
+        name: user.email,
+        email: user.email, 
+        tokenId: refreshTokenId },
       JWT_REFRESH_SECRET,
       { expiresIn: "7d" }
     );

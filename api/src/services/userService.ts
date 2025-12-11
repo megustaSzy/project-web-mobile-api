@@ -26,6 +26,7 @@ export const userService = {
         email: true,
         role: true,
         notelp: true,
+        avatar: true
       },
     });
 
@@ -40,6 +41,7 @@ export const userService = {
         name: true,
         email: true,
         notelp: true,
+        avatar: true
       },
     });
 
@@ -77,7 +79,13 @@ export const userService = {
 
     return prisma.tb_user.update({
       where: { id },
-      data,
+      data: {
+        name: data.name,
+        email: data.email,
+        notelp: data.notelp,
+        password: data.password,
+        avatar: data.avatar
+      },
     });
   },
 
