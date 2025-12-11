@@ -22,7 +22,7 @@ export default function KabupatenDetail() {
       name: "Kabupaten Tanggamus",
       description:
         "Kabupaten Tanggamus menawarkan pesona wisata alam beragam, mulai dari Teluk Kiluan hingga air terjun yang eksotis.",
-      logo: require("../../assets/images/favorite/21.png"),
+      logo: require("../../assets/images/favorite/24.png"),
       hero: require("../../assets/images/hero3.jpg"),
     },
     {
@@ -30,7 +30,7 @@ export default function KabupatenDetail() {
       name: "Kabupaten Lampung Selatan",
       description:
         "Lampung Selatan terkenal dengan wisata pantainya yang indah dan akses mudah ke Pulau Sebesi serta Krakatau.",
-      logo: require("../../assets/images/favorite/22.png"),
+      logo: require("../../assets/images/favorite/20.png"),
       hero: require("../../assets/images/hero3.jpg"),
     },
   ];

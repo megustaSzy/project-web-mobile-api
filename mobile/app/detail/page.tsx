@@ -6,53 +6,37 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  SafeAreaView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
-// Data destinasi
 const destinations = [
-  {
-    id: 1,
-    name: "Rio The Beach",
-    location: "Kalianda",
-    category: "Pantai",
-    price: 100000,
-    description:
-      "Temukan berbagai wisata menarik di Kabupaten Tanggamus, dengan panorama indah dan pengalaman liburan berkesan.",
-    image: require("../../assets/images/hero1.jpg"),
-  },
-  {
-    id: 2,
-    name: "Senaya Beach",
-    location: "Kalianda",
-    category: "Pantai",
-    price: 120000,
-    description:
-      "Destinasi pantai yang tenang dengan ombak lembut, cocok untuk liburan bersama keluarga.",
-    image: require("../../assets/images/hero2.jpg"),
-  },
   {
     id: 3,
     name: "Green Elty Krakatoa",
     location: "Kalianda",
     category: "Pantai",
-    price: 80000,
+    price: 100000,
+    include: ["Travel Antar Jemput", "Tiket Masuk", "Sesai Jadwal"],
     description:
-      "Nikmati keindahan laut biru dengan fasilitas lengkap, suasana nyaman, dan lokasi strategis.",
+      "Temukan berbagai wisata menarik di Kabupaten TanggamusTemukan Berbagai Wisata Di Kabupaten TanggamusTemukan Berbagai Wisata Di Kabupaten TanggamusTemukan Berbagai Wisata Di Kabupaten TanggamusTemukan Berbagai Wisata Di Kabupaten Tanggamus",
+    warning: [
+      "Datang 30 menit sebelum pemberangkatan.",
+      "Harga dapat berubah sewaktu-waktu",
+      "Pemesanan dianggap valid setelah tiket diterbitkan.",
+    ],
     image: require("../../assets/images/hero3.jpg"),
   },
 ];
 
-const formatRupiah = (value: string | number | bigint): string => {
-  const number = Number(String(value).replace(/[^\d]/g, ""));
+const formatRupiah = (value) => {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
-    minimumFractionDigits: 0
-  }).format(number);
+    minimumFractionDigits: 0,
+  }).format(value);
 };
-
 
 export default function DetailPage() {
   const router = useRouter();
@@ -61,62 +45,73 @@ export default function DetailPage() {
 
   const detail = destinations.find((d) => d.id == Number(id));
 
-  if (!detail) {
-    return (
-      <View style={styles.center}>
-        <Text>Data tidak ditemukan.</Text>
-      </View>
-    );
-  }
+  if (!detail) return <Text>Data tidak ditemukan.</Text>;
 
   return (
-    <ScrollView style={styles.container}>
-      {/* HEADER IMAGE */}
-      <Image source={detail.image} style={styles.headerImage} />
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 200 }}>
+        {/* HERO IMAGE */}
+        <View style={styles.heroContainer}>
+          <Image source={detail.image} style={styles.heroImage} />
+          <View style={styles.overlay} />
+        </View>
 
-      <View style={styles.content}>
+        {/* FLOATING CARD */}
+        <View style={styles.card}>
+          {/* TITLE */}
+          <Text style={styles.title}>{detail.name}</Text>
 
-        {/* TITLE + PRICE */}
-        <View style={styles.rowBetween}>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.title}>{detail.name}</Text>
+          <View style={styles.row}>
+            <Ionicons name="location-outline" size={16} color="#6B7280" />
+            <Text style={styles.subText}>{detail.location}</Text>
+          </View>
 
-            <View style={styles.row}>
-              <Ionicons name="location-outline" size={16} color="#6B7280" />
-              <Text style={styles.subInfo}>{detail.location}</Text>
+          {/* BADGE */}
+          <View style={styles.badgeWrapper}>
+            <View style={styles.badge}>
+              <Ionicons name="people-outline" size={18} color="#fff" />
+              <Text style={styles.badgeText}>Max 16 User</Text>
+            </View>
 
-              <Text style={styles.dot}>  </Text>
-
-              <Ionicons name="pricetag-outline" size={16} color="#6B7280" />
-              <Text style={styles.subInfo}>{detail.category}</Text>
+            <View style={styles.badge}>
+              <Ionicons name="time-outline" size={18} color="#fff" />
+              <Text style={styles.badgeText}>12 Hours Duration</Text>
             </View>
           </View>
 
-          <Text style={styles.price}>IDR {formatRupiah(detail.price)}</Text>
-        </View>
+          {/* INCLUDE */}
+          <Text style={styles.sectionTitle}>Include</Text>
 
-        {/* INFO BADGE */}
-        <View style={styles.infoWrapper}>
-          <View style={styles.infoCard}>
-            <Ionicons name="people-outline" size={20} color="#fff" />
-            <Text style={styles.infoText}>Max 16 Orang</Text>
+          <View style={styles.includeWrapper}>
+            {detail.include.map((item, index) => (
+              <View key={index} style={styles.includePill}>
+                <Text style={styles.includeText}>{item}</Text>
+              </View>
+            ))}
           </View>
 
-          <View style={styles.infoCard}>
-            <Ionicons name="time-outline" size={20} color="#fff" />
-            <Text style={styles.infoText}>12 Jam Durasi</Text>
-          </View>
+          {/* DESCRIPTION */}
+          <Text style={styles.sectionTitle}>Deskripsi</Text>
+          <Text style={styles.description}>{detail.description}</Text>
+
+          {/* PERHATIAN */}
+          <Text style={styles.sectionTitle}>Perhatian</Text>
+          {detail.warning.map((item, index) => (
+            <Text key={index} style={styles.warning}>
+              • {item}
+            </Text>
+          ))}
         </View>
+      </ScrollView>
 
-        {/* DESCRIPTION */}
-        <Text style={styles.sectionTitle}>Deskripsi</Text>
-        <Text style={styles.description}>{detail.description}</Text>
+      {/* FIXED BOTTOM BUTTON */}
+      <View style={styles.bottomBar}>
+        <Text style={styles.priceLabel}>{formatRupiah(detail.price)}</Text>
 
-        {/* BUTTON PESAN */}
         <TouchableOpacity
           style={[
             styles.button,
-            { backgroundColor: pressed ? "#F0F0F0" : "#0080FF" },
+            { backgroundColor: pressed ? "#E0E0E0" : "#0080FF" },
           ]}
           onPressIn={() => setPressed(true)}
           onPressOut={() => setPressed(false)}
@@ -129,92 +124,62 @@ export default function DetailPage() {
         >
           <Text style={styles.buttonText}>Pesan Sekarang</Text>
         </TouchableOpacity>
-
       </View>
-    </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
+  safeArea: { flex: 1, backgroundColor: "#fff" },
 
-  center: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  headerImage: {
+  heroContainer: {
     width: "100%",
-    height: 300,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
+    height: 330,
+    position: "relative",
   },
 
-  content: {
-    padding: 20,
+  heroImage: {
+    width: "100%",
+    height: "100%",
   },
 
-  title: {
-    fontSize: 22,
-    fontWeight: "800",
-    color: "#111",
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,27,56,0.72)",
   },
 
-  row: {
+  /* FLOATING CARD */
+  card: {
+    marginTop: -40,
+    backgroundColor: "#fff",
+    marginHorizontal: 16,
+    padding: 18,
+    borderRadius: 22,
+    elevation: 7,
+  },
+
+  title: { fontSize: 21, fontWeight: "800", color: "#111" },
+
+  row: { flexDirection: "row", alignItems: "center", marginTop: 6 },
+  subText: { marginLeft: 4, color: "#6B7280" },
+
+  badgeWrapper: {
+    flexDirection: "row",
+    marginTop: 14,
+    gap: 10,
+  },
+
+  badge: {
+    backgroundColor: "#001B38",
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 6,
+    gap: 6,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 20,
   },
 
-  subInfo: {
-    fontSize: 14,
-    color: "#6B7280",
-    marginLeft: 4,
-  },
-
-  dot: {
-    color: "#6B7280",
-    marginHorizontal: 6,
-  },
-
-  rowBetween: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-  },
-
-  price: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#1F67BB",
-    marginTop: 4,
-  },
-
-  infoWrapper: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 15
-    ,
-  },
-
-  infoCard: {
-    backgroundColor: "#D7D7D7",
-    flex: 1,
-    paddingVertical: 7,
-    borderRadius: 30,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginHorizontal: 5,
-    gap: 8,
-  },
-
-  infoText: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "600",
-  },
+  badgeText: { color: "#fff", fontSize: 13 },
 
   sectionTitle: {
     fontSize: 16,
@@ -223,25 +188,60 @@ const styles = StyleSheet.create({
     color: "#111",
   },
 
+  includeWrapper: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+    marginTop: 10,
+  },
+
+  includePill: {
+    backgroundColor: "#E5E7EB",
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 20,
+  },
+
+  includeText: { fontSize: 13, color: "#374151" },
+
   description: {
-    marginTop: 8,
-    fontSize: 15,
+    marginTop: 6,
     color: "#4B5563",
-    lineHeight: 22,
+    lineHeight: 20,
+  },
+
+  warning: {
+    marginTop: 4,
+    color: "#FF3B30",
+    fontSize: 14,
+  },
+
+  /* BOTTOM BAR */
+  bottomBar: {
+    position: "absolute",
+    bottom: 18,
+    left: 20,
+    right: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+
+  priceLabel: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#0080FF",
   },
 
   button: {
-    marginTop: 28,
-    paddingVertical: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 26,
     borderRadius: 14,
-    alignItems: "center",
-    
-    
   },
 
   buttonText: {
-    color: "#FFFFFF",
+    color: "#fff",
     fontWeight: "700",
-    fontSize: 18,
+    fontSize: 16,
   },
 });
