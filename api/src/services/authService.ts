@@ -5,7 +5,10 @@ import { v4 as uuidv4, validate } from "uuid";
 import { AuthData } from "../types/auth";
 import { sendEmail } from "../utilities/sendEmail";
 import { createError } from "../utilities/createError";
-import { createSessionToken, decodeSessionToken } from "../utilities/sessionToken";
+import {
+  createSessionToken,
+  decodeSessionToken,
+} from "../utilities/sessionToken";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET!;
@@ -176,15 +179,15 @@ export const authService = {
   },
 
   async requestForgotPassword(email: string) {
-    if(!email) throw createError ("email wajib diisi", 400);
+    if (!email) throw createError("email wajib diisi", 400);
 
     const user = await prisma.tb_user.findUnique({
       where: {
-        email
-      }
+        email,
+      },
     });
 
-    if(!user) throw createError("email tidak ditemukan", 404);
+    if (!user) throw createError("email tidak ditemukan", 404);
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
@@ -193,8 +196,8 @@ export const authService = {
       data: {
         email,
         otp,
-        expiresAt
-      }
+        expiresAt,
+      },
     });
 
     const session = {
@@ -207,14 +210,44 @@ export const authService = {
 
     const resetLink = `${process.env.FRONTEND_URL}/reset-password?sessionToken=${sessionToken}`;
 
+    await sendEmail(
+      email,
+      "Reset Password Akun Anda",
+      `
+<html>
+<body>
+    <p>Halo,</p>
+    <p>Berikut adalah link untuk reset password Anda:</p>
+
+    <p>
+        <a href="${resetLink}" style="
+            display: inline-block;
+            padding: 10px 18px;
+            background-color: #4f46e5;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+        ">Reset Password</a>
+    </p>
+
+    <p style="margin-top: 24px;">
+        Link ini hanya berlaku selama <b>5 menit</b>.
+    </p>
+
+    <p>Terima kasih.</p>
+</body>
+</html>
+`
+    );
+
     return {
       message: "Link reset password telah dikirim lewat email",
-      resetLink
-    }
+      resetLink,
+    };
   },
 
   async verifySession(sessionToken: string) {
-    if(!sessionToken) throw createError("token tidak ditemukan", 404);
+    if (!sessionToken) throw createError("token tidak ditemukan", 404);
 
     const decoded = decodeSessionToken(sessionToken);
     const { email, otp } = decoded;
@@ -223,42 +256,41 @@ export const authService = {
     const record = await prisma.tb_otp.findFirst({
       where: {
         email,
-        otp
+        otp,
       },
       orderBy: {
-        createdAt: 'desc'
+        createdAt: "desc",
       },
     });
 
-    if(!record) throw createError("token tidak valid", 400);
-    if(record.expiresAt < new Date()) throw createError("token expired", 400);
+    if (!record) throw createError("token tidak valid", 400);
+    if (record.expiresAt < new Date()) throw createError("token expired", 400);
 
     return {
       valid: true,
-      email
-    }
+      email,
+    };
   },
 
   async resetPassword(sessionToken: string, newPassword: string) {
-    if(!sessionToken) throw createError("token tidak ditemukan", 404);
-    if(!newPassword) throw createError("password wajib diisi", 400);
+    if (!sessionToken) throw createError("token tidak ditemukan", 404);
+    if (!newPassword) throw createError("password wajib diisi", 400);
 
     const decoded = decodeSessionToken(sessionToken);
     const { email, otp } = decoded;
-
 
     // cek db
     const record = await prisma.tb_otp.findFirst({
       where: {
         email,
-        otp
+        otp,
       },
       orderBy: {
-        createdAt: 'desc'
+        createdAt: "desc",
       },
     });
 
-    if(!record) throw createError("token tidak valid", 400);
+    if (!record) throw createError("token tidak valid", 400);
     if (record.expiresAt < new Date()) throw createError("Token expired", 400);
 
     // update password user
@@ -267,21 +299,21 @@ export const authService = {
 
     await prisma.tb_user.update({
       where: {
-        email
+        email,
       },
       data: {
-        password: hashed
-      }
+        password: hashed,
+      },
     });
 
     await prisma.tb_otp.deleteMany({
       where: {
-        email
+        email,
       },
     });
 
-    return{
-      message: "password berhasil direset"
-    }
-  }
+    return {
+      message: "password berhasil direset",
+    };
+  },
 };
