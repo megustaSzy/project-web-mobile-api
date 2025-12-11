@@ -2,6 +2,7 @@ import { Router } from "express";
 import { userController } from "../controllers/userController";
 import { authMiddleware } from "../middlewares/authMiddleware";
 import { authorizeRoles } from "../middlewares/roleMiddleware";
+import { upload } from "../middlewares/uploadMiddleware";
 
 const router = Router();
 
@@ -15,7 +16,7 @@ router.get("/", authMiddleware, authorizeRoles("Admin"), userController.getAllUs
 router.get("/:id", authMiddleware, userController.getUserById);
 
 // Edit user (admin atau user itu sendiri — cek di controller)
-router.put("/:id", authMiddleware, userController.editUser);
+router.put("/:id", authMiddleware, upload.single("avatar"), userController.editUser);
 
 // Hapus user (admin only)
 router.delete("/:id", authMiddleware, authorizeRoles("Admin"), userController.deleteUser);

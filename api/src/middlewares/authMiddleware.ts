@@ -37,7 +37,7 @@ export const authMiddleware = async (
     // ambil data user
     const user = await prisma.tb_user.findUnique({
       where: { id: decoded.id },
-      select: { id: true, name: true, email: true, role: true },
+      select: { id: true, name: true, email: true, role: true, avatar: true },
     });
 
     if (!user) {
@@ -46,10 +46,12 @@ export const authMiddleware = async (
 
     (req as any).user = user;
     return next();
-
   } catch (err: any) {
     if (err.name === "TokenExpiredError") {
-      return ResponseData.unauthorized(res, "token expired, silakan login kembali");
+      return ResponseData.unauthorized(
+        res,
+        "token expired, silakan login kembali"
+      );
     }
 
     return ResponseData.forbidden(res, "token tidak valid");

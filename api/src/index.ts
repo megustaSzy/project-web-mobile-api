@@ -21,6 +21,7 @@ import aboutRoute from "./routes/aboutRoute";
 import statRoute from "./routes/statRoute";
 import paymentRoute from "./routes/paymentRoute";
 import teamRoute from "./routes/teamRoute"
+import testimoniRoute from "./routes/testimoniRoute";
 
 const app = express();
 
@@ -66,6 +67,7 @@ app.use("/api/about", aboutRoute);
 app.use("/api/count", statRoute);
 app.use("/api/payment", paymentRoute);
 app.use("/api/team", teamRoute);
+app.use("/api/testimoni", testimoniRoute)
 
 // Public upload folder
 app.use("/uploads", express.static("public/uploads"));
