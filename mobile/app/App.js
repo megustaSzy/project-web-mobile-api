@@ -8,7 +8,7 @@ import Login from "./auth/login/page";
 import ForgotPassword from "./auth/forgot-password/page";
 import ResetPassword from "./auth/reset-password/page";
 import Signup from "./auth/signup/page";
-import HomeScreen from "./components/Landingpage"; // Pastikan file HomeScreen ada
+import HomeScreen from "../components/Landingpage"; // Pastikan file HomeScreen ada
 
 const Stack = createNativeStackNavigator();
 

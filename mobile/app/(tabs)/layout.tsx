@@ -2,8 +2,8 @@
 import React from "react";
 import { View, SafeAreaView, StatusBar, StyleSheet, Platform } from "react-native";
 import { Slot } from "expo-router";
-import NavBar from "../components/NavBar";          // Top navbar
-import BottomNavbar from "../components/BottomNavbar"; // Bottom navbar
+import NavBar from "../../components/NavBar";          // Top navbar
+import BottomNavbar from "../../components/BottomNavbar"; // Bottom navbar
 
 export default function TabsLayout() {
   return (
