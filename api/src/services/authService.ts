@@ -8,7 +8,6 @@ import { createError } from "../utilities/createError";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET!;
-const MAX_ATTEMPS = 5;
 
 export const authService = {
   async registerUser(data: AuthData) {
@@ -174,6 +173,7 @@ export const authService = {
     const { accessToken, refreshToken } = await this.createTokens(user.id);
     return { user, accessToken, refreshToken };
   },
+
 
   async requestOtp(email: string) {
     if (!email) createError("email wajib diisi", 400);
