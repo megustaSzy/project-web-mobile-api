@@ -1,11 +1,11 @@
 import prisma from "../lib/prisma";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4, validate } from "uuid";
 import { AuthData } from "../types/auth";
 import { sendEmail } from "../utilities/sendEmail";
 import { createError } from "../utilities/createError";
-import { createSessionToken } from "../utilities/sessionToken";
+import { createSessionToken, decodeSessionToken } from "../utilities/sessionToken";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET!;
@@ -210,6 +210,32 @@ export const authService = {
     return {
       message: "Link reset password telah dikirim lewat email",
       resetLink
+    }
+  },
+
+  async verifySession(sessionToken: string) {
+    if(!sessionToken) throw createError("token tidak ditemukan", 404);
+
+    const decoded = decodeSessionToken(sessionToken);
+    const { email, otp } = decoded;
+
+    // cek db
+    const record = await prisma.tb_otp.findFirst({
+      where: {
+        email,
+        otp
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+    });
+
+    if(!record) throw createError("token tidak valid", 400);
+    if(record.expiresAt < new Date()) throw createError("token expired", 400);
+
+    return {
+      valid: true,
+      email
     }
   }
 };
