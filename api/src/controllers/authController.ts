@@ -114,5 +114,19 @@ export const authController = {
     } catch (error) {
       return ResponseData.serverError(res, error)
     }
-  }
+  },
+
+  async verifyResetSession(req: Request, res: Response) {
+    try {
+      // fe kirim query
+      const sessionToken = req.query.sessionToken as string;
+
+      const result = await authService.verifySession(sessionToken);
+      return ResponseData.ok(res, result, "token valid");
+    } catch (error) {
+      return ResponseData.serverError(res, error)
+    }
+  },
+
+  
 };
