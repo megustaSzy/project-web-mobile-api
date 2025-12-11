@@ -237,5 +237,51 @@ export const authService = {
       valid: true,
       email
     }
+  },
+
+  async resetPassword(sessionToken: string, newPassword: string) {
+    if(!sessionToken) throw createError("token tidak ditemukan", 404);
+    if(!newPassword) throw createError("password wajib diisi", 400);
+
+    const decoded = decodeSessionToken(sessionToken);
+    const { email, otp } = decoded;
+
+
+    // cek db
+    const record = await prisma.tb_otp.findFirst({
+      where: {
+        email,
+        otp
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+    });
+
+    if(!record) throw createError("token tidak valid", 400);
+    if (record.expiresAt < new Date()) throw createError("Token expired", 400);
+
+    // update password user
+
+    const hashed = await bcrypt.hash(newPassword, 10);
+
+    await prisma.tb_user.update({
+      where: {
+        email
+      },
+      data: {
+        password: hashed
+      }
+    });
+
+    await prisma.tb_otp.deleteMany({
+      where: {
+        email
+      },
+    });
+
+    return{
+      message: "password berhasil direset"
+    }
   }
 };
