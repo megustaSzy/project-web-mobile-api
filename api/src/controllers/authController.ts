@@ -128,5 +128,15 @@ export const authController = {
     }
   },
 
-  
+  async resetPassword(req: Request, res: Response) {
+    try {
+      const { sessionToken, newPassword } = req.body;
+
+      const result = await authService.resetPassword(sessionToken, newPassword);
+
+      return ResponseData.ok(res, result, "password berhasil direset")
+    } catch (error) {
+      return ResponseData.serverError(res, error);
+    }
+  }
 };
