@@ -1,37 +1,41 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
+// app/_layout.js
+import React from "react";
+import { View, SafeAreaView, StatusBar, StyleSheet, Platform } from "react-native";
+import { Slot } from "expo-router";
+import NavBar from "../components/NavBar";          // Top navbar
+import BottomNavbar from "../components/BottomNavbar"; // Bottom navbar
 
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
-
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
+export default function TabsLayout() {
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
-        
-      {/* <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
-        }}
-      /> */}
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-        }}
+    <SafeAreaView style={styles.safe}>
+      <StatusBar
+        translucent
+        backgroundColor="transparent"
+        barStyle="dark-content"
       />
-    </Tabs>
+
+      {/* Top Navbar */}
+      {/* <NavBar /> */}
+
+      {/* Konten halaman */}
+      <View style={styles.content}>
+        <Slot />
+      </View>
+
+      {/* Bottom Navbar */}
+      {/* <BottomNavbar /> */}
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  safe: {
+    flex: 1,
+    backgroundColor: "#fff",
+    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+  },
+  content: {
+    flex: 1,
+    paddingBottom: 80, // Pastikan konten tidak tertutup BottomNavbar
+  },
+});
