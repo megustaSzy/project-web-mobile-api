@@ -1,4 +1,5 @@
 export interface TestimoniData {
-    status: string,
-    comment: string
+  status: string;
+  comment: string;
+  rating: number;
 }

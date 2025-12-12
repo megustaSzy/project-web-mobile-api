@@ -6,7 +6,6 @@ import { createError } from "../utilities/createError";
 
 export const ticketService = {
   async generateTicketPDF(orderId: number, userId: number, res: Response) {
-
     const order = await prisma.tb_orders.findUnique({
       where: { id: orderId },
     });
@@ -18,7 +17,14 @@ export const ticketService = {
     const qrDataUrl = await QRCode.toDataURL(order.ticketCode);
     const qrBase64 = qrDataUrl.replace(/^data:image\/png;base64,/, "");
 
-    const doc = new PDFDocument({ size: "A4", margin: 0 });
+    // Custom ticket size (mirip tiket KAI)
+    const WIDTH = 900;
+    const HEIGHT = 350;
+
+    const doc = new PDFDocument({
+      size: [WIDTH, HEIGHT],
+      margin: 0,
+    });
 
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
@@ -28,221 +34,165 @@ export const ticketService = {
 
     doc.pipe(res);
 
-    const pageWidth = doc.page.width;
-    const pageHeight = doc.page.height;
+    // Colors
+    const orange = "#f97316";
+    const dark = "#111827";
+    const gray = "#4b5563";
 
-    const marginX = 40;
-    let y = 0;
+    // ================================
+    // HEADER ORANGE (seperti KAI)
+    // ================================
+    doc.rect(0, 0, WIDTH, 80).fill(orange);
 
-    // Color presets
-    const colors = {
-      primary: "#1e3a8a",
-      infoText: "#475569",
-      darkText: "#0f172a",
-      boxBorder: "#bfdbfe",
-    };
+    doc
+      .fillColor("white")
+      .font("Helvetica-Bold")
+      .fontSize(26)
+      .text("BOARDING PASS", 30, 25);
 
-    doc.rect(0, 0, pageWidth, 180).fill(colors.primary);
-    doc.rect(0, 160, pageWidth, 20).fill("#3b82f6");
+    // Garis putih tipis
+    doc
+      .moveTo(0, 80)
+      .lineTo(WIDTH, 80)
+      .strokeColor("#ffffff")
+      .lineWidth(1)
+      .stroke();
 
-    // Decorations
-    doc.fillOpacity(0.3)
-      .circle(pageWidth - 50, 50, 60)
-      .fill("#60a5fa")
-      .circle(70, 120, 40)
-      .fill("#93c5fd")
-      .fillOpacity(1);
+    // ================================
+    // KIRI — INFORMASI UTAMA
+    // ================================
+    const leftX = 30;
+    let y = 100;
 
-    // Logo
-    doc.circle(50, 50, 25).fill("#ffffff");
-    doc.fontSize(20).fillColor(colors.primary).text("🎫", 33, 35);
-
-    // Title
-    doc.font("Helvetica-Bold")
-      .fontSize(28)
-      .fillColor("#ffffff")
-      .text("E-TICKET WISATA", 100, 50);
-
-    doc.font("Helvetica")
+    doc
       .fontSize(12)
-      .fillColor("#e0e7ff")
-      .text("Tiket Digital Anda", 100, 85);
-
-    // Ticket Code Badge
-    doc.roundedRect(40, 120, 200, 40, 5).fill("#ffffff");
-
-    doc.fontSize(10)
-      .fillColor("#64748b")
-      .text("KODE TIKET", 50, 130);
-
-    doc.font("Helvetica-Bold")
-      .fontSize(14)
-      .fillColor(colors.primary)
-      .text(order.ticketCode, 50, 145);
-
-    y = 220;
-
-    doc.font("Helvetica-Bold")
+      .fillColor(gray)
+      .font("Helvetica")
+      .text("Nama / Name", leftX, y);
+    doc
+      .font("Helvetica-Bold")
+      .fillColor(dark)
       .fontSize(16)
-      .fillColor(colors.primary)
-      .text("Informasi Pemesan", marginX, y);
+      .text(order.userName, leftX, y + 15);
 
-    y += 30;
+    y += 55;
 
-    const infoBoxHeight = 90;
-
-    doc.roundedRect(marginX, y, pageWidth - marginX * 2, infoBoxHeight, 8)
-      .fillAndStroke("#f0f9ff", colors.boxBorder);
-
-    doc.font("Helvetica")
-      .fontSize(11)
-      .fillColor(colors.infoText)
-      .text("Nama", marginX + 20, y + 20);
-
-    doc.font("Helvetica-Bold")
+    doc
+      .font("Helvetica")
       .fontSize(12)
-      .fillColor(colors.darkText)
-      .text(order.userName, marginX + 20, y + 38);
-
-    doc.font("Helvetica")
-      .fontSize(11)
-      .fillColor(colors.infoText)
-      .text("No. Telepon", marginX + 20, y + 60);
-
-    doc.font("Helvetica-Bold")
-      .fontSize(12)
-      .fillColor(colors.darkText)
-      .text(order.userPhone, marginX + 20, y + 78);
-
-    y += infoBoxHeight + 30;
-
-    doc.font("Helvetica-Bold")
+      .fillColor(gray)
+      .text("No. Telepon", leftX, y);
+    doc
+      .font("Helvetica-Bold")
       .fontSize(16)
-      .fillColor(colors.primary)
-      .text("Detail Destinasi", marginX, y);
+      .fillColor(dark)
+      .text(order.userPhone, leftX, y + 15);
 
-    y += 30;
+    y += 55;
 
-    const destBoxHeight = 130;
-
-    doc.roundedRect(marginX, y, pageWidth - marginX * 2, destBoxHeight, 8)
-      .fill("#fef3c7");
-
-    // Destinasi
-    doc.font("Helvetica")
-      .fontSize(11)
-      .fillColor("#78350f")
-      .text("🏝️  Destinasi", marginX + 20, y + 20);
-
-    doc.font("Helvetica-Bold")
-      .fontSize(14)
-      .fillColor("#78350f")
-      .text(order.destinationName, marginX + 20, y + 40, {
-        width: pageWidth - 120,
+    doc
+      .font("Helvetica")
+      .fontSize(12)
+      .fillColor(gray)
+      .text("Destinasi", leftX, y);
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(18)
+      .fillColor(dark)
+      .text(order.destinationName, leftX, y + 15, {
+        width: 380,
       });
 
-    // Date
-    doc.fontSize(11)
-      .font("Helvetica")
-      .text("📅  Tanggal", marginX + 20, y + 75);
+    y += 70;
 
-    doc.font("Helvetica-Bold")
+    doc
+      .font("Helvetica")
       .fontSize(12)
+      .fillColor(gray)
+      .text("Tanggal", leftX, y);
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(15)
+      .fillColor(dark)
       .text(
         order.date.toLocaleDateString("id-ID", {
           weekday: "long",
-          year: "numeric",
-          month: "long",
           day: "numeric",
+          month: "long",
+          year: "numeric",
         }),
-        marginX + 20,
-        y + 93
+        leftX,
+        y + 15
       );
 
-    // Time
-    doc.fontSize(11)
+    y += 55;
+
+    doc.font("Helvetica").fontSize(12).fillColor(gray).text("Waktu", leftX, y);
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(15)
+      .fillColor(dark)
+      .text(order.time, leftX, y + 15);
+
+    // ================================
+    // KANAN — TICKET INFO + QR
+    // ================================
+    const rightX = 520;
+
+    // Box Kanan
+    doc
+      .rect(rightX - 20, 100, 360, 230)
+      .strokeColor("#e5e7eb")
+      .lineWidth(1)
+      .stroke();
+
+    doc
       .font("Helvetica")
-      .text("🕐  Waktu", pageWidth / 2 + 20, y + 75);
-
-    doc.font("Helvetica-Bold")
       .fontSize(12)
-      .text(order.time, pageWidth / 2 + 20, y + 93);
+      .fillColor(gray)
+      .text("Kode Tiket", rightX, 120);
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(22)
+      .fillColor(orange)
+      .text(order.ticketCode, rightX, 140);
 
-    y += destBoxHeight + 30;
-
-    const boxWidth = (pageWidth - marginX * 2) / 2 - 10;
-
-    // Quantity
-    doc.roundedRect(marginX, y, boxWidth, 80, 8).fill("#dcfce7");
-
-    doc.fontSize(11)
-      .fillColor("#166534")
-      .text("👥  Jumlah Orang", marginX + 20, y + 20);
-
-    doc.font("Helvetica-Bold")
+    doc
+      .font("Helvetica")
+      .fontSize(12)
+      .fillColor(gray)
+      .text("Jumlah Orang", rightX, 180);
+    doc
+      .font("Helvetica-Bold")
       .fontSize(18)
-      .fillColor("#166534")
-      .text(`${order.quantity} Orang`, marginX + 20, y + 42);
+      .fillColor(dark)
+      .text(`${order.quantity} Orang`, rightX, 200);
 
-    // Price
-    doc.roundedRect(pageWidth / 2 + 10, y, boxWidth, 80, 8).fill("#fee2e2");
-
-    doc.fontSize(11)
-      .fillColor("#991b1b")
-      .text("💰  Total Harga", pageWidth / 2 + 30, y + 20);
-
-    doc.font("Helvetica-Bold")
+    doc
+      .font("Helvetica")
+      .fontSize(12)
+      .fillColor(gray)
+      .text("Total Harga", rightX, 235);
+    doc
+      .font("Helvetica-Bold")
       .fontSize(18)
-      .fillColor("#991b1b")
-      .text(
-        `Rp ${order.totalPrice.toLocaleString("id-ID")}`,
-        pageWidth / 2 + 30,
-        y + 42
-      );
+      .fillColor(dark)
+      .text(`Rp ${order.totalPrice.toLocaleString("id-ID")}`, rightX, 255);
 
-    y += 120;
-
-    doc.font("Helvetica-Bold")
-      .fontSize(14)
-      .fillColor(colors.primary)
-      .text("Scan QR Code", marginX, y, {
-        align: "center",
-        width: pageWidth - marginX * 2,
-      });
-
-    y += 30;
-
-    const qrSize = 180;
-    const qrX = (pageWidth - qrSize) / 2;
-
-    // QR Background
-    doc.roundedRect(qrX - 15, y - 15, qrSize + 30, qrSize + 30, 10)
-      .fill("#ffffff");
-
-    doc.image(Buffer.from(qrBase64, "base64"), qrX, y, {
-      width: qrSize,
-      height: qrSize,
+    // QR Code (di kanan seperti boarding pass)
+    doc.image(Buffer.from(qrBase64, "base64"), rightX + 200, 140, {
+      width: 130,
+      height: 130,
     });
 
-    const footerY = pageHeight - 60;
-
-    doc.font("Helvetica")
-      .fontSize(9)
-      .fillColor("#94a3b8")
-      .text(
-        "Tunjukkan tiket ini saat memasuki lokasi wisata",
-        marginX,
-        footerY,
-        { align: "center", width: pageWidth - marginX * 2 }
-      );
-
-    doc.fontSize(8)
-      .text(
-        "Simpan tiket ini dengan baik. Tiket yang sudah dibeli tidak dapat dikembalikan.",
-        marginX,
-        footerY + 20,
-        { align: "center", width: pageWidth - marginX * 2 }
-      );
+    // Footer tipis
+    doc
+      .fontSize(10)
+      .fillColor(gray)
+      .text("Tunjukkan tiket ini saat memasuki lokasi wisata", 0, HEIGHT - 30, {
+        width: WIDTH,
+        align: "center",
+      });
 
     doc.end();
   },

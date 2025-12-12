@@ -1,0 +1,17 @@
+import { Router } from "express";
+import { bannerController } from "../controllers/bannerController";
+import { authMiddleware } from "../middlewares/authMiddleware";
+import { authorizeRoles } from "../middlewares/roleMiddleware";
+import { upload } from "../middlewares/uploadMiddleware";
+
+
+const router = Router();
+
+router.get("/", bannerController.getBanner);
+router.get("/:id", bannerController.getByIdBanner);
+router.post("/", authMiddleware, authorizeRoles("Admin"), upload.single("image"), bannerController.create);
+router.put("/:id", authMiddleware, authorizeRoles("Admin"), upload.single("image"), bannerController.edit);
+router.delete("/:id", authMiddleware, authorizeRoles("Admin"),bannerController.deleteBanner);
+
+
+export default router;
