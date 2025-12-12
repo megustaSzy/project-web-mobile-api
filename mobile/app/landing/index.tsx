@@ -38,7 +38,7 @@ export default function HomeScreen() {
   const [filteredDestinations, setFilteredDestinations] = useState<DestinationType[]>([]);
 
   const [kategori, setKategori] = useState<string>("");
-  const [daerah, setDaerah] = useState<string>("");
+  const [daerah, setDaerah] = useState<string | null>(null);
 
   const [historyModal, setHistoryModal] = useState(false);
 
@@ -63,7 +63,12 @@ export default function HomeScreen() {
 
 const [historyList, setHistoryList] = useState<HistoryType[]>([]);
 
+type AreaType = {
+  id: number;
+  nama: string;
+};
 
+const [apiAreas, setApiAreas] = useState<AreaType[]>([]);
 
 
 
@@ -76,6 +81,7 @@ const [historyList, setHistoryList] = useState<HistoryType[]>([]);
     getLocation();
     fetchCategories();
     fetchDestinations();
+    fetchAreas(); 
   }, []);
 
   useEffect(() => {
@@ -112,6 +118,27 @@ const [historyList, setHistoryList] = useState<HistoryType[]>([]);
     setApiCategories(categoryData);
   } catch (e) {
     console.log("Category API error:", e);
+  }
+};
+
+const fetchAreas = async () => {
+  try {
+    const res = await fetch(`${BASE_URL}/api/region/regencies/19`);
+    const json = await res.json();
+
+    if (json.status === 200 && Array.isArray(json.data)) {
+      const formatted = json.data.map((item: any) => ({
+        id: item.id,
+        nama: item.name,
+      }));
+
+      setApiAreas(formatted);
+    } else {
+      setApiAreas([]);
+    }
+  } catch (e) {
+    console.log("Area API error:", e);
+    setApiAreas([]);
   }
 };
 
@@ -258,20 +285,22 @@ const [historyList, setHistoryList] = useState<HistoryType[]>([]);
             <Text style={styles.inputLabel}>Daerah</Text>
 
             <Dropdown
-              style={styles.dropdown}
-              placeholderStyle={styles.placeholderStyle}
-              selectedTextStyle={styles.selectedTextStyle}
-              data={[
-                { label: "Pesawaran", value: "Pesawaran" },
-                { label: "Lampung Selatan", value: "Lampung Selatan" },
-                { label: "Tanggamus", value: "Tanggamus" },
-              ]}
-              labelField="label"
-              valueField="value"
-              placeholder="Pilih Daerah"
-              value={daerah}
-              onChange={(item) => setDaerah(item.value)}
-            />
+                    style={styles.dropdown}
+                    placeholderStyle={styles.placeholderStyle}
+                    selectedTextStyle={styles.selectedTextStyle}
+                    data={apiAreas.map(a => ({
+                      label: a.nama,   // tampil di dropdown
+                      value: a.nama,   // value yang disimpan
+                    }))}
+                    labelField="label"
+                    valueField="value"
+                    placeholder="Pilih Daerah"
+                    value={daerah}
+                    onChange={(item) => {
+                      console.log("Daerah terpilih:", item);
+                      setDaerah(item.value);
+                    }}
+                  />
           </View>
         </View>
 

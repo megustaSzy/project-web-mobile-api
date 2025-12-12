@@ -15,6 +15,18 @@ import { Dropdown } from "react-native-element-dropdown";
 import { useRouter } from "expo-router";
 import * as Location from "expo-location";
 
+type DestinationType = {
+  id: string | number;
+  name: string;
+  location: string;
+  price: number;
+  imageUrl: string;
+  description: string;
+  category?: {
+    name: string;
+  };
+};
+
 // ============================
 // MAIN COMPONENT
 // ============================
@@ -22,20 +34,44 @@ export default function HomeScreen() {
   const router = useRouter();
 
   const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
-  const [filteredDestinations, setFilteredDestinations] = useState([]);
 
-  const [kategori, setKategori] = useState("");
-  const [daerah, setDaerah] = useState("");
+  const [filteredDestinations, setFilteredDestinations] = useState<DestinationType[]>([]);
+
+  const [kategori, setKategori] = useState<string>("");
+  const [daerah, setDaerah] = useState<string | null>(null);
+
   const [historyModal, setHistoryModal] = useState(false);
-  const [historyList, setHistoryList] = useState([]);
 
-  const [activeCategory, setActiveCategory] = useState(null);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   const [currentLocation, setCurrentLocation] = useState("Memuat lokasi...");
 
   // API STATE
-  const [apiCategories, setApiCategories] = useState([]);
-  const [apiDestinations, setApiDestinations] = useState([]);
+  type CategoryType = {
+  id: number;
+  name: string;
+  };
+
+  const [apiCategories, setApiCategories] = useState<CategoryType[]>([]);
+  const [apiDestinations, setApiDestinations] = useState<DestinationType[]>([]);
+
+  type HistoryType = {
+  kategori: string;
+  daerah: string;
+  date: string;
+};
+
+const [historyList, setHistoryList] = useState<HistoryType[]>([]);
+
+type AreaType = {
+  id: number;
+  nama: string;
+};
+
+const [apiAreas, setApiAreas] = useState<AreaType[]>([]);
+
+
+
 
   // ============================
   // USE EFFECT
@@ -45,6 +81,7 @@ export default function HomeScreen() {
     getLocation();
     fetchCategories();
     fetchDestinations();
+    fetchAreas(); 
   }, []);
 
   useEffect(() => {
@@ -81,6 +118,27 @@ export default function HomeScreen() {
     setApiCategories(categoryData);
   } catch (e) {
     console.log("Category API error:", e);
+  }
+};
+
+const fetchAreas = async () => {
+  try {
+    const res = await fetch(`${BASE_URL}/api/region/regencies/19`);
+    const json = await res.json();
+
+    if (json.status === 200 && Array.isArray(json.data)) {
+      const formatted = json.data.map((item: any) => ({
+        id: item.id,
+        nama: item.name,
+      }));
+
+      setApiAreas(formatted);
+    } else {
+      setApiAreas([]);
+    }
+  } catch (e) {
+    console.log("Area API error:", e);
+    setApiAreas([]);
   }
 };
 
@@ -165,7 +223,7 @@ export default function HomeScreen() {
   // ============================
   // HANDLE CATEGORY CLICK
   // ============================
-  const handleCategoryPress = (catName) => {
+  const handleCategoryPress = (catName: string) => {
     if (activeCategory === catName) {
       setActiveCategory(null);
       setKategori("");
@@ -178,7 +236,7 @@ export default function HomeScreen() {
   // ============================
   // GO DETAIL PAGE
   // ============================
-  const handleDestinationPress = (d) => {
+  const handleDestinationPress = (d: { id: any; name?: string; location?: string; price?: number; imageUrl?: string; description?: string; category?: { name: string; } | undefined; }) => {
     router.push(`../deskripsi/${d.id}`);
   };
 
@@ -190,7 +248,7 @@ export default function HomeScreen() {
       {/* HEADER */}
       <View style={styles.header}>
         <Image
-          source={require("../assets/images/hero3.jpg")}
+          source={require("../../assets/images/hero3.jpg")}
           style={styles.headerBg}
         />
         <View style={styles.headerOverlay} />
@@ -227,20 +285,22 @@ export default function HomeScreen() {
             <Text style={styles.inputLabel}>Daerah</Text>
 
             <Dropdown
-              style={styles.dropdown}
-              placeholderStyle={styles.placeholderStyle}
-              selectedTextStyle={styles.selectedTextStyle}
-              data={[
-                { label: "Pesawaran", value: "Pesawaran" },
-                { label: "Lampung Selatan", value: "Lampung Selatan" },
-                { label: "Tanggamus", value: "Tanggamus" },
-              ]}
-              labelField="label"
-              valueField="value"
-              placeholder="Pilih Daerah"
-              value={daerah}
-              onChange={(item) => setDaerah(item.value)}
-            />
+                    style={styles.dropdown}
+                    placeholderStyle={styles.placeholderStyle}
+                    selectedTextStyle={styles.selectedTextStyle}
+                    data={apiAreas.map(a => ({
+                      label: a.nama,   // tampil di dropdown
+                      value: a.nama,   // value yang disimpan
+                    }))}
+                    labelField="label"
+                    valueField="value"
+                    placeholder="Pilih Daerah"
+                    value={daerah}
+                    onChange={(item) => {
+                      console.log("Daerah terpilih:", item);
+                      setDaerah(item.value);
+                    }}
+                  />
           </View>
         </View>
 
@@ -281,7 +341,7 @@ export default function HomeScreen() {
 
             >
               <Image
-                source={require("../assets/images/kategori1.png")}
+                source={require("../../assets/images/kategori1.png")}
                 style={styles.categoryIcon}
               />
               <Text
