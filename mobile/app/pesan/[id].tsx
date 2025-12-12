@@ -206,31 +206,142 @@ export default function PesanPage() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
+  container: 
+  { flex: 1, 
+    backgroundColor: "#fff" 
+  },
 
-  headerImageWrapper: { width: "100%", height: 200, position: "relative" },
-  headerImage: { width: "100%", height: 400 },
-  overlay: { position: "absolute", width: "100%", height: 400, backgroundColor: "#001B38", opacity: 0.72 },
+  headerImageWrapper: { 
+    width: "100%", 
+    height: 200, 
+    position: "relative" 
+  },
 
-  card: { backgroundColor: "#fff", marginTop: 20, borderTopLeftRadius: 30, borderTopRightRadius: 35, paddingHorizontal: 20, paddingBottom: 0 ,paddingTop: 10},
+  headerImage: { 
+    width: "100%", 
+    height: 300 
+  },
+  overlay: { 
+    position: "absolute", 
+    width: "100%", 
+    height: 400, 
+    backgroundColor: "#001B38", 
+    opacity: 0.72 
+  },
 
-  title: { fontSize: 20, fontWeight: "bold" },
-  rowLocation: { flexDirection: "row", alignItems: "center", marginBottom: 10 },
-  location: { marginLeft: 5, color: "#6C6C6C" },
+  card: { 
+    backgroundColor: "#fff", 
+    marginTop: 20, 
+    borderTopLeftRadius: 30, 
+    borderTopRightRadius: 35, 
+    paddingHorizontal: 20, 
+    paddingBottom: 0 ,
+    paddingTop: 10
+  },
 
-  infoRow: { flexDirection: "row", marginBottom: 25 },
-  infoBoxLeft: { flex: 1, padding: 12, backgroundColor: "#2F80ED", borderTopLeftRadius: 40, borderBottomLeftRadius: 40, alignItems: "center" },
-  infoBoxRight: { flex: 1, padding: 12, backgroundColor: "#2F80ED", borderTopRightRadius: 40, borderBottomRightRadius: 40, alignItems: "center" },
-  infoText: { color: "#fff", fontSize: 13 },
+  title: { 
+    fontSize: 20, 
+    fontWeight: "bold" 
+  },
 
-  label: { marginTop: 15, marginBottom: 5, color: "#555", fontSize: 14 },
-  inputBox: { flexDirection: "row", alignItems: "center", backgroundColor: "#F6F6F6", padding: 12, borderRadius: 30, marginBottom: 10 },
-  picker: { flex: 1, marginLeft: 8 },
-  input: { marginLeft: 10, flex: 1, fontSize: 14, paddingVertical: 0 },
-  inputText: { marginLeft: 10, flex: 1, fontSize: 14, color: "#222" },
+  rowLocation: { 
+    flexDirection: "row", 
+    alignItems: "center", 
+    marginBottom: 10 
+  },
 
-  bottomContainer: { position: "absolute", bottom: 80, width: "100%", paddingHorizontal: 20 },
-  orderBtn: { backgroundColor: "#2F80ED", paddingVertical: 15, borderRadius: 40, flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 20, alignItems: "center" },
-  orderText: { color: "#fff", fontSize: 15, fontWeight: "bold" },
-  orderPrice: { color: "#fff", fontWeight: "bold" },
+  location: { 
+    marginLeft: 5, 
+    color: "#6C6C6C" 
+  },
+
+  infoRow: { 
+    flexDirection: "row", 
+    marginBottom: 25 
+  },
+
+  infoBoxLeft: { 
+    flex: 1, 
+    padding: 12, 
+    backgroundColor: "#2F80ED", 
+    borderTopLeftRadius: 40, 
+    borderBottomLeftRadius: 40, 
+    alignItems: "center" 
+  },
+
+  infoBoxRight: { 
+    flex: 1, 
+    padding: 12, 
+    backgroundColor: "#2F80ED", 
+    borderTopRightRadius: 40, 
+    borderBottomRightRadius: 40, 
+    alignItems: "center" 
+  },
+
+  infoText: { 
+    color: "#fff", 
+    fontSize: 13 
+  },
+
+  label: { 
+    marginTop: 15, 
+    marginBottom: 5, 
+    color: "#555", 
+    fontSize: 14 
+  },
+
+  inputBox: { 
+    flexDirection: "row", 
+    alignItems: "center", 
+    backgroundColor: "#F6F6F6", 
+    padding: 12, 
+    borderRadius: 30, 
+    marginBottom: 10 
+  },
+
+  picker: { 
+    flex: 1, 
+    marginLeft: 8 
+  },
+
+  input: { 
+    marginLeft: 10, 
+    flex: 1, 
+    fontSize: 14, 
+    paddingVertical: 0 
+  },
+
+  inputText: { 
+    marginLeft: 10, 
+    flex: 1, 
+    fontSize: 14, 
+    color: "#222" 
+  },
+
+  bottomContainer: { 
+    position: "absolute", 
+    bottom: 80, 
+    width: "100%", 
+    paddingHorizontal: 20 
+  },
+
+  orderBtn: { 
+    backgroundColor: "#2F80ED", 
+    paddingVertical: 15, 
+    borderRadius: 40, 
+    flexDirection: "row", 
+    justifyContent: "space-between", 
+    paddingHorizontal: 20, 
+    alignItems: "center" 
+  },
+
+  orderText: { 
+    color: "#fff", 
+    fontSize: 15, 
+    fontWeight: "bold" 
+  },
+  orderPrice: { 
+    color: "#fff", 
+    fontWeight: "bold" 
+  },
 });
