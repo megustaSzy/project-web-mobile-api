@@ -8,6 +8,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   Linking,
+  DeviceEventEmitter,
 } from "react-native";
 import Modal from "react-native-modal";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -93,6 +94,7 @@ export default function LoginForm() {
         await AsyncStorage.setItem("accessToken", accessToken);
         await AsyncStorage.setItem("role", role);
 
+        DeviceEventEmitter.emit('loginSuccess');
         setModalStatus("success");
         setModalMessage("Login berhasil!");
         setModalVisible(true);

@@ -248,7 +248,7 @@ const fetchAreas = async () => {
       {/* HEADER */}
       <View style={styles.header}>
         <Image
-          source={require("../../assets/images/hero3.jpg")}
+          source={require("../assets/images/hero3.jpg")}
           style={styles.headerBg}
         />
         <View style={styles.headerOverlay} />
@@ -341,7 +341,7 @@ const fetchAreas = async () => {
 
             >
               <Image
-                source={require("../../assets/images/kategori1.png")}
+                source={require("../assets/images/kategori1.png")}
                 style={styles.categoryIcon}
               />
               <Text
