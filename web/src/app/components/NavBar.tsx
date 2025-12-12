@@ -3,8 +3,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { Menu, X } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
+import { Menu, X, ChevronDown } from "lucide-react";
 import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
 import { apiFetch } from "@/helpers/api";
@@ -29,7 +29,6 @@ export type ApiProfileResponse = {
 // ========================
 export default function NavBar() {
   const [open, setOpen] = useState(false);
-  const [openLang, setOpenLang] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -39,6 +38,8 @@ export default function NavBar() {
   });
 
   const [language, setLanguage] = useState("id");
+  const [langOpen, setLangOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   const translationSource = {
     home: "Beranda",
@@ -52,7 +53,7 @@ export default function NavBar() {
     logout: "Keluar",
   };
 
-  const [translations, setTranslations] = useState(translationSource);
+  const [translations] = useState(translationSource);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
@@ -60,6 +61,9 @@ export default function NavBar() {
     if (!avatar) return "/images/profile.jpg";
     return avatar.startsWith("http") ? avatar : `${API_URL}${avatar}`;
   };
+
+  const langRef = useRef<HTMLDivElement>(null);
+  const profileRef = useRef<HTMLDivElement>(null);
 
   // ==========================
   // SCROLL EFFECT
@@ -96,14 +100,17 @@ export default function NavBar() {
         });
 
         if (res?.data) {
-          const profileData = {
+          setUserData({
             name: res.data.name || "User",
             avatar: buildAvatarUrl(res.data.avatar),
-          };
-
-          setUserData(profileData);
-
-          localStorage.setItem("profile", JSON.stringify(profileData));
+          });
+          localStorage.setItem(
+            "profile",
+            JSON.stringify({
+              name: res.data.name,
+              avatar: res.data.avatar ?? "/images/profile.jpg",
+            })
+          );
         }
       } catch (err) {
         console.error("Gagal fetch profile:", err);
@@ -123,6 +130,22 @@ export default function NavBar() {
   }, []);
 
   // ==========================
+  // CLOSE DROPDOWN ON OUTSIDE CLICK
+  // ==========================
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (langRef.current && !langRef.current.contains(e.target as Node)) {
+        setLangOpen(false);
+      }
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setProfileOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // ==========================
   // LOGOUT
   // ==========================
   const handleLogout = () => {
@@ -135,9 +158,7 @@ export default function NavBar() {
   return (
     <header
       className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-        scrolled
-          ? "bg-white shadow-md border-b border-gray-200"
-          : "bg-transparent"
+        scrolled ? "bg-white shadow-md border-b border-gray-200" : "bg-transparent"
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 flex items-center h-16">
@@ -154,12 +175,9 @@ export default function NavBar() {
           <Link href="/about">{translations.about}</Link>
           <Link href="/tourlist">{translations.tour}</Link>
           <Link href="/tiket">{translations.ticket}</Link>
-
           <button
             onClick={() =>
-              document.getElementById("contact")?.scrollIntoView({
-                behavior: "smooth",
-              })
+              document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })
             }
           >
             {translations.contact}
@@ -169,78 +187,94 @@ export default function NavBar() {
         {/* RIGHT SIDE */}
         <div className="hidden md:flex gap-4 ml-auto items-center">
           {/* LANGUAGE */}
-          <button
-            onClick={() => setOpenLang(!openLang)}
-            className={`${scrolled ? "text-gray-700" : "text-white"}`}
-          >
-            {language.toUpperCase()}
-          </button>
-
-          {openLang && (
-            <div className="absolute right-20 top-14 w-40 bg-white shadow rounded-lg">
-              <button
-                onClick={() => {
-                  setLanguage("id");
-                  localStorage.setItem("language", "id");
-                  setOpenLang(false);
-                }}
-                className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-              >
-                🇮🇩 Indonesia
-              </button>
-
-              <button
-                onClick={() => {
-                  setLanguage("en");
-                  localStorage.setItem("language", "en");
-                  setOpenLang(false);
-                }}
-                className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-              >
-                🇺🇸 English
-              </button>
-            </div>
-          )}
-
-          {/* PROFILE / LOGIN */}
-          {isLoggedIn ? (
-            <div className="relative group flex items-center gap-2 cursor-pointer">
-              <Image
-                src={userData.avatar}
-                width={35}
-                height={35}
-                alt="Profile"
-                className="rounded-full"
-                loader={({ src }) => {
-                  if (!src.startsWith("http")) return `${API_URL}${src}`;
-                  return src;
-                }}
+          <div className="relative" ref={langRef}>
+            <button
+              onClick={() => setLangOpen((prev) => !prev)}
+              className="flex items-center gap-1 px-3 py-1 border rounded-md text-sm"
+            >
+              {language.toUpperCase()}
+              <ChevronDown
+                size={16}
+                className={`transition-transform duration-200 ${langOpen ? "rotate-180" : ""}`}
               />
-              <span>{userData.name}</span>
+            </button>
 
-              <div className="absolute right-0 top-10 bg-white shadow-md rounded-md w-40 opacity-0 invisible group-hover:opacity-100 group-hover:visible">
-                <Link
-                  href="/profil"
-                  className="block px-4 py-2 hover:bg-gray-100"
-                >
-                  {translations.editProfile}
-                </Link>
-
+            {langOpen && (
+              <div className="absolute right-0 mt-1 w-36 bg-white shadow rounded-md overflow-hidden z-50">
                 <button
-                  onClick={handleLogout}
-                  className="block w-full text-left px-4 py-2 hover:bg-red-100 text-red-600"
+                  onClick={() => {
+                    setLanguage("id");
+                    localStorage.setItem("language", "id");
+                    setLangOpen(false);
+                  }}
+                  className="w-full text-left px-4 py-2 hover:bg-gray-100"
                 >
-                  {translations.logout}
+                  🇮🇩 Indonesia
+                </button>
+                <button
+                  onClick={() => {
+                    setLanguage("en");
+                    localStorage.setItem("language", "en");
+                    setLangOpen(false);
+                  }}
+                  className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                >
+                  🇺🇸 English
                 </button>
               </div>
+            )}
+          </div>
+
+          {/* PROFILE */}
+          {isLoggedIn ? (
+            <div className="relative" ref={profileRef}>
+              <button
+                onClick={() => setProfileOpen((prev) => !prev)}
+                className="flex items-center gap-2 px-2 py-1 rounded-md hover:bg-gray-100 transition"
+              >
+                <Image
+                  src={userData.avatar}
+                  width={32}
+                  height={32}
+                  alt="Profile"
+                  className="rounded-full"
+                  loader={({ src }) =>
+                    src.startsWith("http") ? src : `${API_URL}${src}`
+                  }
+                />
+                <span className="text-sm">{userData.name}</span>
+                <ChevronDown
+                  size={14}
+                  className={`transition-transform duration-200 ${profileOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+
+              {profileOpen && (
+                <div className="absolute right-0 mt-1 w-40 bg-white shadow rounded-md overflow-hidden z-50">
+                  <Link
+                    href="/profil"
+                    className="block px-4 py-2 hover:bg-gray-100 text-sm"
+                    onClick={() => setProfileOpen(false)}
+                  >
+                    {translations.editProfile}
+                  </Link>
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setProfileOpen(false);
+                    }}
+                    className="w-full text-left px-4 py-2 hover:bg-red-100 text-red-600 text-sm"
+                  >
+                    {translations.logout}
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <Link
               href="/login"
               className={`px-4 py-1 rounded-full border ${
-                scrolled
-                  ? "text-gray-700 border-gray-700"
-                  : "text-white border-white"
+                scrolled ? "text-gray-700 border-gray-700" : "text-white border-white"
               }`}
             >
               {translations.login}
@@ -249,10 +283,7 @@ export default function NavBar() {
         </div>
 
         {/* BURGER MENU */}
-        <button
-          onClick={() => setOpen((p) => !p)}
-          className="md:hidden ml-auto p-2"
-        >
+        <button onClick={() => setOpen((p) => !p)} className="md:hidden ml-auto p-2">
           {open ? (
             <X className={scrolled ? "text-gray-800" : "text-white"} />
           ) : (
@@ -281,21 +312,13 @@ export default function NavBar() {
             <Link href="/tiket" onClick={() => setOpen(false)}>
               {translations.ticket}
             </Link>
-
-            <button onClick={() => setOpen(false)}>
-              {translations.contact}
-            </button>
+            <button onClick={() => setOpen(false)}>{translations.contact}</button>
 
             {isLoggedIn ? (
               <>
-                <Link
-                  href="/profil"
-                  onClick={() => setOpen(false)}
-                  className="py-2"
-                >
+                <Link href="/profil" onClick={() => setOpen(false)} className="py-2">
                   {translations.editProfile}
                 </Link>
-
                 <button
                   onClick={() => {
                     handleLogout();
@@ -315,7 +338,6 @@ export default function NavBar() {
                 >
                   {translations.login}
                 </Link>
-
                 <Link
                   href="/signup"
                   onClick={() => setOpen(false)}
@@ -325,32 +347,6 @@ export default function NavBar() {
                 </Link>
               </>
             )}
-
-            <div className="border-t mt-4 pt-4 flex justify-center gap-4">
-              <button
-                onClick={() => {
-                  setLanguage("id");
-                  localStorage.setItem("language", "id");
-                }}
-                className={`px-3 py-1 rounded-md ${
-                  language === "id" ? "bg-blue-600 text-white" : "bg-gray-200"
-                }`}
-              >
-                🇮🇩 ID
-              </button>
-
-              <button
-                onClick={() => {
-                  setLanguage("en");
-                  localStorage.setItem("language", "en");
-                }}
-                className={`px-3 py-1 rounded-md ${
-                  language === "en" ? "bg-blue-600 text-white" : "bg-gray-200"
-                }`}
-              >
-                🇺🇸 EN
-              </button>
-            </div>
           </nav>
         </div>
       </div>
