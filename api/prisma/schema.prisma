@@ -205,3 +205,12 @@ model tb_testimoni {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model tb_banner {
+  id        Int      @id @default(autoincrement())
+  number    String
+  header    String
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
