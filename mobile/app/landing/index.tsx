@@ -15,6 +15,18 @@ import { Dropdown } from "react-native-element-dropdown";
 import { useRouter } from "expo-router";
 import * as Location from "expo-location";
 
+type DestinationType = {
+  id: string | number;
+  name: string;
+  location: string;
+  price: number;
+  imageUrl: string;
+  description: string;
+  category?: {
+    name: string;
+  };
+};
+
 // ============================
 // MAIN COMPONENT
 // ============================
@@ -22,20 +34,39 @@ export default function HomeScreen() {
   const router = useRouter();
 
   const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
-  const [filteredDestinations, setFilteredDestinations] = useState([]);
 
-  const [kategori, setKategori] = useState("");
-  const [daerah, setDaerah] = useState("");
+  const [filteredDestinations, setFilteredDestinations] = useState<DestinationType[]>([]);
+
+  const [kategori, setKategori] = useState<string>("");
+  const [daerah, setDaerah] = useState<string>("");
+
   const [historyModal, setHistoryModal] = useState(false);
-  const [historyList, setHistoryList] = useState([]);
 
-  const [activeCategory, setActiveCategory] = useState(null);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   const [currentLocation, setCurrentLocation] = useState("Memuat lokasi...");
 
   // API STATE
-  const [apiCategories, setApiCategories] = useState([]);
-  const [apiDestinations, setApiDestinations] = useState([]);
+  type CategoryType = {
+  id: number;
+  name: string;
+  };
+
+  const [apiCategories, setApiCategories] = useState<CategoryType[]>([]);
+  const [apiDestinations, setApiDestinations] = useState<DestinationType[]>([]);
+
+  type HistoryType = {
+  kategori: string;
+  daerah: string;
+  date: string;
+};
+
+const [historyList, setHistoryList] = useState<HistoryType[]>([]);
+
+
+
+
+
 
   // ============================
   // USE EFFECT
@@ -165,7 +196,7 @@ export default function HomeScreen() {
   // ============================
   // HANDLE CATEGORY CLICK
   // ============================
-  const handleCategoryPress = (catName) => {
+  const handleCategoryPress = (catName: string) => {
     if (activeCategory === catName) {
       setActiveCategory(null);
       setKategori("");
@@ -178,7 +209,7 @@ export default function HomeScreen() {
   // ============================
   // GO DETAIL PAGE
   // ============================
-  const handleDestinationPress = (d) => {
+  const handleDestinationPress = (d: { id: any; name?: string; location?: string; price?: number; imageUrl?: string; description?: string; category?: { name: string; } | undefined; }) => {
     router.push(`../deskripsi/${d.id}`);
   };
 

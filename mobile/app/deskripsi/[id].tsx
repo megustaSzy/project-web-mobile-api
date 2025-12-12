@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -6,40 +6,96 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 
+type DestinationDetailType = {
+  id: string | number;
+  name: string;
+  location: string;
+  price: number;
+  imageUrl: string;
+  description: string;
+  category?: {
+    name: string;
+  };
+};
+
 export default function DestinationDetail() {
   const router = useRouter();
-  const params = useLocalSearchParams();
-  
-  const id = params.id ? String(params.id) : null;
-  const title = params.title ? String(params.title) : "No Title";
-  const location = params.location ? String(params.location) : "Unknown";
-  const price = params.price ? String(params.price) : "0";
+  const { id } = useLocalSearchParams();
+
+  const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
+
+  // STATE DATA API
+  const [detail, setDetail] = useState<DestinationDetailType | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // =============================
+  // FETCH DETAIL DESTINATION
+  // =============================
+  const fetchDetail = async () => {
+    try {
+      const res = await fetch(`${BASE_URL}/api/destinations/${id}`);
+      const json = await res.json();
+
+      if (json.data) {
+        setDetail(json.data);
+      }
+
+      setLoading(false);
+    } catch (error) {
+      console.log("DETAIL ERROR:", error);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDetail();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+        <ActivityIndicator size="large" color="#2F80ED" />
+      </View>
+    );
+  }
+
+  if (!detail) {
+    return (
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+        <Text>Data tidak ditemukan</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 180 }}>
-        {/* HEADER IMAGE */}
+        
+        {/* HEADER IMAGE dari API */}
         <View style={styles.imageWrapper}>
-          <Image source={require("../../assets/images/hero3.jpg")} style={styles.headerImage} />
+          <Image
+            source={{ uri: `${BASE_URL}${detail.imageUrl}` }}
+            style={styles.headerImage}
+          />
           <View style={styles.overlay} />
         </View>
 
-        {/* Content */}
+        {/* CARD CONTENT */}
         <View style={styles.card}>
-          {/* Title & Location */}
-          <Text style={styles.title}>{title}</Text>
-          <Text style={styles.location}>{location}</Text>
+          <Text style={styles.title}>{detail.name}</Text>
+          <Text style={styles.location}>{detail.location}</Text>
 
           {/* Info Row */}
           <View style={styles.infoRow}>
             <View style={styles.infoBoxLeft}>
-              <Text style={styles.infoText}>Max 16 User</Text>
+              <Text style={styles.infoText}>Kategori: {detail.category?.name}</Text>
             </View>
             <View style={styles.infoBoxRight}>
-              <Text style={styles.infoText}>12 Hours Duration</Text>
+              <Text style={styles.infoText}>Harga: IDR {detail.price}</Text>
             </View>
           </View>
 
@@ -51,13 +107,10 @@ export default function DestinationDetail() {
             <View style={styles.includeItem}><Text style={styles.includeText}>Snack LamiGo</Text></View>
           </View>
 
-
-          {/* Description */}
+          {/* Deskripsi API */}
           <Text style={styles.subTitle}>Deskripsi</Text>
-          <Text style={styles.description}>
-            Temukan berbagai wisata di Kabupaten Tanggamus. Jelajahi destinasi
-            terbaik dan dapatkan pengalaman luar biasa.
-          </Text>
+          <Text style={styles.description}>{detail.description}</Text>
+
           {/* Perhatian */}
           <Text style={styles.subTitle}>Perhatian</Text>
           <View style={styles.noticeBox}>
@@ -68,30 +121,34 @@ export default function DestinationDetail() {
         </View>
       </ScrollView>
 
-      {/* FIXED BUTTON */}
+      {/* BUTTON PESAN */}
       <View style={styles.bottomContainer}>
         <TouchableOpacity
           style={styles.orderBtn}
-          onPress={() => {
-            if (!id) {
-              console.warn("ID tidak ditemukan");
-              return;
-            }
+          onPress={() =>
             router.push({
-              pathname: "../pesan/[id]",
-              params: { id: String(id), title, location, price },
-            });
-          }}
+  pathname: "../pesan/[id]",
+  params: { 
+    id: detail.id,
+    title: detail.name,
+    location: detail.location,
+    price: detail.price,
+    imageUrl: detail.imageUrl   // ⬅️ WAJIB dikirim!
+  },
+})
+
+          }
         >
           <Text style={styles.orderText}>Pesan Sekarang</Text>
-          <Text style={styles.orderPrice}>IDR {price},-</Text>
+          <Text style={styles.orderPrice}>IDR {detail.price},-</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 }
 
-/* ===================== STYLE ===================== */
+
+/* ===================== STYLE (TIDAK DIUBAH) ===================== */
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
 
