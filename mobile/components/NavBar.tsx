@@ -9,11 +9,11 @@ import {
 } from "react-native";
 import { useRouter, usePathname } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Menu as MenuIcon, X as CloseIcon } from 'lucide-react-native';
+import { Menu as MenuIcon, X as CloseIcon } from "lucide-react-native";
 
 export default function NavBarMobile() {
   const router = useRouter();
-  const pathname = usePathname(); // <-- path saat ini
+  const pathname = usePathname();
 
   const [open, setOpen] = useState(false);
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -21,26 +21,26 @@ export default function NavBarMobile() {
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [language, setLanguage] = useState("id");
+
   const [userData, setUserData] = useState({
     name: "User",
     avatar: require("../assets/images/faiz.jpg"),
   });
 
-  // Tentukan warna berdasarkan halaman
+  // HALAMAN DENGAN WARNA NAVBAR
   const blackPages = ["tiket/page", "profil/page"];
-  const whitePages = ["/", "Landingpage", "tourlist/page"];
-  const textColor = blackPages.some(p => pathname.includes(p)) ? "#000" : "#fff";
-  const iconColor = blackPages.some(p => pathname.includes(p)) ? "#000" : "#fff";
+  const textColor = blackPages.some((p) => pathname.includes(p)) ? "#000" : "#fff";
+  const iconColor = textColor;
 
-  // Scroll Shadow Effect
+  // EFFECT SCROLL
   useEffect(() => {
     const listener = scrollY.addListener(({ value }) => {
       setScrolled(value > 10);
     });
     return () => scrollY.removeListener(listener);
-  }, [scrollY]);
+  }, []);
 
-  // Load Language
+  // LOAD BAHASA
   useEffect(() => {
     (async () => {
       const lang = await AsyncStorage.getItem("language");
@@ -53,15 +53,58 @@ export default function NavBarMobile() {
     await AsyncStorage.setItem("language", lang);
   };
 
-  // Load Token & Profile
+  // 🔥 AMBIL PROFIL DARI API + SIMPAN ASYNCSTORAGE
+const fetchUserProfile = async () => {
+  try {
+    const token = await AsyncStorage.getItem("accessToken");
+
+    if (!token) {
+      setIsLoggedIn(false);
+      return;
+    }
+
+    setIsLoggedIn(true);
+
+    const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/users/profile`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+
+    // Simpan ke state
+    setUserData({
+      name: data.data?.name || "User",
+      avatar: data.data?.avatar
+        ? { uri: `${process.env.EXPO_PUBLIC_API_URL}${data.data.avatar}` }
+        : require("../assets/images/faiz.jpg"),
+    });
+
+    // Simpan ke AsyncStorage
+    await AsyncStorage.setItem(
+      "profile",
+      JSON.stringify({
+        name: data.data?.name,
+        avatar: `${process.env.EXPO_PUBLIC_API_URL}${data.data?.avatar}`,
+      })
+    );
+
+  } catch (err) {
+    console.log("Error loading profile:", err);
+  }
+};
+
+
+  // LOAD DARI API + ASYNCSTORAGE
   const loadProfile = async () => {
-    const token = await AsyncStorage.getItem("token");
-    const profile = await AsyncStorage.getItem("profile");
+    try {
+      const token = await AsyncStorage.getItem("accessToken");
+      const profile = await AsyncStorage.getItem("profile");
 
-    setIsLoggedIn(!!token);
+      setIsLoggedIn(!!token);
 
-    if (profile) {
-      try {
+      if (profile) {
         const parsed = JSON.parse(profile);
         setUserData({
           name: parsed.name || "User",
@@ -69,9 +112,12 @@ export default function NavBarMobile() {
             ? { uri: parsed.avatar }
             : require("../assets/images/faiz.jpg"),
         });
-      } catch (e) {
-        console.log("Profile error");
       }
+
+      // 🔥 PAKSA REFRESH KE API AGAR NAMANYA REALTIME
+      fetchUserProfile();
+    } catch (err) {
+      console.log("Profile load error:", err);
     }
   };
 
@@ -79,18 +125,17 @@ export default function NavBarMobile() {
     loadProfile();
   }, []);
 
-  // Logout
   const handleLogout = async () => {
-    await AsyncStorage.removeItem("token");
+    await AsyncStorage.removeItem("accessToken");
+    await AsyncStorage.removeItem("profile");
     setIsLoggedIn(false);
+    setUserData({ name: "User", avatar: require("../assets/images/faiz.jpg") });
   };
 
   const t = {
     home: language === "id" ? "Beranda" : "Home",
-    about: language === "id" ? "Tentang Kami" : "About Us",
     tour: language === "id" ? "Daftar Wisata" : "Tour List",
     ticket: language === "id" ? "Tiket Saya" : "My Ticket",
-    contact: language === "id" ? "Kontak" : "Contact",
     login: language === "id" ? "Masuk" : "Login",
     signup: language === "id" ? "Daftar" : "Sign Up",
     editProfile: language === "id" ? "Edit Profil" : "Edit Profile",
@@ -99,39 +144,40 @@ export default function NavBarMobile() {
 
   return (
     <View style={{ zIndex: 50 }}>
-      {/* NAVBAR FIXED */}
-      <Animated.View
-        style={[
-          styles.header,
-          scrolled ? styles.header : {},
-        ]}
-      >
-        {/* Logo + Welcome */}
+      <Animated.View style={[styles.header]}>
+        {/* LOGO + WELCOME */}
         <View style={styles.left}>
           <Image
             source={require("../assets/images/logo.png")}
             style={{ width: 40, height: 40 }}
           />
+
           <View style={styles.welcomeBox}>
-            <Text style={[styles.welcomeText, { color: textColor }]}>Hi, Selamat Datang</Text>
-            <Text style={[styles.userName, { color: textColor }]}>{userData.name}</Text>
+            <Text style={[styles.welcomeText, { color: textColor }]}>
+              Hi, Selamat Datang
+            </Text>
+            <Text style={[styles.userName, { color: textColor }]}>
+              {userData.name}
+            </Text>
           </View>
         </View>
 
-        {/* Right Menu */}
+        {/* MENU KANAN */}
         <View style={styles.right}>
-          {/* Language */}
           <TouchableOpacity
-            onPress={() =>
-              handleChangeLanguage(language === "id" ? "en" : "id")
-            }
+            onPress={() => handleChangeLanguage(language === "id" ? "en" : "id")}
           >
-            <Text style={[styles.lang, { color: textColor }]}>{language.toUpperCase()}</Text>
+            <Text style={[styles.lang, { color: textColor }]}>
+              {language.toUpperCase()}
+            </Text>
           </TouchableOpacity>
 
-          {/* Burger */}
           <TouchableOpacity onPress={() => setOpen(!open)}>
-            {open ? <CloseIcon size={26} color={iconColor} /> : <MenuIcon size={26} color={iconColor} />}
+            {open ? (
+              <CloseIcon size={26} color={iconColor} />
+            ) : (
+              <MenuIcon size={26} color={iconColor} />
+            )}
           </TouchableOpacity>
         </View>
       </Animated.View>
@@ -142,7 +188,11 @@ export default function NavBarMobile() {
           {isLoggedIn ? (
             <>
               <TouchableOpacity onPress={() => router.push("/profil/page")}>
-                <Text style={[styles.menuItem, { color: textColor }]}>{t.editProfile}</Text>
+                <Text style={[styles.menuItem]}>{t.editProfile}</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={handleLogout}>
+                <Text style={[styles.menuItem]}>{t.logout}</Text>
               </TouchableOpacity>
             </>
           ) : (
@@ -153,6 +203,7 @@ export default function NavBarMobile() {
               >
                 <Text style={styles.loginTxtWhite}>{t.login}</Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 onPress={() => router.push("../auth/signup/page")}
                 style={styles.signupBtn}
@@ -180,9 +231,6 @@ const styles = StyleSheet.create({
     top: 0,
     zIndex: 50,
     backgroundColor: "rgba(0,0,0,0)",
-    borderBottomWidth: 0,
-    shadowOpacity: 0,
-    elevation: 0,
   },
   left: {
     flexDirection: "row",
@@ -194,17 +242,32 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 15,
   },
-  welcomeText: { 
-    fontSize: 12 
-  },
+  welcomeText: { fontSize: 12 },
   userName: { fontSize: 14, fontWeight: "700", marginTop: -2 },
   lang: { fontSize: 14, fontWeight: "700" },
-  profilePic: { width: 35, height: 35, borderRadius: 50 },
   menu: { marginTop: 65, backgroundColor: "#fff", paddingVertical: 15 },
-  menuItem: { paddingVertical: 12, paddingHorizontal: 20, fontSize: 16, borderBottomWidth: 1, borderColor: "#444" },
-  loginBtnFull: { backgroundColor: "#007AFF", marginHorizontal: 20, padding: 12, borderRadius: 8 },
+  menuItem: {
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    fontSize: 16,
+    borderBottomWidth: 1,
+    borderColor: "#e0e0e0",
+  },
+  loginBtnFull: {
+    backgroundColor: "#007AFF",
+    marginHorizontal: 20,
+    padding: 12,
+    borderRadius: 8,
+  },
   loginTxtWhite: { color: "white", textAlign: "center", fontWeight: "600" },
-  signupBtn: { borderWidth: 1, borderColor: "#007AFF", marginHorizontal: 20, marginTop: 10, padding: 12, borderRadius: 8 },
+  signupBtn: {
+    borderWidth: 1,
+    borderColor: "#007AFF",
+    marginHorizontal: 20,
+    marginTop: 10,
+    padding: 12,
+    borderRadius: 8,
+  },
   signupTxt: { color: "#007AFF", textAlign: "center", fontWeight: "600" },
   welcomeBox: { marginLeft: 8 },
 });

@@ -72,19 +72,37 @@ export default function SearchCard() {
     load();
   }, []);
 
-  useEffect(() => {
-    if (!selectedCategory) return;
-
-    async function load() {
+ useEffect(() => {
+  async function loadAreas() {
+    try {
       const res = await fetch(
-        `https://api.example.com/daerah?kategori=${selectedCategory}`
+        "http://192.168.100.141:3001/api/region/regencies/19"
       );
-      const data: { data: Area[] } = await res.json();
-      setAreas(data.data);
-    }
 
-    load();
-  }, [selectedCategory]);
+      const json: {
+        status: number;
+        message: string;
+        data: { id: number; name: string }[];
+      } = await res.json();
+
+      if (json.status === 200) {
+        const formatted = json.data.map((item) => ({
+          id: item.id,
+          nama: item.name, // sesuaikan dengan interface Area
+        }));
+
+        setAreas(formatted);
+      } else {
+        setAreas([]);
+      }
+    } catch (error) {
+      console.error("Gagal load daftar daerah:", error);
+      setAreas([]);
+    }
+  }
+
+  loadAreas();
+}, []); // ⛔ TANPA selectedCategory
 
   return (
     <div className="bg-white rounded-[22px] shadow-sm p-6 w-full max-w-5xl mx-auto border border-gray-200">

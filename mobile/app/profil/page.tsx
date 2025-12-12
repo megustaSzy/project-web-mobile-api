@@ -12,45 +12,58 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+const API_URL = "http://10.93.86.50:3001"; // SAMAKAN DENGAN WEB
+
 export default function ProfileScreen() {
   const [user, setUser] = useState({
     name: "",
     email: "",
-    avatar: null as string | null,
+    role: "",
+    avatar: "" as string,
   });
 
   const [loading, setLoading] = useState(true);
+  const [file, setFile] = useState<any>(null);
   const [preview, setPreview] = useState<string | null>(null);
 
-  // Convert image to base64
+  const buildAvatarUrl = (avatar?: string | null) => {
+    if (!avatar) return "https://via.placeholder.com/150";
+    return avatar.startsWith("http") ? avatar : `${API_URL}${avatar}`;
+  };
+
+  //------------------------------------------------------
+  // 🔵 PICK IMAGE
+  //------------------------------------------------------
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
       aspect: [1, 1],
-      base64: true,
     });
 
     if (!result.canceled) {
-      const base64Img = `data:image/jpeg;base64,${result.assets[0].base64}`;
-      setPreview(base64Img);
+      const asset = result.assets[0];
+      setPreview(asset.uri);
+      setFile(asset); // Simpan file asli untuk upload
     }
   };
 
-  // Load profile (local first)
+  //------------------------------------------------------
+  // 🔵 FETCH PROFILE (LOCAL FIRST, THEN API)
+  //------------------------------------------------------
   useEffect(() => {
     const loadProfile = async () => {
-      const local = await AsyncStorage.getItem("profile");
       const token = await AsyncStorage.getItem("token");
+      const local = await AsyncStorage.getItem("profile");
 
+      // Jika ada profile lokal → tampilkan dulu
       if (local) {
         const p = JSON.parse(local);
         setUser({
-          name: p.name || "Pengguna",
-          email: p.email || "",
-          avatar: p.avatar || null,
+          name: p.name,
+          email: p.email,
+          role: p.role,
+          avatar: buildAvatarUrl(p.avatar),
         });
-        setLoading(false);
-        return;
       }
 
       if (!token) {
@@ -59,54 +72,94 @@ export default function ProfileScreen() {
       }
 
       try {
-        const res = await fetch("http://10.93.86.50:3001/api/users", {
+        const res = await fetch(`${API_URL}/api/users/profile`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        if (res.ok) {
-          const data = await res.json();
-          const avatarUrl = data.avatar
-            ? data.avatar.startsWith("http")
-              ? data.avatar
-              : `http://10.93.86.50:3001/uploads/${data.avatar}`
-            : null;
+        const json = await res.json();
 
-          setUser({
-            name: data.name || "Pengguna",
-            email: data.email || "",
-            avatar: avatarUrl,
-          });
+        if (res.ok) {
+          const data = json.data;
+
+          const profileData = {
+            name: data.name,
+            email: data.email,
+            role: data.role,
+            avatar: buildAvatarUrl(data.avatar),
+          };
+
+          setUser(profileData);
+          await AsyncStorage.setItem("profile", JSON.stringify(profileData));
         }
       } catch (err) {
-        console.log("Gagal fetch profil", err);
+        console.log("Error fetch profile:", err);
       }
-
       setLoading(false);
     };
 
     loadProfile();
   }, []);
 
-  // Save to local (AsyncStorage)
-  const handleSaveLocal = async () => {
-    const newProfile = {
-      name: user.name || "Pengguna",
-      email: user.email || "",
-      avatar: preview || user.avatar,
-    };
+  //------------------------------------------------------
+  // 🟢 UPDATE PROFILE (PUT /api/users)
+  //------------------------------------------------------
+  const updateProfile = async () => {
+    const token = await AsyncStorage.getItem("token");
+    if (!token) return Alert.alert("Error", "Silakan login terlebih dahulu.");
 
-    setUser(newProfile);
+    try {
+      const form = new FormData();
+      form.append("name", user.name);
 
-    await AsyncStorage.setItem("profile", JSON.stringify(newProfile));
-    setPreview(null);
+      if (file) {
+        form.append("avatar", {
+          uri: file.uri,
+          name: "avatar.jpg",
+          type: "image/jpeg",
+        } as any);
+      }
 
-    Alert.alert("Berhasil", "Profil berhasil disimpan secara lokal.");
+      const res = await fetch(`${API_URL}/api/users`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+        body: form,
+      });
+
+      const json = await res.json();
+
+      if (!res.ok) {
+        console.log(json);
+        return Alert.alert("Gagal", "Tidak bisa update profil.");
+      }
+
+      const data = json.data;
+
+      const newProfile = {
+        name: data.name,
+        email: data.email,
+        role: data.role,
+        avatar: buildAvatarUrl(data.avatar),
+      };
+
+      setUser(newProfile);
+      await AsyncStorage.setItem("profile", JSON.stringify(newProfile));
+      setPreview(null);
+      setFile(null);
+
+      Alert.alert("Berhasil", "Profil berhasil diperbarui!");
+    } catch (err) {
+      console.log("Error update:", err);
+      Alert.alert("Gagal update profil");
+    }
   };
 
+  //------------------------------------------------------
   const handleLogout = async () => {
     await AsyncStorage.removeItem("token");
-    // Jika ingin hapus profile:
-    // await AsyncStorage.removeItem("profile");
+    await AsyncStorage.removeItem("profile");
     Alert.alert("Logout", "Anda telah keluar.");
   };
 
@@ -119,14 +172,15 @@ export default function ProfileScreen() {
     );
   }
 
+  //------------------------------------------------------
+  // 🔵 RENDER UI
+  //------------------------------------------------------
   return (
     <View style={styles.container}>
-      {/* Foto */}
+      {/* Avatar */}
       <View style={{ alignItems: "center", marginBottom: 20 }}>
         <Image
-          source={{
-            uri: preview || user.avatar || "https://via.placeholder.com/150",
-          }}
+          source={{ uri: preview || user.avatar }}
           style={styles.avatar}
         />
 
@@ -135,7 +189,7 @@ export default function ProfileScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Nama */}
+      {/* Name */}
       <TextInput
         placeholder="Nama"
         value={user.name}
@@ -143,17 +197,13 @@ export default function ProfileScreen() {
         style={styles.input}
       />
 
-      <Text style={{ color: "#666", marginBottom: 25 }}>{user.email}</Text>
+      {/* Email */}
+      <Text style={{ color: "#555", marginBottom: 5 }}>{user.email}</Text>
+      <Text style={{ color: "#777", marginBottom: 25 }}>{user.role}</Text>
 
-      {preview ? (
-        <TouchableOpacity style={styles.saveBtn} onPress={handleSaveLocal}>
-          <Text style={styles.btnText}>Simpan Foto & Nama (Lokal)</Text>
-        </TouchableOpacity>
-      ) : (
-        <TouchableOpacity style={styles.saveSecondary} onPress={handleSaveLocal}>
-          <Text style={styles.btnText}>Simpan Nama (Lokal)</Text>
-        </TouchableOpacity>
-      )}
+      <TouchableOpacity style={styles.saveBtn} onPress={updateProfile}>
+        <Text style={styles.btnText}>Simpan Perubahan</Text>
+      </TouchableOpacity>
 
       <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
         <Text style={styles.btnText}>Logout</Text>
@@ -168,7 +218,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f5f5f5",
     alignItems: "center",
-    paddingTop : 100 ,
+    paddingTop: 100,
   },
   avatar: {
     width: 140,
@@ -196,13 +246,6 @@ const styles = StyleSheet.create({
   },
   saveBtn: {
     backgroundColor: "#2563eb",
-    padding: 15,
-    borderRadius: 10,
-    width: "100%",
-    marginBottom: 10,
-  },
-  saveSecondary: {
-    backgroundColor: "#3b82f6",
     padding: 15,
     borderRadius: 10,
     width: "100%",
