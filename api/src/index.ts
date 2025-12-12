@@ -20,7 +20,7 @@ import categoryRoute from "./routes/categoryRoute";
 import aboutRoute from "./routes/aboutRoute";
 import statRoute from "./routes/statRoute";
 import paymentRoute from "./routes/paymentRoute";
-import teamRoute from "./routes/teamRoute"
+import teamRoute from "./routes/teamRoute";
 import testimoniRoute from "./routes/testimoniRoute";
 
 const app = express();
@@ -48,10 +48,9 @@ app.get("/", (req, res) => {
   res.json({
     status: 200,
     message: "Welcome Server API",
-    success: true
-  })
-})
-
+    success: true,
+  });
+});
 
 // ROUTES
 app.use("/api/users", userRoute);
@@ -67,13 +66,14 @@ app.use("/api/about", aboutRoute);
 app.use("/api/count", statRoute);
 app.use("/api/payment", paymentRoute);
 app.use("/api/team", teamRoute);
-app.use("/api/testimoni", testimoniRoute)
+app.use("/api/testimoni", testimoniRoute);
 
 // Public upload folder
 app.use("/uploads", express.static("public/uploads"));
 
 // TESTING
+console.log(process.env.FRONTEND_URL);
 
 export default app;
 
-// total dest, kategori, pengguna, 
+// total dest, kategori, pengguna,
