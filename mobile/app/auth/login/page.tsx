@@ -53,7 +53,7 @@ export default function LoginForm() {
 
           setTimeout(() => {
             setModalVisible(false);
-            router.replace("/");
+            router.replace("/landing");
           }, 1200);
         }
       }
