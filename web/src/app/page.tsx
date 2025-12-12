@@ -8,14 +8,10 @@ import Testimoni from "./components/Testimoni";
 import InputTestimoni from "./components/InputTestimoni";
 
 export default function Home() {
-  
   return (
     <main className="flex flex-col min-h-screen bg-white dark:bg-black">
-    { /* Navbar */ }
       <NavBar />
 
-
-      {/* Hero Section */}
       <section>
         <Hero />
       </section>
@@ -24,26 +20,19 @@ export default function Home() {
         <Destination />
       </section>
 
-       <section>
+      <section>
         <ChooseUs />
       </section>
 
       <section>
-       <Testimoni user={undefined}/>
+        <Testimoni />
       </section>
 
       <section>
         <InputTestimoni />
       </section>
 
-      {/* Search Card */}
-      <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20">
-        {/* <SearchCard /> */}
-      </section>
-
-    {/* footer */}
-    <Footer />
-
+      <Footer />
     </main>
   );
 }

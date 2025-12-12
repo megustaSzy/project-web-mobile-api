@@ -17,10 +17,14 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 export default function PesanPage() {
   const router = useRouter();
   const params = useLocalSearchParams();
+
+  const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
+
   const id = params?.id ?? null;
   const title = params?.title ?? "Nama Destinasi";
   const location = params?.location ?? "Lokasi";
   const price = params?.price ?? "100000";
+  const imageUrl = params?.imageUrl ?? "";   // ⬅️ ambil dari detail page
 
   // === States ===
   const [penjemputan, setPenjemputan] = useState(""); 
@@ -81,19 +85,29 @@ export default function PesanPage() {
   return (
     <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 180 }}>
-        {/* HEADER IMAGE */}
+
+        {/* HEADER IMAGE (API) */}
         <View style={styles.headerImageWrapper}>
-          <Image source={require("../../assets/images/hero3.jpg")} style={styles.headerImage} />
+          <Image
+            source={{
+              uri: imageUrl
+                ? `${BASE_URL}${imageUrl}`
+                : "https://via.placeholder.com/600x400",
+            }}
+            style={styles.headerImage}
+          />
           <View style={styles.overlay} />
         </View>
 
         {/* WHITE CARD */}
         <View style={styles.card}>
           <Text style={styles.title}>{String(title)}</Text>
+
           <View style={styles.rowLocation}>
             <Ionicons name="location-outline" size={16} color="#7B7B8B" />
             <Text style={styles.location}>{String(location)}</Text>
           </View>
+
 
           <View style={styles.infoRow}>
             <View style={styles.infoBoxLeft}>

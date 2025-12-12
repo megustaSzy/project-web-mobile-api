@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { MapPin } from "lucide-react";
+import { MapPin, ChevronDown } from "lucide-react";
 import { apiFetch } from "@/helpers/api";
 import { ApiCategoryResponse, CategoryItem } from "@/types/category";
 
@@ -25,6 +25,10 @@ export default function SearchCard() {
   const [areas, setAreas] = useState<Area[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [selectedArea, setSelectedArea] = useState<string>("");
+
+  // PANAH ROTASI
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+  const [isAreaOpen, setIsAreaOpen] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined" && navigator.geolocation) {
@@ -60,19 +64,17 @@ export default function SearchCard() {
     async function load() {
       try {
         const res = await apiFetch<ApiCategoryResponse>("/api/category");
-
         setCategories(res.data.items);
       } catch (err) {
         console.error("Gagal load kategori:", err);
       }
     }
-
     load();
   }, []);
 
-
   useEffect(() => {
     if (!selectedCategory) return;
+
     async function load() {
       const res = await fetch(
         `https://api.example.com/daerah?kategori=${selectedCategory}`
@@ -80,6 +82,7 @@ export default function SearchCard() {
       const data: { data: Area[] } = await res.json();
       setAreas(data.data);
     }
+
     load();
   }, [selectedCategory]);
 
@@ -102,13 +105,18 @@ export default function SearchCard() {
         {/* KATEGORI */}
         <div className="md:col-span-2 flex flex-col">
           <label className="text-xs text-gray-400 mb-1">Kategori Wisata</label>
-          <div className="flex items-center gap-2 border border-gray-300 rounded-full px-4 py-2 bg-white">
+
+          <div
+            className="flex items-center gap-2 border border-gray-300 rounded-full px-4 py-2 bg-white relative"
+            onClick={() => setIsCategoryOpen((prev) => !prev)}
+          >
             <MapPin className="text-gray-500 w-4 h-4" />
 
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="text-gray-700 text-sm bg-transparent outline-none w-full"
+              onBlur={() => setIsCategoryOpen(false)}
+              className="text-gray-700 text-sm bg-transparent outline-none w-full appearance-none"
             >
               <option value="">Pilih Kategori</option>
 
@@ -118,19 +126,31 @@ export default function SearchCard() {
                 </option>
               ))}
             </select>
+
+            {/* ICON DROPDOWN */}
+            <ChevronDown
+              className={`w-4 h-4 absolute right-4 text-gray-500 transition-transform duration-200 ${
+                isCategoryOpen ? "rotate-180" : ""
+              }`}
+            />
           </div>
         </div>
 
         {/* DAERAH */}
         <div className="md:col-span-2 flex flex-col">
           <label className="text-xs text-gray-400 mb-1">Daerah</label>
-          <div className="flex items-center gap-2 border border-gray-300 rounded-full px-4 py-2 bg-white">
+
+          <div
+            className="flex items-center gap-2 border border-gray-300 rounded-full px-4 py-2 bg-white relative"
+            onClick={() => setIsAreaOpen((prev) => !prev)}
+          >
             <MapPin className="text-gray-500 w-4 h-4" />
 
             <select
               value={selectedArea}
               onChange={(e) => setSelectedArea(e.target.value)}
-              className="text-gray-700 text-sm bg-transparent outline-none w-full"
+              onBlur={() => setIsAreaOpen(false)}
+              className="text-gray-700 text-sm bg-transparent outline-none w-full appearance-none"
             >
               <option value="">Pilih Daerah</option>
 
@@ -140,10 +160,17 @@ export default function SearchCard() {
                 </option>
               ))}
             </select>
+
+            {/* ICON DROPDOWN */}
+            <ChevronDown
+              className={`w-4 h-4 absolute right-4 text-gray-500 transition-transform duration-200 ${
+                isAreaOpen ? "rotate-180" : ""
+              }`}
+            />
           </div>
         </div>
 
-        {/* SEARCH BUTTON */}
+        {/* SEARCH */}
         <div className="flex flex-col justify-end">
           <label className="text-xs text-transparent mb-1">.</label>
 
