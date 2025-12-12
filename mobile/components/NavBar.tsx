@@ -10,6 +10,8 @@ import {
 import { useRouter, usePathname } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Menu as MenuIcon, X as CloseIcon } from "lucide-react-native";
+import { DeviceEventEmitter } from 'react-native';
+
 
 export default function NavBarMobile() {
   const router = useRouter();
@@ -58,35 +60,42 @@ const fetchUserProfile = async () => {
   try {
     const token = await AsyncStorage.getItem("accessToken");
 
+    // Jika tidak ada token, langsung set default dan keluar
     if (!token) {
       setIsLoggedIn(false);
+      setUserData({ name: 'User', avatar: require('../assets/images/faiz.jpg') });
       return;
     }
 
-    setIsLoggedIn(true);
-
+    // Ambil data profil dari API
     const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/users/profile`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
 
     const data = await response.json();
 
-    // Simpan ke state
+    // Jika data user kosong, tetap set default
+    if (!data.data) {
+      setIsLoggedIn(false);
+      setUserData({ name: 'User', avatar: require('../assets/images/faiz.jpg') });
+      return;
+    }
+
+    // Jika data valid, update state user
+    setIsLoggedIn(true);
     setUserData({
-      name: data.data?.name || "User",
-      avatar: data.data?.avatar
+      name: data.data.name,
+      avatar: data.data.avatar
         ? { uri: `${process.env.EXPO_PUBLIC_API_URL}${data.data.avatar}` }
-        : require("../assets/images/faiz.jpg"),
+        : require('../assets/images/faiz.jpg'),
     });
 
     // Simpan ke AsyncStorage
     await AsyncStorage.setItem(
       "profile",
       JSON.stringify({
-        name: data.data?.name,
-        avatar: `${process.env.EXPO_PUBLIC_API_URL}${data.data?.avatar}`,
+        name: data.data.name,
+        avatar: data.data.avatar ? `${process.env.EXPO_PUBLIC_API_URL}${data.data.avatar}` : null,
       })
     );
 
@@ -95,35 +104,56 @@ const fetchUserProfile = async () => {
   }
 };
 
-
   // LOAD DARI API + ASYNCSTORAGE
-  const loadProfile = async () => {
-    try {
-      const token = await AsyncStorage.getItem("accessToken");
-      const profile = await AsyncStorage.getItem("profile");
+  const [loadingProfile, setLoadingProfile] = useState(true);
 
-      setIsLoggedIn(!!token);
+const loadProfile = async () => {
+  try {
+    const token = await AsyncStorage.getItem("accessToken");
+    const profile = await AsyncStorage.getItem("profile");
 
-      if (profile) {
-        const parsed = JSON.parse(profile);
-        setUserData({
-          name: parsed.name || "User",
-          avatar: parsed.avatar
-            ? { uri: parsed.avatar }
-            : require("../assets/images/faiz.jpg"),
-        });
-      }
+    setIsLoggedIn(!!token);
 
-      // 🔥 PAKSA REFRESH KE API AGAR NAMANYA REALTIME
-      fetchUserProfile();
-    } catch (err) {
-      console.log("Profile load error:", err);
+    if (profile) {
+      const parsed = JSON.parse(profile);
+      setUserData({
+        name: parsed.name || "User",
+        avatar: parsed.avatar
+          ? { uri: parsed.avatar }
+          : require("../assets/images/faiz.jpg"),
+      });
     }
-  };
 
-  useEffect(() => {
-    loadProfile();
-  }, []);
+    await fetchUserProfile(); // pastikan fetch selesai
+  } catch (err) {
+    console.log("Profile load error:", err);
+  } finally {
+    setLoadingProfile(false);
+  }
+};
+
+
+useEffect(() => {
+  const subscription = DeviceEventEmitter.addListener('loginSuccess', async () => {
+    setOpen(false);            // tutup menu dulu
+    await loadProfile();       // update state userData & isLoggedIn
+    setTimeout(() => setOpen(true), 50); // buka kembali menu supaya re-render
+  });
+  return () => subscription.remove();
+}, []);
+
+const [menuReady, setMenuReady] = useState(false);
+
+useEffect(() => {
+  const subscription = DeviceEventEmitter.addListener('loginSuccess', async () => {
+    setMenuReady(false);        // blok menu
+    await loadProfile();        // tunggu state update
+    setMenuReady(true);         // render menu baru
+  });
+  return () => subscription.remove();
+}, []);
+
+
 
   const handleLogout = async () => {
     await AsyncStorage.removeItem("accessToken");
@@ -183,37 +213,31 @@ const fetchUserProfile = async () => {
       </Animated.View>
 
       {/* MENU MOBILE */}
-      {open && (
-        <View style={styles.menu}>
-          {isLoggedIn ? (
-            <>
-              <TouchableOpacity onPress={() => router.push("/profil/page")}>
-                <Text style={[styles.menuItem]}>{t.editProfile}</Text>
-              </TouchableOpacity>
+          {open && menuReady && (
+  <View style={styles.menu}>
+    {isLoggedIn ? (
+      <TouchableOpacity onPress={handleLogout} style={styles.menuItem}>
+        <Text style={{ color: "#fff", textAlign: "center", fontWeight: "600" }}>{t.logout}</Text>
+      </TouchableOpacity>
+    ) : (
+      <>
+        <TouchableOpacity
+          onPress={() => router.push("../auth/login/page")}
+          style={styles.loginBtnFull}
+        >
+          <Text style={styles.loginTxtWhite}>{t.login}</Text>
+        </TouchableOpacity>
 
-              <TouchableOpacity onPress={handleLogout}>
-                <Text style={[styles.menuItem]}>{t.logout}</Text>
-              </TouchableOpacity>
-            </>
-          ) : (
-            <>
-              <TouchableOpacity
-                onPress={() => router.push("../auth/login/page")}
-                style={styles.loginBtnFull}
-              >
-                <Text style={styles.loginTxtWhite}>{t.login}</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={() => router.push("../auth/signup/page")}
-                style={styles.signupBtn}
-              >
-                <Text style={styles.signupTxt}>{t.signup}</Text>
-              </TouchableOpacity>
-            </>
-          )}
-        </View>
-      )}
+        <TouchableOpacity
+          onPress={() => router.push("../auth/signup/page")}
+          style={styles.signupBtn}
+        >
+          <Text style={styles.signupTxt}>{t.signup}</Text>
+        </TouchableOpacity>
+      </>
+    )}
+  </View>
+)}
     </View>
   );
 }
@@ -247,15 +271,20 @@ const styles = StyleSheet.create({
   lang: { fontSize: 14, fontWeight: "700" },
   menu: { marginTop: 65, backgroundColor: "#fff", paddingVertical: 15 },
   menuItem: {
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    fontSize: 16,
-    borderBottomWidth: 1,
-    borderColor: "#e0e0e0",
-  },
+  backgroundColor: "#FF3B30", // merah
+  color: "#fff",              // teks putih
+  marginHorizontal: 20,
+  marginTop: 10,
+  padding: 12,
+  borderRadius: 8,
+  textAlign: "center",        // biar teks di tengah
+  fontWeight: "600",
+  fontSize: 16,
+},
   loginBtnFull: {
     backgroundColor: "#007AFF",
     marginHorizontal: 20,
+    marginVertical: 10,
     padding: 12,
     borderRadius: 8,
   },

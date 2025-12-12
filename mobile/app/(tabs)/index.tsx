@@ -1,28 +1,12 @@
-import React from "react";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Platform, ScrollView } from 'react-native';
-// import Hero from "@/app/compo/Hero";
-// import Destinasi from "@/app/compo/Destinasi";
-// import ChooseUs from "@/app/compo/ChooseUs";
-// import Testimoni from "@/app/compo/Testimoni";
-// import InputTestimoni from "@/app/compo/InputTestimoni";
-// import Footer from "@/app/compo/Footer";
-import Landingpage from "../../components/Landingpage";
-import NavBar from "../../components/NavBar";
-import BottomNavbar from "../../components/BottomNavbar";
-export default function HomeScreen() {
-  return (
-    <ScrollView>
-      {/* <NavBar/> */}
-      {/* <Hero />
-      <Destinasi />
-      <ChooseUs />
-      <Testimoni user={undefined} />
-      <InputTestimoni /> */}
-      <Landingpage/>
-      {/* <Footer /> */}
-      {/* <BottomNavbar/> */}
-    </ScrollView>
-  );
-}
+import { useEffect } from "react";
+import { useRouter } from "expo-router";
 
+export default function Index() {
+  const router = useRouter();
+
+  useEffect(() => {
+    router.replace("/auth/login/page"); // redirect ke landing
+  }, []);
+
+  return null;
+}
