@@ -201,6 +201,7 @@ model tb_testimoni {
   userId    Int
   status    String
   comment   String
+  rating    Int?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
