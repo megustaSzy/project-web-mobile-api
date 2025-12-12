@@ -191,7 +191,7 @@ export default function NavBar() {
           <div className="relative" ref={langRef}>
             <button
               onClick={() => setLangOpen((prev) => !prev)}
-              className={`flex items-center gap-1 px-3 py-1 border rounded-md text-sm ${textColor} border-gray-700`}
+              className={`flex items-center gap-1 px-3 py-1 border rounded-md text-sm ${textColor}`}
             >
               {language.toUpperCase()}
               <ChevronDown
@@ -231,7 +231,7 @@ export default function NavBar() {
             <div className="relative" ref={profileRef}>
               <button
                 onClick={() => setProfileOpen((prev) => !prev)}
-                className={`flex items-center gap-2 px-2 py-1 rounded-md${textColor}`}
+                className={`flex items-center gap-2 px-2 py-1 rounded-md text-sm-gray-100 transition ${textColor}`}
               >
                 <Image
                   src={userData.avatar}

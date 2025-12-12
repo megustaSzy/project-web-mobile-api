@@ -1,37 +1,82 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
-import Image from "next/image";
-import { Star, Quote } from "lucide-react";
 
-export default function TestimoniSection({ user }) {
-  const testimonials = [
-    {
-      id: 1,
-      text: "Liburanku jadi luar biasa berkat layanan yang cepat dan ramah. Terima kasih banyak!",
-      rating: 5,
-    },
-    {
-      id: 2,
-      text: "Tempatnya indah banget dan pelayanannya memuaskan. Pasti balik lagi deh!",
-      rating: 5,
-    },
-    {
-      id: 3,
-      text: "Sangat puas dengan pengalaman wisata yang ditawarkan, recommended banget!",
-      rating: 5,
-    },
-    {
-      id: 4,
-      text: "Perjalanan yang menyenangkan dan tidak terlupakan, terima kasih LamiGo!",
-      rating: 5,
-    },
-  ];
+import { useEffect, useState } from "react";
+import { Star, Quote } from "lucide-react";
+import { apiFetch } from "@/helpers/api";
+
+export type UserItem = {
+  name: string;
+  avatar: string | null;
+};
+
+export type TestimoniItem = {
+  id: number;
+  userId: number;
+  status: string;
+  comment: string;
+  rating: number;
+  createdAt: string;
+  updatedAt: string;
+  user: UserItem;
+};
+
+export type ApiResponse = {
+  status: number;
+  message: string;
+  data: {
+    items: TestimoniItem[];
+  };
+};
+
+export default function TestimoniSection() {
+  const [testimonials, setTestimonials] = useState<TestimoniItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+  const buildImageUrl = (img?: string | null) => {
+    if (!img) return "/images/default-user.png";
+
+    if (img.startsWith("/uploads")) return `${API_URL}${img}`;
+
+    if (img.startsWith("http://") || img.startsWith("https://")) return img;
+
+    return `${API_URL}/${img}`;
+  };
+
+  useEffect(() => {
+    const loadTestimonials = async () => {
+      try {
+        const res: ApiResponse = await apiFetch("/api/testimoni");
+
+        if (res?.data?.items) {
+          setTestimonials(res.data.items);
+        }
+      } catch (err) {
+        console.error("Gagal mengambil testimoni:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTestimonials();
+  }, []);
 
   return (
-    <section className="relative py-20 bg-gradient-to-b from-[#Ffffff] to-[#dbe7f9]">
+    <section className="relative py-20 bg-linear-to-b from-[#ffffff] to-[#dbe7f9]">
       <div className="max-w-7xl mx-auto px-6 text-center">
         <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-12">
           Testimoni
         </h2>
+
+        {loading && (
+          <p className="text-center text-gray-600">Memuat testimoni...</p>
+        )}
+
+        {!loading && testimonials.length === 0 && (
+          <p className="text-center text-gray-500">Belum ada testimoni.</p>
+        )}
 
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {testimonials.map((item) => (
@@ -39,15 +84,12 @@ export default function TestimoniSection({ user }) {
               key={item.id}
               className="bg-white/90 shadow-md rounded-2xl p-6 text-left border border-gray-100 hover:shadow-lg transition-all backdrop-blur-sm"
             >
-              {/* Icon kutipan */}
               <Quote className="text-gray-300 mb-2" size={28} />
 
-              {/* Isi testimoni */}
               <p className="text-gray-700 text-sm mb-4 leading-relaxed">
-                {item.text}
+                {item.comment}
               </p>
 
-              {/* Rating bintang */}
               <div className="flex gap-1 mb-4">
                 {Array.from({ length: item.rating }).map((_, i) => (
                   <Star
@@ -58,23 +100,21 @@ export default function TestimoniSection({ user }) {
                 ))}
               </div>
 
-              {/* Profil user */}
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full overflow-hidden">
-                  <Image
-                    src={user?.image || "/images/default-user.png"}
-                    alt={user?.name || "User"}
-                    width={40}
-                    height={40}
-                    className="object-cover"
+                  <img
+                    src={buildImageUrl(item.user.avatar)}
+                    alt={item.user.name}
+                    className="w-10 h-10 object-cover"
                   />
                 </div>
+
                 <div>
                   <h4 className="font-semibold text-blue-600">
-                    {user?.name || "User"}
+                    {item.user.name}
                   </h4>
                   <p className="text-gray-500 text-xs">
-                    {user?.role || "Traveler"}
+                    {item.status || "Mahasiswa"}
                   </p>
                 </div>
               </div>
