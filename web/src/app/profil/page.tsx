@@ -1,89 +1,130 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { apiFetch } from "@/helpers/api";
 
-/**
- * ProfilePage
- * - ambil awal dari API (jika ada)
- * - tapi ketika user "Simpan Foto" => simpan ke localStorage (base64)
- * - update state lokal supaya navbar bisa baca dari localStorage
- */
+export type ApiProfileResponse = {
+  status: number;
+  message: string;
+  data: {
+    id: number;
+    name: string;
+    email: string;
+    role: string;
+    avatar?: string | null;
+  };
+};
+
+type UserProfile = {
+  name: string;
+  email: string;
+  role: string;
+  avatar: string;
+};
 
 export default function ProfilePage() {
-  const [user, setUser] = useState<{ name: string; email: string; avatar: string }>({
+  const [user, setUser] = useState<UserProfile>({
     name: "",
     email: "",
+    role: "",
     avatar: "/images/profile.jpg",
   });
   const [loading, setLoading] = useState(true);
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
 
-  // Utility: konversi file -> base64 data URL
-  const fileToDataUrl = (file: File): Promise<string> =>
-    new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (typeof reader.result === "string") resolve(reader.result);
-        else reject(new Error("Gagal konversi file"));
-      };
-      reader.onerror = () => reject(new Error("FileReader error"));
-      reader.readAsDataURL(file);
-    });
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
-  useEffect(() => {
+  const buildAvatarUrl = (avatar?: string | null) => {
+    if (!avatar) return "/images/profile.jpg";
+    return avatar.startsWith("http") ? avatar : `${API_URL}${avatar}`;
+  };
+
+  const fetchProfile = async () => {
     const token = localStorage.getItem("token");
-
-    // prioritas: jika user sudah menyimpan profil di localStorage -> gunakan itu
-    const local = localStorage.getItem("profile");
-    if (local) {
-      try {
-        const p = JSON.parse(local);
-        setUser({
-          name: p.name || "Pengguna",
-          email: p.email || "",
-          avatar: p.avatar || "/images/profile.jpg",
-        });
-        setLoading(false);
-        return;
-      } catch {
-        // jatuhkan ke fetch API jika JSON corrupt
-      }
-    }
-
-    // fallback: ambil dari API (jika ada token)
     if (!token) {
       setLoading(false);
       return;
     }
 
-    fetch("http://10.93.86.50:3001/api/users", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(async (res) => {
-        if (!res.ok) throw new Error("Gagal mengambil profil");
-        return res.json();
-      })
-      .then((data) => {
-        const avatarUrl = data.avatar
-          ? data.avatar.startsWith("http")
-            ? data.avatar
-            : `http://10.93.86.50:3001/uploads/${data.avatar}`
-          : "/images/profile.jpg";
+    try {
+      const res: ApiProfileResponse = await apiFetch("/api/users/profile", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
+      const data = res.data;
+      const profileData: UserProfile = {
+        name: data.name || "Pengguna",
+        email: data.email || "",
+        role: data.role || "",
+        avatar: buildAvatarUrl(data.avatar),
+      };
+
+      setUser(profileData);
+      localStorage.setItem("profile", JSON.stringify(profileData));
+    } catch (err) {
+      console.error("Error fetch profile:", err);
+      alert("Gagal memuat profil. Silakan login ulang.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateProfile = async (name: string, avatarFile?: File) => {
+    const token = localStorage.getItem("token");
+    if (!token) return alert("Silakan login terlebih dahulu.");
+
+    try {
+      const formData = new FormData();
+      formData.append("name", name);
+      if (avatarFile) formData.append("avatar", avatarFile);
+
+      const res: ApiProfileResponse = await apiFetch("/api/users", {
+        method: "PUT",
+        body: formData,
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = res.data;
+      const avatarUrl = buildAvatarUrl(data.avatar);
+
+      const newProfile: UserProfile = {
+        name: data.name || "Pengguna",
+        email: data.email || "",
+        role: data.role || "",
+        avatar: avatarUrl,
+      };
+
+      setUser(newProfile);
+      localStorage.setItem("profile", JSON.stringify(newProfile));
+      setFile(null);
+      setPreview(null);
+
+      alert("Profil berhasil diperbarui!");
+    } catch (err) {
+      console.error("Error update profile:", err);
+      alert("Gagal update profil. Silakan coba lagi.");
+    }
+  };
+
+  useEffect(() => {
+    const local = localStorage.getItem("profile");
+    if (local) {
+      try {
+        const p: UserProfile = JSON.parse(local);
         setUser({
-          name: data.name || "Pengguna",
-          email: data.email || "",
-          avatar: avatarUrl,
+          name: p.name || "Pengguna",
+          email: p.email || "",
+          role: p.role || "",
+          avatar: buildAvatarUrl(p.avatar),
         });
-      })
-      .catch((err) => {
-        console.error("Error ambil profil:", err);
-      })
-      .finally(() => setLoading(false));
+        setLoading(false);
+        return;
+      } catch {}
+    }
+    fetchProfile();
   }, []);
 
-  // Menangani perubahan input file
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0];
     if (!selected) return;
@@ -91,49 +132,15 @@ export default function ProfilePage() {
     setPreview(URL.createObjectURL(selected));
   };
 
-  // Simpan profil (lokal): konversi file ke base64 dan simpan ke localStorage
-  const handleSaveLocal = async () => {
-    try {
-      let avatarData = user.avatar; // default tetap avatar yang ada
-
-      if (file) {
-        // convert to base64 data URL
-        avatarData = await fileToDataUrl(file);
-      }
-
-      // update state lokal
-      const newProfile = {
-        name: user.name || "Pengguna",
-        email: user.email || "",
-        avatar: avatarData,
-      };
-      setUser(newProfile);
-
-      // simpan di localStorage sebagai JSON
-      localStorage.setItem("profile", JSON.stringify(newProfile));
-
-      // bersihkan preview/file setelah simpan
-      setFile(null);
-      setPreview(null);
-
-      // beri notifikasi kecil
-      alert("Profil disimpan secara lokal — perubahan langsung muncul di navigasi.");
-    } catch (err) {
-      console.error("Gagal menyimpan profil secara lokal:", err);
-      alert("Terjadi kesalahan saat menyimpan profil (lokal).");
-    }
-  };
-
-  // Opsional: edit nama inline (bisa kamu ganti dengan form)
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUser((prev) => ({ ...prev, name: e.target.value }));
   };
 
-  // Logout
+  const handleSave = () => updateProfile(user.name, file ?? undefined);
+
   const handleLogout = () => {
     localStorage.removeItem("token");
-    // opsional: hapus profile lokal juga jika mau
-    // localStorage.removeItem("profile");
+    localStorage.removeItem("profile");
     window.location.href = "/login";
   };
 
@@ -150,7 +157,7 @@ export default function ProfilePage() {
         {/* Foto Profil */}
         <div className="relative mb-6">
           <img
-            src={preview || user.avatar}
+            src={preview ?? user.avatar}
             alt="Foto Profil"
             className="w-32 h-32 rounded-full object-cover border-4 border-blue-100 mx-auto shadow-sm"
           />
@@ -165,7 +172,7 @@ export default function ProfilePage() {
           </label>
         </div>
 
-        {/* Nama (bisa diedit langsung) */}
+        {/* Nama */}
         <input
           value={user.name}
           onChange={handleNameChange}
@@ -173,28 +180,20 @@ export default function ProfilePage() {
           placeholder="Nama Anda"
         />
 
-        <p className="text-gray-500 text-sm mb-6">{user.email}</p>
+        {/* Email */}
+        <p className="text-gray-500 text-sm mb-1">{user.email}</p>
+        {/* Role */}
+        <p className="text-gray-400 text-xs mb-6">{user.role}</p>
 
-        {/* Jika ada preview (file baru), tampilkan tombol Simpan Lokal */}
-        {preview && (
-          <button
-            onClick={handleSaveLocal}
-            className="w-full bg-blue-600 text-white py-2 rounded-lg mb-4 hover:bg-blue-700 transition-all"
-          >
-            Simpan Foto & Nama (Lokal)
-          </button>
-        )}
+        {/* Tombol Simpan */}
+        <button
+          onClick={handleSave}
+          className="w-full bg-blue-600 text-white py-2 rounded-lg mb-4 hover:bg-blue-700 transition-all"
+        >
+          Simpan Perubahan
+        </button>
 
-        {/* Juga sediakan tombol Simpan Nama tanpa upload foto */}
-        {!preview && (
-          <button
-            onClick={handleSaveLocal}
-            className="w-full bg-blue-500 text-white py-2 rounded-lg mb-4 hover:bg-blue-600 transition-all"
-          >
-            Simpan Nama (Lokal)
-          </button>
-        )}
-
+        {/* Logout */}
         <button
           onClick={handleLogout}
           className="w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition-all"

@@ -30,9 +30,9 @@ export default function SignupForm({
     const email = (document.getElementById("email") as HTMLInputElement)?.value;
     const password = (document.getElementById("password") as HTMLInputElement)
       ?.value;
-    const phone = (document.getElementById("phone") as HTMLInputElement)?.value;
+    const notelp = (document.getElementById("notelp") as HTMLInputElement)?.value;
 
-    if (!name || !email || !password || !phone) {
+    if (!name || !email || !password || !notelp) {
       setMessage("Semua field harus diisi!");
       return;
     }
@@ -48,7 +48,7 @@ export default function SignupForm({
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ name, email, password, phone }),
+          body: JSON.stringify({ name, email, password, notelp }),
         }
       );
 
@@ -127,9 +127,9 @@ export default function SignupForm({
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="phone">No Handphone</FieldLabel>
+                <FieldLabel htmlFor="notelp">No Handphone</FieldLabel>
                 <Input
-                  id="phone"
+                  id="notelp"
                   type="text"
                   placeholder="08xxxxxxxxxx"
                   required

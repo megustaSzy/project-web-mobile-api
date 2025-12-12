@@ -54,6 +54,13 @@ export default function NavBar() {
 
   const [translations, setTranslations] = useState(translationSource);
 
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+
+  const buildAvatarUrl = (avatar?: string | null) => {
+    if (!avatar) return "/images/profile.jpg";
+    return avatar.startsWith("http") ? avatar : `${API_URL}${avatar}`;
+  };
+
   // ==========================
   // SCROLL EFFECT
   // ==========================
@@ -84,21 +91,19 @@ export default function NavBar() {
 
     const loadProfile = async () => {
       try {
-        const res = await apiFetch<ApiProfileResponse>("/api/users/profile");
+        const res = await apiFetch<ApiProfileResponse>("/api/users/profile", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
         if (res?.data) {
-          setUserData({
+          const profileData = {
             name: res.data.name || "User",
-            avatar: res.data.avatar || "/images/profile.jpg",
-          });
+            avatar: buildAvatarUrl(res.data.avatar),
+          };
 
-          localStorage.setItem(
-            "profile",
-            JSON.stringify({
-              name: res.data.name,
-              avatar: res.data.avatar ?? "/images/profile.jpg",
-            })
-          );
+          setUserData(profileData);
+
+          localStorage.setItem("profile", JSON.stringify(profileData));
         }
       } catch (err) {
         console.error("Gagal fetch profile:", err);
@@ -206,6 +211,10 @@ export default function NavBar() {
                 height={35}
                 alt="Profile"
                 className="rounded-full"
+                loader={({ src }) => {
+                  if (!src.startsWith("http")) return `${API_URL}${src}`;
+                  return src;
+                }}
               />
               <span>{userData.name}</span>
 
