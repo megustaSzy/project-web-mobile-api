@@ -22,7 +22,7 @@ export const orderController = {
         Number(quantity)
       );
 
-      return ResponseData.created(res, order, "order berhasil dibuat");
+      return ResponseData.created(res, order);
     } catch (error) {
       return ResponseData.serverError(res, error);
     }
@@ -32,7 +32,7 @@ export const orderController = {
     try {
       const userId = (req as any).user.id;
       const orders = await orderService.getOrdersByUser(userId);
-      return ResponseData.ok(res, orders, "data order berhasil diambil");
+      return ResponseData.ok(res, orders);
     } catch (error) {
       return ResponseData.serverError(res, error);
     }
@@ -46,7 +46,7 @@ export const orderController = {
       const userId = (req as any).user.id;
 
       const order = await orderService.getOrderById(id, userId);
-      return ResponseData.ok(res, order, "data order berhasil diambil");
+      return ResponseData.ok(res, order);
     } catch (error) {
       return ResponseData.serverError(res, error);
     }
@@ -75,7 +75,7 @@ export const orderController = {
         createdAt: order.createdAt,
       };
 
-      return ResponseData.ok(res, ticketData, "data tiket berhasil diambil");
+      return ResponseData.ok(res, ticketData);
     } catch (error) {
       return ResponseData.serverError(res, error);
     }

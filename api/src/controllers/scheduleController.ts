@@ -16,7 +16,6 @@ export const scheduleController = {
       return ResponseData.ok(
         res,
         schedules,
-        "daftar schedule berhasil diambil"
       );
     } catch (error) {
       return ResponseData.serverError(res, error);
@@ -33,7 +32,7 @@ export const scheduleController = {
 
       const schedule = await scheduleService.getScheduleById(id);
 
-      return ResponseData.ok(res, schedule, "schedule berhasil diambil");
+      return ResponseData.ok(res, schedule);
 
     } catch (error) {
 
@@ -71,7 +70,7 @@ export const scheduleController = {
 
       const schedule = await scheduleService.createSchedule(data);
 
-      return ResponseData.created(res, schedule, "schedule berhasil dibuat");
+      return ResponseData.created(res, schedule);
 
     } catch (error) {
       return ResponseData.serverError(res, error);
@@ -86,7 +85,7 @@ export const scheduleController = {
 
       const schedule = await scheduleService.updateSchedule(id, req.body);
 
-      return ResponseData.ok(res, schedule, "schedule berhasil diperbarui");
+      return ResponseData.ok(res, schedule);
     } catch (error) {
       return ResponseData.serverError(res, error);
     }

@@ -9,7 +9,7 @@ export const regionController = {
 
       const regencies = await regionService.getRegencies(id);
 
-      return ResponseData.ok(res, regencies, "berhasil menampilkan data");
+      return ResponseData.ok(res, regencies);
 
     } catch (error) {
         return ResponseData.serverError(res, error)

@@ -10,7 +10,7 @@ export const testimoniController = {
 
       const testimoni = await testimoniService.getAllTestimoni(page, limit);
 
-      return ResponseData.ok(res, testimoni, "data testimoni berhasil diambil");
+      return ResponseData.ok(res, testimoni);
     } catch (error) {
       return ResponseData.serverError(res, error);
     }
@@ -24,7 +24,7 @@ export const testimoniController = {
 
       const testimoni = await testimoniService.getByIdTestimoni(id);
 
-      return ResponseData.ok(res, testimoni, "testimoni berhasil diambil");
+      return ResponseData.ok(res, testimoni);
     } catch (error) {
       return ResponseData.serverError(res, error);
     }
@@ -39,7 +39,7 @@ export const testimoniController = {
         req.body
       );
 
-      return ResponseData.created(res, testimoni, "berhasil membuat testimoni");
+      return ResponseData.created(res, testimoni);
     } catch (error) {
       return ResponseData.serverError(res, error);
     }
@@ -58,7 +58,7 @@ export const testimoniController = {
         userId,
         req.body
       );
-      return ResponseData.ok(res, testimoni, "testimoni berhasil diupdate");
+      return ResponseData.ok(res, testimoni);
     } catch (error) {
       return ResponseData.serverError(res, error);
     }

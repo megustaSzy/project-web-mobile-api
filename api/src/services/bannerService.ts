@@ -13,16 +13,15 @@ export const bannerService = {
 
   async getByIdBanner(id: number) {
     const testimoni = await prisma.tb_testimoni.findUnique({
-        where: {
-            id
-        }
+      where: {
+        id,
+      },
     });
 
-    if(!testimoni) throw createError("id tidak ditemukan", 404);
+    if (!testimoni) throw createError("id tidak ditemukan", 404);
 
-    return testimoni
+    return testimoni;
   },
-
 
   async createBanner(data: BannerData) {
     return prisma.tb_banner.create({
@@ -30,10 +29,10 @@ export const bannerService = {
         number: data.number,
         header: data.header,
         name: data.name,
+        imageUrl: data.imageUrl,
       },
     });
   },
-  
 
   async editBanner(id: number, data: BannerData) {
     const banner = await prisma.tb_banner.findUnique({
@@ -56,20 +55,19 @@ export const bannerService = {
     });
   },
 
-
   async deleteBanner(id: number) {
     const banner = await prisma.tb_banner.findUnique({
-        where: {
-            id  
-        }
+      where: {
+        id,
+      },
     });
 
-    if(!banner) throw createError("id tidak ditemukan", 404);
+    if (!banner) throw createError("id tidak ditemukan", 404);
 
     return prisma.tb_testimoni.delete({
-        where: {
-            id
-        }
-    })
-  }
+      where: {
+        id,
+      },
+    });
+  },
 };

@@ -9,7 +9,7 @@ export const teamController = {
         try {
             const team = await teamService.getTeam();
 
-            return ResponseData.ok(res, team, "berhasil mengambil team");
+            return ResponseData.ok(res, team);
         } catch (error) {
             return ResponseData.serverError(res, error)
         }
@@ -40,7 +40,7 @@ export const teamController = {
                     imageUrl: image,
                   });
             
-                return ResponseData.created(res, team, "team berhasil ditambahkan");
+                return ResponseData.created(res, team);
         } catch (error) {
             return ResponseData.serverError(res, error)
         }
@@ -55,7 +55,7 @@ export const teamController = {
     
             const team = await teamService.editTeam(id, req.body);
     
-            return ResponseData.ok(res, team, "data team berhasil diperbarui");
+            return ResponseData.ok(res, team);
             
         } catch (error) {
             return ResponseData.serverError(res, error)
@@ -71,7 +71,7 @@ export const teamController = {
     
             const team = await teamService.deleteIdTeam(id);
     
-            return ResponseData.ok(res, "berhasil menghapus team");
+            return ResponseData.ok(res, team);
         } catch (error) {
             return ResponseData.serverError(res, error)
         }

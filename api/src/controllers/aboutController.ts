@@ -10,7 +10,7 @@ export const aboutController = {
         try {
             const about = await aboutService.getAbout();
 
-            return ResponseData.ok(res, about, "about berhasil ditampilkan")
+            return ResponseData.ok(res, about)
         } catch (error) {
             return ResponseData.serverError(res, error)
         }
@@ -35,7 +35,7 @@ export const aboutController = {
 
             const data = await aboutService.updateAbout(id, req.body)
 
-            return ResponseData.ok(res, data, "about berhasil diperbarui")
+            return ResponseData.ok(res, data)
         } catch (error) {
             return ResponseData.serverError(res, error)
         }

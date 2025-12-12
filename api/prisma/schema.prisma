@@ -211,6 +211,7 @@ model tb_banner {
   number    String
   header    String
   name      String
+  imageUrl  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

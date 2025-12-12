@@ -1,5 +1,6 @@
-export interface BannerData{
-    number: string,
-    header: string,
-    name: string
+export interface BannerData {
+  number: string;
+  header: string;
+  name: string;
+  imageUrl: string;
 }

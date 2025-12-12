@@ -11,7 +11,7 @@ export const categoryController = {
 
       const category = await categoryService.getAllCategories(page, limit);
 
-      return ResponseData.ok(res, category, "category berhasil diambil");
+      return ResponseData.ok(res, category);
     } catch (error) {
       return ResponseData.serverError(res, error);
     }
@@ -25,7 +25,7 @@ export const categoryController = {
 
       const category = await categoryService.getCategoryById(id);
 
-      return ResponseData.ok(res, category, "berhasil menampilkan data");
+      return ResponseData.ok(res, category);
     } catch (error) {
       return ResponseData.serverError(res, error);
     }
@@ -39,7 +39,7 @@ export const categoryController = {
 
       const category = await categoryService.addCategory({ name });
 
-      return ResponseData.created(res, category, "berhasil menambah category");
+      return ResponseData.created(res, category);
     } catch (error) {
       return ResponseData.serverError(res, error);
     }
@@ -53,7 +53,7 @@ export const categoryController = {
   
       const category = await categoryService.editCategory(id, req.body);
   
-      return ResponseData.ok(res, category, "berhasil update category");
+      return ResponseData.ok(res, category);
       
     } catch (error) {
       return ResponseData.serverError(res, error)

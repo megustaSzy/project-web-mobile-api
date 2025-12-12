@@ -32,7 +32,7 @@ export const destinationController = {
 
       const destination = await destinationService.getDestinationById(id);
 
-      return ResponseData.ok(res, destination, "destinasi berhasil diambil");
+      return ResponseData.ok(res, destination);
 
     } catch (error) {
       return ResponseData.serverError(res, error);
@@ -63,7 +63,7 @@ export const destinationController = {
         imageUrl: image,
       });
 
-      return ResponseData.created(res, destination, "destinasi berhasil ditambahkan");
+      return ResponseData.created(res, destination);
     } catch (error) {
       return ResponseData.serverError(res, error);
     }
@@ -81,7 +81,7 @@ export const destinationController = {
         imageUrl: image
       });
 
-      return ResponseData.ok(res, updatedDestination, "destinasi berhasil diperbarui");
+      return ResponseData.ok(res, updatedDestination);
     } catch (error) {
       return ResponseData.serverError(res, error);
     }

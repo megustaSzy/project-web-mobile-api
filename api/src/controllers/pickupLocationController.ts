@@ -12,7 +12,6 @@ export const pickupLocationController = {
       return ResponseData.ok(
         res,
         pickups,
-        "daftar lokasi penjemputan berhasil diambil"
       );
     } catch (error) {
       return ResponseData.serverError(res, error);
@@ -28,7 +27,6 @@ export const pickupLocationController = {
       return ResponseData.ok(
         res,
         pickup,
-        "lokasi penjemputan berhasil diambil"
       );
     } catch (error) {
       return ResponseData.serverError(res, error);
@@ -41,7 +39,6 @@ export const pickupLocationController = {
       return ResponseData.created(
         res,
         pickup,
-        "lokasi penjemputan berhasil ditambahkan"
       );
     } catch (error) {
       return ResponseData.serverError(res, error);
@@ -60,7 +57,6 @@ export const pickupLocationController = {
       return ResponseData.ok(
         res,
         updatedPickup,
-        "lokasi penjemputan berhasil diperbarui"
       );
     } catch (error) {
       return ResponseData.serverError(res, error);

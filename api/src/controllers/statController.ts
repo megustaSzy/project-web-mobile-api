@@ -6,13 +6,9 @@ export const statController = {
   async getStats(req: Request, res: Response) {
     try {
       const data = await statService.getStats();
-      return res.json({
-        success: true,
-        message: "Berhasil mengambil statistik",
-        data,
-      });
+      return ResponseData.ok(res, data)
     } catch (error) {
-      return res.status(500).json({ success: false, message: "Error" });
+      return ResponseData.serverError(res, error)
     }
   },
 };

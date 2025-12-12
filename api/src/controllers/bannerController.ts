@@ -29,8 +29,12 @@ export const bannerController = {
 
     async create(req: Request, res: Response) {
         try {
+            const image = req.file ? `/uploads/${req.file.filename}` : null;
             
-            const banner = await bannerService.createBanner(req.body);
+            const banner = await bannerService.createBanner({
+                ...req.body,
+                imageUrl: image,
+            });
 
             return ResponseData.created(res, banner)
 
