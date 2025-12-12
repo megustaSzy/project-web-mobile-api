@@ -9,135 +9,107 @@ import {
   ScrollView,
   Modal,
 } from "react-native";
-import isEqual from "lodash/isEqual";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
 import { Dropdown } from "react-native-element-dropdown";
-import * as Location from "expo-location"; // ← Tambahan import
+import { useRouter } from "expo-router";
+import * as Location from "expo-location";
 
 // ============================
-// FORMAT RUPIAH
-// ============================
-const formatRupiah = (v: any) =>
-  new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    minimumFractionDigits: 0,
-  }).format(Number(String(v).replace(/[^\d]/g, "")));
-
-// ============================
-// DUMMY DATA
-// ============================
-const destinations = [
-  {
-    id: 1,
-    name: "Green Elty Krakatoa",
-    location: "Kalianda",
-    price: 25000,
-    image: require("../../assets/images/hero3.jpg"),
-  },
-  {
-    id: 2,
-    name: "Pantai Sari Ringgung",
-    location: "Pesawaran",
-    price: 15000,
-    image: require("../../assets/images/hero3.jpg"),
-  },
-  {
-    id: 3,
-    name: "Pahawang Island",
-    location: "Pesawaran",
-    price: 50000,
-    image: require("../../assets/images/hero3.jpg"),
-  },
-];
-
-const kabupatenList = [
-  {
-    id: 1,
-    name: "Kabupaten Tanggamus",
-    desc: "Pesona wisata alam beragam...",
-    image: require("../../assets/images/favorite/21.png"),
-    count: 12,
-  },
-  {
-    id: 2,
-    name: "Kabupaten Lampung Selatan",
-    desc: "Destinasi pantai & gunung populer...",
-    image: require("../../assets/images/favorite/21.png"),
-    imageUri: "../../assets/images/favorite/21.png",
-    count: 18,
-  },
-  {
-    id: 3,
-    name: "Kabupaten Pesawaran",
-    desc: "Pulau-pulau cantik dan snorkeling...",
-    image: require("../../assets/images/favorite/21.png"),
-    imageUri: "../../assets/images/favorite/21.png",
-    count: 22,
-  },
-];
-
-const CATEGORY_DATA = [
-  { id: 1, name: "Pantai", icon: require("../../assets/images/kategori1.png") },
-  { id: 2, name: "Gunung", icon: require("../../assets/images/kategori2.png") },
-  { id: 3, name: "Bukit", icon: require("../../assets/images/kategori3.png") },
-  { id: 4, name: "Pulau", icon: require("../../assets/images/kategori4.png") },
-  { id: 5, name: "Air Terjun", icon: require("../../assets/images/kategori5.png") },
-];
-
-// Untuk Dropdown Kategori
-const kategoriList = [
-  { label: "Pantai", value: "Pantai" },
-  { label: "Gunung", value: "Gunung" },
-  { label: "Pulau", value: "Pulau" },
-  { label: "Air Terjun", value: "Air Terjun" },
-];
-
-// Untuk Dropdown Daerah
-const daerahList = [
-  { label: "Bandar Lampung", value: "Bandar Lampung" },
-  { label: "Pesawaran", value: "Pesawaran" },
-  { label: "Lampung Selatan", value: "Lampung Selatan" },
-  { label: "Tanggamus", value: "Tanggamus" },
-];
-
-// ===============================
 // MAIN COMPONENT
-// ===============================
+// ============================
 export default function HomeScreen() {
   const router = useRouter();
+
+  const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
+  const [filteredDestinations, setFilteredDestinations] = useState([]);
 
   const [kategori, setKategori] = useState("");
   const [daerah, setDaerah] = useState("");
   const [historyModal, setHistoryModal] = useState(false);
   const [historyList, setHistoryList] = useState([]);
+
   const [activeCategory, setActiveCategory] = useState(null);
 
-  const [currentLocation, setCurrentLocation] = useState("Memuat lokasi..."); // ← state lokasi
+  const [currentLocation, setCurrentLocation] = useState("Memuat lokasi...");
 
-  // ===============================
-  // LOAD HISTORY & GET LOCATION
-  // ===============================
+  // API STATE
+  const [apiCategories, setApiCategories] = useState([]);
+  const [apiDestinations, setApiDestinations] = useState([]);
+
+  // ============================
+  // USE EFFECT
+  // ============================
   useEffect(() => {
     loadHistory();
-    getLocation(); // ← panggil fungsi lokasi
+    getLocation();
+    fetchCategories();
+    fetchDestinations();
   }, []);
 
-  const loadHistory = async () => {
-    try {
-      const data = await AsyncStorage.getItem("searchHistory");
-      if (data) setHistoryList(JSON.parse(data));
-    } catch (e) {
-      console.log("loadHistory error", e);
-    }
-  };
+  useEffect(() => {
+  if (!kategori) {
+    setFilteredDestinations(apiDestinations);
+    return;
+  }
 
-  // ===============================
-  // GET CURRENT LOCATION
-  // ===============================
+  const hasil = apiDestinations.filter(
+    (item) => item.category?.name === kategori
+  );
+
+  setFilteredDestinations(hasil);
+}, [kategori, apiDestinations]);
+
+  // ============================
+  // FETCH CATEGORY
+  // ============================
+  const fetchCategories = async () => {
+  try {
+    const res = await fetch(`${BASE_URL}/api/category`);
+    const json = await res.json();
+
+    let categoryData = [];
+
+    if (Array.isArray(json)) {
+      categoryData = json;                     // FORMAT A
+    } else if (json.data && Array.isArray(json.data)) {
+      categoryData = json.data;                // FORMAT B
+    } else if (json.data?.items && Array.isArray(json.data.items)) {
+      categoryData = json.data.items;          // FORMAT C
+    }
+
+    setApiCategories(categoryData);
+  } catch (e) {
+    console.log("Category API error:", e);
+  }
+};
+
+
+  // ============================
+  // FETCH DESTINATIONS
+  // ============================
+  const fetchDestinations = async () => {
+  try {
+    const res = await fetch(`${BASE_URL}/api/destinations`);
+    const json = await res.json();
+
+    // cek struktur API
+    if (json && json.data && Array.isArray(json.data.items)) {
+      setApiDestinations(json.data.items);
+    } else {
+      console.log("DEST API not match:", json);
+      setApiDestinations([]);
+    }
+  } catch (e) {
+    console.log("Error fetch Destinations:", e);
+    setApiDestinations([]);
+  }
+};
+
+
+  // ============================
+  // GET LOCATION
+  // ============================
   const getLocation = async () => {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -147,18 +119,11 @@ export default function HomeScreen() {
       }
 
       const loc = await Location.getCurrentPositionAsync({});
-      const { latitude, longitude } = loc.coords;
+      const geo = await Location.reverseGeocodeAsync(loc.coords);
 
-      const reverseGeocode = await Location.reverseGeocodeAsync({
-        latitude,
-        longitude,
-      });
-
-      if (reverseGeocode.length > 0) {
-        const place = reverseGeocode[0];
-        setCurrentLocation(`${place.city || place.subregion || "Kota"}, ${place.region || ""}`);
-      } else {
-        setCurrentLocation("Lokasi tidak tersedia");
+      if (geo.length > 0) {
+        const place = geo[0];
+        setCurrentLocation(`${place.city || place.subregion}, ${place.region}`);
       }
     } catch (e) {
       console.log("Lokasi error", e);
@@ -166,11 +131,23 @@ export default function HomeScreen() {
     }
   };
 
-  // ===============================
+  // ============================
+  // LOAD HISTORY
+  // ============================
+  const loadHistory = async () => {
+    try {
+      const data = await AsyncStorage.getItem("searchHistory");
+      if (data) setHistoryList(JSON.parse(data));
+    } catch (e) {
+      console.log("loadHistory error", e);
+    }
+  };
+
+  // ============================
   // SAVE HISTORY
-  // ===============================
+  // ============================
   const saveHistory = async () => {
-    if (kategori.trim() === "" || daerah.trim() === "") return;
+    if (!kategori || !daerah) return;
 
     const newData = {
       kategori,
@@ -180,38 +157,34 @@ export default function HomeScreen() {
 
     const updated = [newData, ...historyList];
     setHistoryList(updated);
+    await AsyncStorage.setItem("searchHistory", JSON.stringify(updated));
 
-    try {
-      await AsyncStorage.setItem("searchHistory", JSON.stringify(updated));
-      alert("Pencarian disimpan ke history!");
-    } catch (e) {
-      console.log("saveHistory error", e);
-    }
+    alert("Pencarian disimpan ke history!");
   };
 
-  // ===============================
-  // HANDLE CATEGORY PRESS
-  // ===============================
-  const handleCategoryPress = (cat: any) => {
-    if (activeCategory === cat) {
+  // ============================
+  // HANDLE CATEGORY CLICK
+  // ============================
+  const handleCategoryPress = (catName) => {
+    if (activeCategory === catName) {
       setActiveCategory(null);
       setKategori("");
     } else {
-      setActiveCategory(cat);
-      setKategori(cat);
+      setActiveCategory(catName);
+      setKategori(catName);
     }
   };
 
-  // ===============================
-  // HANDLE DESTINATION CLICK
-  // ===============================
-  const handleDestinationPress = (d: any) => {
+  // ============================
+  // GO DETAIL PAGE
+  // ============================
+  const handleDestinationPress = (d) => {
     router.push(`../deskripsi/${d.id}`);
   };
 
-  // ===============================
-  // RENDER
-  // ===============================
+  // ============================
+  // RENDER UI
+  // ============================
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       {/* HEADER */}
@@ -226,53 +199,47 @@ export default function HomeScreen() {
       {/* CARD */}
       <View style={styles.cardBox}>
         <Text style={styles.label}>Lokasi Kamu</Text>
-        <Text style={styles.location}>{currentLocation}</Text> {/* ← lokasi dynamic */}
+        <Text style={styles.location}>{currentLocation}</Text>
 
         <View style={styles.row}>
-          {/* Kategori Wisata */}
+          {/* KATEGORI DROPDOWN */}
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Kategori Wisata</Text>
+
             <Dropdown
               style={styles.dropdown}
               placeholderStyle={styles.placeholderStyle}
               selectedTextStyle={styles.selectedTextStyle}
-              inputSearchStyle={styles.inputSearchStyle}
-              iconStyle={styles.iconStyle}
-              data={kategoriList}
-              search
-              maxHeight={300}
+              data={apiCategories.map((c) => ({
+                label: c.name,
+                value: c.name,
+              }))}
               labelField="label"
               valueField="value"
               placeholder="Pilih Kategori"
-              searchPlaceholder="Cari kategori..."
               value={kategori}
-              onChange={(item) => {
-                setKategori(item.value);
-                setActiveCategory(null);
-              }}
+              onChange={(item) => setKategori(item.value)}
             />
           </View>
 
-          {/* Daerah */}
+          {/* DAERAH DROPDOWN */}
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Daerah</Text>
+
             <Dropdown
               style={styles.dropdown}
               placeholderStyle={styles.placeholderStyle}
               selectedTextStyle={styles.selectedTextStyle}
-              inputSearchStyle={styles.inputSearchStyle}
-              iconStyle={styles.iconStyle}
-              data={daerahList}
-              search
-              maxHeight={300}
+              data={[
+                { label: "Pesawaran", value: "Pesawaran" },
+                { label: "Lampung Selatan", value: "Lampung Selatan" },
+                { label: "Tanggamus", value: "Tanggamus" },
+              ]}
               labelField="label"
               valueField="value"
               placeholder="Pilih Daerah"
-              searchPlaceholder="Cari daerah..."
               value={daerah}
-              onChange={(item) => {
-                setDaerah(item.value);
-              }}
+              onChange={(item) => setDaerah(item.value)}
             />
           </View>
         </View>
@@ -284,14 +251,15 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      {/* CATEGORY */}
+      {/* CATEGORY LIST */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
         style={{ marginTop: 15, paddingLeft: 12 }}
       >
-        {CATEGORY_DATA.map((cat) => {
+        {apiCategories.map((cat) => {
           const isActive = activeCategory === cat.name;
+
           return (
             <TouchableOpacity
               key={cat.id}
@@ -299,40 +267,61 @@ export default function HomeScreen() {
               style={[
                 styles.categoryChip,
                 isActive
-                  ? { backgroundColor: "#007BFF20", borderColor: "#007BFF", borderWidth: 2 }
-                  : { backgroundColor: "#fff" },
+                  ? {
+                      backgroundColor: "#007BFF",
+                      borderColor: "#007BFF",
+                      borderWidth: 2,
+                    }
+                  : {
+                      backgroundColor: "#fff",
+                      borderColor: "#000",
+                      borderWidth: 1.2,
+                    },
+              ]}
+
+            >
+              <Image
+                source={require("../../assets/images/kategori1.png")}
+                style={styles.categoryIcon}
+              />
+              <Text
+              style={[
+                styles.categoryChipText,
+                isActive ? { color: "#fff" } : { color: "#000" },
               ]}
             >
-              <Image source={cat.icon} style={styles.categoryIcon} />
-              <Text
-                style={[
-                  styles.categoryChipText,
-                  isActive ? { color: "#007BFF" } : { color: "#333" },
-                ]}
-              >
-                {cat.name}
-              </Text>
+              {cat.name}
+            </Text>
+
             </TouchableOpacity>
           );
         })}
       </ScrollView>
 
-      {/* POPULAR */}
+      {/* POPULAR DESTINATION */}
       <Text style={styles.sectionTitle}>Populer Destination</Text>
+
       <View style={styles.popularGrid}>
-        {destinations.map((d) => (
+        {filteredDestinations.map((d) => (
           <TouchableOpacity
             key={d.id}
             onPress={() => handleDestinationPress(d)}
             style={styles.popularItem}
           >
-            <Image source={d.image} style={styles.popularBG} />
+            <Image
+              source={{ uri: `${BASE_URL}${d.imageUrl}` }}
+              style={styles.popularBG}
+            />
+
             <View style={styles.popularOverlay} />
+
             <View style={styles.popularContent}>
               <Text style={styles.popularTitle}>{d.name}</Text>
               <View style={styles.popularLocationRow}>
                 <Ionicons name="location-sharp" size={14} color="#fff" />
-                <Text style={styles.popularLocationText}>{d.location}</Text>
+                <Text style={styles.popularLocationText}>
+                  {d.category?.name}
+                </Text>
               </View>
             </View>
           </TouchableOpacity>
@@ -344,6 +333,7 @@ export default function HomeScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalBox}>
             <Text style={styles.modalTitle}>Riwayat Pencarian</Text>
+
             <ScrollView style={{ maxHeight: 300 }}>
               {historyList.map((h, i) => (
                 <View key={i} style={styles.historyItem}>
@@ -354,11 +344,12 @@ export default function HomeScreen() {
                 </View>
               ))}
             </ScrollView>
+
             <TouchableOpacity
               style={styles.closeBtn}
               onPress={() => setHistoryModal(false)}
             >
-              <Text style={{ color: "white", fontWeight: "700" }}>Tutup</Text>
+              <Text style={{ color: "#fff", fontWeight: "700" }}>Tutup</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -367,223 +358,227 @@ export default function HomeScreen() {
   );
 }
 
-// ============================
-// STYLES
-// ============================
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F7F7F7" },
+  container: {
+    flex: 1,
+    backgroundColor: "#F8F9FA",
+  },
   header: {
-    height: 280,
+    height: 270,
     width: "100%",
     position: "relative",
-    justifyContent: "flex-end",
-    paddingBottom: 20,
   },
   headerBg: {
-    position: "absolute",
-    top: 0,
-    left: 0,
     width: "100%",
     height: "100%",
-    resizeMode: "cover",
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
   headerOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: "100%",
-    backgroundColor: "rgba(0, 27, 56, 0.72)",
-  },
+  position: "absolute",
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  backgroundColor: "rgba(0, 27, 56, 0.72)", // #001B38 opacity 72%
+  borderBottomLeftRadius: 20,
+  borderBottomRightRadius: 20,
+},
+
+
   cardBox: {
     backgroundColor: "#fff",
-    marginTop: -120,
-    alignSelf: "center",
-    width: "90%",
-    borderRadius: 20,
-    padding: 20,
+    marginHorizontal: 15,
+    marginTop: -70,
+    padding: 15,
+    borderRadius: 15,
     elevation: 4,
-  },
-  label: { 
-    color: "#777", 
-    fontSize: 15 
-  },
-
-  location: { 
-    fontSize: 20, 
-    fontWeight: "600", 
-    marginTop: 2 
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
   },
 
-  row: { 
-    flexDirection: "row", 
-    justifyContent: "space-between", 
-    marginTop: 15 
+  label: {
+    fontSize: 14,
+    color: "#6C757D",
+    marginBottom: 3,
+  },
+  location: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 15,
+    color: "#343A40",
   },
 
-  inputGroup: { 
-    width: "48%" 
-  },
-
-  inputLabel: { 
-    fontSize: 15, 
-    color: "#666", 
-    marginBottom: 6 
-  },
-
-  rowBetween: { 
-    flexDirection: "row", 
+  row: {
+    flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 15 
-    },
-
-  searchBtn: { 
-    backgroundColor: "#007BFF", 
-    paddingVertical: 12, 
-    paddingHorizontal: 150, 
-    borderRadius: 15, 
-    alignItems: "center" 
   },
 
-  searchText: { 
-    fontSize : 14, 
-    color: "#fff", 
-    fontWeight: "600" 
+  inputGroup: {
+    width: "48%",
+  },
+  inputLabel: {
+    fontSize: 14,
+    color: "#6C757D",
+    marginBottom: 5,
   },
 
-  sectionTitle: { 
-    fontSize: 20, 
-    marginTop: 20, 
-    marginLeft: 20, 
-    fontWeight: "700" 
+  dropdown: {
+    height: 45,
+    borderColor: "#CED4DA",
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    backgroundColor: "#fff",
+  },
+  placeholderStyle: {
+    fontSize: 14,
+    color: "#ADB5BD",
+  },
+  selectedTextStyle: {
+    fontSize: 14,
+    color: "#212529",
   },
 
-  popularGrid: { 
-    flexDirection: "row", 
-    flexWrap: "wrap", 
-    justifyContent: "space-between", 
-    paddingHorizontal: 20, 
-    marginTop: 10 
+  rowBetween: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginTop: 15,
   },
 
-  popularItem: { 
-    width: "48%", 
-    height: 190, 
-    borderRadius: 15, 
-    overflow: "hidden", 
-    marginBottom: 15, 
-    position: "relative", 
-    backgroundColor: "#000" 
+  searchBtn: {
+    backgroundColor: "#007BFF",
+    paddingHorizontal: 161,
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  searchText: {
+    color: "#fff",
+    fontWeight: "700",
   },
 
-  popularBG: { 
-    width: "100%", 
-    height: "100%", 
-    resizeMode: "cover", 
-    position: "absolute" 
+  // CATEGORY
+  categoryChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    backgroundColor: "#fff",
+    borderRadius: 20,
+    marginRight: 10,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+  },
+  categoryChipText: {
+    fontSize: 14,
+    marginLeft: 6,
+  },
+  categoryIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: 5,
   },
 
-  popularOverlay: { 
-    position: "absolute", 
-    width: "100%", 
-    height: "100%", 
-    backgroundColor: "rgba(0,0,0,0.6)" 
+  // POPULAR
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    marginTop: 20,
+    marginLeft: 15,
   },
 
-  popularContent: { 
-    position: "absolute", 
-    bottom: 12, 
-    left: 10, 
-    right: 10 
+  popularGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    paddingHorizontal: 10,
+    marginTop: 10,
+    justifyContent: "space-between",
   },
 
-  popularTitle: { 
-    color: "#fff", 
-    fontSize: 15, 
-    fontWeight: "700" 
+  popularItem: {
+    width: "48%",
+    height: 170,
+    marginBottom: 15,
+    borderRadius: 15,
+    overflow: "hidden",
+    position: "relative",
   },
 
-  popularLocationRow: { 
-    flexDirection: "row", 
-    alignItems: "center", 
-    marginTop: 3 
+  popularBG: {
+    width: "100%",
+    height: "100%",
+  },
+  popularOverlay: {
+  position: "absolute",
+  left: 0,
+  right: 0,
+  bottom: 0,
+  top: 0,
+  backgroundColor: "rgba(0,0,0,0.60)", // 70% opacity
+},
+
+
+  popularContent: {
+    position: "absolute",
+    bottom: 10,
+    left: 10,
+  },
+  popularTitle: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  popularLocationRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 3,
+  },
+  popularLocationText: {
+    color: "#fff",
+    fontSize: 12,
+    marginLeft: 3,
   },
 
-  popularLocationText: { 
-    color: "#fff", 
-    marginLeft: 4, 
-    fontSize: 13 },
-  categoryChip: { 
-    flexDirection: "row", 
-    alignItems: "center", 
-    paddingVertical: 8, 
-    paddingHorizontal: 15, 
-    borderRadius: 25, 
-    marginRight: 12, 
-    borderWidth: 1, 
-    borderColor: "#eee" 
+  // MODAL
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.3)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalBox: {
+    width: "85%",
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 15,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    marginBottom: 10,
   },
 
-  categoryIcon: { 
-    width: 26, 
-    height: 26, 
-    resizeMode: "contain", 
-    marginRight: 8 
+  historyItem: {
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderColor: "#EEE",
+  },
+  historyText: {
+    fontSize: 14,
+  },
+  historyDate: {
+    fontSize: 12,
+    color: "#6C757D",
   },
 
-  categoryChipText: { 
-    fontSize: 14, 
-    fontWeight: "600" 
+  closeBtn: {
+    marginTop: 15,
+    backgroundColor: "#007BFF",
+    padding: 12,
+    borderRadius: 10,
+    alignItems: "center",
   },
-
-  dropdown: { 
-    height: 48, 
-    backgroundColor: "#fff", 
-    borderRadius: 8, 
-    paddingHorizontal: 12, 
-    borderWidth: 1, 
-    borderColor: "#ccc", 
-    marginTop: 4 
-  },
-
-  placeholderStyle: { 
-    fontSize: 14, 
-    color: "#888" 
-  },
-
-  selectedTextStyle: { 
-    fontSize: 14, 
-    color: "#000" 
-  },
-
-  inputSearchStyle: { 
-    height: 40, 
-    fontSize: 14, 
-    borderRadius: 8 
-  },
-
-  iconStyle: { 
-    width: 20, 
-    height: 20 
-  },
-
-  modalOverlay: { 
-    flex: 1, 
-    backgroundColor: "rgba(0,0,0,0.5)", 
-    justifyContent: "center", 
-    alignItems: "center" 
-  },
-
-  modalBox: { 
-    width: "85%", 
-    backgroundColor: "white", 
-    padding: 20, 
-    borderRadius: 15 
-  },
-  
-  modalTitle: { fontSize: 18, fontWeight: "700", marginBottom: 10 },
-  historyItem: { paddingVertical: 10, borderBottomWidth: 1, borderColor: "#ddd" },
-  historyText: { fontSize: 15, fontWeight: "600" },
-  historyDate: { fontSize: 12, color: "#777" },
-  closeBtn: { marginTop: 15, backgroundColor: "#007BFF", paddingVertical: 10, borderRadius: 10, alignItems: "center" },
 });
