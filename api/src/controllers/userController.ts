@@ -10,7 +10,7 @@ export const userController = {
 
       const users = await userService.getAllUsers(page, limit);
 
-      return ResponseData.ok(res, users, "daftar user berhasil diambil");
+      return ResponseData.ok(res, users);
     } catch (error) {
       return ResponseData.serverError(res, error);
     }
@@ -24,7 +24,7 @@ export const userController = {
 
       const user = await userService.getUserById(id);
 
-      return ResponseData.ok(res, user, "user berhasil diambil");
+      return ResponseData.ok(res, user);
     } catch (error) {
       return ResponseData.serverError(res, error);
     }
@@ -57,12 +57,12 @@ export const userController = {
 
       const updatedUser = await userService.updateUserById(id, dataToUpdate);
 
-      return ResponseData.ok(res, updatedUser, "user berhasil diperbarui");
+      return ResponseData.ok(res, updatedUser);
     } catch (error) {
       return ResponseData.serverError(res, error);
     }
   },
-  
+
   async deleteUser(req: Request, res: Response) {
     try {
       const id = Number(req.params.id);
@@ -77,13 +77,13 @@ export const userController = {
 
       await userService.deleteUserById(id);
 
-      return ResponseData.ok(res, null, "user berhasil dihapus");
+      return ResponseData.ok(res, null);
     } catch (error) {
       return ResponseData.serverError(res, error);
     }
   },
 
   async getProfile(req: Request, res: Response) {
-    return ResponseData.ok(res, (req as any).user, "profil berhasil diambil");
+    return ResponseData.ok(res, (req as any).user);
   },
 };
