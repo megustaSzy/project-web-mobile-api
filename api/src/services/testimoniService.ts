@@ -40,6 +40,7 @@ export const testimoniService = {
         userId,
         status: data.status,
         comment: data.comment,
+        rating: data.rating,
       },
       include: {
         user: {
@@ -99,18 +100,19 @@ export const testimoniService = {
     });
   },
 
-  async deleteTestimoniById(id: number, userId: number) {
-    const testimoni = await prisma.tb_testimoni.findUnique({ where: { id } });
+  async deleteTestimoni(id: number) {
+    const testimoni = await prisma.tb_testimoni.findFirst({
+      where: {
+        id,
+      },
+    });
 
     if (!testimoni) throw createError("id tidak ditemukan", 404);
 
-    if (testimoni.userId !== userId) {
-      throw createError(
-        "anda tidak memiliki akses untuk menghapus testimoni ini",
-        403
-      );
-    }
-
-    return prisma.tb_testimoni.delete({ where: { id } });
+    return prisma.tb_testimoni.delete({
+      where: {
+        id,
+      },
+    });
   },
 };
