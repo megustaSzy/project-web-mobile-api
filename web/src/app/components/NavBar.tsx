@@ -155,6 +155,9 @@ export default function NavBar() {
     setUserData({ name: "User", avatar: "/images/profile.jpg" });
   };
 
+  const textColor = scrolled ? "text-gray-800" : "text-white";
+  const borderColor = scrolled ? "border-gray-700" : "border-white";
+
   return (
     <header
       className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
@@ -167,9 +170,7 @@ export default function NavBar() {
 
         {/* DESKTOP MENU */}
         <nav
-          className={`hidden md:flex absolute left-1/2 -translate-x-1/2 gap-8 ${
-            scrolled ? "text-gray-800" : "text-white"
-          }`}
+          className={`hidden md:flex absolute left-1/2 -translate-x-1/2 gap-8 ${textColor}`}
         >
           <Link href="/">{translations.home}</Link>
           <Link href="/about">{translations.about}</Link>
@@ -190,7 +191,7 @@ export default function NavBar() {
           <div className="relative" ref={langRef}>
             <button
               onClick={() => setLangOpen((prev) => !prev)}
-              className="flex items-center gap-1 px-3 py-1 border rounded-md text-sm"
+              className={`flex items-center gap-1 px-3 py-1 border rounded-md text-sm ${textColor} border-gray-700`}
             >
               {language.toUpperCase()}
               <ChevronDown
@@ -230,7 +231,7 @@ export default function NavBar() {
             <div className="relative" ref={profileRef}>
               <button
                 onClick={() => setProfileOpen((prev) => !prev)}
-                className="flex items-center gap-2 px-2 py-1 rounded-md hover:bg-gray-100 transition"
+                className={`flex items-center gap-2 px-2 py-1 rounded-md${textColor}`}
               >
                 <Image
                   src={userData.avatar}
@@ -253,7 +254,7 @@ export default function NavBar() {
                 <div className="absolute right-0 mt-1 w-40 bg-white shadow rounded-md overflow-hidden z-50">
                   <Link
                     href="/profil"
-                    className="block px-4 py-2 hover:bg-gray-100 text-sm"
+                    className="block px-4 py-2 hover:bg-gray-100 text-sm text-gray-800"
                     onClick={() => setProfileOpen(false)}
                   >
                     {translations.editProfile}
@@ -273,9 +274,7 @@ export default function NavBar() {
           ) : (
             <Link
               href="/login"
-              className={`px-4 py-1 rounded-full border ${
-                scrolled ? "text-gray-700 border-gray-700" : "text-white border-white"
-              }`}
+              className={`px-4 py-1 rounded-full border ${textColor} ${borderColor}`}
             >
               {translations.login}
             </Link>
