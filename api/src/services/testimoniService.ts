@@ -28,7 +28,7 @@ export const testimoniService = {
     return pagination.paginate({ count, rows });
   },
 
-  async getAprovedTestimoni(page: number, limit: number) {
+  async getApprovedTestimoni(page: number, limit: number) {
     const pagination = new Pagination(page, limit);
 
     const count = await prisma.tb_testimoni.count({
@@ -44,7 +44,7 @@ export const testimoniService = {
       skip: pagination.offset,
       take: pagination.limit,
       orderBy: {
-        createdAt: "asc",
+        createdAt: "desc",
       },
       include: {
         user: {
@@ -155,6 +155,46 @@ export const testimoniService = {
       data: {
         status: data.status,
         comment: data.comment,
+        rating: data.rating,
+        approvalStatus: "PENDING",
+      },
+    });
+  },
+
+  async approveTestimoni(id: number) {
+    const testimoni = await prisma.tb_testimoni.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!testimoni) throw createError("id tidak ditemukan", 404);
+
+    return prisma.tb_testimoni.update({
+      where: {
+        id,
+      },
+      data: {
+        approvalStatus: "APPROVED",
+      },
+    });
+  },
+
+  async rejectedTestimoni(id: number) {
+    const testimoni = await prisma.tb_testimoni.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!testimoni) throw createError("id tidak ditemukan", 404);
+
+    return prisma.tb_testimoni.update({
+      where: {
+        id,
+      },
+      data: {
+        approvalStatus: "REJECTED",
       },
     });
   },
