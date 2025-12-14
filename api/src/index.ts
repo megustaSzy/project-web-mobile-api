@@ -22,6 +22,7 @@ import statRoute from "./routes/statRoute";
 import paymentRoute from "./routes/paymentRoute";
 import teamRoute from "./routes/teamRoute";
 import testimoniRoute from "./routes/testimoniRoute";
+import bannerRoute from "./routes/bannerRoute"
 
 const app = express();
 
@@ -67,12 +68,10 @@ app.use("/api/count", statRoute);
 app.use("/api/payment", paymentRoute);
 app.use("/api/team", teamRoute);
 app.use("/api/testimoni", testimoniRoute);
+app.use("/api/banner", bannerRoute);
 
 // Public upload folder
 app.use("/uploads", express.static("public/uploads"));
-
-// TESTING
-console.log(process.env.FRONTEND_URL);
 
 export default app;
 
