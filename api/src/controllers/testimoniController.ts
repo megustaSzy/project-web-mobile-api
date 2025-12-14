@@ -5,11 +5,36 @@ import { ResponseData } from "../utilities/Response";
 export const testimoniController = {
   async getAll(req: Request, res: Response) {
     try {
-      const page = Number(req.query.page);
-      const limit = Number(req.query.limit);
+      const page = Number(req.query.page) || 1;
+      const limit = Number(req.query.limit) || 10;
 
       const testimoni = await testimoniService.getAllTestimoni(page, limit);
 
+      return ResponseData.ok(res, testimoni);
+    } catch (error) {
+      return ResponseData.serverError(res, error);
+    }
+  },
+
+  async getApproved(req: Request, res: Response) {
+    try {
+      const page = Number(req.query.page) || 1;
+      const limit = Number(req.query.limit) || 10;
+
+      const testimoni = await testimoniService.getApprovedTestimoni(page, limit);
+
+      return ResponseData.ok(res, testimoni)
+    } catch (error) {
+      return ResponseData.serverError(res, error)
+    }
+  },
+
+  async getPending(req: Request, res: Response) {
+    try {
+      const page = Number(req.query.page) || 1;
+      const limit = Number(req.query.limit) || 10;
+
+      const testimoni = await testimoniService.getPendingTestimoni(page, limit);
       return ResponseData.ok(res, testimoni);
     } catch (error) {
       return ResponseData.serverError(res, error);
