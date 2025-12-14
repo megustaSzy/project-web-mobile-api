@@ -5,14 +5,25 @@ import { authorizeRoles } from "../middlewares/roleMiddleware";
 
 const router = Router();
 
-router.get("/", testimoniController.getAll);
+// tampil di website (hanya APPROVED)
+router.get("/", testimoniController.getApproved);
 
-router.get("/:id", testimoniController.getById);
-
+// user add
 router.post("/", authMiddleware, testimoniController.create);
 
-router.put("/:id", authMiddleware, authorizeRoles("Admin"), testimoniController.edit);
 
-router.delete("/:id", authMiddleware, authorizeRoles("Admin"), testimoniController.delete);
+router.delete("/:id", authMiddleware, testimoniController.delete ); // bisa user sendiri atau admin (optional logic)
+
+router.get("/admin", authMiddleware, authorizeRoles("Admin"), testimoniController.getAll);
+
+router.get("/admin/pending", authMiddleware, authorizeRoles("Admin"), testimoniController.getPending);
+
+router.put("/:id", authMiddleware, authorizeRoles("Admin"), testimoniController.edit);  // user pemilik testimoni
+
+router.patch("/admin/:id/approve", authMiddleware, authorizeRoles("Admin"), testimoniController.approve);
+
+router.patch("/admin/:id/reject", authMiddleware, authorizeRoles("Admin"), testimoniController.reject);
+
+router.get("/:id", testimoniController.getById);
 
 export default router;
