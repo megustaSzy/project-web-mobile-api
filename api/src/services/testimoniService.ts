@@ -28,6 +28,65 @@ export const testimoniService = {
     return pagination.paginate({ count, rows });
   },
 
+  async getApprovedTestimoni(page: number, limit: number) {
+    const pagination = new Pagination(page, limit);
+
+    const count = await prisma.tb_testimoni.count({
+      where: {
+        approvalStatus: "APPROVED",
+      },
+    });
+
+    const rows = await prisma.tb_testimoni.findMany({
+      where: {
+        approvalStatus: "APPROVED",
+      },
+      skip: pagination.offset,
+      take: pagination.limit,
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        user: {
+          select: {
+            name: true,
+            avatar: true,
+          },
+        },
+      },
+    });
+
+    return pagination.paginate({ count, rows });
+  },
+
+  async getPendingTestimoni(page: number, limit: number) {
+    const pagination = new Pagination(page, limit);
+
+    const count = await prisma.tb_testimoni.count({
+      where: {
+        approvalStatus: "PENDING",
+      },
+    });
+
+    const rows = await prisma.tb_testimoni.findMany({
+      where: {
+        approvalStatus: "PENDING",
+      },
+      skip: pagination.offset,
+      take: pagination.limit,
+      include: {
+        user: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    return pagination.paginate({ count, rows });
+  },
+
   async createTestimoni(userId: number, data: TestimoniData) {
     const user = await prisma.tb_user.findUnique({
       where: { id: userId },
@@ -96,6 +155,46 @@ export const testimoniService = {
       data: {
         status: data.status,
         comment: data.comment,
+        rating: data.rating,
+        approvalStatus: "PENDING",
+      },
+    });
+  },
+
+  async approveTestimoni(id: number) {
+    const testimoni = await prisma.tb_testimoni.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!testimoni) throw createError("id tidak ditemukan", 404);
+
+    return prisma.tb_testimoni.update({
+      where: {
+        id,
+      },
+      data: {
+        approvalStatus: "APPROVED",
+      },
+    });
+  },
+
+  async rejectedTestimoni(id: number) {
+    const testimoni = await prisma.tb_testimoni.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!testimoni) throw createError("id tidak ditemukan", 404);
+
+    return prisma.tb_testimoni.update({
+      where: {
+        id,
+      },
+      data: {
+        approvalStatus: "REJECTED",
       },
     });
   },
