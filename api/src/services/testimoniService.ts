@@ -28,6 +28,37 @@ export const testimoniService = {
     return pagination.paginate({ count, rows });
   },
 
+  async getAprovedTestimoni(page: number, limit: number){
+    const pagination = new Pagination(page, limit);
+
+    const count = await prisma.tb_testimoni.count({
+      where: {
+        approvalStatus: "APPROVED"
+      },
+    });
+
+    const rows = await prisma.tb_testimoni.findMany({
+      where: {
+        approvalStatus: "APPROVED"
+      },
+      skip: pagination.offset,
+      take: pagination.limit,
+      orderBy:{
+        createdAt: 'asc'
+      },
+      include: {
+        user: {
+          select: {
+            name: true,
+            avatar: true
+          }
+        }
+      }
+    });
+
+    return pagination.paginate({ count, rows })
+  },
+
   async createTestimoni(userId: number, data: TestimoniData) {
     const user = await prisma.tb_user.findUnique({
       where: { id: userId },
