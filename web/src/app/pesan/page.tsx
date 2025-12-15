@@ -1,198 +1,248 @@
-// "use client";
+"use client";
 
-// import { useState } from "react";
-// import Image from "next/image";
-// import { MapPin, Calendar, Clock, Users, CheckCircle } from "lucide-react";
-// import { useSearchParams } from "next/navigation";
-// import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import { MapPin, Calendar, Clock, Users, CheckCircle } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import { apiFetch } from "@/helpers/api";
 
-// const destinations = [
-//   {
-//     id: 1,
-//     name: "Rio The Beach",
-//     location: "Kalianda",
-//     image: "/images/hero1.jpg",
-//     desc: "Pantai Rio The Beach menghadirkan keindahan pasir putih dan ombak tenang, cocok untuk bersantai dan menikmati suasana laut.",
-//     price: 120000,
-//   },
-//   {
-//     id: 2,
-//     name: "Senaya Beach",
-//     location: "Kalianda",
-//     image: "/images/hero2.jpg",
-//     desc: "Senaya Beach menawarkan panorama laut biru dan angin sejuk, tempat ideal untuk bersantai dan menikmati keindahan alam.",
-//     price: 120000,
-//   },
-//   {
-//     id: 3,
-//     name: "Green Elty Krakatoa",
-//     location: "Kalianda",
-//     image: "/images/hero3.jpg",
-//     desc: "Green Elty Krakatoa menyajikan pemandangan laut yang menakjubkan dengan suasana tenang dan fasilitas nyaman untuk berlibur.",
-//     price: 120000,
-//   },
-// ];
+type DestinationItem = {
+  id: number;
+  name: string;
+  location: string;
+  image: string | null;
+  desc: string;
+  price: number;
+};
 
-// export default function PesanPage() {
-//   const searchParams = useSearchParams();
-//   const destId = Number(searchParams.get("id"));
-//   const selectedDest = destinations.find((d) => d.id === destId);
+type ApiResponse<T> = {
+  status: number;
+  message: string;
+  data: T;
+};
 
-//   const [pickup, setPickup] = useState("");
-//   const [date, setDate] = useState("");
-//   const [time, setTime] = useState("");
-//   const [people, setPeople] = useState(1);
-//   const [success, setSuccess] = useState(false);
+export default function PesanPage() {
+  const searchParams = useSearchParams();
+  const destId = Number(searchParams.get("id"));
 
-//   const handleSubmit = (e: React.FormEvent) => {
-//     e.preventDefault();
-//     setSuccess(true);
-//     setTimeout(() => setSuccess(false), 3000);
-//   };
+  const [selectedDest, setSelectedDest] = useState<DestinationItem | null>(null);
+  const [loading, setLoading] = useState(true);
 
-//   return (
-//     <section className="relative w-full min-h-screen bg-gradient-to-b from-blue-100 via-white to-blue-50 flex items-center justify-center py-20 px-4">
+  const [pickup, setPickup] = useState("");
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+  const [people, setPeople] = useState(1);
 
-//       <div className="relative z-10 w-full max-w-xl bg-white/80 backdrop-blur-xl border border-white/40 shadow-xl rounded-3xl p-10">
-//         {selectedDest ? (
-//           <>
-//             {/* HEADER */}
-//             <div className="flex flex-col items-center text-center mb-10">
-//               <div className="relative w-44 h-44 rounded-2xl overflow-hidden shadow-lg mb-5">
-//                 <Image
-//                   src={selectedDest.image}
-//                   alt={selectedDest.name}
-//                   fill
-//                   className="object-cover"
-//                 />
-//               </div>
+  const [success, setSuccess] = useState(false);
 
-//               <h1 className="text-3xl font-semibold text-gray-800">
-//                 {selectedDest.name}
-//               </h1>
-//               <p className="text-gray-500 text-sm">{selectedDest.location}</p>
-//               <p className="text-gray-600 text-sm mt-3 leading-relaxed max-w-md">
-//                 {selectedDest.desc}
-//               </p>
-//             </div>
+  // =====================================
+  // 🔥 AMBIL DATA DESTINASI BY ID
+  // =====================================
+  useEffect(() => {
+    const fetchDestination = async () => {
+      try {
+        const res: ApiResponse<DestinationItem> = await apiFetch(
+          `/api/destinations/${destId}`
+        );
 
-//             {/* FORM */}
-//             <form onSubmit={handleSubmit} className="space-y-6">
+        setSelectedDest(res.data);
+      } catch (error) {
+        console.error("Gagal memuat destinasi:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (destId) fetchDestination();
+  }, [destId]);
+
+  // =====================================
+  // 🔥 URL GAMBAR (ANTI ERROR)
+  // =====================================
+  const getImageUrl = (path: string | null | undefined) => {
+    if (!path) return "/images/default.jpg";
+
+    if (path.startsWith("http")) return path;
+
+    return `http://localhost:3001${path}`;
+  };
+
+  // =====================================
+  // 🔥 SUBMIT ORDER KE API
+  // =====================================
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      await apiFetch("/api/orders", {
+        method: "POST",
+        body: JSON.stringify({
+          destinationId: selectedDest?.id,
+          pickup,
+          date,
+          time,
+          people,
+        }),
+      });
+
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (error) {
+      console.error("Gagal mengirim pesanan:", error);
+      alert("Gagal membuat pesanan!");
+    }
+  };
+
+  return (
+    <section className="relative w-full min-h-screen bg-gradient-to-b from-blue-100 via-white to-blue-50 flex items-center justify-center py-20 px-4">
+      <div className="relative z-10 w-full max-w-xl bg-white/80 backdrop-blur-xl border border-white/40 shadow-xl rounded-3xl p-10">
+
+        {/* LOADING */}
+        {loading && <p className="text-center text-gray-500">Memuat destinasi...</p>}
+
+        {!loading && selectedDest ? (
+          <>
+            {/* HEADER */}
+            <div className="flex flex-col items-center text-center mb-10">
+              <div className="relative w-44 h-44 rounded-2xl overflow-hidden shadow-lg mb-5">
+                <Image
+                  unoptimized
+                  src={getImageUrl(selectedDest.image)}
+                  alt={selectedDest.name}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+
+              <h1 className="text-3xl font-semibold text-gray-800">{selectedDest.name}</h1>
+              <p className="text-gray-500 text-sm">{selectedDest.location}</p>
+              <p className="text-gray-600 text-sm mt-3 leading-relaxed max-w-md">
+                {selectedDest.desc}
+              </p>
+            </div>
+
+            {/* FORM */}
+            <form onSubmit={handleSubmit} className="space-y-6">
               
-//               {/* LOKASI PENJEMPUTAN */}
-//               <div className="space-y-2">
-//                 <label className="text-sm font-medium text-gray-600">
-//                   Lokasi Penjemputan
-//                 </label>
-//                 <div className="flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3 bg-white shadow-sm">
-//                   <MapPin className="w-4 h-4 text-gray-400" />
-//                   <select
-//                     value={pickup}
-//                     onChange={(e) => setPickup(e.target.value)}
-//                     required
-//                     className="w-full bg-transparent outline-none text-gray-700 text-sm"
-//                   >
-//                     <option value="">Pilih lokasi</option>
-//                     <option value="Terminal Rajabasa">Terminal Rajabasa</option>
-//                     <option value="Terminal Kemiling">Terminal Kemiling</option>
-//                     <option value="Stasiun Tanjung Karang">Stasiun Tanjung Karang</option>
-//                   </select>
-//                 </div>
-//               </div>
+              {/* Lokasi Penjemputan */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-600">Lokasi Penjemputan</label>
+                <div className="flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3 bg-white shadow-sm">
+                  <MapPin className="w-4 h-4 text-gray-400" />
+                  <select
+                    value={pickup}
+                    onChange={(e) => setPickup(e.target.value)}
+                    required
+                    className="w-full bg-transparent outline-none text-gray-700 text-sm"
+                  >
+                    <option value="">Pilih lokasi</option>
+                    <option value="Terminal Rajabasa">Terminal Rajabasa</option>
+                    <option value="Terminal Kemiling">Terminal Kemiling</option>
+                    <option value="Stasiun Tanjung Karang">Stasiun Tanjung Karang</option>
+                  </select>
+                </div>
+              </div>
 
-//               {/* GRID INPUT */}
-//               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-//                 {/* TANGGAL */}
-//                 <div className="space-y-2">
-//                   <label className="text-sm font-medium text-gray-600">Tanggal</label>
-//                   <div className="flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3 bg-white shadow-sm">
-//                     <Calendar className="w-4 h-4 text-gray-400" />
-//                     <input
-//                       type="date"
-//                       value={date}
-//                       onChange={(e) => setDate(e.target.value)}
-//                       required
-//                       className="w-full bg-transparent outline-none text-sm text-gray-700"
-//                     />
-//                   </div>
-//                 </div>
+              {/* Tanggal & Jam */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-600">Tanggal</label>
+                  <div className="flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3 bg-white shadow-sm">
+                    <Calendar className="w-4 h-4 text-gray-400" />
+                    <input
+                      type="date"
+                      value={date}
+                      onChange={(e) => setDate(e.target.value)}
+                      required
+                      className="w-full bg-transparent outline-none text-sm text-gray-700"
+                    />
+                  </div>
+                </div>
 
-//                 {/* JAM */}
-//                 <div className="space-y-2">
-//                   <label className="text-sm font-medium text-gray-600">Jam</label>
-//                   <div className="flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3 bg-white shadow-sm">
-//                     <Clock className="w-4 h-4 text-gray-400" />
-//                     <input
-//                       type="text"
-//                       value={time}
-//                       onChange={(e) => setTime(e.target.value)}
-//                       placeholder="07.00 - 16.00"
-//                       required
-//                       className="w-full bg-transparent outline-none text-sm text-gray-700"
-//                     />
-//                   </div>
-//                 </div>
-//               </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-600">Jam</label>
+                  <div className="flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3 bg-white shadow-sm">
+                    <Clock className="w-4 h-4 text-gray-400" />
+                    <input
+                      type="text"
+                      value={time}
+                      onChange={(e) => setTime(e.target.value)}
+                      placeholder="07.00 - 16.00"
+                      required
+                      className="w-full bg-transparent outline-none text-sm text-gray-700"
+                    />
+                  </div>
+                </div>
 
-//               {/* JUMLAH TIKET */}
-//               <div className="space-y-2">
-//                 <label className="text-sm font-medium text-gray-600">Jumlah Tiket</label>
-//                 <div className="flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3 bg-white shadow-sm">
-//                   <Users className="w-4 h-4 text-gray-400" />
-//                   <input
-//                     type="number"
-//                     min="1"
-//                     max="16"
-//                     value={people}
-//                     onChange={(e) => setPeople(Number(e.target.value))}
-//                     required
-//                     className="w-full bg-transparent outline-none text-sm text-gray-700"
-//                   />
-//                 </div>
-//               </div>
+              </div>
 
-//               <button
-//                 type="submit"
-//                 className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-xl shadow-md transition-all"
-//               >
-//                 Konfirmasi Pesanan
-//               </button>
-//             </form>
-//           </>
-//         ) : (
-//           <div className="text-center text-gray-600">
-//             <p className="text-lg font-medium">🚫 Destinasi tidak ditemukan</p>
-//             <p className="text-sm text-gray-500 mt-2">
-//               Silakan kembali ke halaman utama untuk memilih destinasi.
-//             </p>
-//           </div>
-//         )}
-//       </div>
+              {/* Jumlah Tiket */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-600">Jumlah Tiket</label>
+                <div className="flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3 bg-white shadow-sm">
+                  <Users className="w-4 h-4 text-gray-400" />
+                  <input
+                    type="number"
+                    min="1"
+                    max="16"
+                    value={people}
+                    onChange={(e) => setPeople(Number(e.target.value))}
+                    required
+                    className="w-full bg-transparent outline-none text-sm text-gray-700"
+                  />
+                </div>
+              </div>
 
-//       {/* POPUP */}
-//       <AnimatePresence>
-//         {success && (
-//           <motion.div
-//             initial={{ opacity: 0, y: 30 }}
-//             animate={{ opacity: 1, y: 0 }}
-//             exit={{ opacity: 0, y: 30 }}
-//             className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50"
-//           >
-//             <motion.div
-//               initial={{ scale: 0.9 }}
-//               animate={{ scale: 1 }}
-//               exit={{ scale: 0.9 }}
-//               className="bg-white rounded-2xl shadow-xl p-8 text-center max-w-sm w-full"
-//             >
-//               <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-3" />
-//               <h2 className="text-lg font-semibold text-gray-800">Pesanan Berhasil!</h2>
-//               <p className="text-sm text-gray-600 mt-1">
-//                 Pesananmu telah dikonfirmasi 🎉
-//               </p>
-//             </motion.div>
-//           </motion.div>
-//         )}
-//       </AnimatePresence>
-//     </section>
-//   );
-// }
+              {/* SUBMIT */}
+              <button
+                type="submit"
+                className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-xl shadow-md transition-all"
+              >
+                Konfirmasi Pesanan
+              </button>
+            </form>
+          </>
+        ) : (
+          !loading && (
+            <div className="text-center text-gray-600">
+              <p className="text-lg font-medium">🚫 Destinasi tidak ditemukan</p>
+              <p className="text-sm text-gray-500 mt-2">
+                Silakan kembali ke halaman utama untuk memilih destinasi.
+              </p>
+            </div>
+          )
+        )}
+      </div>
+
+      {/* POPUP SUCCESS */}
+      <AnimatePresence>
+        {success && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 30 }}
+            className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50"
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              className="bg-white rounded-2xl shadow-xl p-8 text-center max-w-sm w-full"
+            >
+              <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-3" />
+              <h2 className="text-lg font-semibold text-gray-800">
+                Pesanan Berhasil!
+              </h2>
+              <p className="text-sm text-gray-600 mt-1">
+                Pesananmu telah dikonfirmasi 🎉
+              </p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+    </section>
+  );
+}
