@@ -85,30 +85,36 @@ export default function VisionSection() {
             </>
           )}
         </div>
-      
         {/* NILAI UTAMA */}
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold">Nilai Utama LamiGo</h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {value.map((item, i) => (
-            <div
-              key={item.id}
-              className="bg-white shadow-md border border-gray-100 rounded-2xl p-6 flex items-start gap-4"
-            >
-              <img
-                src={`/images/${14 + i}.svg`}
-                alt={`Card ${i + 1}`}
-                className="w-20 h-20"
-              />
+          {value.map((item) => {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
+            const imageSrc = item.imageUrl
+              ? `${apiUrl.replace(/\/$/, "")}${item.imageUrl}`
+              : "/images/default.svg";
 
-              <div>
-                <h1 className="font-semibold text-lg">{item.header}</h1>
-                <p className="font-regular text-lg">{item.name}</p>
+            return (
+              <div
+                key={item.id}
+                className="bg-white shadow-md border border-gray-100 rounded-2xl p-6 flex items-start gap-4"
+              >
+                <img
+                  src={imageSrc}
+                  alt={item.header}
+                  className="w-20 h-20 object-contain"
+                />
+
+                <div>
+                  <h1 className="font-semibold text-lg">{item.header}</h1>
+                  <p className="text-lg">{item.name}</p>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>

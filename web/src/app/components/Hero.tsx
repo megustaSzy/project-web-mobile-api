@@ -2,12 +2,11 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import SearchCard from "./SearchCard"; 
+import SearchCard from "./SearchCard";
 // import { Calendar, Clock, Users, Search, MapPin } from "lucide-react";
 
-
 const images = ["/images/hero1.jpg", "/images/hero2.jpg", "/images/hero3.jpg"];
- 
+
 export default function Hero() {
   const [current, setCurrent] = useState(0);
 
@@ -45,21 +44,19 @@ export default function Hero() {
         </AnimatePresence>
       </div>
 
-     {/* Hero Content */}
-<div className="relative z-10 flex flex-col justify-center items-center text-center text-white px-4 py-28 md:py-40">
-  <div className="flex flex-col items-center gap-1">
-  <div className="relative z-10 flex flex-col justify-center items-center text-center px-4 py-0 md:py-0">
-  <div className="w-24 h-24 md:w-40 md:h-40 relative mb-6 md:mb-0">
-    <Image
-      src="/images/best.png" // ganti path sesuai lokasi file
-      alt="Best Travel Experience"
-      fill
-      className="object-contain"
-    />
-  </div>
-</div>
-
-
+      {/* Hero Content */}
+      <div className="relative z-10 flex flex-col justify-center items-center text-center text-white px-4 py-28 md:py-40">
+        <div className="flex flex-col items-center gap-1">
+          <div className="relative z-10 flex flex-col justify-center items-center text-center px-4 py-0 md:py-0">
+            <div className="w-24 h-24 md:w-40 md:h-40 relative mb-6 md:mb-0">
+              <Image
+                src="/images/best.png" 
+                alt="Best Travel Experience"
+                fill
+                className="object-contain"
+              />
+            </div>
+          </div>
         </div>
 
         <h1 className="text-4xl md:text-6xl font-extrabold mb-5">

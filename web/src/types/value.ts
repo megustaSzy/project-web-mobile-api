@@ -2,6 +2,7 @@ export interface ValueItem {
   id: number;
   header: string;
   name: string;
+  imageUrl: string | null; // 🔥 WAJIB nullable (API real sering null)
   createdAt: string;
   updatedAt: string;
 }
