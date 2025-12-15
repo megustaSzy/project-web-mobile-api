@@ -5,6 +5,10 @@ export interface ApiDestinationItem {
   imageUrl: string | null;
   description: string | null;
   price: number;
+  region: string;
+  include: string[];
+  ketentuan: string[];
+  perhatian: string[];
   categoryId: number;
   category: {
     id: number;
@@ -31,7 +35,14 @@ export interface DestinationsType {
   id: number; 
   name: string;
   imageUrl: string | null; 
-  desc: string;
+  description: string;
   price: number;
-  category: string;
-}
+   include: string[];
+  ketentuan: string[];
+  perhatian: string[];
+  category: {
+    id: number;
+    name: string;
+  };
+  region: string;
+};
