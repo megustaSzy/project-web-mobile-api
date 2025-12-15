@@ -61,12 +61,15 @@ model tb_refreshToken {
 }
 
 model tb_destinations {
-  id          Int    @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   name        String
   // location    String      
   imageUrl    String
   description String
   price       Int
+  include     String[]
+  ketentuan   String[]
+  perhatian   String[]
 
   categoryId Int
   category   tb_category @relation(fields: [categoryId], references: [id])

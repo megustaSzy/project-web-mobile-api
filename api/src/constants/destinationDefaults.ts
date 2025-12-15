@@ -5,9 +5,8 @@ export const DEFAULT_INCLUDE = [
 ];
 
 export const DEFAULT_KETENTUAN = [
-  "Tidak bisa refund",
-  "Datang tepat waktu",
-  "Minimal peserta 10 orang"
+  "Max 16 User",
+  "12 Hours Duration"
 ];
 
 export const DEFAULT_PERHATIAN = [
