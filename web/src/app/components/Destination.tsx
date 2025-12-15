@@ -132,19 +132,19 @@ export default function DestinasiSection() {
                       <span>{d.category}</span>
                     </div>
 
-                    <p className="text-gray-600 text-sm mb-4">{d.desc}</p>
+                    {/* <p className="text-gray-600 text-sm mb-4">{d.desc}</p> */}
 
                     <div className="flex justify-between items-center">
-                      <button
+                      {/* <button
                         onClick={() => router.push(`/pesan?id=${d.id}`)}
                         className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-all duration-300"
                       >
                         Pesan Sekarang
-                      </button>
+                      </button> */}
 
-                      <p className="text-gray-800 font-medium text-sm">
+                      {/* <p className="text-gray-800 font-medium text-sm">
                         Rp.{Number(d.price).toLocaleString("id-ID")},-
-                      </p>
+                      </p> */}
                     </div>
                   </div>
                 </div>
