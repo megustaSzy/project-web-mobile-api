@@ -7,12 +7,11 @@ const router = Router();
 
 // tampil di website (hanya APPROVED)
 router.get("/", testimoniController.getApproved);
+router.get("/:id", testimoniController.getById);
 
-// user add
 router.post("/", authMiddleware, testimoniController.create);
 
-
-router.delete("/:id", authMiddleware, testimoniController.delete ); // bisa user sendiri atau admin (optional logic)
+router.delete("/:id", authMiddleware, authorizeRoles("Admin"), testimoniController.delete ); 
 
 router.get("/admin", authMiddleware, authorizeRoles("Admin"), testimoniController.getAll);
 
@@ -24,6 +23,5 @@ router.patch("/admin/:id/approve", authMiddleware, authorizeRoles("Admin"), test
 
 router.patch("/admin/:id/reject", authMiddleware, authorizeRoles("Admin"), testimoniController.reject);
 
-router.get("/:id", testimoniController.getById);
 
 export default router;

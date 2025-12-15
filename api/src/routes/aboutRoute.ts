@@ -3,6 +3,7 @@ import { aboutController } from "../controllers/aboutController";
 import { authMiddleware } from "../middlewares/authMiddleware";
 import { authorizeRoles } from "../middlewares/roleMiddleware";
 import { valueController } from "../controllers/valueController";
+import { upload } from "../middlewares/uploadMiddleware";
 
 
 const router = Router();
@@ -16,8 +17,8 @@ router.put("/:id", authMiddleware, authorizeRoles("Admin"), aboutController.upda
 router.delete("/:id", authMiddleware, authorizeRoles("Admin"), aboutController.deleteAbout);
 
 router.get("/value/:id", authMiddleware, authorizeRoles("Admin"), valueController.getValueById);
-router.post("/value", authMiddleware, authorizeRoles("Admin"), valueController.createValue);
-router.put("/value/:id", authMiddleware, authorizeRoles("Admin"), valueController.editById);
+router.post("/value", authMiddleware, authorizeRoles("Admin"), upload.single("image"), valueController.createValue);
+router.put("/value/:id", authMiddleware, authorizeRoles("Admin"), upload.single("image"), valueController.editById);
 router.delete("/value/:id", authMiddleware, authorizeRoles("Admin"), valueController.deleteById);
 
 

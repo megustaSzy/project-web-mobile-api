@@ -30,7 +30,11 @@ export const valueController = {
 
   async createValue(req: Request, res: Response) {
     try {
-      const value = await valueService.createValue(req.body);
+      const image = req.file ? `/uploads/${req.file.filename}` : null;
+      const value = await valueService.createValue({
+        ...req.body,
+        imageUrl: image,
+      });
 
       return ResponseData.created(res, value);
     } catch (error) {
@@ -41,10 +45,14 @@ export const valueController = {
   async editById(req: Request, res: Response) {
     try {
       const id = Number(req.params.id);
+      const image = req.file ? `/uploads/${req.file.filename}` : null;
 
       if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
 
-      const updateValue = await valueService.editValue(id, req.body);
+      const updateValue = await valueService.editValue(id, {
+        ...req.body,
+        imageUrl: image,
+      });
 
       return ResponseData.ok(res, updateValue);
     } catch (error) {
