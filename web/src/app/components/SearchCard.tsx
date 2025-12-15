@@ -112,10 +112,10 @@ export default function SearchCard() {
           <p className="text-sm text-gray-400">Lokasi Kamu</p>
           <h2 className="text-xl font-semibold text-gray-800">{location}</h2>
         </div>
-
+{/* 
         <button className="h-10 flex items-end text-sm text-gray-500 hover:text-blue-600 transition font-medium">
           Cari Histori &gt;
-        </button>
+        </button> */}
       </div>
 
       {/* FORM GRID */}
