@@ -192,9 +192,12 @@ export default function DestinasiSection() {
                           setSelectedData(d);
                           setOpenModal(true);
                         }}
-                        className="text-blue-600 text-sm cursor-pointer hover:underline"
+                        className="group flex items-center gap-1 text-blue-600 text-sm cursor-pointer font-medium hover:underline"
                       >
-                        Detail
+                        Lihat Detail
+                        <span className="transition-transform duration-200 group-hover:translate-x-1">
+                          →
+                        </span>
                       </span>
                     </div>
                   </div>
