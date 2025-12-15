@@ -122,7 +122,7 @@ export default function DestinasiSection() {
       <img
         src="/images/destinasi.svg"
         alt="Background"
-        className="absolute inset-0 w-full h-full object-cover opacity-5"
+        className="absolute inset-0 w-full h-full object-cover opacity-2"
       />
 
       <div className="relative z-10 max-w-6xl mx-auto px-4 pt-[150px] pb-10 text-center">
