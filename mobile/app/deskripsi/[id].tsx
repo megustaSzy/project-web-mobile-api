@@ -17,10 +17,16 @@ type DestinationDetailType = {
   price: number;
   imageUrl: string;
   description: string;
+
+  include: string[];
+  ketentuan: string[];
+  perhatian: string[];
+
   category?: {
     name: string;
   };
 };
+
 
 export default function DestinationDetail() {
   const router = useRouter();
@@ -36,20 +42,20 @@ export default function DestinationDetail() {
   // FETCH DETAIL DESTINATION
   // =============================
   const fetchDetail = async () => {
-    try {
-      const res = await fetch(`${BASE_URL}/api/destinations/${id}`);
-      const json = await res.json();
+  try {
+    const res = await fetch(`${BASE_URL}/api/destinations/${id}`);
+    const json = await res.json();
 
-      if (json.data) {
-        setDetail(json.data);
-      }
-
-      setLoading(false);
-    } catch (error) {
-      console.log("DETAIL ERROR:", error);
-      setLoading(false);
+    if (json.data) {
+      setDetail(json.data);
     }
-  };
+
+    setLoading(false);
+  } catch (error) {
+    console.log("DETAIL ERROR:", error);
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchDetail();
@@ -90,57 +96,76 @@ export default function DestinationDetail() {
           <Text style={styles.location}>{detail.location}</Text>
 
           {/* Info Row */}
-          <View style={styles.infoRow}>
+          {/* <View style={styles.infoRow}>
             <View style={styles.infoBoxLeft}>
               <Text style={styles.infoText}>Kategori: {detail.category?.name}</Text>
             </View>
             <View style={styles.infoBoxRight}>
               <Text style={styles.infoText}>Harga: IDR {detail.price}</Text>
             </View>
-          </View>
+          </View> */}
+
+            {/* Deskripsi API */}
+            <Text style={styles.subTitle}>Deskripsi</Text>
+            <Text style={styles.description}>{detail.description}</Text>
 
           {/* Include */}
           <Text style={styles.subTitle}>Include</Text>
           <View style={styles.includeRow}>
-            <View style={styles.includeItem}><Text style={styles.includeText}>Travel Pulang Pergi</Text></View>
-            <View style={styles.includeItem}><Text style={styles.includeText}>Tiket Masuk</Text></View>
-            <View style={styles.includeItem}><Text style={styles.includeText}>Snack LamiGo</Text></View>
+            {detail.include.map((item, index) => (
+              <View key={index} style={styles.includeItem}>
+                <Text style={styles.includeText}>{item}</Text>
+              </View>
+            ))}
           </View>
 
-          {/* Deskripsi API */}
-          <Text style={styles.subTitle}>Deskripsi</Text>
-          <Text style={styles.description}>{detail.description}</Text>
+
+          <Text style={styles.subTitle}>Ketentuan</Text>
+          <View style={styles.includeRow}>
+            {detail.ketentuan.map((item, index) => (
+              <View key={index} style={styles.includeItem}>
+                <Text style={styles.includeText}>{item}</Text>
+              </View>
+            ))}
+          </View>
+
 
           {/* Perhatian */}
           <Text style={styles.subTitle}>Perhatian</Text>
           <View style={styles.noticeBox}>
-            <Text style={styles.noticeText}>- Datang 30 menit sebelum pemberangkatan.</Text>
-            <Text style={styles.noticeText}>- LamiGo hanya penyedia travel dan tiket destinasi.</Text>
-            <Text style={styles.noticeText}>- Kejadian apapun saat ditempat wisata bukan tanggung jawab LamiGo.</Text>
+            {detail.perhatian.map((item, index) => (
+              <Text key={index} style={styles.noticeText}>
+                - {item}
+              </Text>
+            ))}
           </View>
+
         </View>
       </ScrollView>
 
       {/* BUTTON PESAN */}
       <View style={styles.bottomContainer}>
+        {/* HARGA */}
+        <Text style={styles.priceText}>
+          Harga  IDR {Number(detail.price).toLocaleString("id-ID")},-
+        </Text>
+
+        {/* BUTTON PESAN */}
         <TouchableOpacity
           style={styles.orderBtn}
           onPress={() =>
             router.push({
-  pathname: "../pesan/[id]",
-  params: { 
-    id: detail.id,
-    title: detail.name,
-    location: detail.location,
-    price: detail.price,
-    imageUrl: detail.imageUrl   // ⬅️ WAJIB dikirim!
-  },
-})
-
-          }
-        >
+              pathname: "../pesan/[id]",
+              params: {
+                id: detail.id,
+                title: detail.name,
+                location: detail.location,
+                price: detail.price,
+                imageUrl: detail.imageUrl,
+              },
+            })
+          }>
           <Text style={styles.orderText}>Pesan Sekarang</Text>
-          <Text style={styles.orderPrice}>IDR {detail.price},-</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -193,14 +218,30 @@ const styles = StyleSheet.create({
   },
   infoText: { color: "#fff", fontSize: 13 },
 
-  subTitle: { fontSize: 16, fontWeight: "600", marginBottom: 10 },
-
+  
   includeRow: { flexDirection: "row", flexWrap: "wrap", marginBottom: 25, gap: 15 },
-  includeItem: { backgroundColor: "#F8F8F8", paddingVertical: 6, paddingHorizontal: 14, borderRadius: 8, elevation: 1, justifyContent: "center", alignItems: "center" },
+  includeItem: { backgroundColor: "#F8F8F8", paddingVertical: 6, paddingHorizontal: 12, borderRadius: 8, elevation: 1, justifyContent: "center", alignItems: "center" },
   includeText: { fontSize: 12, color: "#333", fontWeight: "600" },
+  
+subTitle: {
+  fontSize: 16,
+  fontWeight: "600",
+  marginBottom: 10,
+  color: "#111",
+},
 
-  noticeBox: { backgroundColor: "#FFF4E5", padding: 15, borderRadius: 12, marginBottom: 20 },
-  noticeText: { fontSize: 13, color: "#FF8000", marginBottom: 6 },
+noticeBox: {
+  paddingVertical: 6,
+  marginBottom: 20,
+},
+
+noticeText: {
+  fontSize: 14,
+  color: "#333",
+  marginBottom: 6,
+  lineHeight: 20,
+},
+
 
   description: { color: "#6C6C6C", lineHeight: 20, marginBottom: 20 },
 
@@ -210,15 +251,37 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingHorizontal: 20,
   },
-  orderBtn: {
-    backgroundColor: "#2F80ED",
-    paddingVertical: 15,
-    borderRadius: 40,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    alignItems: "center",
-  },
-  orderText: { color: "#fff", fontSize: 15, fontWeight: "bold" },
+  // orderBtn: {
+  //   backgroundColor: "#2F80ED",
+  //   paddingVertical: 15,
+  //   borderRadius: 40,
+  //   flexDirection: "row",
+  //   justifyContent: "space-between",
+  //   paddingHorizontal: 20,
+  //   alignItems: "center",
+  // },
+  // orderText: { color: "#fff", fontSize: 15, fontWeight: "bold" },
   orderPrice: { color: "#fff", fontWeight: "bold" },
+
+  priceText: {
+  fontSize: 15,
+  fontWeight: "400",
+  color: "#111",
+  marginBottom: 12,
+  textAlign: "left",
+},
+
+orderBtn: {
+  backgroundColor: "#2F80ED",
+  paddingVertical: 15,
+  borderRadius: 40,
+  alignItems: "center",
+},
+
+orderText: {
+  color: "#fff",
+  fontSize: 15,
+  fontWeight: "bold",
+},
+
 });
