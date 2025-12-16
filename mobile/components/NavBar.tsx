@@ -128,7 +128,7 @@ export default function NavBarMobile() {
         <View style={styles.menu}>
           {isLoggedIn ? (
             <TouchableOpacity onPress={handleLogout} style={styles.menuItem}>
-              <Text style={styles.menuText}>Logout</Text>
+              <Text style={styles.menuItem}>Logout</Text>
             </TouchableOpacity>
           ) : (
             <>
@@ -137,9 +137,9 @@ export default function NavBarMobile() {
                   setOpen(false);
                   router.push("../auth/login/page");
                 }}
-                style={styles.loginBtn}
+                style={styles.loginBtnFull}
               >
-                <Text style={styles.loginText}>Masuk</Text>
+                <Text style={styles.loginTxtWhite}>Masuk</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -149,7 +149,7 @@ export default function NavBarMobile() {
                 }}
                 style={styles.signupBtn}
               >
-                <Text style={styles.signupText}>Daftar</Text>
+                <Text style={styles.signupTxt}>Daftar</Text>
               </TouchableOpacity>
             </>
           )}
