@@ -1,20 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { MapPin, Calendar, Clock, Users, CheckCircle } from "lucide-react";
+import { MapPin, Calendar, Clock, User } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
 import { apiFetch } from "@/helpers/api";
-
-type DestinationItem = {
-  id: number;
-  name: string;
-  location: string;
-  image: string | null;
-  desc: string;
-  price: number;
-};
+import { DestinationsType } from "@/types/destination";
 
 type ApiResponse<T> = {
   status: number;
@@ -24,225 +15,228 @@ type ApiResponse<T> = {
 
 export default function PesanPage() {
   const searchParams = useSearchParams();
-  const destId = Number(searchParams.get("id"));
+  const destinationId = Number(searchParams.get("destinationId"));
 
-  const [selectedDest, setSelectedDest] = useState<DestinationItem | null>(null);
+  const [destination, setDestination] =
+    useState<DestinationsType | null>(null);
   const [loading, setLoading] = useState(true);
 
   const [pickup, setPickup] = useState("");
   const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
+  const [departTime, setDepartTime] = useState("");
+  const [returnTime, setReturnTime] = useState("");
   const [people, setPeople] = useState(1);
 
-  const [success, setSuccess] = useState(false);
+  const dateRef = useRef<HTMLInputElement>(null);
+  const departRef = useRef<HTMLInputElement>(null);
+  const returnRef = useRef<HTMLInputElement>(null);
 
-  // =====================================
-  // 🔥 AMBIL DATA DESTINASI BY ID
-  // =====================================
+  /* ================= FETCH ================= */
   useEffect(() => {
-    const fetchDestination = async () => {
-      try {
-        const res: ApiResponse<DestinationItem> = await apiFetch(
-          `/api/destinations/${destId}`
-        );
+    if (!destinationId) return;
 
-        setSelectedDest(res.data);
-      } catch (error) {
-        console.error("Gagal memuat destinasi:", error);
+    const fetchData = async () => {
+      try {
+        const res: ApiResponse<DestinationsType> =
+          await apiFetch(`/api/destinations/${destinationId}`);
+        setDestination(res.data);
+      } catch (e) {
+        console.error(e);
       } finally {
         setLoading(false);
       }
     };
 
-    if (destId) fetchDestination();
-  }, [destId]);
+    fetchData();
+  }, [destinationId]);
 
-  // =====================================
-  // 🔥 URL GAMBAR (ANTI ERROR)
-  // =====================================
-  const getImageUrl = (path: string | null | undefined) => {
-    if (!path) return "/images/default.jpg";
+  if (loading) return <p className="text-center mt-20">Loading...</p>;
+  if (!destination)
+    return <p className="text-center mt-20">Destinasi tidak ditemukan</p>;
 
-    if (path.startsWith("http")) return path;
+  const imageUrl = destination.imageUrl
+    ? `${process.env.NEXT_PUBLIC_API_URL}${destination.imageUrl}`
+    : "/images/default.jpg";
 
-    return `http://localhost:3001${path}`;
-  };
+  const totalPrice = destination.price * people;
 
-  // =====================================
-  // 🔥 SUBMIT ORDER KE API
-  // =====================================
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  /* ================= SUBMIT ================= */
+  const handleSubmit = async () => {
+    await apiFetch("/api/orders", {
+      method: "POST",
+      body: JSON.stringify({
+        destinationId: destination.id,
+        pickup,
+        date,
+        departTime,
+        returnTime,
+        people,
+      }),
+    });
 
-    try {
-      await apiFetch("/api/orders", {
-        method: "POST",
-        body: JSON.stringify({
-          destinationId: selectedDest?.id,
-          pickup,
-          date,
-          time,
-          people,
-        }),
-      });
-
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 3000);
-    } catch (error) {
-      console.error("Gagal mengirim pesanan:", error);
-      alert("Gagal membuat pesanan!");
-    }
+    alert("Pesanan berhasil 🎉");
   };
 
   return (
-    <section className="relative w-full min-h-screen bg-gradient-to-b from-blue-100 via-white to-blue-50 flex items-center justify-center py-20 px-4">
-      <div className="relative z-10 w-full max-w-xl bg-white/80 backdrop-blur-xl border border-white/40 shadow-xl rounded-3xl p-10">
+    <main className="min-h-screen bg-neutral-100 flex justify-center px-4 py-8">
+      <div className="w-full max-w-sm bg-white rounded-2xl shadow overflow-hidden">
 
-        {/* LOADING */}
-        {loading && <p className="text-center text-gray-500">Memuat destinasi...</p>}
+        {/* IMAGE */}
+        <div className="relative h-36">
+          <Image
+            src={imageUrl}
+            alt={destination.name}
+            fill
+            unoptimized
+            className="object-cover"
+          />
+        </div>
 
-        {!loading && selectedDest ? (
-          <>
-            {/* HEADER */}
-            <div className="flex flex-col items-center text-center mb-10">
-              <div className="relative w-44 h-44 rounded-2xl overflow-hidden shadow-lg mb-5">
-                <Image
-                  unoptimized
-                  src={getImageUrl(selectedDest.image)}
-                  alt={selectedDest.name}
-                  fill
-                  className="object-cover"
-                />
-              </div>
+        <div className="p-5 space-y-4">
 
-              <h1 className="text-3xl font-semibold text-gray-800">{selectedDest.name}</h1>
-              <p className="text-gray-500 text-sm">{selectedDest.location}</p>
-              <p className="text-gray-600 text-sm mt-3 leading-relaxed max-w-md">
-                {selectedDest.desc}
-              </p>
-            </div>
+          {/* TITLE */}
+          <div>
+            <h1 className="text-base font-semibold">{destination.name}</h1>
+            <p className="flex items-center gap-1 text-xs text-neutral-500">
+              <MapPin size={12} />
+              {destination.category.name}
+            </p>
+          </div>
 
-            {/* FORM */}
-            <form onSubmit={handleSubmit} className="space-y-6">
-              
-              {/* Lokasi Penjemputan */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-600">Lokasi Penjemputan</label>
-                <div className="flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3 bg-white shadow-sm">
-                  <MapPin className="w-4 h-4 text-gray-400" />
-                  <select
-                    value={pickup}
-                    onChange={(e) => setPickup(e.target.value)}
-                    required
-                    className="w-full bg-transparent outline-none text-gray-700 text-sm"
-                  >
-                    <option value="">Pilih lokasi</option>
-                    <option value="Terminal Rajabasa">Terminal Rajabasa</option>
-                    <option value="Terminal Kemiling">Terminal Kemiling</option>
-                    <option value="Stasiun Tanjung Karang">Stasiun Tanjung Karang</option>
-                  </select>
-                </div>
-              </div>
+          {/* INFO */}
+          <div className="flex justify-between bg-blue-600 text-white text-xs rounded-full px-4 py-2">
+            <span>Max 16 User</span>
+            <span>12 Hours Duration</span>
+          </div>
 
-              {/* Tanggal & Jam */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-600">Tanggal</label>
-                  <div className="flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3 bg-white shadow-sm">
-                    <Calendar className="w-4 h-4 text-gray-400" />
-                    <input
-                      type="date"
-                      value={date}
-                      onChange={(e) => setDate(e.target.value)}
-                      required
-                      className="w-full bg-transparent outline-none text-sm text-gray-700"
-                    />
-                  </div>
-                </div>
+          {/* FORM */}
+          <div className="space-y-3 text-sm">
 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-600">Jam</label>
-                  <div className="flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3 bg-white shadow-sm">
-                    <Clock className="w-4 h-4 text-gray-400" />
-                    <input
-                      type="text"
-                      value={time}
-                      onChange={(e) => setTime(e.target.value)}
-                      placeholder="07.00 - 16.00"
-                      required
-                      className="w-full bg-transparent outline-none text-sm text-gray-700"
-                    />
-                  </div>
-                </div>
-
-              </div>
-
-              {/* Jumlah Tiket */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-600">Jumlah Tiket</label>
-                <div className="flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3 bg-white shadow-sm">
-                  <Users className="w-4 h-4 text-gray-400" />
-                  <input
-                    type="number"
-                    min="1"
-                    max="16"
-                    value={people}
-                    onChange={(e) => setPeople(Number(e.target.value))}
-                    required
-                    className="w-full bg-transparent outline-none text-sm text-gray-700"
-                  />
-                </div>
-              </div>
-
-              {/* SUBMIT */}
-              <button
-                type="submit"
-                className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-xl shadow-md transition-all"
+            <Label>Pilih lokasi penjemputan</Label>
+            <Field icon={<MapPin size={16} />}>
+              <select
+                value={pickup}
+                onChange={(e) => setPickup(e.target.value)}
+                className="w-full bg-transparent outline-none text-sm"
               >
-                Konfirmasi Pesanan
-              </button>
-            </form>
-          </>
-        ) : (
-          !loading && (
-            <div className="text-center text-gray-600">
-              <p className="text-lg font-medium">🚫 Destinasi tidak ditemukan</p>
-              <p className="text-sm text-gray-500 mt-2">
-                Silakan kembali ke halaman utama untuk memilih destinasi.
-              </p>
-            </div>
-          )
-        )}
-      </div>
+                <option value="">Lokasi Penjemputan</option>
+                <option value="Terminal Rajabasa">Terminal Rajabasa</option>
+                <option value="Stasiun Tanjung Karang">
+                  Stasiun Tanjung Karang
+                </option>
+              </select>
+            </Field>
 
-      {/* POPUP SUCCESS */}
-      <AnimatePresence>
-        {success && (
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 30 }}
-            className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50"
-          >
-            <motion.div
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.9 }}
-              className="bg-white rounded-2xl shadow-xl p-8 text-center max-w-sm w-full"
+            <Label>Pilih tanggal</Label>
+            <Field
+              icon={<Calendar size={16} />}
+              onIconClick={() => dateRef.current?.showPicker()}
             >
-              <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-3" />
-              <h2 className="text-lg font-semibold text-gray-800">
-                Pesanan Berhasil!
-              </h2>
-              <p className="text-sm text-gray-600 mt-1">
-                Pesananmu telah dikonfirmasi 🎉
-              </p>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              <input
+                ref={dateRef}
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="w-full bg-transparent outline-none text-sm
+                  [&::-webkit-calendar-picker-indicator]:opacity-0"
+              />
+            </Field>
 
-    </section>
+            <Label>Pilih waktu keberangkatan</Label>
+            <Field
+              icon={<Clock size={16} />}
+              onIconClick={() => departRef.current?.showPicker()}
+            >
+              <input
+                ref={departRef}
+                type="time"
+                value={departTime}
+                onChange={(e) => setDepartTime(e.target.value)}
+                className="w-full bg-transparent outline-none text-sm
+                  [&::-webkit-calendar-picker-indicator]:opacity-0"
+              />
+            </Field>
+
+            <Label>Pilih waktu kepulangan</Label>
+            <Field
+              icon={<Clock size={16} />}
+              onIconClick={() => returnRef.current?.showPicker()}
+            >
+              <input
+                ref={returnRef}
+                type="time"
+                value={returnTime}
+                onChange={(e) => setReturnTime(e.target.value)}
+                className="w-full bg-transparent outline-none text-sm
+                  [&::-webkit-calendar-picker-indicator]:opacity-0"
+              />
+            </Field>
+
+            <Label>Jumlah tiket</Label>
+            <Field icon={<User size={16} />}>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setPeople(Math.max(1, people - 1))}
+                  className="w-8 h-8 rounded-full bg-neutral-100 flex items-center justify-center text-lg hover:bg-neutral-200"
+                >
+                  −
+                </button>
+
+                <span className="font-medium w-4 text-center">{people}</span>
+
+                <button
+                  type="button"
+                  onClick={() => setPeople(Math.min(16, people + 1))}
+                  className="w-8 h-8 rounded-full bg-neutral-100 flex items-center justify-center text-lg hover:bg-neutral-200"
+                >
+                  +
+                </button>
+              </div>
+            </Field>
+
+          </div>
+
+          {/* PAY */}
+          <button
+            onClick={handleSubmit}
+            className="w-full flex justify-between items-center bg-blue-600 text-white py-3 px-5 rounded-xl text-sm font-medium"
+          >
+            <span>Bayar Sekarang</span>
+            <span>IDR {totalPrice.toLocaleString("id-ID")}</span>
+          </button>
+
+        </div>
+      </div>
+    </main>
+  );
+}
+
+/* ================= UI PARTS ================= */
+
+function Label({ children }: { children: string }) {
+  return <p className="text-xs text-neutral-500">{children}</p>;
+}
+
+function Field({
+  icon,
+  children,
+  onIconClick,
+}: {
+  icon: React.ReactNode;
+  children: React.ReactNode;
+  onIconClick?: () => void;
+}) {
+  return (
+    <div className="flex items-center gap-3 border border-neutral-200 rounded-full px-4 py-2">
+      <button
+        type="button"
+        onClick={onIconClick}
+        className="text-neutral-400"
+      >
+        {icon}
+      </button>
+      {children}
+    </div>
   );
 }

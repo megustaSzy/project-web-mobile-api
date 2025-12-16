@@ -2,83 +2,46 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { MapPin } from "lucide-react";
 import { apiFetch } from "@/helpers/api";
 import { ApiDestinationsResponse, DestinationsType } from "@/types/destination";
 import { ApiCategoryResponse, CategoryItem } from "@/types/category";
 import DestinationModal from "./DestinationModal";
 
-/* =======================
-   REGION TYPE
-======================= */
-type RegionItem = {
-  id: number;
-  name: string;
-};
-
-type ApiRegionResponse = {
-  status: number;
-  data: RegionItem[];
-};
-
 export default function DestinasiSection() {
   const [data, setData] = useState<DestinationsType[]>([]);
   const [categories, setCategories] = useState<CategoryItem[]>([]);
-  const [regions, setRegions] = useState<RegionItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<string>("");
 
-  /* =======================
-     MODAL STATE
-  ======================= */
   const [openModal, setOpenModal] = useState(false);
   const [selectedData, setSelectedData] = useState<DestinationsType | null>(
     null
   );
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL; // pastikan di .env
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-  /* =======================
-     LOAD CATEGORY
-  ======================= */
+  /* LOAD CATEGORY */
   const loadCategories = useCallback(async () => {
     try {
-      const res = await apiFetch<ApiCategoryResponse>(`${API_URL}/api/category`);
-      setCategories(res.data.items);
+      const res = await apiFetch<ApiCategoryResponse>("/api/category");
+      const items = res.data.items ?? [];
+      setCategories(items);
 
-      if (res.data.items.length > 0) {
-        setActiveCategory(res.data.items[0].name);
+      if (items.length > 0) {
+        setActiveCategory(items[0].name);
       }
-    } catch (err) {
-      console.error("Gagal fetch kategori:", err);
+    } catch {
       setCategories([]);
     }
-  }, [API_URL]);
+  }, []);
 
-  /* =======================
-     LOAD REGION
-  ======================= */
-  const loadRegions = useCallback(async () => {
-    try {
-      const res = await apiFetch<ApiRegionResponse>(`${API_URL}/api/region/regencies/19`);
-      setRegions(res.data ?? []);
-    } catch (err) {
-      console.error("Gagal fetch region:", err);
-      setRegions([]);
-    }
-  }, [API_URL]);
-
-  /* =======================
-     LOAD DESTINATIONS
-  ======================= */
+  /* LOAD DESTINATIONS */
   const loadDestinations = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await apiFetch<ApiDestinationsResponse>(`${API_URL}/api/destinations`);
+      const res = await apiFetch<ApiDestinationsResponse>("/api/destinations");
 
-      const items = res.data.items;
-
-      const mapped: DestinationsType[] = items.map((it) => ({
+      const mapped: DestinationsType[] = res.data.items.map((it) => ({
         id: it.id,
         name: it.name ?? "Tanpa Nama",
         imageUrl: it.imageUrl,
@@ -87,39 +50,23 @@ export default function DestinasiSection() {
         include: it.include ?? [],
         ketentuan: it.ketentuan ?? [],
         perhatian: it.perhatian ?? [],
-        category: {
-          id: it.category?.id ?? 0,
-          name: it.category?.name ?? "Tidak diketahui",
-        },
-        region: it.region ?? { id: 0, name: "Tidak diketahui" },
+        category: it.category!,
+        region: it.region!, // ✅ BIARKAN DARI API
       }));
 
       setData(mapped);
-    } catch (err) {
-      console.error("Gagal fetch destinasi:", err);
+    } catch {
       setData([]);
     } finally {
       setLoading(false);
     }
-  }, [API_URL]);
+  }, []);
 
-  /* =======================
-     EFFECT
-  ======================= */
   useEffect(() => {
     loadCategories();
-    loadRegions();
-  }, [loadCategories, loadRegions]);
+    loadDestinations();
+  }, [loadCategories, loadDestinations]);
 
-  useEffect(() => {
-    if (regions.length > 0) {
-      loadDestinations();
-    }
-  }, [regions, loadDestinations]);
-
-  /* =======================
-     RENDER
-  ======================= */
   return (
     <section className="relative w-full bg-linear-to-b from-[#a7c8e7] to-[#f2f6f9] overflow-hidden">
       <img
@@ -133,9 +80,7 @@ export default function DestinasiSection() {
           Tujuan Wisata Favorit
         </h2>
 
-        {/* =======================
-            CATEGORY
-        ======================= */}
+        {/* CATEGORY */}
         <div className="flex justify-center flex-wrap gap-4 mb-12">
           {categories.map((cat) => {
             const active = activeCategory === cat.name;
@@ -155,15 +100,13 @@ export default function DestinasiSection() {
           })}
         </div>
 
-        {/* =======================
-            GRID
-        ======================= */}
+        {/* GRID */}
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {loading ? (
             <p className="col-span-3 text-gray-500">Loading...</p>
           ) : (
             data
-              .filter((d) => d.category?.name === activeCategory)
+              .filter((d) => d.category && d.category?.name === activeCategory)
               .map((d) => (
                 <div
                   key={d.id}
@@ -184,10 +127,10 @@ export default function DestinasiSection() {
                   <div className="p-5 text-left">
                     <h3 className="font-semibold text-lg mb-1">{d.name}</h3>
 
-                    <div className="flex items-center gap-1 text-sm text-gray-500 mb-3">
-                      <MapPin size={14} />
-                      <span>{d.region.name}</span>
-                    </div>
+                    {/* REGION TERBACA */}
+                    <p className="text-sm text-gray-500 mb-4">
+                      {d.region?.name ?? "Lokasi tidak diketahui"}
+                    </p>
 
                     <div className="flex justify-end">
                       <span
@@ -195,12 +138,9 @@ export default function DestinasiSection() {
                           setSelectedData(d);
                           setOpenModal(true);
                         }}
-                        className="group flex items-center gap-1 text-blue-600 text-sm cursor-pointer font-medium hover:underline"
+                        className="text-blue-600 text-sm cursor-pointer font-medium hover:underline"
                       >
-                        Lihat Detail
-                        <span className="transition-transform duration-200 group-hover:translate-x-1">
-                          →
-                        </span>
+                        Lihat Detail →
                       </span>
                     </div>
                   </div>
@@ -210,9 +150,6 @@ export default function DestinasiSection() {
         </div>
       </div>
 
-      {/* =======================
-          MODAL DETAIL
-      ======================= */}
       <DestinationModal
         open={openModal}
         data={selectedData}

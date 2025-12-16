@@ -48,7 +48,7 @@ export default function DestinationModal({
             <h3 className="text-xl font-semibold">{data.name}</h3>
             <div className="flex items-center gap-1 text-sm opacity-90">
               <MapPin size={14} />
-              <span>{data.category.name}</span>
+              <span>{data.region?.name ?? "Lokasi tidak diketahui"}</span>
             </div>
           </div>
         </div>
@@ -116,7 +116,7 @@ export default function DestinationModal({
             <button
               onClick={() => {
                 onClose();
-                router.push(`/pesan`);
+                router.push(`/pesan?destinationId=${data.id}`);
               }}
               className="px-6 py-2 rounded-full bg-blue-600 text-white text-sm hover:bg-blue-700 transition"
             >
