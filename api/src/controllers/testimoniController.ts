@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { testimoniService } from "../services/testimoniService";
 import { ResponseData } from "../utilities/Response";
+import { testimoniSchema } from "../schemas/testimoniSchema";
 
 export const testimoniController = {
   async getAll(req: Request, res: Response) {
@@ -60,12 +61,15 @@ export const testimoniController = {
 
   async create(req: Request, res: Response) {
     try {
-      const userId = (req as any).user.id;
+      const parsed = testimoniSchema.safeParse(req.body);
 
-      const testimoni = await testimoniService.createTestimoni(
-        userId,
-        req.body
-      );
+      if (!parsed.success) {
+        return ResponseData.badRequest(res, "Validasi input gagal");
+      }
+
+      const testimoni = await testimoniService.createTestimoni({
+        ...parsed.data
+      });
 
       return ResponseData.created(res, testimoni);
     } catch (error) {
@@ -122,13 +126,13 @@ export const testimoniController = {
     try {
       const id = Number(req.params.id);
 
-      if(isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
+      if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
 
       const testimoni = await testimoniService.rejectedTestimoni(id);
 
-      return ResponseData.ok(res, testimoni)
+      return ResponseData.ok(res, testimoni);
     } catch (error) {
-      return ResponseData.serverError(res, error)
+      return ResponseData.serverError(res, error);
     }
-  }
+  },
 };

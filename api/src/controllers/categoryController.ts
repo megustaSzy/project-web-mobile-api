@@ -5,7 +5,6 @@ import { ResponseData } from "../utilities/Response";
 export const categoryController = {
   async getCategory(req: Request, res: Response) {
     try {
-
       const page = Number(req.query.page) || 1;
       const limit = Number(req.query.limit) || 10;
 
@@ -35,7 +34,9 @@ export const categoryController = {
     try {
       const { name } = req.body;
 
-      if (!name) return ResponseData.badRequest(res, "nama wajib diisi");
+      if (!name) {
+        return ResponseData.badRequest(res, "nama wajib diisi");
+      }
 
       const category = await categoryService.addCategory({ name });
 
@@ -48,15 +49,14 @@ export const categoryController = {
   async updateCategory(req: Request, res: Response) {
     try {
       const id = Number(req.params.id);
-  
-      if(isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
-  
+
+      if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
+
       const category = await categoryService.editCategory(id, req.body);
-  
+
       return ResponseData.ok(res, category);
-      
     } catch (error) {
-      return ResponseData.serverError(res, error)
+      return ResponseData.serverError(res, error);
     }
   },
 

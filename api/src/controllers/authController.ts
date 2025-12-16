@@ -1,20 +1,30 @@
 import { ResponseData } from "../utilities/Response";
 import { authService } from "../services/authService";
 import { Request, Response } from "express";
+import { loginSchema, registerSchema } from "../schemas/authSchema";
 
 export const authController = {
   async register(req: Request, res: Response) {
-    try {
-      const user = await authService.registerUser(req.body);
-      return ResponseData.created(res, user, "registrasi berhasil");
-    } catch (error: any) {
-      return ResponseData.badRequest(res, error.message);
-    }
-  },
+    const result = registerSchema.safeParse(req.body);
 
+    if (!result.success) {
+      return ResponseData.badRequest(res, result.error.issues[0].message);
+    }
+
+    const user = await authService.registerUser(result.data);
+
+    return ResponseData.created(res, user, "registrasi berhasil");
+  },
   async login(req: Request, res: Response) {
+    const result = loginSchema.safeParse(req.body);
+
+    if (!result.success) {
+      return ResponseData.badRequest(res, result.error.issues[0].message);
+    }
+
+    const { email, password } = result.data;
+
     try {
-      const { email, password } = req.body;
       const { user, accessToken, refreshToken } = await authService.loginUser(
         email,
         password
@@ -100,7 +110,6 @@ export const authController = {
       const redirectUrl = `${process.env.FRONTEND_URL}/login?accessToken=${accessToken}&refreshToken=${refreshToken}`;
 
       return res.redirect(redirectUrl);
-      
     } catch (err: any) {
       return ResponseData.serverError(res, err.message);
     }
@@ -114,7 +123,7 @@ export const authController = {
 
       return ResponseData.ok(res, result, "link password telah dikirim");
     } catch (error) {
-      return ResponseData.serverError(res, error)
+      return ResponseData.serverError(res, error);
     }
   },
 
@@ -126,7 +135,7 @@ export const authController = {
       const result = await authService.verifySession(sessionToken);
       return ResponseData.ok(res, result, "token valid");
     } catch (error) {
-      return ResponseData.serverError(res, error)
+      return ResponseData.serverError(res, error);
     }
   },
 
@@ -136,9 +145,9 @@ export const authController = {
 
       const result = await authService.resetPassword(sessionToken, newPassword);
 
-      return ResponseData.ok(res, result, "password berhasil direset")
+      return ResponseData.ok(res, result, "password berhasil direset");
     } catch (error) {
       return ResponseData.serverError(res, error);
     }
-  }
+  },
 };

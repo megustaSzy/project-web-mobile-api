@@ -14,7 +14,8 @@ export const categoryService = {
       skip: pagination.offset,
       take: pagination.limit,
       orderBy: {
-        id: "asc",
+        // id: "asc",
+        name: 'asc'
       },
       include: {
         destinations: true,

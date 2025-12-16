@@ -1,23 +1,59 @@
-import prisma from "../src/lib/prisma"
-import bcrypt from "bcryptjs"
-
-// seeder testing testttt
+import prisma from "../src/lib/prisma";
+import bcrypt from "bcryptjs";
 
 async function main() {
-    const hashedPassword = await bcrypt.hash("admin123", 10);
-    
-    await prisma.tb_user.create({
-        data: {
-            name: "Admin",
-            email: "himawand656@gmail.com",
-            password: hashedPassword,
-            notelp: "08572772",
-            role: "Admin"
-        }
+  const hashedPassword = await bcrypt.hash("admin123", 10);
+
+  await prisma.tb_user.upsert({
+    where: {
+      email: "himawand656@gmail.com",
+    },
+    update: {},
+    create: {
+      name: "Admin",
+      email: "himawand656@gmail.com",
+      password: hashedPassword,
+      notelp: "08572772",
+      role: "Admin",
+    },
+  });
+
+  console.log("Admin user seeded");
+
+  const regions = [
+    "Lampung Selatan",
+    "Lampung Timur",
+    "Lampung Tengah",
+    "Lampung Utara",
+    "Lampung Barat",
+    "Pesawaran",
+    "Tulang Bawang",
+    "Way Kanan",
+    "Mesuji",
+    "Pringsewu",
+    "Tanggamus",
+    "Pesisir Barat",
+    "Bandar Lampung",
+    "Metro",
+  ];
+
+  for (const name of regions) {
+    await prisma.tb_regions.upsert({
+      where: { name },
+      update: {},
+      create: { name },
     });
+  }
+
+  console.log("regions seeded");
 }
 
 main()
-    .then(() => console.log("Seeding done"))
-    .catch((e) => console.error(e))
-    .finally(() => prisma.$disconnect())
+  .then(() => console.log("seeding done"))
+  .catch((e) => {
+    console.error("seeding error:", e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
