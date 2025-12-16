@@ -2,6 +2,7 @@ import { View, Text, Image, ScrollView, StyleSheet, TouchableOpacity } from "rea
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { wisata } from "../data/wisata";
 import { Ionicons } from "@expo/vector-icons";
+import { ReactElement, JSXElementConstructor, ReactNode, ReactPortal, Key } from "react";
 
 export default function DaerahPage() {
   const router = useRouter();
@@ -9,6 +10,7 @@ export default function DaerahPage() {
 
   // cari berdasarkan id, bukan array index!
   const daerah = wisata.find((item) => item.id == id);
+  const destinasi = daerah.destinasi?.[0];
 
   if (!daerah) {
     return (
@@ -31,19 +33,22 @@ export default function DaerahPage() {
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.title}>{daerah.name}</Text>
-        <Text style={styles.desc}>{daerah.description}</Text>
+      <Text style={styles.title}>{destinasi?.name}</Text>
+      <Text style={styles.desc}>{destinasi?.deskripsi}</Text>
 
-        <Text style={styles.subtitle}>Destination</Text>
+      <Text style={styles.subtitle}>Destination</Text>
 
-        <View style={styles.categoryRow}>
-          {daerah.kategori?.map((item, i) => (
+      <View style={styles.categoryRow}>
+        {destinasi?.kategori
+          ?.split(",")
+          .map((item, i) => (
             <TouchableOpacity key={i} style={styles.categoryBtn}>
-              <Text style={styles.categoryText}>{item}</Text>
+              <Text style={styles.categoryText}>{item.trim()}</Text>
             </TouchableOpacity>
           ))}
-        </View>
       </View>
+    </View>
+
     </ScrollView>
   );
 }
