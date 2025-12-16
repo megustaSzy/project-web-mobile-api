@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { MapPin } from "lucide-react";
 import { apiFetch } from "@/helpers/api";
 import { ApiDestinationsResponse, DestinationsType } from "@/types/destination";
@@ -36,12 +36,14 @@ export default function DestinasiSection() {
     null
   );
 
+  const API_URL = process.env.NEXT_PUBLIC_API_URL; // pastikan di .env
+
   /* =======================
      LOAD CATEGORY
   ======================= */
-  async function loadCategories() {
+  const loadCategories = useCallback(async () => {
     try {
-      const res = await apiFetch<ApiCategoryResponse>("/api/category");
+      const res = await apiFetch<ApiCategoryResponse>(`${API_URL}/api/category`);
       setCategories(res.data.items);
 
       if (res.data.items.length > 0) {
@@ -51,27 +53,28 @@ export default function DestinasiSection() {
       console.error("Gagal fetch kategori:", err);
       setCategories([]);
     }
-  }
+  }, [API_URL]);
 
   /* =======================
      LOAD REGION
   ======================= */
-  async function loadRegions() {
+  const loadRegions = useCallback(async () => {
     try {
-      const res = await apiFetch<ApiRegionResponse>("/api/region/regencies/19");
+      const res = await apiFetch<ApiRegionResponse>(`${API_URL}/api/region/regencies/19`);
       setRegions(res.data ?? []);
     } catch (err) {
       console.error("Gagal fetch region:", err);
       setRegions([]);
     }
-  }
+  }, [API_URL]);
 
   /* =======================
      LOAD DESTINATIONS
-  ======================= */ async function loadDestinations() {
+  ======================= */
+  const loadDestinations = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await apiFetch<ApiDestinationsResponse>("/api/destinations");
+      const res = await apiFetch<ApiDestinationsResponse>(`${API_URL}/api/destinations`);
 
       const items = res.data.items;
 
@@ -85,10 +88,10 @@ export default function DestinasiSection() {
         ketentuan: it.ketentuan ?? [],
         perhatian: it.perhatian ?? [],
         category: {
-          id: it.category.id,
-          name: it.category.name,
+          id: it.category?.id ?? 0,
+          name: it.category?.name ?? "Tidak diketahui",
         },
-        region: it.region ?? "Tidak diketahui",
+        region: it.region ?? { id: 0, name: "Tidak diketahui" },
       }));
 
       setData(mapped);
@@ -98,7 +101,7 @@ export default function DestinasiSection() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [API_URL]);
 
   /* =======================
      EFFECT
@@ -106,13 +109,13 @@ export default function DestinasiSection() {
   useEffect(() => {
     loadCategories();
     loadRegions();
-  }, []);
+  }, [loadCategories, loadRegions]);
 
   useEffect(() => {
     if (regions.length > 0) {
       loadDestinations();
     }
-  }, [regions]);
+  }, [regions, loadDestinations]);
 
   /* =======================
      RENDER
@@ -160,7 +163,7 @@ export default function DestinasiSection() {
             <p className="col-span-3 text-gray-500">Loading...</p>
           ) : (
             data
-              .filter((d) => d.category.name === activeCategory)
+              .filter((d) => d.category?.name === activeCategory)
               .map((d) => (
                 <div
                   key={d.id}
@@ -170,7 +173,7 @@ export default function DestinasiSection() {
                     <img
                       src={
                         d.imageUrl
-                          ? process.env.NEXT_PUBLIC_API_URL + d.imageUrl
+                          ? `${API_URL}${d.imageUrl}`
                           : "/images/default.jpg"
                       }
                       alt={d.name}
@@ -183,7 +186,7 @@ export default function DestinasiSection() {
 
                     <div className="flex items-center gap-1 text-sm text-gray-500 mb-3">
                       <MapPin size={14} />
-                      <span>{d.region}</span>
+                      <span>{d.region.name}</span>
                     </div>
 
                     <div className="flex justify-end">

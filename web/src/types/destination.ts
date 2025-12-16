@@ -5,12 +5,15 @@ export interface ApiDestinationItem {
   imageUrl: string | null;
   description: string | null;
   price: number;
-  region: string;
   include: string[];
   ketentuan: string[];
   perhatian: string[];
   categoryId: number;
   category: {
+    id: number;
+    name: string;
+  };
+  region: {
     id: number;
     name: string;
   };
@@ -44,5 +47,8 @@ export interface DestinationsType {
     id: number;
     name: string;
   };
-  region: string;
+   region: {
+    id: number;
+    name: string;
+  };
 };
