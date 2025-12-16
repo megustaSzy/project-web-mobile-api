@@ -9,7 +9,7 @@ const router = Router();
 router.get("/", testimoniController.getApproved);
 router.get("/:id", testimoniController.getById);
 
-router.post("/", authMiddleware, testimoniController.create);
+router.post("/", testimoniController.create);
 
 router.delete("/:id", authMiddleware, authorizeRoles("Admin"), testimoniController.delete ); 
 
