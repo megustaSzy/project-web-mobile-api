@@ -2,23 +2,17 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-
 import { apiFetch } from "@/helpers/api";
 import { ApiDestinationsResponse, DestinationsType } from "@/types/destination";
 import { ApiCategoryResponse, CategoryItem } from "@/types/category";
-import { RegionApiResponse, RegionItem } from "@/types/region";
 import DestinationModal from "./DestinationModal";
 
 export default function DestinasiSection() {
   const [data, setData] = useState<DestinationsType[]>([]);
   const [categories, setCategories] = useState<CategoryItem[]>([]);
-  const [regions, setRegions] = useState<RegionItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<string>("");
 
-  /* =======================
-     MODAL STATE
-  ======================= */
   const [openModal, setOpenModal] = useState(false);
   const [selectedData, setSelectedData] = useState<DestinationsType | null>(
     null
@@ -26,41 +20,22 @@ export default function DestinasiSection() {
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-  /* =======================
-     LOAD CATEGORY
-  ======================= */
+  /* LOAD CATEGORY */
   const loadCategories = useCallback(async () => {
     try {
       const res = await apiFetch<ApiCategoryResponse>("/api/category");
       const items = res.data.items ?? [];
-
       setCategories(items);
 
       if (items.length > 0) {
         setActiveCategory(items[0].name);
       }
-    } catch (err) {
-      console.error("Gagal fetch kategori:", err);
+    } catch {
       setCategories([]);
     }
   }, []);
 
-  /* =======================
-     LOAD REGION (LOGIC ONLY)
-  ======================= */
-  const loadRegions = useCallback(async () => {
-    try {
-      const res = await apiFetch<RegionApiResponse>("/api/region");
-      setRegions(res.data.items ?? []);
-    } catch (err) {
-      console.error("Gagal fetch region:", err);
-      setRegions([]);
-    }
-  }, []);
-
-  /* =======================
-     LOAD DESTINATIONS
-  ======================= */
+  /* LOAD DESTINATIONS */
   const loadDestinations = useCallback(async () => {
     setLoading(true);
     try {
@@ -75,61 +50,29 @@ export default function DestinasiSection() {
         include: it.include ?? [],
         ketentuan: it.ketentuan ?? [],
         perhatian: it.perhatian ?? [],
-        category: {
-          id: it.category?.id ?? 0,
-          name: it.category?.name ?? "Tidak diketahui",
-        },
-        region: it.region ?? { id: 0, name: "Tidak diketahui" },
+        category: it.category!,
+        region: it.region!, // ✅ BIARKAN DARI API
       }));
 
       setData(mapped);
-    } catch (err) {
-      console.error("Gagal fetch destinasi:", err);
+    } catch {
       setData([]);
     } finally {
       setLoading(false);
     }
   }, []);
 
-  /* =======================
-     EFFECT INIT
-  ======================= */
   useEffect(() => {
     loadCategories();
-    loadRegions();
     loadDestinations();
-  }, [loadCategories, loadRegions, loadDestinations]);
+  }, [loadCategories, loadDestinations]);
 
-  /* =======================
-     USE REGION (NO UI)
-  ======================= */
-  useEffect(() => {
-    if (regions.length > 0) {
-      setData((prev) =>
-        prev.map((d) => {
-          const validRegion = regions.find((r) => r.id === d.region.id);
-
-          return {
-            ...d,
-            region: validRegion ?? {
-              id: 0,
-              name: "Tidak diketahui",
-            },
-          };
-        })
-      );
-    }
-  }, [regions]);
-
-  /* =======================
-     RENDER
-  ======================= */
   return (
     <section className="relative w-full bg-linear-to-b from-[#a7c8e7] to-[#f2f6f9] overflow-hidden">
       <img
         src="/images/destinasi.svg"
         alt="Background"
-        className="absolute inset-0 w-full h-full object-cover opacity-3"
+        className="absolute inset-0 w-full h-full object-cover opacity-2"
       />
 
       <div className="relative z-10 max-w-6xl mx-auto px-4 pt-[150px] pb-10 text-center">
@@ -163,7 +106,7 @@ export default function DestinasiSection() {
             <p className="col-span-3 text-gray-500">Loading...</p>
           ) : (
             data
-              .filter((d) => d.category?.name === activeCategory)
+              .filter((d) => d.category && d.category?.name === activeCategory)
               .map((d) => (
                 <div
                   key={d.id}
@@ -182,7 +125,12 @@ export default function DestinasiSection() {
                   </div>
 
                   <div className="p-5 text-left">
-                    <h3 className="font-semibold text-lg mb-4">{d.name}</h3>
+                    <h3 className="font-semibold text-lg mb-1">{d.name}</h3>
+
+                    {/* REGION TERBACA */}
+                    <p className="text-sm text-gray-500 mb-4">
+                      {d.region?.name ?? "Lokasi tidak diketahui"}
+                    </p>
 
                     <div className="flex justify-end">
                       <span
@@ -190,12 +138,9 @@ export default function DestinasiSection() {
                           setSelectedData(d);
                           setOpenModal(true);
                         }}
-                        className="group flex items-center gap-1 text-blue-600 text-sm cursor-pointer font-medium hover:underline"
+                        className="text-blue-600 text-sm cursor-pointer font-medium hover:underline"
                       >
-                        Lihat Detail
-                        <span className="transition-transform duration-200 group-hover:translate-x-1">
-                          →
-                        </span>
+                        Lihat Detail →
                       </span>
                     </div>
                   </div>
@@ -205,7 +150,6 @@ export default function DestinasiSection() {
         </div>
       </div>
 
-      {/* MODAL */}
       <DestinationModal
         open={openModal}
         data={selectedData}
