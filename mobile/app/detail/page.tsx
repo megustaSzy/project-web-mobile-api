@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -11,40 +11,68 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
-const destinations = [
-  {
-    id: 3,
-    name: "Green Elty Krakatoa",
-    location: "Kalianda",
-    category: "Pantai",
-    price: 100000,
-    include: ["Travel Antar Jemput", "Tiket Masuk", "Sesai Jadwal"],
-    description:
-      "Temukan berbagai wisata menarik di Kabupaten TanggamusTemukan Berbagai Wisata Di Kabupaten TanggamusTemukan Berbagai Wisata Di Kabupaten TanggamusTemukan Berbagai Wisata Di Kabupaten TanggamusTemukan Berbagai Wisata Di Kabupaten Tanggamus",
-    warning: [
-      "Datang 30 menit sebelum pemberangkatan.",
-      "Harga dapat berubah sewaktu-waktu",
-      "Pemesanan dianggap valid setelah tiket diterbitkan.",
-    ],
-    image: require("../../assets/images/hero3.jpg"),
-  },
-];
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
-const formatRupiah = (value) => {
+const formatRupiah = (value: unknown): string => {
+  const numericValue =
+    typeof value === "number"
+      ? value
+      : typeof value === "string"
+      ? Number(value)
+      : typeof value === "bigint"
+      ? Number(value)
+      : 0;
+
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
     minimumFractionDigits: 0,
-  }).format(value);
+  }).format(numericValue);
 };
+
+type DestinationDetail = {
+  id: number;
+  name: string;
+  imageUrl: string;
+  location: string;
+  category: {
+    name: string;
+  } | null;
+  description: string;
+  include: string[];
+  ketentuan: string[];
+  perhatian: string[];
+  price: number;
+};
+
 
 export default function DetailPage() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
+
+  const [detail, setDetail] = useState<DestinationDetail | null>(null);
+  const [loading, setLoading] = useState(true);
   const [pressed, setPressed] = useState(false);
 
-  const detail = destinations.find((d) => d.id == Number(id));
+  useEffect(() => {
+    const fetchDetail = async () => {
+      try {
+        const res = await fetch(`${API_URL}/destinations/${id}`);
+        const json = await res.json();
 
+        // Sesuaikan jika struktur backend berbeda
+        setDetail(json.data ?? json);
+      } catch (error) {
+        console.error("Gagal mengambil detail destinasi:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) fetchDetail();
+  }, [id]);
+
+  if (loading) return <Text style={{ padding: 20 }}>Loading...</Text>;
   if (!detail) return <Text>Data tidak ditemukan.</Text>;
 
   return (
@@ -52,7 +80,14 @@ export default function DetailPage() {
       <ScrollView contentContainerStyle={{ paddingBottom: 200 }}>
         {/* HERO IMAGE */}
         <View style={styles.heroContainer}>
-          <Image source={detail.image} style={styles.heroImage} />
+          <Image
+            source={{
+              uri: detail.imageUrl
+                ? API_URL + detail.imageUrl
+                : "https://via.placeholder.com/600",
+            }}
+            style={styles.heroImage}
+          />
           <View style={styles.overlay} />
         </View>
 
@@ -63,7 +98,9 @@ export default function DetailPage() {
 
           <View style={styles.row}>
             <Ionicons name="location-outline" size={16} color="#6B7280" />
-            <Text style={styles.subText}>{detail.location}</Text>
+            <Text style={styles.subText}>
+              {detail.category?.name ?? detail.location}
+            </Text>
           </View>
 
           {/* BADGE */}
@@ -81,32 +118,49 @@ export default function DetailPage() {
 
           {/* INCLUDE */}
           <Text style={styles.sectionTitle}>Include</Text>
-
           <View style={styles.includeWrapper}>
-            {detail.include.map((item, index) => (
+            {detail.include?.map((item, index) => (
               <View key={index} style={styles.includePill}>
                 <Text style={styles.includeText}>{item}</Text>
               </View>
             ))}
           </View>
 
-          {/* DESCRIPTION */}
+          {/* DESKRIPSI */}
           <Text style={styles.sectionTitle}>Deskripsi</Text>
           <Text style={styles.description}>{detail.description}</Text>
 
+          {/* KETENTUAN */}
+          {detail.ketentuan?.length > 0 && (
+            <>
+              <Text style={styles.sectionTitle}>Ketentuan</Text>
+              {detail.ketentuan.map((item, index) => (
+                <Text key={index} style={styles.warning}>
+                  • {item}
+                </Text>
+              ))}
+            </>
+          )}
+
           {/* PERHATIAN */}
-          <Text style={styles.sectionTitle}>Perhatian</Text>
-          {detail.warning.map((item, index) => (
-            <Text key={index} style={styles.warning}>
-              • {item}
-            </Text>
-          ))}
+          {detail.perhatian?.length > 0 && (
+            <>
+              <Text style={styles.sectionTitle}>Perhatian</Text>
+              {detail.perhatian.map((item, index) => (
+                <Text key={index} style={styles.warning}>
+                  • {item}
+                </Text>
+              ))}
+            </>
+          )}
         </View>
       </ScrollView>
 
       {/* FIXED BOTTOM BUTTON */}
       <View style={styles.bottomBar}>
-        <Text style={styles.priceLabel}>{formatRupiah(detail.price)}</Text>
+        <Text style={styles.priceLabel}>
+          {formatRupiah(detail.price)}
+        </Text>
 
         <TouchableOpacity
           style={[
@@ -115,19 +169,16 @@ export default function DetailPage() {
           ]}
           onPressIn={() => setPressed(true)}
           onPressOut={() => setPressed(false)}
-          onPress={() =>
-            router.push({
-              pathname: "/pesan/page",
-              params: { id: detail.id },
-            })
-          }
+          onPress={() => router.push(`/pesan/${detail.id}`)}
         >
           <Text style={styles.buttonText}>Pesan Sekarang</Text>
         </TouchableOpacity>
+
       </View>
     </SafeAreaView>
   );
 }
+
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: "#fff" },
