@@ -4,46 +4,10 @@
 import { useEffect, useState } from "react";
 import { Star, Quote } from "lucide-react";
 import { apiFetch } from "@/helpers/api";
-
-export type UserItem = {
-  name: string;
-  avatar: string | null;
-};
-
-export type TestimoniItem = {
-  id: number;
-  userId: number;
-  status: string;
-  comment: string;
-  rating: number;
-  createdAt: string;
-  updatedAt: string;
-  user: UserItem;
-};
-
-export type ApiResponse = {
-  status: number;
-  message: string;
-  data: {
-    items: TestimoniItem[];
-  };
-};
-
+import { TestimoniItem, ApiResponse } from "@/types/testimoni";
 export default function TestimoniSection() {
   const [testimonials, setTestimonials] = useState<TestimoniItem[]>([]);
   const [loading, setLoading] = useState(true);
-
-  const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-  const buildImageUrl = (img?: string | null) => {
-    if (!img) return "/images/default-user.png";
-
-    if (img.startsWith("/uploads")) return `${API_URL}${img}`;
-
-    if (img.startsWith("http://") || img.startsWith("https://")) return img;
-
-    return `${API_URL}/${img}`;
-  };
 
   useEffect(() => {
     const loadTestimonials = async () => {
@@ -51,7 +15,11 @@ export default function TestimoniSection() {
         const res: ApiResponse = await apiFetch("/api/testimoni");
 
         if (res?.data?.items) {
-          setTestimonials(res.data.items);
+          // Optional: filter hanya yang APPROVED
+          const approved = res.data.items.filter(
+            (item) => item.approvalStatus === "APPROVED"
+          );
+          setTestimonials(approved);
         }
       } catch (err) {
         console.error("Gagal mengambil testimoni:", err);
@@ -103,18 +71,18 @@ export default function TestimoniSection() {
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full overflow-hidden">
                   <img
-                    src={buildImageUrl(item.user.avatar)}
-                    alt={item.user.name}
+                    src="/images/default-user.png"
+                    alt="User"
                     className="w-10 h-10 object-cover"
                   />
                 </div>
 
                 <div>
                   <h4 className="font-semibold text-blue-600">
-                    {item.user.name}
+                    {item.name || "Anonymous"}
                   </h4>
                   <p className="text-gray-500 text-xs">
-                    {item.status || "Mahasiswa"}
+                    {item.profession || "Pengguna"}
                   </p>
                 </div>
               </div>
