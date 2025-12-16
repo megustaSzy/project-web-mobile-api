@@ -69,54 +69,74 @@ export default function LoginForm() {
         LOGIN MANUAL EMAIL + PASSWORD
   ============================================================ */
   const handleLogin = async () => {
-    if (!email || !password) {
+  if (!email || !password) {
+    setModalStatus("error");
+    setModalMessage("Masukkan email dan password!");
+    setModalVisible(true);
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    const res = await fetch(`${API_URL}/api/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const json = await res.json();
+
+    if (!res.ok) {
       setModalStatus("error");
-      setModalMessage("Masukkan email dan password!");
+      setModalMessage(json.message || "Email atau password salah.");
       setModalVisible(true);
       return;
     }
 
-    try {
-      setLoading(true);
+    // =========================
+    // ✅ DATA DARI API
+    // =========================
+    const token = json.data.accessToken;
+    const user = json.data.user;
 
-      const res = await fetch(`${API_URL}/api/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+    // =========================
+    // ✅ SIMPAN TOKEN & PROFILE
+    // =========================
+    await AsyncStorage.setItem("token", token);
 
-      const data = await res.json();
+    const profile = {
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      avatar: user.avatar ? `${API_URL}${user.avatar}` : null,
+    };
 
-      if (res.ok) {
-        const accessToken = data.data?.accessToken;
-        const role = data.data?.user?.role?.toLowerCase() || "user";
+    await AsyncStorage.setItem("profile", JSON.stringify(profile));
 
-        await AsyncStorage.setItem("accessToken", accessToken);
-        await AsyncStorage.setItem("role", role);
+    // =========================
+    // 🔔 TRIGGER NAVBAR UPDATE
+    // =========================
+    DeviceEventEmitter.emit("loginSuccess");
 
-        DeviceEventEmitter.emit('loginSuccess');
-        setModalStatus("success");
-        setModalMessage("Login berhasil!");
-        setModalVisible(true);
+    setModalStatus("success");
+    setModalMessage("Login berhasil!");
+    setModalVisible(true);
 
-        setTimeout(() => {
-          setModalVisible(false);
-          router.replace("/landing");
-          }, 1500);
+    setTimeout(() => {
+      setModalVisible(false);
+      router.replace("/landing");
+    }, 1500);
 
-      } else {
-        setModalStatus("error");
-        setModalMessage(data.message || "Email atau password salah.");
-        setModalVisible(true);
-      }
-    } catch (err) {
-      setModalStatus("error");
-      setModalMessage("Tidak dapat terhubung ke server.");
-      setModalVisible(true);
-    } finally {
-      setLoading(false);
-    }
-  };
+  } catch (err) {
+    setModalStatus("error");
+    setModalMessage("Tidak dapat terhubung ke server.");
+    setModalVisible(true);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   /* ============================================================
         LOGIN GOOGLE

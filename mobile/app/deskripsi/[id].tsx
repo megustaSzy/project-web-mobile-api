@@ -139,7 +139,6 @@ export default function DestinationDetail() {
               </Text>
             ))}
           </View>
-
         </View>
       </ScrollView>
 

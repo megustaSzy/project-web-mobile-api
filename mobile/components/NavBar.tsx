@@ -1,121 +1,50 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   Image,
   TouchableOpacity,
-  Animated,
   StyleSheet,
 } from "react-native";
 import { useRouter, usePathname } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Menu as MenuIcon, X as CloseIcon } from "lucide-react-native";
-import { DeviceEventEmitter } from 'react-native';
 
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 export default function NavBarMobile() {
   const router = useRouter();
   const pathname = usePathname();
 
   const [open, setOpen] = useState(false);
-  const scrollY = useRef(new Animated.Value(0)).current;
-  const [scrolled, setScrolled] = useState(false);
-
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [language, setLanguage] = useState("id");
 
   const [userData, setUserData] = useState({
     name: "User",
     avatar: require("../assets/images/faiz.jpg"),
   });
 
-  // HALAMAN DENGAN WARNA NAVBAR
-  const blackPages = ["tiket/page", "profil/page"];
-  const textColor = blackPages.some((p) => pathname.includes(p)) ? "#000" : "#fff";
-  const iconColor = textColor;
+  // =============================
+  // LOAD PROFILE (ASYNC + API)
+  // =============================
+  const loadProfile = async () => {
+    const token = await AsyncStorage.getItem("token");
+    const localProfile = await AsyncStorage.getItem("profile");
 
-  // EFFECT SCROLL
-  useEffect(() => {
-    const listener = scrollY.addListener(({ value }) => {
-      setScrolled(value > 10);
-    });
-    return () => scrollY.removeListener(listener);
-  }, []);
-
-  // LOAD BAHASA
-  useEffect(() => {
-    (async () => {
-      const lang = await AsyncStorage.getItem("language");
-      if (lang) setLanguage(lang);
-    })();
-  }, []);
-
-  const handleChangeLanguage = async (lang: string) => {
-    setLanguage(lang);
-    await AsyncStorage.setItem("language", lang);
-  };
-
-  // 🔥 AMBIL PROFIL DARI API + SIMPAN ASYNCSTORAGE
-const fetchUserProfile = async () => {
-  try {
-    const token = await AsyncStorage.getItem("accessToken");
-
-    // Jika tidak ada token, langsung set default dan keluar
     if (!token) {
       setIsLoggedIn(false);
-      setUserData({ name: 'User', avatar: require('../assets/images/faiz.jpg') });
+      setUserData({
+        name: "User",
+        avatar: require("../assets/images/faiz.jpg"),
+      });
       return;
     }
 
-    // Ambil data profil dari API
-    const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/users/profile`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    const data = await response.json();
-
-    // Jika data user kosong, tetap set default
-    if (!data.data) {
-      setIsLoggedIn(false);
-      setUserData({ name: 'User', avatar: require('../assets/images/faiz.jpg') });
-      return;
-    }
-
-    // Jika data valid, update state user
     setIsLoggedIn(true);
-    setUserData({
-      name: data.data.name,
-      avatar: data.data.avatar
-        ? { uri: `${process.env.EXPO_PUBLIC_API_URL}${data.data.avatar}` }
-        : require('../assets/images/faiz.jpg'),
-    });
 
-    // Simpan ke AsyncStorage
-    await AsyncStorage.setItem(
-      "profile",
-      JSON.stringify({
-        name: data.data.name,
-        avatar: data.data.avatar ? `${process.env.EXPO_PUBLIC_API_URL}${data.data.avatar}` : null,
-      })
-    );
-
-  } catch (err) {
-    console.log("Error loading profile:", err);
-  }
-};
-
-  // LOAD DARI API + ASYNCSTORAGE
-  const [loadingProfile, setLoadingProfile] = useState(true);
-
-const loadProfile = async () => {
-  try {
-    const token = await AsyncStorage.getItem("accessToken");
-    const profile = await AsyncStorage.getItem("profile");
-
-    setIsLoggedIn(!!token);
-
-    if (profile) {
-      const parsed = JSON.parse(profile);
+    // 1️⃣ Ambil dari local dulu
+    if (localProfile) {
+      const parsed = JSON.parse(localProfile);
       setUserData({
         name: parsed.name || "User",
         avatar: parsed.avatar
@@ -124,58 +53,58 @@ const loadProfile = async () => {
       });
     }
 
-    await fetchUserProfile(); // pastikan fetch selesai
-  } catch (err) {
-    console.log("Profile load error:", err);
-  } finally {
-    setLoadingProfile(false);
-  }
-};
+    // 2️⃣ Update dari API
+    try {
+      const res = await fetch(`${API_URL}/api/users/profile`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const json = await res.json();
 
+      if (res.ok && json.data) {
+        const profile = {
+          name: json.data.name,
+          avatar: json.data.avatar
+            ? `${API_URL}${json.data.avatar}`
+            : null,
+        };
 
-useEffect(() => {
-  const subscription = DeviceEventEmitter.addListener('loginSuccess', async () => {
-    setOpen(false);            // tutup menu dulu
-    await loadProfile();       // update state userData & isLoggedIn
-    setTimeout(() => setOpen(true), 50); // buka kembali menu supaya re-render
-  });
-  return () => subscription.remove();
-}, []);
+        setUserData({
+          name: profile.name,
+          avatar: profile.avatar
+            ? { uri: profile.avatar }
+            : require("../assets/images/faiz.jpg"),
+        });
 
-const [menuReady, setMenuReady] = useState(false);
-
-useEffect(() => {
-  const subscription = DeviceEventEmitter.addListener('loginSuccess', async () => {
-    setMenuReady(false);        // blok menu
-    await loadProfile();        // tunggu state update
-    setMenuReady(true);         // render menu baru
-  });
-  return () => subscription.remove();
-}, []);
-
-
-
-  const handleLogout = async () => {
-    await AsyncStorage.removeItem("accessToken");
-    await AsyncStorage.removeItem("profile");
-    setIsLoggedIn(false);
-    setUserData({ name: "User", avatar: require("../assets/images/faiz.jpg") });
+        await AsyncStorage.setItem("profile", JSON.stringify(profile));
+      }
+    } catch (err) {
+      console.log("Navbar profile error:", err);
+    }
   };
 
-  const t = {
-    home: language === "id" ? "Beranda" : "Home",
-    tour: language === "id" ? "Daftar Wisata" : "Tour List",
-    ticket: language === "id" ? "Tiket Saya" : "My Ticket",
-    login: language === "id" ? "Masuk" : "Login",
-    signup: language === "id" ? "Daftar" : "Sign Up",
-    editProfile: language === "id" ? "Edit Profil" : "Edit Profile",
-    logout: language === "id" ? "Keluar" : "Logout",
+  useEffect(() => {
+    loadProfile();
+  }, []);
+
+  // =============================
+  // LOGOUT
+  // =============================
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem("token");
+    await AsyncStorage.removeItem("profile");
+    setIsLoggedIn(false);
+    setUserData({
+      name: "User",
+      avatar: require("../assets/images/faiz.jpg"),
+    });
+    setOpen(false);
   };
 
   return (
     <View style={{ zIndex: 50 }}>
-      <Animated.View style={[styles.header]}>
-        {/* LOGO + WELCOME */}
+      {/* HEADER */}
+      <View style={styles.header}>
+        {/* LEFT */}
         <View style={styles.left}>
           <Image
             source={require("../assets/images/logo.png")}
@@ -183,64 +112,53 @@ useEffect(() => {
           />
 
           <View style={styles.welcomeBox}>
-            <Text style={[styles.welcomeText, { color: textColor }]}>
-              Hi, Selamat Datang
-            </Text>
-            <Text style={[styles.userName, { color: textColor }]}>
-              {userData.name}
-            </Text>
+            <Text style={styles.welcomeText}>Hi, Selamat Datang</Text>
+            <Text style={styles.userName}>{userData.name}</Text>
           </View>
         </View>
 
-        {/* MENU KANAN */}
-        <View style={styles.right}>
-          <TouchableOpacity
-            onPress={() => handleChangeLanguage(language === "id" ? "en" : "id")}
-          >
-            <Text style={[styles.lang, { color: textColor }]}>
-              {language.toUpperCase()}
-            </Text>
-          </TouchableOpacity>
+        {/* RIGHT */}
+        <TouchableOpacity onPress={() => setOpen(!open)}>
+          {open ? <CloseIcon size={26} /> : <MenuIcon size={26} />}
+        </TouchableOpacity>
+      </View>
 
-          <TouchableOpacity onPress={() => setOpen(!open)}>
-            {open ? (
-              <CloseIcon size={26} color={iconColor} />
-            ) : (
-              <MenuIcon size={26} color={iconColor} />
-            )}
-          </TouchableOpacity>
+      {/* MENU */}
+      {open && (
+        <View style={styles.menu}>
+          {isLoggedIn ? (
+            <TouchableOpacity onPress={handleLogout} style={styles.menuItem}>
+              <Text style={styles.menuText}>Logout</Text>
+            </TouchableOpacity>
+          ) : (
+            <>
+              <TouchableOpacity
+                onPress={() => {
+                  setOpen(false);
+                  router.push("../auth/login/page");
+                }}
+                style={styles.loginBtn}
+              >
+                <Text style={styles.loginText}>Masuk</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => {
+                  setOpen(false);
+                  router.push("../auth/signup/page");
+                }}
+                style={styles.signupBtn}
+              >
+                <Text style={styles.signupText}>Daftar</Text>
+              </TouchableOpacity>
+            </>
+          )}
         </View>
-      </Animated.View>
-
-      {/* MENU MOBILE */}
-          {open && menuReady && (
-  <View style={styles.menu}>
-    {isLoggedIn ? (
-      <TouchableOpacity onPress={handleLogout} style={styles.menuItem}>
-        <Text style={{ color: "#fff", textAlign: "center", fontWeight: "600" }}>{t.logout}</Text>
-      </TouchableOpacity>
-    ) : (
-      <>
-        <TouchableOpacity
-          onPress={() => router.push("../auth/login/page")}
-          style={styles.loginBtnFull}
-        >
-          <Text style={styles.loginTxtWhite}>{t.login}</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={() => router.push("../auth/signup/page")}
-          style={styles.signupBtn}
-        >
-          <Text style={styles.signupTxt}>{t.signup}</Text>
-        </TouchableOpacity>
-      </>
-    )}
-  </View>
-)}
+      )}
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   header: {
