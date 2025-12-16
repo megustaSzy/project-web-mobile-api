@@ -48,7 +48,7 @@ export default function DestinationModal({
             <h3 className="text-xl font-semibold">{data.name}</h3>
             <div className="flex items-center gap-1 text-sm opacity-90">
               <MapPin size={14} />
-              <span>{data.category.name}</span>
+              <span>{data.region?.name ?? "Lokasi tidak diketahui"}</span>
             </div>
           </div>
         </div>
