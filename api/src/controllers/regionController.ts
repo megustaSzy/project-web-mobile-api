@@ -3,7 +3,7 @@ import { regionService } from "../services/regionService";
 import { ResponseData } from "../utilities/Response";
 
 export const regionController = {
-  async getRegenciesByProvinsi(req: Request, res: Response) {
+  async getRegencies(req: Request, res: Response) {
     try {
       const page = Number(req.query.page) || 1;
       const limit = Number(req.query.limit) || 10;

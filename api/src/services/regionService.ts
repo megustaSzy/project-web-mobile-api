@@ -14,8 +14,11 @@ export const regionService = {
       skip: pagination.offset,
       take: pagination.limit,
       orderBy: {
-        name: 'asc'
+        id: 'asc'
       },
+      include: {
+        destinations: true
+      }
     });
 
     return pagination.paginate({ count, rows })

@@ -39,6 +39,7 @@ export const destinationService = {
         : undefined,
       include: {
         category: true,
+        region: true,
       },
       orderBy: { id: "asc" },
       skip: pagination.offset,
@@ -83,6 +84,7 @@ export const destinationService = {
   async addDestination(data: DestinationData) {
     const price = Number(data.price);
     const categoryId = Number(data.categoryId);
+    const regionId = Number(data.regionId);
 
     const existing = await prisma.tb_destinations.findFirst({
       where: {
@@ -90,13 +92,21 @@ export const destinationService = {
       },
     });
 
-    if (existing) createError("nama destinasi sudah ada", 400);
+    if (existing) throw createError("nama destinasi sudah ada", 400);
 
     const category = await prisma.tb_category.findUnique({
-      where: { id: data.categoryId },
+      where: { id: categoryId },
     });
 
-    if (!category) createError("category tidak ditemukan", 404);
+    if (!category) throw createError("category tidak ditemukan", 404);
+
+    const region = await prisma.tb_regions.findUnique({
+      where: {
+        id: regionId,
+      },
+    });
+
+    if (!region) createError("region tidak ditemukan", 404);
 
     return prisma.tb_destinations.create({
       data: {
@@ -109,35 +119,54 @@ export const destinationService = {
         ketentuan: DEFAULT_KETENTUAN,
         perhatian: DEFAULT_PERHATIAN,
 
-        category: { connect: { id: categoryId } },
+        category: {
+          connect: {
+            id: categoryId,
+          },
+        },
+
+        region: {
+          connect: {
+            id: regionId,
+          },
+        },
       },
       include: {
         category: true,
+        region: true,
       },
     });
   },
 
   async editDestination(id: number, data: DestinationData) {
     const existing = await prisma.tb_destinations.findUnique({
-      where: {
-        id,
-      },
+      where: { id },
     });
 
-    if (!existing) createError("destinasi tidak ditemukan", 404);
+    if (!existing) throw createError("destinasi tidak ditemukan", 404);
 
     return prisma.tb_destinations.update({
       where: { id },
       data: {
-        name: data.name,
-        ...(data.imageUrl ? { imageUrl: data.imageUrl } : {}),
-        description: data.description,
-        price: data.price,
-        category: { connect: { id: data.categoryId } },
+        ...(data.name && { name: data.name }),
+        ...(data.imageUrl && { imageUrl: data.imageUrl }),
+        ...(data.description && { description: data.description }),
+        ...(data.price && { price: Number(data.price) }),
+
+        ...(data.categoryId && {
+          category: {
+            connect: { id: Number(data.categoryId) },
+          },
+        }),
+
+        ...(data.regionId && {
+          region: {
+            connect: { id: Number(data.regionId) },
+          },
+        }),
       },
     });
   },
-
   async deleteDestinationById(id: number) {
     const existing = await prisma.tb_destinations.findFirst({
       where: {

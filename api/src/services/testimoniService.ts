@@ -14,15 +14,7 @@ export const testimoniService = {
       take: pagination.limit,
       orderBy: {
         createdAt: "desc",
-      },
-      include: {
-        user: {
-          select: {
-            name: true,
-            avatar: true,
-          },
-        },
-      },
+      }
     });
 
     return pagination.paginate({ count, rows });
@@ -45,15 +37,7 @@ export const testimoniService = {
       take: pagination.limit,
       orderBy: {
         createdAt: "desc",
-      },
-      include: {
-        user: {
-          select: {
-            name: true,
-            avatar: true,
-          },
-        },
-      },
+      }
     });
 
     return pagination.paginate({ count, rows });
@@ -74,41 +58,14 @@ export const testimoniService = {
       },
       skip: pagination.offset,
       take: pagination.limit,
-      include: {
-        user: {
-          select: {
-            name: true,
-            email: true,
-          },
-        },
-      },
     });
 
     return pagination.paginate({ count, rows });
   },
 
-  async createTestimoni(userId: number, data: TestimoniData) {
-    const user = await prisma.tb_user.findUnique({
-      where: { id: userId },
-    });
-
-    if (!user) throw createError("user tidak ditemukan", 404);
-
+  async createTestimoni(data: TestimoniData) {
     const testimoni = await prisma.tb_testimoni.create({
-      data: {
-        userId,
-        status: data.status,
-        comment: data.comment,
-        rating: data.rating,
-      },
-      include: {
-        user: {
-          select: {
-            name: true,
-            avatar: true,
-          },
-        },
-      },
+      data
     });
 
     return testimoni;
@@ -118,15 +75,7 @@ export const testimoniService = {
     const testimoni = await prisma.tb_testimoni.findUnique({
       where: {
         id,
-      },
-      include: {
-        user: {
-          select: {
-            name: true,
-            avatar: true,
-          },
-        },
-      },
+      }
     });
 
     if (!testimoni) throw createError("id tidak ditemukan", 404);
@@ -142,20 +91,9 @@ export const testimoniService = {
 
     if (!testimoni) throw createError("testimoni tidak ditemukan", 404);
 
-    // pastikan testimoni benar milik user
-    if (testimoni.userId !== userId) {
-      throw createError(
-        "anda tidak memiliki akses untuk mengedit testimoni ini",
-        403
-      );
-    }
-
     return prisma.tb_testimoni.update({
       where: { id },
       data: {
-        status: data.status,
-        comment: data.comment,
-        rating: data.rating,
         approvalStatus: "PENDING",
       },
     });

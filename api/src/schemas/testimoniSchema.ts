@@ -1,8 +1,9 @@
 import { z } from "zod";
 
 export const testimoniSchema = z.object({
-  name: z.string().min(1, "Nama wajib diisi"),
-  email: z.string().email("Email tidak valid"),
-  comment: z.string().min(1, "Komentar wajib diisi"),
-  rating: z.coerce.number().min(1).max(5),
+  name: z.string().min(1).optional(),
+  email: z.string().email().optional(),
+  profession: z.string().optional(),
+  comment: z.string().min(1),
+  rating: z.number().min(1).max(5).optional(),
 });
