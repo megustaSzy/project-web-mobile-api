@@ -116,7 +116,7 @@ export default function DestinationModal({
             <button
               onClick={() => {
                 onClose();
-                router.push(`/pesan`);
+                router.push(`/pesan?destinationId=${data.id}`);
               }}
               className="px-6 py-2 rounded-full bg-blue-600 text-white text-sm hover:bg-blue-700 transition"
             >
