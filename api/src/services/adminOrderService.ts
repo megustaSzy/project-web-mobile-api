@@ -110,7 +110,6 @@ export const adminOrderService = {
             updatedAt: true,
           },
         },
-        schedule: true,
       },
     });
 
@@ -135,7 +134,6 @@ export const adminOrderService = {
             updatedAt: true,
           },
         },
-        schedule: true,
       },
     });
 

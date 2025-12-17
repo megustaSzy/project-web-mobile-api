@@ -1,12 +1,15 @@
 import prisma from "../lib/prisma";
 import { createError } from "../utilities/createError";
-import { DestinationData } from "../types/destination";
 import { Pagination } from "../utilities/Pagination";
 import {
   DEFAULT_INCLUDE,
   DEFAULT_KETENTUAN,
   DEFAULT_PERHATIAN,
 } from "../constants/destinationDefaults";
+import {
+  CreateDestinationDTO,
+  UpdateDestinationDTO,
+} from "../schemas/destinationSchema";
 
 export const destinationService = {
   async getAllDestinations(page: number, limit: number, category?: string) {
@@ -39,7 +42,12 @@ export const destinationService = {
         : undefined,
       include: {
         category: true,
-        region: true,
+        region: {
+          select: {
+            id: true,
+            name: true
+          }
+        }
       },
       orderBy: { id: "asc" },
       skip: pagination.offset,
@@ -81,11 +89,7 @@ export const destinationService = {
     };
   },
 
-  async addDestination(data: DestinationData) {
-    const price = Number(data.price);
-    const categoryId = Number(data.categoryId);
-    const regionId = Number(data.regionId);
-
+  async addDestination(data: CreateDestinationDTO) {
     const existing = await prisma.tb_destinations.findFirst({
       where: {
         name: data.name,
@@ -95,14 +99,14 @@ export const destinationService = {
     if (existing) throw createError("nama destinasi sudah ada", 400);
 
     const category = await prisma.tb_category.findUnique({
-      where: { id: categoryId },
+      where: { id: data.categoryId },
     });
 
     if (!category) throw createError("category tidak ditemukan", 404);
 
     const region = await prisma.tb_regions.findUnique({
       where: {
-        id: regionId,
+        id: data.regionId,
       },
     });
 
@@ -111,9 +115,9 @@ export const destinationService = {
     return prisma.tb_destinations.create({
       data: {
         name: data.name,
-        imageUrl: data.imageUrl,
+        imageUrl: data.imageUrl!,
         description: data.description,
-        price: price,
+        price: data.price,
 
         include: DEFAULT_INCLUDE,
         ketentuan: DEFAULT_KETENTUAN,
@@ -121,13 +125,13 @@ export const destinationService = {
 
         category: {
           connect: {
-            id: categoryId,
+            id: data.categoryId,
           },
         },
 
         region: {
           connect: {
-            id: regionId,
+            id: data.regionId,
           },
         },
       },
@@ -138,7 +142,7 @@ export const destinationService = {
     });
   },
 
-  async editDestination(id: number, data: DestinationData) {
+  async editDestination(id: number, data: UpdateDestinationDTO) {
     const existing = await prisma.tb_destinations.findUnique({
       where: { id },
     });
@@ -148,20 +152,22 @@ export const destinationService = {
     return prisma.tb_destinations.update({
       where: { id },
       data: {
-        ...(data.name && { name: data.name }),
-        ...(data.imageUrl && { imageUrl: data.imageUrl }),
-        ...(data.description && { description: data.description }),
-        ...(data.price && { price: Number(data.price) }),
+        ...(data.name !== undefined && { name: data.name }),
+        ...(data.imageUrl !== undefined && { imageUrl: data.imageUrl }),
+        ...(data.description !== undefined && {
+          description: data.description,
+        }),
+        ...(data.price !== undefined && { price: data.price }),
 
-        ...(data.categoryId && {
+        ...(data.categoryId !== undefined && {
           category: {
-            connect: { id: Number(data.categoryId) },
+            connect: { id: data.categoryId },
           },
         }),
 
-        ...(data.regionId && {
+        ...(data.regionId !== undefined && {
           region: {
-            connect: { id: Number(data.regionId) },
+            connect: { id: data.regionId },
           },
         }),
       },

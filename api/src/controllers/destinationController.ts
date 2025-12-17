@@ -3,14 +3,17 @@ import { destinationService } from "../services/destinationService";
 import { ResponseData } from "../utilities/Response";
 
 export const destinationController = {
-
   async getDestinations(req: Request, res: Response) {
     try {
       const page = Number(req.query.page) || 1;
       const limit = 10;
       const category = req.query.category as string | undefined;
 
-      const destinations = await destinationService.getAllDestinations(page, limit, category);
+      const destinations = await destinationService.getAllDestinations(
+        page,
+        limit,
+        category
+      );
 
       return ResponseData.ok(
         res,
@@ -19,7 +22,6 @@ export const destinationController = {
           ? `destinasi kategori ${category} berhasil diambil`
           : "semua destinasi berhasil diambil"
       );
-
     } catch (error) {
       return ResponseData.serverError(res, error);
     }
@@ -33,7 +35,6 @@ export const destinationController = {
       const destination = await destinationService.getDestinationById(id);
 
       return ResponseData.ok(res, destination);
-
     } catch (error) {
       return ResponseData.serverError(res, error);
     }
@@ -41,25 +42,14 @@ export const destinationController = {
 
   async addDestination(req: Request, res: Response) {
     try {
-      // Validasi body
-      if (!req.body.categoryId || isNaN(Number(req.body.categoryId))) {
-        return ResponseData.badRequest(res, "categoryId tidak valid");
-      }
-
-      if (!req.body.price || isNaN(Number(req.body.price))) {
-        return ResponseData.badRequest(res, "price tidak valid");
-      }
-
-      if(!req.file) {
-        return ResponseData.badRequest(res, "image wajib diupload")
+      if (!req.file) {
+        return ResponseData.badRequest(res, "image wajib diupload");
       }
 
       const image = req.file ? `/uploads/${req.file.filename}` : null;
 
       const destination = await destinationService.addDestination({
         ...req.body,
-        categoryId: Number(req.body.categoryId),
-        price: Number(req.body.price),
         imageUrl: image,
       });
 
@@ -78,7 +68,7 @@ export const destinationController = {
 
       const updatedDestination = await destinationService.editDestination(id, {
         ...req.body,
-        imageUrl: image
+        ...(req.file && { imageUrl: `/uploads/${req.file.filename}` }),
       });
 
       return ResponseData.ok(res, updatedDestination);
