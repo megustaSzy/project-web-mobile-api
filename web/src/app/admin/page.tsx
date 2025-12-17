@@ -10,17 +10,27 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import StatsCard from "./components/StatsCard";
-import { Counts, ChartItem, StatsResponse } from "@/types/dashboard";
+import { Counts, ChartItem, StatsResponse } from "../../types/count";
 
+// URL API
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
+// ========================
+// Fungsi fetch API
+// ========================
 async function fetchStats(): Promise<StatsResponse> {
   if (!API_URL) throw new Error("NEXT_PUBLIC_API_URL not defined");
+
   const res = await fetch(`${API_URL}/api/count`);
   if (!res.ok) throw new Error("Failed to fetch stats");
-  return res.json();
+
+  const json: StatsResponse = await res.json();
+  return json;
 }
 
+// ========================
+// Component Dashboard
+// ========================
 export default function AdminDashboard() {
   const [stats, setStats] = useState<Counts>({
     totalUsers: 0,
@@ -29,15 +39,42 @@ export default function AdminDashboard() {
   });
 
   const [chartData, setChartData] = useState<ChartItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchStats().then((json) => {
-      if (json.success) {
-        setStats(json.data.counts);
-        setChartData(json.data.chartData);
+    const getStats = async () => {
+      try {
+        setLoading(true);
+        const json = await fetchStats();
+
+        if (json.status === 200) {
+          setStats(json.data.counts);
+          setChartData(json.data.chartData);
+        } else {
+          setError("Gagal memuat data dari server");
+        }
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("Terjadi kesalahan tidak diketahui");
+        }
+      } finally {
+        setLoading(false);
       }
-    });
+    };
+
+    getStats();
   }, []);
+
+  if (loading) {
+    return <div className="p-8 text-gray-500">Memuat data dashboard…</div>;
+  }
+
+  if (error) {
+    return <div className="p-8 text-red-500">Error: {error}</div>;
+  }
 
   return (
     <div className="p-8 bg-[#fafafa] min-h-screen">
@@ -67,7 +104,7 @@ export default function AdminDashboard() {
             </BarChart>
           </ResponsiveContainer>
         ) : (
-          <p className="text-gray-500">Memuat grafik…</p>
+          <p className="text-gray-500">Tidak ada data untuk ditampilkan</p>
         )}
       </div>
     </div>
