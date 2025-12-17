@@ -1,5 +1,5 @@
 import prisma from "../lib/prisma";
-import { AboutData } from "../types/about";
+import { CreateAboutDTO, UpdateAboutDTO } from "../schemas/aboutSchema";
 import { createError } from "../utilities/createError";
 
 
@@ -9,20 +9,20 @@ export const aboutService = {
         return prisma.tb_about.findFirst();
     },
     
-    async createAbout(data: AboutData) {
+    async createAbout(data: CreateAboutDTO) {
         return prisma.tb_about.create({
             data
         })
     },
 
-    async updateAbout (id: number, data: AboutData) {
+    async updateAbout (id: number, data: UpdateAboutDTO) {
         const existing = await prisma.tb_about.findUnique({
             where: {
                 id
             }
         });
 
-        if(!existing) createError("id tidak ditemukan", 404);
+        if(!existing) throw createError("id tidak ditemukan", 404);
 
         return prisma.tb_about.update({
             where: {
