@@ -5,19 +5,8 @@ import { ResponseData } from "../utilities/Response";
 export const adminOrderController = {
   async createOrder(req: Request, res: Response) {
     try {
-      const { userId, scheduleId, quantity } = req.body;
-
-      const order = await adminOrderService.createOrder(
-        Number(userId),
-        Number(scheduleId),
-        Number(quantity)
-      );
-
-      return ResponseData.created(
-        res,
-        order,
-        "order berhasil dibuat oleh admin"
-      );
+      const order = await adminOrderService.createOrder(req.body);
+      return ResponseData.created(res, order);
     } catch (error) {
       return ResponseData.serverError(res, error);
     }
