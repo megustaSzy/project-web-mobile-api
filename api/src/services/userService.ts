@@ -1,8 +1,8 @@
 import prisma from "../lib/prisma";
 import bcrypt from "bcryptjs";
 import { createError } from "../utilities/createError";
-import { UserData } from "../types/user";
 import { Pagination } from "../utilities/Pagination";
+import { UpdateUserData } from "../schemas/updateSchema";
 
 export const userService = {
   // GET all users
@@ -15,7 +15,7 @@ export const userService = {
       skip: pagination.offset,
       take: pagination.limit,
       where: {
-        role: 'User'
+        role: "User",
       },
       orderBy: {
         id: "asc",
@@ -26,7 +26,7 @@ export const userService = {
         email: true,
         role: true,
         notelp: true,
-        avatar: true
+        avatar: true,
       },
     });
 
@@ -41,7 +41,7 @@ export const userService = {
         name: true,
         email: true,
         notelp: true,
-        avatar: true
+        avatar: true,
       },
     });
 
@@ -51,44 +51,35 @@ export const userService = {
   },
 
   // UPDATE user by ID
-  async updateUserById(id: number, data: UserData) {
-    const existingUser = await prisma.tb_user.findUnique({
-      where: { id },
-    });
+  async updateUserById(id: number, data: UpdateUserData) {
+    const existingUser = await prisma.tb_user.findUnique({ where: { id } });
+    if (!existingUser) {
+      throw createError("id tidak ditemukan", 404);
+    }
 
-    if (!existingUser) createError("id tidak ditemukan", 404);
-
-    //cek duplikat email
-    if(data.email) {
+    if (data.email) {
       const emailExist = await prisma.tb_user.findFirst({
         where: {
           email: data.email,
-          NOT: {
-            id
-          }
-        }
+          NOT: { id },
+        },
       });
 
-      if(emailExist) createError("email sudah digunakan", 400)
+      if (emailExist) {
+        throw createError("email sudah digunakan", 400);
+      }
     }
 
     if (data.password) {
-      if(data.password.length < 6) createError ("password minimal 6 karakter", 400);
-      data.password = await bcrypt.hash(data.password, 10)
+      data.password = await bcrypt.hash(data.password, 10);
     }
 
     return prisma.tb_user.update({
       where: { id },
-      data: {
-        name: data.name,
-        email: data.email,
-        notelp: data.notelp,
-        password: data.password,
-        avatar: data.avatar
-      },
+      data,
     });
   },
-
+  
   // DELETE user by ID
   async deleteUserById(id: number) {
     const user = await prisma.tb_user.findUnique({
