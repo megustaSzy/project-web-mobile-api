@@ -1,5 +1,5 @@
 import prisma from "../lib/prisma";
-import { TeamData } from "../types/team";
+import { CreateTeamDTO, UpdateTeamDTO } from "../schemas/teamSchema";
 import { createError } from "../utilities/createError";
 
 export const teamService = {
@@ -24,7 +24,7 @@ export const teamService = {
         return team;
     },
 
-    async createTeam(data: TeamData) {
+    async createTeam(data: CreateTeamDTO) {
         return prisma.tb_ourTeam.create({
             data: {
                 name: data.name,
@@ -34,7 +34,7 @@ export const teamService = {
         })
     },
 
-    async editTeam(id: number, data: TeamData) {
+    async editTeam(id: number, data: UpdateTeamDTO) {
         const team = await prisma.tb_ourTeam.findUnique({
             where: {
                 id
