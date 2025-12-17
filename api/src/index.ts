@@ -22,16 +22,20 @@ import statRoute from "./routes/statRoute";
 import paymentRoute from "./routes/paymentRoute";
 import teamRoute from "./routes/teamRoute";
 import testimoniRoute from "./routes/testimoniRoute";
-import bannerRoute from "./routes/bannerRoute"
+import bannerRoute from "./routes/bannerRoute";
 
 const app = express();
 
-// Body parser
-app.use(express.json());
+app.use("/api/destinations", destinationRoute);
+app.use("/api/banner", bannerRoute);
+app.use("/api/testimoni", testimoniRoute);
+
+
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
 app.use(requestLogger);
 
-// CORS
 app.use(
   cors({
     origin: true,
@@ -39,24 +43,12 @@ app.use(
   })
 );
 
-// Cookie parser
 app.use(cookieParser());
-
-// Passport
 app.use(passport.initialize());
 
-app.get("/", (req, res) => {
-  res.json({
-    status: 200,
-    message: "Welcome Server API",
-    success: true,
-  });
-});
 
-// ROUTES
 app.use("/api/users", userRoute);
 app.use("/api/auth", authRoute);
-app.use("/api/destinations", destinationRoute);
 app.use("/api/pickup-locations", pickupLocationRoute);
 app.use("/api/schedules", scheduleRoute);
 app.use("/api/region", regionRoute);
@@ -67,12 +59,15 @@ app.use("/api/about", aboutRoute);
 app.use("/api/count", statRoute);
 app.use("/api/payment", paymentRoute);
 app.use("/api/team", teamRoute);
-app.use("/api/testimoni", testimoniRoute);
-app.use("/api/banner", bannerRoute);
 
-// Public upload folder
 app.use("/uploads", express.static("public/uploads"));
 
-export default app;
+app.get("/", (req, res) => {
+  res.json({
+    status: 200,
+    message: "Welcome Server API",
+    success: true,
+  });
+});
 
-// total dest, kategori, pengguna,
+export default app;

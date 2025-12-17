@@ -1,5 +1,5 @@
 import prisma from "../lib/prisma";
-import { TestimoniData } from "../types/testimoni";
+import { TestimoniData } from "../schemas/testimoniSchema";
 import { createError } from "../utilities/createError";
 import { Pagination } from "../utilities/Pagination";
 

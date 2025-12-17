@@ -1,53 +1,85 @@
 import prisma from "../lib/prisma";
+import { CreateAdminOrderInput } from "../schemas/createAdminOrderSchema";
 import { createError } from "../utilities/createError";
 import { Pagination } from "../utilities/Pagination";
 import { v4 as uuidv4 } from "uuid";
 
+type PaymentStatusType = "pending" | "paid" | "failed" | "expired";
+
 export const adminOrderService = {
-  // Admin membuat order (1 order = 1 tiket)
-  async createOrder(userId: number, scheduleId: number, quantity: number) {
-    if (quantity <= 0) throw createError("quantity minimal 1", 400);
+  async createOrder(input: CreateAdminOrderInput) {
+    const {
+      userId,
+      destinationId,
+      pickupLocationId,
+      quantity,
+      date,
+      time,
+      returnTime,
+      isPaid = false,
+    } = input;
 
     const user = await prisma.tb_user.findUnique({
       where: { id: userId },
     });
     if (!user) throw createError("user tidak ditemukan", 404);
 
-    const schedule = await prisma.tb_schedules.findUnique({
-      where: { id: scheduleId },
-      include: { destination: true },
+    const destination = await prisma.tb_destinations.findUnique({
+      where: { id: destinationId },
     });
-    if (!schedule) throw createError("jadwal tidak ditemukan", 404);
+    if (!destination) throw createError("destinasi tidak ditemukan", 404);
 
-    // Hitung total harga
-    const totalPrice = schedule.destination.price * quantity;
+    let pickupLocationName: string | null = null;
 
-    // Generate ticket
-    const ticketCode = "TCK-" + uuidv4().split("-")[0].toUpperCase();
+    if (pickupLocationId) {
+      const pickup = await prisma.tb_pickup_locations.findUnique({
+        where: { id: pickupLocationId },
+      });
+      if (!pickup) throw createError("pickup location tidak ditemukan", 404);
+
+      pickupLocationName = pickup.name;
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const orderDate = new Date(date);
+    orderDate.setHours(0, 0, 0, 0);
+
+    if (orderDate < today)
+      throw createError("tanggal keberangkatan sudah lewat", 400);
+
+    const totalPrice = destination.price * quantity;
+
+    const ticketCode = `TICKET-${Date.now()}-${uuidv4()
+      .slice(0, 6)
+      .toUpperCase()}`;
 
     const order = await prisma.tb_orders.create({
       data: {
         userId,
-        scheduleId,
         quantity,
         totalPrice,
 
-        // snapshot user
+        pickupLocationId: pickupLocationId ?? null,
+        pickupLocationName,
+
         userName: user.name,
         userPhone: user.notelp ?? "",
 
-        // snapshot destination
-        destinationName: schedule.destination.name,
-        destinationPrice: schedule.destination.price,
+        destinationName: destination.name,
+        destinationPrice: destination.price,
 
-        // snapshot schedule
-        date: schedule.date,
-        time: schedule.time,
+        date: orderDate,
+        time,
+        returnTime,
 
-        // tiket
         ticketCode,
-        ticketUrl: null, // nanti diisi setelah generate PDF
-        isPaid: false,
+        isPaid,
+        paymentStatus: isPaid
+          ? ("paid" as PaymentStatusType)
+          : ("pending" as PaymentStatusType),
+        paidAt: isPaid ? new Date() : null,
       },
     });
 
@@ -78,7 +110,6 @@ export const adminOrderService = {
             updatedAt: true,
           },
         },
-        schedule: true,
       },
     });
 
@@ -103,7 +134,6 @@ export const adminOrderService = {
             updatedAt: true,
           },
         },
-        schedule: true,
       },
     });
 

@@ -14,7 +14,8 @@ const JWT_SECRET = process.env.JWT_SECRET!;
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET!;
 
 export const authService = {
-  async registerUser(data: AuthData) {
+  async registerUser(data: AuthData, createRole?: "Admin" | "User") {
+    const roleSave = data.role === "Admin" && createRole === "Admin" ? "Admin" : "User";
     const existing = await prisma.tb_user.findUnique({
       where: { email: data.email },
     });
@@ -28,8 +29,8 @@ export const authService = {
         name: data.name,
         email: data.email,
         password: hash,
-        role: data.role,
-        notelp: data.notelp,
+        role: roleSave,
+        notelp: data.notelp || "",
       },
     });
   },

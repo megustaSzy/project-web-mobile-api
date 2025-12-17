@@ -33,36 +33,32 @@ export const userController = {
   async editUser(req: Request, res: Response) {
     try {
       const id = Number(req.params.id);
-      if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
+      if (isNaN(id)) {
+        return ResponseData.badRequest(res, "id tidak valid");
+      }
 
       const currentUser = (req as any).user;
 
-      // Hanya Admin atau user yang bersangkutan
+      // Admin atau user itu sendiri
       if (currentUser.role !== "Admin" && Number(currentUser.id) !== id) {
         return ResponseData.forbidden(res, "akses ditolak");
       }
 
-      // Siapkan data untuk update
-      const dataToUpdate: any = { ...req.body };
-
-      // Jika ada upload gambar
+      // avatar dari multer
       if (req.file) {
-        dataToUpdate.avatar = `/uploads/${req.file.filename}`;
+        req.body.avatar = `/uploads/${req.file.filename}`;
       }
 
-      // Jika password empty string → hapus, jangan update
-      if (dataToUpdate.password === "" || dataToUpdate.password === null) {
-        delete dataToUpdate.password;
-      }
-
-      const updatedUser = await userService.updateUserById(id, dataToUpdate);
+      const updatedUser = await userService.updateUserById(
+        id,
+        req.body //
+      );
 
       return ResponseData.ok(res, updatedUser);
     } catch (error) {
       return ResponseData.serverError(res, error);
     }
   },
-
   async deleteUser(req: Request, res: Response) {
     try {
       const id = Number(req.params.id);

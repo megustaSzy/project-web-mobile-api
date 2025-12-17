@@ -3,22 +3,20 @@ import { userController } from "../controllers/userController";
 import { authMiddleware } from "../middlewares/authMiddleware";
 import { authorizeRoles } from "../middlewares/roleMiddleware";
 import { upload } from "../middlewares/uploadMiddleware";
+import { validate } from "../middlewares/validate";
+import { updateSchema } from "../schemas/updateSchema";
 
 const router = Router();
 
 // User melihat profil sendiri
 router.get("/profile", authMiddleware, userController.getProfile);
 
-// Khusus admin: list semua user
 router.get("/", authMiddleware, authorizeRoles("Admin"), userController.getAllUsers);
 
-// Admin & user bisa melihat user tertentu
 router.get("/:id", authMiddleware, userController.getUserById);
 
-// Edit user (admin atau user itu sendiri — cek di controller)
-router.put("/:id", authMiddleware, upload.single("avatar"), userController.editUser);
+router.patch("/:id", authMiddleware, upload.single("avatar"), validate(updateSchema), userController.editUser);
 
-// Hapus user (admin only)
 router.delete("/:id", authMiddleware, authorizeRoles("Admin"), userController.deleteUser);
 
 export default router;

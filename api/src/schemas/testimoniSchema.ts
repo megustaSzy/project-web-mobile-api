@@ -7,3 +7,5 @@ export const testimoniSchema = z.object({
   comment: z.string().min(1),
   rating: z.number().min(1).max(5).optional(),
 });
+
+export type TestimoniData = z.infer<typeof testimoniSchema>;

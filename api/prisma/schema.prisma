@@ -99,6 +99,7 @@ model tb_pickup_locations {
   updatedAt DateTime @updatedAt
 
   schedules tb_schedules[]
+  orders    tb_orders[]
 }
 
 model tb_schedules {
@@ -111,7 +112,6 @@ model tb_schedules {
   date             DateTime
   createdAt        DateTime            @default(now())
   updatedAt        DateTime            @updatedAt
-  orders           tb_orders[]
 }
 
 enum PaymentStatus {
@@ -134,22 +134,24 @@ model tb_orders {
   id Int @id @default(autoincrement())
 
   // Relasi
-  user       tb_user      @relation(fields: [userId], references: [id])
-  userId     Int
-  schedule   tb_schedules @relation(fields: [scheduleId], references: [id])
-  scheduleId Int
+  user             tb_user              @relation(fields: [userId], references: [id])
+  userId           Int
+  pickupLocation   tb_pickup_locations? @relation(fields: [pickupLocationId], references: [id])
+  pickupLocationId Int?
 
   // Order info
   quantity   Int
   totalPrice Float
 
-  // Snapshot field (diambil saat order)
-  userName         String
-  userPhone        String
-  destinationName  String
-  destinationPrice Float
-  date             DateTime
-  time             String
+  // Snapshot
+  userName           String
+  userPhone          String
+  destinationName    String
+  destinationPrice   Float
+  date               DateTime
+  time               String
+  returnTime         String?
+  pickupLocationName String?
 
   // Tiket
   ticketCode String  @unique
@@ -159,17 +161,16 @@ model tb_orders {
   isPaid          Boolean        @default(false)
   paymentStatus   PaymentStatus  @default(pending)
   paymentMethod   PaymentMethod?
-  transactionId   String? // dari Midtrans
-  snapToken       String? // token Snap
-  snapRedirectUrl String? // URL pembayaran Snap
+  transactionId   String?
+  snapToken       String?
+  snapRedirectUrl String?
   paidAt          DateTime?
 
   // Timestamp
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt
 
-  // Constraint unik supaya user tidak bisa pesan schedule sama 2x
-  @@unique([userId, scheduleId])
+  @@unique([userId, date])
 }
 
 model tb_category {
