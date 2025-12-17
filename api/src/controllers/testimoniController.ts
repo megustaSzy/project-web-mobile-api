@@ -60,16 +60,14 @@ export const testimoniController = {
   },
 
   async create(req: Request, res: Response) {
+    const result = await testimoniSchema.safeParse(req.body);
+
+    if (!result.success) {
+      return ResponseData.badRequest(res, result.error.issues[0].message);
+    }
+
     try {
-      const parsed = testimoniSchema.safeParse(req.body);
-
-      if (!parsed.success) {
-        return ResponseData.badRequest(res, "Validasi input gagal");
-      }
-
-      const testimoni = await testimoniService.createTestimoni({
-        ...parsed.data
-      });
+      const testimoni = await testimoniService.createTestimoni(result.data);
 
       return ResponseData.created(res, testimoni);
     } catch (error) {
