@@ -2,10 +2,12 @@ import { Router } from "express";
 // import { asyncHandler } from "../middlewares/asyncHandler";
 import passport from "../config/passport";
 import { authController } from "../controllers/authController";
+import { validate } from "../middlewares/validate";
+import { registerSchema } from "../schemas/authSchema";
 
 const router = Router();
 
-router.post("/register", authController.register);
+router.post("/register", validate(registerSchema), authController.register);
 
 router.post("/login", authController.login);
 

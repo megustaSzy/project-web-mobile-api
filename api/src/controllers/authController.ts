@@ -5,16 +5,14 @@ import { loginSchema, registerSchema } from "../schemas/authSchema";
 
 export const authController = {
   async register(req: Request, res: Response) {
-    const result = registerSchema.safeParse(req.body);
-
-    if (!result.success) {
-      return ResponseData.badRequest(res, result.error.issues[0].message);
+    try {
+      const user = await authService.registerUser(req.body);
+      return ResponseData.created(res, user)
+    } catch (error) {
+      return ResponseData.serverError(res, error)
     }
-
-    const user = await authService.registerUser(result.data);
-
-    return ResponseData.created(res, user, "registrasi berhasil");
   },
+
   async login(req: Request, res: Response) {
     const result = loginSchema.safeParse(req.body);
 

@@ -10,7 +10,6 @@ export const validate =
       return ResponseData.badRequest(res, result.error.issues[0].message);
     }
 
-    // body sudah bersih & valid
     req.body = result.data;
     next();
   };
