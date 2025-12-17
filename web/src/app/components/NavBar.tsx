@@ -40,6 +40,7 @@ export default function NavBar() {
   const [language, setLanguage] = useState("id");
   const [langOpen, setLangOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [logoutConfirm, setLogoutConfirm] = useState(false);
 
   const translationSource = {
     home: "Beranda",
@@ -77,6 +78,9 @@ export default function NavBar() {
   // ==========================
   // INIT TOKEN + PROFILE
   // ==========================
+  type JwtPayload = {
+    exp: number;
+  };
   useEffect(() => {
     const token = Cookies.get("accessToken");
 
@@ -86,18 +90,24 @@ export default function NavBar() {
     }
 
     try {
-      jwtDecode(token);
+      const decoded = jwtDecode<JwtPayload>(token);
+
+      if (decoded.exp * 1000 < Date.now()) {
+        Cookies.remove("accessToken", { path: "/" });
+        setIsLoggedIn(false);
+        return;
+      }
+
       setIsLoggedIn(true);
     } catch {
+      Cookies.remove("accessToken", { path: "/" });
       setIsLoggedIn(false);
       return;
     }
 
     const loadProfile = async () => {
       try {
-        const res = await apiFetch<ApiProfileResponse>("/api/users/profile", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await apiFetch<ApiProfileResponse>("/api/users/profile");
 
         if (res?.data) {
           setUserData({
@@ -137,7 +147,10 @@ export default function NavBar() {
       if (langRef.current && !langRef.current.contains(e.target as Node)) {
         setLangOpen(false);
       }
-      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+      if (
+        profileRef.current &&
+        !profileRef.current.contains(e.target as Node)
+      ) {
         setProfileOpen(false);
       }
     };
@@ -149,7 +162,8 @@ export default function NavBar() {
   // LOGOUT
   // ==========================
   const handleLogout = () => {
-    Cookies.remove("accessToken");
+    Cookies.remove("accessToken", { path: "/" });
+    window.location.href = "/login";
     localStorage.removeItem("profile");
     setIsLoggedIn(false);
     setUserData({ name: "User", avatar: "/images/profile.jpg" });
@@ -161,7 +175,9 @@ export default function NavBar() {
   return (
     <header
       className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-        scrolled ? "bg-white shadow-md border-b border-gray-200" : "bg-transparent"
+        scrolled
+          ? "bg-white shadow-md border-b border-gray-200"
+          : "bg-transparent"
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 flex items-center h-16">
@@ -178,7 +194,9 @@ export default function NavBar() {
           <Link href="/tiket">{translations.ticket}</Link>
           <button
             onClick={() =>
-              document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })
+              document
+                .getElementById("contact")
+                ?.scrollIntoView({ behavior: "smooth" })
             }
           >
             {translations.contact}
@@ -196,7 +214,9 @@ export default function NavBar() {
               {language.toUpperCase()}
               <ChevronDown
                 size={16}
-                className={`transition-transform duration-200 ${langOpen ? "rotate-180" : ""}`}
+                className={`transition-transform duration-200 ${
+                  langOpen ? "rotate-180" : ""
+                }`}
               />
             </button>
 
@@ -246,7 +266,9 @@ export default function NavBar() {
                 <span className="text-sm">{userData.name}</span>
                 <ChevronDown
                   size={14}
-                  className={`transition-transform duration-200 ${profileOpen ? "rotate-180" : ""}`}
+                  className={`transition-transform duration-200 ${
+                    profileOpen ? "rotate-180" : ""
+                  }`}
                 />
               </button>
 
@@ -261,7 +283,7 @@ export default function NavBar() {
                   </Link>
                   <button
                     onClick={() => {
-                      handleLogout();
+                      setLogoutConfirm(true);
                       setProfileOpen(false);
                     }}
                     className="w-full text-left px-4 py-2 hover:bg-red-100 text-red-600 text-sm"
@@ -282,7 +304,10 @@ export default function NavBar() {
         </div>
 
         {/* BURGER MENU */}
-        <button onClick={() => setOpen((p) => !p)} className="md:hidden ml-auto p-2">
+        <button
+          onClick={() => setOpen((p) => !p)}
+          className="md:hidden ml-auto p-2"
+        >
           {open ? (
             <X className={scrolled ? "text-gray-800" : "text-white"} />
           ) : (
@@ -311,16 +336,22 @@ export default function NavBar() {
             <Link href="/tiket" onClick={() => setOpen(false)}>
               {translations.ticket}
             </Link>
-            <button onClick={() => setOpen(false)}>{translations.contact}</button>
+            <button onClick={() => setOpen(false)}>
+              {translations.contact}
+            </button>
 
             {isLoggedIn ? (
               <>
-                <Link href="/profil" onClick={() => setOpen(false)} className="py-2">
+                <Link
+                  href="/profil"
+                  onClick={() => setOpen(false)}
+                  className="py-2"
+                >
                   {translations.editProfile}
                 </Link>
                 <button
                   onClick={() => {
-                    handleLogout();
+                    setLogoutConfirm(true);
                     setOpen(false);
                   }}
                   className="py-2 bg-red-500 text-white rounded-md"
@@ -349,6 +380,46 @@ export default function NavBar() {
           </nav>
         </div>
       </div>
+      {/* ===================== */}
+      {/* LOGOUT CONFIRM MODAL */}
+      {/* ===================== */}
+      {logoutConfirm && (
+        <div className="fixed inset-0 z-999 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl w-[90%] max-w-sm p-6 shadow-2xl animate-scaleIn">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-14 h-14 flex items-center justify-center rounded-full bg-red-100 text-red-600 mb-4">
+                ⚠️
+              </div>
+
+              <h2 className="text-lg font-semibold text-gray-800">
+                Konfirmasi Logout
+              </h2>
+              <p className="text-sm text-gray-500 mt-2">
+                Apakah Anda yakin ingin keluar dari akun ini?
+              </p>
+
+              <div className="flex gap-3 mt-6 w-full">
+                <button
+                  onClick={() => setLogoutConfirm(false)}
+                  className="flex-1 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
+                >
+                  Batal
+                </button>
+
+                <button
+                  onClick={() => {
+                    setLogoutConfirm(false);
+                    handleLogout();
+                  }}
+                  className="flex-1 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition"
+                >
+                  Ya, Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

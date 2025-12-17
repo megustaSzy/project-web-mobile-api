@@ -15,8 +15,8 @@ export async function apiFetch<T>(
 
   const headers: HeadersInit = {
     "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...(options.headers ?? {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 
   const response = await fetch(fullUrl, {
@@ -27,7 +27,7 @@ export async function apiFetch<T>(
   });
 
   const contentType = response.headers.get("content-type");
-  const text = await response.text(); // 👈 ambil dulu text
+  const text = await response.text();
 
   if (!response.ok) {
     console.error("❌ API ERROR:", {
@@ -38,9 +38,8 @@ export async function apiFetch<T>(
     throw new Error(`HTTP ${response.status}`);
   }
 
-  //  BUKAN JSON
   if (!contentType || !contentType.includes("application/json")) {
-    console.error(" RESPONSE BUKAN JSON:", {
+    console.error("❌ RESPONSE BUKAN JSON:", {
       url: fullUrl,
       contentType,
       response: text,
