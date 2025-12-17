@@ -33,11 +33,6 @@ export const categoryController = {
   async createCategoty(req: Request, res: Response) {
     try {
       const { name } = req.body;
-
-      if (!name) {
-        return ResponseData.badRequest(res, "nama wajib diisi");
-      }
-
       const category = await categoryService.addCategory({ name });
 
       return ResponseData.created(res, category);

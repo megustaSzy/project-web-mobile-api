@@ -26,9 +26,6 @@ import bannerRoute from "./routes/bannerRoute";
 
 const app = express();
 
-app.use("/api/destinations", destinationRoute);
-app.use("/api/banner", bannerRoute);
-app.use("/api/testimoni", testimoniRoute);
 
 
 app.use(express.json({ limit: "10mb" }));
@@ -46,6 +43,13 @@ app.use(
 app.use(cookieParser());
 app.use(passport.initialize());
 
+app.get("/", (req, res) => {
+  res.json({
+    status: 200,
+    message: "Welcome Server API",
+    success: true,
+  });
+});
 
 app.use("/api/users", userRoute);
 app.use("/api/auth", authRoute);
@@ -59,15 +63,9 @@ app.use("/api/about", aboutRoute);
 app.use("/api/count", statRoute);
 app.use("/api/payment", paymentRoute);
 app.use("/api/team", teamRoute);
+app.use("/api/destinations", destinationRoute);
+app.use("/api/banner", bannerRoute);
+app.use("/api/testimoni", testimoniRoute);
 
-app.use("/uploads", express.static("public/uploads"));
-
-app.get("/", (req, res) => {
-  res.json({
-    status: 200,
-    message: "Welcome Server API",
-    success: true,
-  });
-});
 
 export default app;

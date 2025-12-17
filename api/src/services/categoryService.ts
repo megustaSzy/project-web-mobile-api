@@ -1,5 +1,5 @@
 import prisma from "../lib/prisma";
-import { CategoryData } from "../types/category";
+import { CreateCategoryDTO, UpdateCategoryDTO } from "../schemas/categorySchema";
 import { createError } from "../utilities/createError";
 import { Pagination } from "../utilities/Pagination";
 
@@ -40,7 +40,7 @@ export const categoryService = {
     return category;
   },
 
-  async addCategory(data: CategoryData) {
+  async addCategory(data: CreateCategoryDTO) {
 
     const existing = await prisma.tb_category.findFirst({
       where: {
@@ -48,7 +48,7 @@ export const categoryService = {
       }
     });
 
-    if(existing) createError("nama category sudah ada", 400)
+    if(existing) throw createError("nama category sudah ada", 400)
 
     return prisma.tb_category.create({
       data: {
@@ -60,14 +60,14 @@ export const categoryService = {
     });
   },
 
-  async editCategory(id: number, data: CategoryData) {
+  async editCategory(id: number, data: UpdateCategoryDTO) {
     const category = await prisma.tb_category.findUnique({
       where: {
         id
       }
     });
 
-    if(!category) createError("id tidak ditemukan", 404);
+    if(!category) throw createError("id tidak ditemukan", 404);
 
     return prisma.tb_category.update({
       where: {

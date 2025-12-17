@@ -1,5 +1,5 @@
 import prisma from "../lib/prisma";
-import { RegionData } from "../types/region";
+import { CreateRegionDTO } from "../schemas/regionSchema";
 import { createError } from "../utilities/createError";
 import { Pagination } from "../utilities/Pagination"
 
@@ -39,7 +39,7 @@ export const regionService = {
     return region;
   },
 
-  async createRegion(data: RegionData) {
+  async createRegion(data: CreateRegionDTO) {
     const region = await prisma.tb_regions.findFirst({
       where: {
         name: data.name
@@ -55,7 +55,7 @@ export const regionService = {
     })
   },
 
-  async editRegion(id: number, data: RegionData) {
+  async editRegion(id: number, data: CreateRegionDTO) {
     const region = await prisma.tb_regions.findUnique({
       where: {
         id
