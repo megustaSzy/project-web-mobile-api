@@ -110,7 +110,7 @@ export const destinationService = {
       },
     });
 
-    if (!region) createError("region tidak ditemukan", 404);
+    if (!region) throw createError("region tidak ditemukan", 404);
 
     return prisma.tb_destinations.create({
       data: {
