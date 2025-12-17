@@ -7,20 +7,11 @@ export const orderController = {
   async createOrder(req: Request, res: Response) {
     try {
       const userId = (req as any).user.id;
-      const { scheduleId, quantity } = req.body;
 
-      if (!scheduleId || !quantity) {
-        return ResponseData.badRequest(
-          res,
-          "scheduleId dan quantity wajib diisi"
-        );
-      }
-
-      const order = await orderService.createOrder(
+      const order = await orderService.createOrder({
         userId,
-        Number(scheduleId),
-        Number(quantity)
-      );
+        ...req.body,
+      });
 
       return ResponseData.created(res, order);
     } catch (error) {

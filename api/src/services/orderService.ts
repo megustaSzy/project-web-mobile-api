@@ -22,6 +22,7 @@ export const orderService = {
     time,
     returnTime,
   }: CreateOrderInput & { userId: number }) {
+    
     const user = await prisma.tb_user.findUnique({
       where: { id: userId },
     });
@@ -98,15 +99,37 @@ export const orderService = {
     return order;
   },
   async getOrdersByUser(userId: number) {
+
     return await prisma.tb_orders.findMany({
       where: { userId },
       orderBy: { id: "desc" },
+      select: {
+        id: true,
+        destinationName: true,
+        pickupLocationName: true,
+        date: true,
+        time: true,
+        returnTime: true,
+        quantity: true,
+        totalPrice: true,
+        paymentStatus: true,
+        isPaid: true,
+        createdAt: true
+      }
     });
+
   },
 
   async getOrderById(id: number, userId: number) {
-    const order = await prisma.tb_orders.findUnique({ where: { id } });
+    const order = await prisma.tb_orders.findFirst({
+      where: {
+        id,
+        userId
+      },
+    });
+
     if (!order) throw createError("order tidak ditemukan", 404);
+
     if (order.userId !== userId)
       throw createError("anda tidak memiliki akses ke order ini", 403);
     return order;
