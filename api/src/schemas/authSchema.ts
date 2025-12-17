@@ -4,19 +4,17 @@ export const registerSchema = z.object({
   name: z
     .string()
     .min(1, "nama wajib diisi")
-    // huruf + spasi (nama orang)
     .regex(/^[a-zA-Z\s]+$/, "nama hanya boleh huruf dan spasi"),
 
   email: z
     .string()
     .min(1, "email wajib diisi")
     .email("format email tidak valid")
-    .lowercase(), // normalisasi
+    .lowercase(),
 
   password: z
     .string()
     .min(6, "password minimal 6 karakter")
-    // minimal 1 huruf & 1 angka
     .regex(
       /^(?=.*[a-zA-Z])(?=.*\d).+$/,
       "password harus mengandung huruf dan angka"
