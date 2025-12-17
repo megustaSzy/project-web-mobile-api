@@ -1,5 +1,3 @@
-Ah, paham! Kamu mau supaya README-nya rapi, tapi hanya bagian perintah terminal yang diberi blok bash, sementara isi .env tetap pakai blok env. Jadi gampang dibaca dan copy-paste. Berikut versi yang sudah dirapikan:
-
 # **Tech Stack Backend**
 
 * **Programming Language**: Express (v5.1.0)
@@ -72,7 +70,7 @@ FRONTEND_URL=http://localhost:3000
 EMAIL_USER=YOUR_EMAIL_USER
 EMAIL_PASS=YOUR_EMAIL_PASS
 EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
+EMAIL_PORT=465
 
 # Payment Gateway (Midtrans)
 MIDTRANS_MERCHANT_ID=YOUR_MIDTRANS_MERCHANT_ID
