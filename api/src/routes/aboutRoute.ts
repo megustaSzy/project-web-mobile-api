@@ -6,6 +6,7 @@ import { valueController } from "../controllers/valueController";
 import { upload } from "../middlewares/uploadMiddleware";
 import { validate } from "../middlewares/validate";
 import { createAboutSchema, updateAboutSchema } from "../schemas/aboutSchema";
+import { createValueSchema, updateValueSchema } from "../schemas/valueSchema";
 
 
 const router = Router();
@@ -19,8 +20,8 @@ router.put("/:id", authMiddleware, authorizeRoles("Admin"), validate(updateAbout
 router.delete("/:id", authMiddleware, authorizeRoles("Admin"), aboutController.deleteAbout);
 
 router.get("/value/:id", authMiddleware, authorizeRoles("Admin"), valueController.getValueById);
-router.post("/value", authMiddleware, authorizeRoles("Admin"), upload.single("image"), valueController.createValue);
-router.put("/value/:id", authMiddleware, authorizeRoles("Admin"), upload.single("image"), valueController.editById);
+router.post("/value", authMiddleware, authorizeRoles("Admin"), upload.single("image"), validate(createValueSchema), valueController.createValue);
+router.put("/value/:id", authMiddleware, authorizeRoles("Admin"), upload.single("image"), validate(updateValueSchema), valueController.editById);
 router.delete("/value/:id", authMiddleware, authorizeRoles("Admin"), valueController.deleteById);
 
 
