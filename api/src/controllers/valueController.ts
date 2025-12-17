@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { valueService } from "../services/valueService";
 import { ResponseData } from "../utilities/Response";
+import { uploadToCloudinary } from "../utilities/uploadToCloudinary";
 
 export const valueController = {
   async getAll(req: Request, res: Response) {
@@ -30,10 +31,15 @@ export const valueController = {
 
   async createValue(req: Request, res: Response) {
     try {
-      const image = req.file ? `/uploads/${req.file.filename}` : null;
+      let imageUrl: string | undefined;
+
+      if (req.file) {
+        const result: any = await uploadToCloudinary(req.file.buffer);
+        imageUrl = result.secure_url;
+      }
       const value = await valueService.createValue({
         ...req.body,
-        imageUrl: image,
+        ...(imageUrl && { imageUrl }),
       });
 
       return ResponseData.created(res, value);
@@ -45,13 +51,18 @@ export const valueController = {
   async editById(req: Request, res: Response) {
     try {
       const id = Number(req.params.id);
-      const image = req.file ? `/uploads/${req.file.filename}` : null;
-
       if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
+
+      let imageUrl: string | undefined;
+
+      if (req.file) {
+        const result: any = await uploadToCloudinary(req.file.buffer);
+        imageUrl = result.secure_url;
+      }
 
       const updateValue = await valueService.editValue(id, {
         ...req.body,
-        imageUrl: image,
+        ...(imageUrl && { imageUrl }),
       });
 
       return ResponseData.ok(res, updateValue);
