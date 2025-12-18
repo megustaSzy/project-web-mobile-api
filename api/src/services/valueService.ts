@@ -38,6 +38,7 @@ export const valueService = {
         header: data.header,
         name: data.name,
         ...(data.imageUrl && { imageUrl: data.imageUrl }),
+        ...(data.imagePublicId && { imagePublicId: data.imagePublicId })
       },
     });
   },
@@ -52,6 +53,7 @@ export const valueService = {
         ...(data.header && { header: data.header }),
         ...(data.name && { name: data.name }),
         ...(data.imageUrl && { imageUrl: data.imageUrl }),
+        ...(data.imagePublicId && { imagePublicId: data.imagePublicId })
       },
     });
   },

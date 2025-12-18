@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { teamService } from "../services/teamService";
 import { ResponseData } from "../utilities/Response";
 import { uploadToCloudinary } from "../utilities/uploadToCloudinary";
+import cloudinary from "../config/cloudinary";
 
 // testing
 export const teamController = {
@@ -39,7 +40,8 @@ export const teamController = {
 
       const team = await teamService.createTeam({
         ...req.body,
-        imageUrl: result.secure_url, // simpan URL Cloudinary
+        imageUrl: result.secure_url,
+        imagePublicId: result.public_id
       });
 
       return ResponseData.created(res, team);
@@ -53,26 +55,34 @@ export const teamController = {
       const id = Number(req.params.id);
       if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
 
+      const team = await teamService.getTeamById(id);
+      if (!team) return ResponseData.notFound(res, "team tidak ditemukan");
+
       let imageUrl: string | undefined;
+      let imagePublicId: string | undefined;
 
       if (req.file) {
         const result: any = await uploadToCloudinary(req.file.buffer);
         imageUrl = result.secure_url;
+        imagePublicId = result.public_id;
+
+        if (team.imagePublicId) {
+          await cloudinary.uploader.destroy(team.imagePublicId);
+        }
       }
 
-      const updateData = {
+      const updateTeam = await teamService.editTeam(id, {
         ...req.body,
         ...(imageUrl && { imageUrl }),
-      };
+        ...(imagePublicId && { imagePublicId }),
+      });
 
-      const team = await teamService.editTeam(id, updateData);
-
-      return ResponseData.ok(res, team);
+      return ResponseData.ok(res, updateTeam);
     } catch (error) {
       return ResponseData.serverError(res, error);
     }
   },
-  
+
   async deleteTeamById(req: Request, res: Response) {
     try {
       const id = Number(req.params.id);

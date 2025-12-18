@@ -12,7 +12,7 @@ const router = Router();
 router.get("/", bannerController.getBanner);
 router.get("/:id", bannerController.getByIdBanner);
 router.post("/", authMiddleware, authorizeRoles("Admin"), upload.single("image"), validate(createBannerSchema), bannerController.create);
-router.put("/:id", authMiddleware, authorizeRoles("Admin"), upload.single("image"), validate(updateBannerSchema), bannerController.edit);
+router.patch("/:id", authMiddleware, authorizeRoles("Admin"), upload.single("image"), validate(updateBannerSchema), bannerController.edit);
 router.delete("/:id", authMiddleware, authorizeRoles("Admin"),bannerController.deleteBanner);
 
 

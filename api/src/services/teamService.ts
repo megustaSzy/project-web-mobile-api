@@ -26,11 +26,7 @@ export const teamService = {
 
     async createTeam(data: CreateTeamDTO) {
         return prisma.tb_ourTeam.create({
-            data: {
-                name: data.name,
-                job: data.job,
-                imageUrl: data.imageUrl
-            }
+            data
         })
     },
 

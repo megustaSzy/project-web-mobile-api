@@ -15,13 +15,14 @@ datasource db {
 }
 
 model tb_user {
-  id       Int     @id @default(autoincrement())
-  name     String
-  email    String  @unique
-  password String?
-  notelp   String?
-  role     Role    @default(User)
-  avatar   String?
+  id             Int     @id @default(autoincrement())
+  name           String
+  email          String  @unique
+  password       String?
+  notelp         String?
+  role           Role    @default(User)
+  avatar         String?
+  avatarPublicId String?
 
   provider   String? @default("local")
   providerId String?
@@ -60,11 +61,12 @@ model tb_refreshToken {
 }
 
 model tb_destinations {
-  id          Int    @id @default(autoincrement())
-  name        String
-  imageUrl    String
-  description String
-  price       Int
+  id            Int     @id @default(autoincrement())
+  name          String
+  imageUrl      String
+  imagePublicId String?
+  description   String
+  price         Int
 
   include   String[]
   ketentuan String[]
@@ -198,19 +200,21 @@ model tb_otp {
 }
 
 model tb_values {
-  id        Int      @id @default(autoincrement())
-  header    String?
-  name      String
-  imageUrl  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            Int      @id @default(autoincrement())
+  header        String?
+  name          String
+  imageUrl      String?
+  imagePublicId String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model tb_ourTeam {
-  id       Int     @id @default(autoincrement())
-  name     String
-  job      String
-  imageUrl String?
+  id            Int     @id @default(autoincrement())
+  name          String
+  job           String
+  imageUrl      String?
+  imagePublicId String?
 }
 
 model tb_testimoni {
@@ -226,13 +230,14 @@ model tb_testimoni {
 }
 
 model tb_banner {
-  id        Int      @id @default(autoincrement())
-  number    String
-  header    String
-  name      String
-  imageUrl  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            Int      @id @default(autoincrement())
+  number        String
+  header        String
+  name          String
+  imageUrl      String?
+  imagePublicId String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 enum TestimoniStatus {

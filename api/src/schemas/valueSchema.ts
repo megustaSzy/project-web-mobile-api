@@ -1,13 +1,15 @@
 import { z } from "zod";
 
-export const createValueSchema = z.object({
+export const createValueSchema = z
+  .object({
     header: z.string().min(1, "header wajib diisi"),
     name: z.string().min(1, "name wajib diisi"),
-
-    imageUrl: z.string().url("imageUrl wajib diisi").optional()
-});
+    imageUrl: z.string().url("imageUrl harus berupa URL yang valid").optional(),
+    imagePublicId: z.string().optional(),
+  })
+  .strict();
 
 export const updateValueSchema = createValueSchema.partial();
 
 export type CreateValueDTO = z.infer<typeof createValueSchema>;
-export type UpdateValueDTO = z.infer<typeof updateValueSchema>
+export type UpdateValueDTO = z.infer<typeof updateValueSchema>;

@@ -12,7 +12,7 @@ router.get("/", teamController.getTeam);
 router.get("/:id", teamController.getByIdTeam);
 
 router.post("/", authMiddleware, authorizeRoles("Admin"), upload.single("image"), validate(createTeamSchema), teamController.createTeam);
-router.put("/:id", authMiddleware, authorizeRoles("Admin"), upload.single("image"), validate(updateTeamSchema), teamController.editTeam);
+router.patch("/:id", authMiddleware, authorizeRoles("Admin"), upload.single("image"), validate(updateTeamSchema), teamController.editTeam);
 
 router.delete("/:id", authMiddleware, authorizeRoles("Admin"), teamController.deleteTeamById);
 

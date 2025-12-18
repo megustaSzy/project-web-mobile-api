@@ -9,6 +9,7 @@ export const createDestinationSchema = z.object({
   regionId: z.coerce.number().int().positive(),
 
   imageUrl: z.string().optional(),
+  imagePublicId: z.string().optional()
 });
 
 export const updateDestinationSchema = createDestinationSchema.partial();
