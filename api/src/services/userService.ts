@@ -42,6 +42,7 @@ export const userService = {
         email: true,
         notelp: true,
         avatar: true,
+        avatarPublicId: true,
       },
     });
 
