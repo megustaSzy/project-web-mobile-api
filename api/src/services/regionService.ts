@@ -1,66 +1,39 @@
 import prisma from "../lib/prisma";
 import { CreateRegionDTO } from "../schemas/regionSchema";
 import { createError } from "../utilities/createError";
-
-// cache global (1 instance per server)
-const regionCache = new Map<string, any>();
+import { Pagination } from "../utilities/Pagination";
 
 export const regionService = {
   async getAll(page: number, limit: number) {
-    const key = `${page}-${limit}`;
-    const cached = regionCache.get(key);
+    const pagination = new Pagination(page, limit);
 
-    if (cached) {
-      return cached;
-    }
+    const count = await prisma.tb_regions.count();
 
     const rows = await prisma.tb_regions.findMany({
-      skip: (page - 1) * limit,
-      take: limit,
-      orderBy: { id: "asc" },
-      select: {
-        id: true,
-        name: true,
+      skip: pagination.offset,
+      take: pagination.limit,
+      orderBy: {
+        id: "asc",
+      },
+      include: {
+        destinations: true,
       },
     });
 
-    const result = {
-      page,
-      limit,
-      hasNext: rows.length === limit,
-      rows: rows.map((r) => ({
-        id: r.id,
-        name: r.name,
-      })),
-    };
-
-    regionCache.set(key, result);
-    return result;
+    return pagination.paginate({ count, rows });
   },
 
   async getById(id: number) {
     const region = await prisma.tb_regions.findUnique({
       where: { id },
-      select: {
-        id: true,
-        name: true,
-        createdAt: true,
-        destinations: {
-          select: {
-            id: true,
-            name: true,
-            price: true,
-            imageUrl: true,
-          },
-          orderBy: { id: "asc" },
-        },
+      include: {
+        destinations: true, // kalau mau langsung ambil destinasi terkait
       },
     });
 
     if (!region) throw createError("id tidak ditemukan", 404);
     return region;
   },
-
   async createRegion(data: CreateRegionDTO) {
     const region = await prisma.tb_regions.findFirst({
       where: { name: data.name },
@@ -68,12 +41,9 @@ export const regionService = {
 
     if (region) throw createError("nama sudah digunakan", 400);
 
-    const created = await prisma.tb_regions.create({
-      data: { name: data.name },
+    return prisma.tb_regions.create({
+      data,
     });
-
-    regionCache.clear();
-    return created;
   },
 
   async editRegion(id: number, data: CreateRegionDTO) {
@@ -85,7 +55,6 @@ export const regionService = {
       data,
     });
 
-    regionCache.clear(); 
     return updated;
   },
 
@@ -97,7 +66,6 @@ export const regionService = {
       where: { id },
     });
 
-    regionCache.clear(); 
     return deleted;
   },
 };

@@ -89,7 +89,7 @@ model tb_regions {
   id   Int    @id @default(autoincrement())
   name String @unique
 
-  destinations tb_destinations[] // 1 daerah → banyak destinasi
+  destinations tb_destinations[] 
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
