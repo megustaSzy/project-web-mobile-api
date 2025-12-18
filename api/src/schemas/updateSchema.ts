@@ -13,9 +13,6 @@ export const updateSchema = z
         "password harus mengandung huruf dan angka"
       )
       .optional(),
-    avatar: z.string().optional(),
-
-    avatarPublicId: z.string().optional(),
   })
   .strict();
 
