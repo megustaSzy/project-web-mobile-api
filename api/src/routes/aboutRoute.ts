@@ -21,7 +21,7 @@ router.delete("/:id", authMiddleware, authorizeRoles("Admin"), aboutController.d
 
 router.get("/value/:id", authMiddleware, authorizeRoles("Admin"), valueController.getValueById);
 router.post("/value", authMiddleware, authorizeRoles("Admin"), upload.single("image"), validate(createValueSchema), valueController.createValue);
-router.put("/value/:id", authMiddleware, authorizeRoles("Admin"), upload.single("image"), validate(updateValueSchema), valueController.editById);
+router.patch("/value/:id", authMiddleware, authorizeRoles("Admin"), upload.single("image"), validate(updateValueSchema), valueController.editById);
 router.delete("/value/:id", authMiddleware, authorizeRoles("Admin"), valueController.deleteById);
 
 
