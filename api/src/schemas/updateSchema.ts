@@ -14,6 +14,8 @@ export const updateSchema = z
       )
       .optional(),
     avatar: z.string().optional(),
+
+    avatarPublicId: z.string().optional(),
   })
   .strict();
 
