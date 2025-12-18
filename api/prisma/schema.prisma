@@ -82,6 +82,7 @@ model tb_destinations {
   updatedAt DateTime @updatedAt
 
   schedules tb_schedules[]
+  @@index([regionId])
 }
 
 model tb_regions {
