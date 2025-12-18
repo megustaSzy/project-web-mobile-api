@@ -3,6 +3,7 @@ import { destinationService } from "../services/destinationService";
 import { ResponseData } from "../utilities/Response";
 import { uploadToCloudinary } from "../utilities/uploadToCloudinary";
 import { UpdateDestinationDTO } from "../schemas/destinationSchema";
+import cloudinary from "../config/cloudinary";
 
 export const destinationController = {
   async getDestinations(req: Request, res: Response) {
@@ -52,7 +53,8 @@ export const destinationController = {
 
       const destination = await destinationService.addDestination({
         ...req.body,
-        imageUrl: result.secure_url, // URL Cloudinary
+        imageUrl: result.secure_url,
+        imagePublicId: result.public_id
       });
 
       return ResponseData.created(res, destination);
@@ -65,24 +67,30 @@ export const destinationController = {
       const id = Number(req.params.id);
       if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
 
+      const destination = await destinationService.getDestinationById(id);
+      if(!destination) {
+        return ResponseData.badRequest(res, "destination tidak ditemukan")
+      }
+
       let imageUrl: string | undefined;
+      let imagePublicId: string | undefined;
 
       // Upload ke Cloudinary jika ada file baru
       if (req.file) {
         const result: any = await uploadToCloudinary(req.file.buffer);
         imageUrl = result.secure_url;
+        imagePublicId = result.public_id;
+
+        if(destination.imagePublicId) {
+          await cloudinary.uploader.destroy(destination.imagePublicId);
+        }
       }
 
-      // Gabungkan body + imageUrl kalau ada
-      const updateData: UpdateDestinationDTO = {
+      const updatedDestination = await destinationService.editDestination(id, {
         ...req.body,
         ...(imageUrl && { imageUrl }),
-      };
-
-      const updatedDestination = await destinationService.editDestination(
-        id,
-        updateData
-      );
+        ...(imagePublicId && { imagePublicId })
+      });
 
       return ResponseData.ok(res, updatedDestination);
     } catch (error) {

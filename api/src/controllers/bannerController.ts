@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { bannerService } from "../services/bannerService";
 import { ResponseData } from "../utilities/Response";
 import { uploadToCloudinary } from "../utilities/uploadToCloudinary";
+import cloudinary from "../config/cloudinary";
 
 export const bannerController = {
   async getBanner(req: Request, res: Response) {
@@ -29,17 +30,17 @@ export const bannerController = {
 
   async create(req: Request, res: Response) {
     try {
-      let imageUrl: string | undefined;
-      if (req.file) {
-        const result: any = await uploadToCloudinary(req.file.buffer);
-        imageUrl = result.secure_url; 
+      if (!req.file) {
+        return ResponseData.badRequest(res, "image wajib diupload");
       }
+
+      const result: any = await uploadToCloudinary(req.file.buffer);
 
       const banner = await bannerService.createBanner({
         ...req.body,
-        ...(imageUrl && { imageUrl }),
+        imageUrl: result.secure_url,
+        imagePublicId: result.public_id,
       });
-
       return ResponseData.created(res, banner);
     } catch (error) {
       return ResponseData.serverError(res, error);
@@ -49,19 +50,30 @@ export const bannerController = {
   async edit(req: Request, res: Response) {
     try {
       const id = Number(req.params.id);
-
       if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
 
+      const banner = await bannerService.getByIdBanner(id);
+      if (!banner) return ResponseData.notFound(res, "banner tidak ditemukan");
+
       let imageUrl: string | undefined;
+      let imagePublicId: string | undefined;
+
       if (req.file) {
         const result: any = await uploadToCloudinary(req.file.buffer);
         imageUrl = result.secure_url;
+        imagePublicId = result.public_id;
+
+        if (banner.imagePublicId) {
+          await cloudinary.uploader.destroy(banner.imagePublicId);
+        }
       }
 
-      const banner = await bannerService.editBanner(id, {
+      const updateBanner = await bannerService.editBanner(id, {
         ...req.body,
         ...(imageUrl && { imageUrl }),
+        ...(imagePublicId && { imagePublicId })
       });
+
       return ResponseData.ok(res, banner);
     } catch (error) {
       return ResponseData.serverError(res, error);
