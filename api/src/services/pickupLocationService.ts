@@ -1,6 +1,6 @@
 import prisma from "../lib/prisma";
+import { CreatePickupDTO, UpdatePickupDTO } from "../schemas/pickupSchema";
 import { createError } from "../utilities/createError";
-import { PickupData } from "../types/pickup";
 import { Pagination } from "../utilities/Pagination";
 
 export const pickupLocationService = {
@@ -25,7 +25,7 @@ export const pickupLocationService = {
     return pickup;
   },
 
-  async createPickupLocation(data: PickupData) {
+  async createPickupLocation(data: CreatePickupDTO) {
     if (!data.name || data.name.trim().length === 0)
       createError("nama lokasi wajib diisi", 400);
 
@@ -37,7 +37,7 @@ export const pickupLocationService = {
     return prisma.tb_pickup_locations.create({ data: { name: data.name } });
   },
 
-  async editPickupLocation(id: number, data: PickupData) {
+  async editPickupLocation(id: number, data: UpdatePickupDTO) {
     if (!data.name || data.name.trim().length === 0)
       createError("nama lokasi wajib diisi", 400);
 
