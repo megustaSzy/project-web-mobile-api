@@ -3,8 +3,7 @@ import { CreateAdminOrderInput } from "../schemas/createAdminOrderSchema";
 import { createError } from "../utilities/createError";
 import { Pagination } from "../utilities/Pagination";
 import { v4 as uuidv4 } from "uuid";
-
-type PaymentStatusType = "pending" | "paid" | "failed" | "expired";
+import { PaymentStatus } from "@prisma/client";
 
 export const adminOrderService = {
   async createOrder(input: CreateAdminOrderInput) {
@@ -14,14 +13,12 @@ export const adminOrderService = {
       pickupLocationId,
       quantity,
       date,
-      time,
+      departureTime,
       returnTime,
       isPaid = false,
     } = input;
 
-    const user = await prisma.tb_user.findUnique({
-      where: { id: userId },
-    });
+    const user = await prisma.tb_user.findUnique({ where: { id: userId } });
     if (!user) throw createError("user tidak ditemukan", 404);
 
     const destination = await prisma.tb_destinations.findUnique({
@@ -29,14 +26,12 @@ export const adminOrderService = {
     });
     if (!destination) throw createError("destinasi tidak ditemukan", 404);
 
-    let pickupLocationName: string | null = null;
-
-    if (pickupLocationId) {
+    let pickupLocationName = "";
+    if (pickupLocationId !== undefined) {
       const pickup = await prisma.tb_pickup_locations.findUnique({
         where: { id: pickupLocationId },
       });
       if (!pickup) throw createError("pickup location tidak ditemukan", 404);
-
       pickupLocationName = pickup.name;
     }
 
@@ -45,51 +40,50 @@ export const adminOrderService = {
 
     const orderDate = new Date(date);
     orderDate.setHours(0, 0, 0, 0);
-
     if (orderDate < today)
       throw createError("tanggal keberangkatan sudah lewat", 400);
 
     const totalPrice = destination.price * quantity;
-
     const ticketCode = `TICKET-${Date.now()}-${uuidv4()
       .slice(0, 6)
+      .toUpperCase()}`;
+    const paymentOrderId = `ORDER-${Date.now()}-${uuidv4()
+      .slice(0, 8)
       .toUpperCase()}`;
 
     const order = await prisma.tb_orders.create({
       data: {
         userId,
+        destinationId,
+        pickupLocationId,
         quantity,
         totalPrice,
 
-        pickupLocationId: pickupLocationId ?? null,
-        pickupLocationName,
-
         userName: user.name,
         userPhone: user.notelp ?? "",
+        userEmail: user.email,
 
         destinationName: destination.name,
         destinationPrice: destination.price,
+        pickupLocationName,
 
         date: orderDate,
-        time,
-        returnTime,
+        departureTime: departureTime,
+        returnTime: returnTime,
 
         ticketCode,
         isPaid,
-        paymentStatus: isPaid
-          ? ("paid" as PaymentStatusType)
-          : ("pending" as PaymentStatusType),
-        paidAt: isPaid ? new Date() : null,
+        paymentOrderId,
+        paymentStatus: isPaid ? PaymentStatus.paid : PaymentStatus.pending,
+        paidAt: isPaid ? new Date() : undefined,
       },
     });
 
     return order;
   },
 
-  // Get semua order
   async getAllOrders(page: number, limit: number) {
     const pagination = new Pagination(page, limit);
-
     const [count, rows] = await Promise.all([
       prisma.tb_orders.count(),
       prisma.tb_orders.findMany({
@@ -113,11 +107,8 @@ export const adminOrderService = {
         },
       }),
     ]);
-
     return pagination.paginate({ count, rows });
   },
-
-  // Detail order
   async getOrderById(id: number) {
     const order = await prisma.tb_orders.findUnique({
       where: { id },
@@ -137,17 +128,12 @@ export const adminOrderService = {
         },
       },
     });
-
     if (!order) throw createError("order tidak ditemukan", 404);
-
     return order;
   },
-
-  // Hapus order
   async deleteById(id: number) {
     const order = await prisma.tb_orders.findUnique({ where: { id } });
     if (!order) throw createError("order tidak ditemukan", 404);
-
     try {
       return await prisma.tb_orders.delete({ where: { id } });
     } catch {

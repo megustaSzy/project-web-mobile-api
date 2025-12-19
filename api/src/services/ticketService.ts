@@ -39,9 +39,6 @@ export const ticketService = {
     const dark = "#111827";
     const gray = "#4b5563";
 
-    // ================================
-    // HEADER ORANGE (seperti KAI)
-    // ================================
     doc.rect(0, 0, WIDTH, 80).fill(orange);
 
     doc
@@ -58,9 +55,6 @@ export const ticketService = {
       .lineWidth(1)
       .stroke();
 
-    // ================================
-    // KIRI — INFORMASI UTAMA
-    // ================================
     const leftX = 30;
     let y = 100;
 
@@ -132,11 +126,8 @@ export const ticketService = {
       .font("Helvetica-Bold")
       .fontSize(15)
       .fillColor(dark)
-      .text(order.time, leftX, y + 15);
+      .text(order.departureTime, leftX, y + 15);
 
-    // ================================
-    // KANAN — TICKET INFO + QR
-    // ================================
     const rightX = 520;
 
     // Box Kanan
