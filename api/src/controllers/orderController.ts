@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { orderService } from "../services/orderService";
 import { ResponseData } from "../utilities/Response";
 import { ticketService } from "../services/ticketService";
+import { paymentService } from "../services/paymentService";
 
 export const orderController = {
   async createOrder(req: Request, res: Response) {
@@ -78,7 +79,34 @@ export const orderController = {
       const userId = (req as any).user.id;
 
       await ticketService.generateTicketPDF(id, userId, res);
-      // (Tidak perlu return ResponseData karena PDF langsung dikirim)
+    } catch (error) {
+      return ResponseData.serverError(res, error);
+    }
+  },
+
+  async payOrder(req: Request, res: Response) {
+    try {
+      const id = Number(req.params.id);
+      if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
+
+      const userId = (req as any).user.id;
+
+      const order = await orderService.getOrderById(id, userId);
+
+      if (order.isPaid) {
+        return ResponseData.badRequest(res, "order sudah dibayar");
+      }
+
+      if (order.snapToken) {
+        return ResponseData.ok(res, {
+          snapToken: order.snapToken,
+          redirectUrl: order.snapRedirectUrl,
+        });
+      }
+
+      const payment = await paymentService.createTransaction(order);
+
+      return ResponseData.ok(res, payment);
     } catch (error) {
       return ResponseData.serverError(res, error);
     }
