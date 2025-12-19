@@ -2,27 +2,33 @@ import prisma from "../lib/prisma";
 import { CreateOrderInput } from "../schemas/createOrderSchema";
 import { createError } from "../utilities/createError";
 import { v4 as uuidv4 } from "uuid";
-
-type PaymentStatusType = "pending" | "paid" | "failed" | "expired";
+// Import Enum langsung dari Prisma Client agar sinkron dengan schema
+import { PaymentStatus, PaymentMethod } from "@prisma/client";
 
 export const orderService = {
   async createOrder({
     userId,
     destinationId,
+    pickupLocationId,
     quantity,
     date,
-    time,
+    departureTime, // Sesuaikan dengan schema (sebelumnya 'time')
     returnTime,
   }: CreateOrderInput & { userId: number }) {
     const user = await prisma.tb_user.findUnique({
       where: { id: userId },
     });
-    if (!user) throw createError("user tidak ditemukan", 404);
+    if (!user) throw createError("User tidak ditemukan", 404);
 
     const destination = await prisma.tb_destinations.findUnique({
       where: { id: destinationId },
     });
-    if (!destination) throw createError("destinasi tidak ditemukan", 404);
+    if (!destination) throw createError("Destinasi tidak ditemukan", 404);
+
+    const pickup = await prisma.tb_pickup_locations.findUnique({
+      where: { id: pickupLocationId },
+    });
+    if (!pickup) throw createError("Lokasi penjemputan tidak ditemukan", 404);
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -31,86 +37,109 @@ export const orderService = {
     orderDate.setHours(0, 0, 0, 0);
 
     if (orderDate < today) {
-      throw createError("tanggal keberangkatan sudah lewat", 400);
-    }
-
-    const existingOrder = await prisma.tb_orders.findFirst({
-      where: {
-        userId,
-        date: orderDate,
-      },
-    });
-
-    if (existingOrder) {
-      throw createError("anda sudah memiliki pesanan di tanggal ini", 400);
+      throw createError("Tanggal keberangkatan tidak boleh di masa lalu", 400);
     }
 
     const totalPrice = destination.price * quantity;
 
-    const ticketCode = `TICKET-${uuidv4().slice(0, 8).toUpperCase()}`;
-    const paymentOrderId = `ORDER-${Date.now()}-${uuidv4().slice(0, 8)}`;
+    const ticketCode = `TICKET-${Date.now()}-${uuidv4()
+      .slice(0, 6)
+      .toUpperCase()}`;
 
-    return prisma.tb_orders.create({
+    const paymentOrderId = `ORDER-${Date.now()}-${uuidv4()
+      .slice(0, 8)
+      .toUpperCase()}`;
+
+    const order = await prisma.tb_orders.create({
       data: {
         userId,
+        destinationId,
+        pickupLocationId,
         quantity,
         totalPrice,
 
         userName: user.name,
-        userPhone: user.notelp ?? "",
+        userPhone: user.notelp ?? "", // Pastikan field ini sesuai model user kamu
         userEmail: user.email,
 
         destinationName: destination.name,
         destinationPrice: destination.price,
+        pickupLocationName: pickup.name,
 
         date: orderDate,
-        time,
-        returnTime,
+        departureTime: departureTime, // Sesuai schema
+        returnTime: returnTime,
 
         ticketCode,
         paymentOrderId,
-
-        paymentStatus: "pending" as PaymentStatusType,
+        paymentStatus: PaymentStatus.pending, // Pakai Enum Prisma
         isPaid: false,
+      },
+    });
+
+    return order;
+  },
+
+  async getOrderByPaymentOrderId(paymentOrderId: string) {
+    return await prisma.tb_orders.findUnique({
+      where: { paymentOrderId },
+    });
+  },
+  async getOrdersByUser(userId: number) {
+    return await prisma.tb_orders.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" }, // Lebih baik urutkan berdasarkan waktu buat
+      select: {
+        id: true,
+        destinationName: true,
+        pickupLocationName: true,
+        date: true,
+        departureTime: true, // Sesuai schema (sebelumnya 'time')
+        returnTime: true,
+        quantity: true,
+        totalPrice: true,
+        paymentStatus: true,
+        isPaid: true,
+        ticketCode: true, // Berguna untuk ditampilkan di UI
+        createdAt: true,
       },
     });
   },
 
-  async getOrdersByUser(userId: number) {
-    return prisma.tb_orders.findMany({
-      where: { userId },
-      orderBy: { createdAt: "desc" },
-    });
-  },
-
   async getOrderById(id: number, userId: number) {
+    // Cari order yang ID-nya cocok DAN userId-nya cocok
     const order = await prisma.tb_orders.findFirst({
-      where: { id, userId },
+      where: {
+        id,
+        userId,
+      },
+      include: {
+        destination: true, // Opsional: jika ingin detail destinasi saat ini
+        pickupLocation: true,
+      },
     });
 
-    if (!order) throw createError("order tidak ditemukan", 404);
+    if (!order) {
+      throw createError("Order tidak ditemukan", 404);
+    }
+
     return order;
-  },
-
-  async findByPaymentOrderId(paymentOrderId: string) {
-    return prisma.tb_orders.findUnique({
-      where: { paymentOrderId },
-    });
   },
 
   async updateOrderPaymentData(
     orderId: number,
     data: {
+      paymentOrderId?: string;
       snapToken?: string;
       snapRedirectUrl?: string;
       transactionId?: string;
-      paymentStatus?: PaymentStatusType;
-      paymentMethod?: any;
+      paymentStatus?: PaymentStatus; // Gunakan Enum Prisma
+      paymentMethod?: PaymentMethod; // Gunakan Enum Prisma
       isPaid?: boolean;
       paidAt?: Date;
     }
   ) {
-    return prisma.tb_orders.update({
+    return await prisma.tb_orders.update({
       where: { id: orderId },
       data,
     });
