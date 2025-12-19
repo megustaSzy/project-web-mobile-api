@@ -90,28 +90,29 @@ export const adminOrderService = {
   async getAllOrders(page: number, limit: number) {
     const pagination = new Pagination(page, limit);
 
-    const count = await prisma.tb_orders.count();
-
-    const rows = await prisma.tb_orders.findMany({
-      skip: pagination.offset,
-      take: pagination.limit,
-      orderBy: { id: "desc" },
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            notelp: true,
-            role: true,
-            provider: true,
-            providerId: true,
-            createdAt: true,
-            updatedAt: true,
+    const [count, rows] = await Promise.all([
+      prisma.tb_orders.count(),
+      prisma.tb_orders.findMany({
+        skip: pagination.offset,
+        take: pagination.limit,
+        orderBy: { id: "desc" },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              notelp: true,
+              role: true,
+              provider: true,
+              providerId: true,
+              createdAt: true,
+              updatedAt: true,
+            },
           },
         },
-      },
-    });
+      }),
+    ]);
 
     return pagination.paginate({ count, rows });
   },

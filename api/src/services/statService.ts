@@ -2,9 +2,11 @@ import prisma from "../lib/prisma";
 
 export const statService = {
   async getStats() {
-    const totalUsers = await prisma.tb_user.count();
-    const totalDestinations = await prisma.tb_destinations.count();
-    const totalCategories = await prisma.tb_category.count();
+    const [totalUsers, totalDestinations, totalCategories] = await Promise.all([
+      prisma.tb_user.count(),
+      prisma.tb_destinations.count(),
+      prisma.tb_category.count(),
+    ]);
 
     return {
       counts: {

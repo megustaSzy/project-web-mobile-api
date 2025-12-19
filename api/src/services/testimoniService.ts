@@ -7,15 +7,16 @@ export const testimoniService = {
   async getAllTestimoni(page: number, limit: number) {
     const pagination = new Pagination(page, limit);
 
-    const count = await prisma.tb_testimoni.count();
-
-    const rows = await prisma.tb_testimoni.findMany({
-      skip: pagination.offset,
-      take: pagination.limit,
-      orderBy: {
-        createdAt: "desc",
-      }
-    });
+    const [count, rows] = await Promise.all([
+      prisma.tb_testimoni.count(),
+      prisma.tb_testimoni.findMany({
+        skip: pagination.offset,
+        take: pagination.limit,
+        orderBy: {
+          id: 'asc'
+        }
+      })
+    ])
 
     return pagination.paginate({ count, rows });
   },
