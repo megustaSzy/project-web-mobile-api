@@ -7,22 +7,24 @@ export const regionService = {
   async getAll(page: number, limit: number) {
     const pagination = new Pagination(page, limit);
 
-    const count = await prisma.tb_regions.count();
-
-    const rows = await prisma.tb_regions.findMany({
-      skip: pagination.offset,
-      take: pagination.limit,
-      orderBy: {
-        id: "asc",
-      },
-      include: {
-        destinations: true,
-      },
-    });
+    const [count, rows] = await Promise.all([
+      prisma.tb_regions.count(),
+      prisma.tb_regions.findMany({
+        skip: pagination.offset,
+        take: pagination.limit,
+        orderBy: {
+          id: "asc",
+        },
+        select: {
+          id: true,
+          name: true,
+          destinations: true, // ambil semua destinasi terkait
+        },
+      }),
+    ]);
 
     return pagination.paginate({ count, rows });
   },
-
   async getById(id: number) {
     const region = await prisma.tb_regions.findUnique({
       where: { id },
