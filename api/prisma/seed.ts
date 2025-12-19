@@ -46,6 +46,42 @@ async function main() {
   }
 
   console.log("regions seeded");
+
+  const category = ["Air Terjun", "Bukit", "Pantai", "Pulau", "Gunung"];
+
+  for (const name of category) {
+    await prisma.tb_category.upsert({
+      where: {
+        name,
+      },
+      update: {},
+      create: {
+        name,
+      },
+    });
+  }
+
+  console.log("Category seed");
+
+  const pickup = [
+    "Terminal Rajabasa",
+    "Terminal Kemiling",
+    "Stasiun Tanjung Karang",
+  ];
+
+  for (const name of pickup) {
+    await prisma.tb_pickup_locations.upsert({
+      where: {
+        name,
+      },
+      update: {},
+      create: {
+        name,
+      },
+    });
+  }
+
+  console.log("Pickup seed");
 }
 
 main()

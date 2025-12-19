@@ -98,7 +98,7 @@ model tb_regions {
 
 model tb_pickup_locations {
   id   Int    @id @default(autoincrement())
-  name String
+  name String @unique
 
   orders tb_orders[]
 
@@ -172,7 +172,7 @@ model tb_orders {
 
 model tb_category {
   id           Int               @id @default(autoincrement())
-  name         String
+  name         String            @unique
   destinations tb_destinations[]
 }
 
