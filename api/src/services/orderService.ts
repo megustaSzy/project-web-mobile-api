@@ -11,12 +11,10 @@ export const orderService = {
     pickupLocationId,
     quantity,
     date,
-    departureTime, 
+    departureTime,
     returnTime,
   }: CreateOrderInput & { userId: number }) {
-    const user = await prisma.tb_user.findUnique({
-      where: { id: userId },
-    });
+    const user = await prisma.tb_user.findUnique({ where: { id: userId } });
     if (!user) throw createError("User tidak ditemukan", 404);
 
     const destination = await prisma.tb_destinations.findUnique({
@@ -24,10 +22,14 @@ export const orderService = {
     });
     if (!destination) throw createError("Destinasi tidak ditemukan", 404);
 
-    const pickup = await prisma.tb_pickup_locations.findUnique({
-      where: { id: pickupLocationId },
-    });
-    if (!pickup) throw createError("Lokasi penjemputan tidak ditemukan", 404);
+    let pickupName = "";
+    if (pickupLocationId) {
+      const pickup = await prisma.tb_pickup_locations.findUnique({
+        where: { id: pickupLocationId },
+      });
+      if (!pickup) throw createError("Lokasi penjemputan tidak ditemukan", 404);
+      pickupName = pickup.name;
+    }
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -35,16 +37,14 @@ export const orderService = {
     const orderDate = new Date(date);
     orderDate.setHours(0, 0, 0, 0);
 
-    if (orderDate < today) {
+    if (orderDate < today)
       throw createError("Tanggal keberangkatan tidak boleh di masa lalu", 400);
-    }
 
     const totalPrice = destination.price * quantity;
 
     const ticketCode = `TICKET-${Date.now()}-${uuidv4()
       .slice(0, 6)
       .toUpperCase()}`;
-
     const paymentOrderId = `ORDER-${Date.now()}-${uuidv4()
       .slice(0, 8)
       .toUpperCase()}`;
@@ -53,32 +53,31 @@ export const orderService = {
       data: {
         userId,
         destinationId,
-        pickupLocationId,
+        pickupLocationId: pickupLocationId ?? null,
         quantity,
         totalPrice,
 
         userName: user.name,
-        userPhone: user.notelp ?? "", // Pastikan field ini sesuai model user kamu
+        userPhone: user.notelp ?? "",
         userEmail: user.email,
 
         destinationName: destination.name,
         destinationPrice: destination.price,
-        pickupLocationName: pickup.name,
+        pickupLocationName: pickupName,
 
         date: orderDate,
-        departureTime: departureTime, // Sesuai schema
-        returnTime: returnTime,
+        departureTime,
+        returnTime: returnTime ?? null,
 
         ticketCode,
         paymentOrderId,
-        paymentStatus: PaymentStatus.pending, // Pakai Enum Prisma
+        paymentStatus: PaymentStatus.pending,
         isPaid: false,
       },
     });
 
     return order;
   },
-
   async getOrderByPaymentOrderId(paymentOrderId: string) {
     return await prisma.tb_orders.findUnique({
       where: { paymentOrderId },
@@ -131,8 +130,8 @@ export const orderService = {
       snapToken?: string;
       snapRedirectUrl?: string;
       transactionId?: string;
-      paymentStatus?: PaymentStatus; 
-      paymentMethod?: PaymentMethod; 
+      paymentStatus?: PaymentStatus;
+      paymentMethod?: PaymentMethod;
       isPaid?: boolean;
       paidAt?: Date;
     }
