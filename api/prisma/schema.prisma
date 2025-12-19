@@ -78,10 +78,11 @@ model tb_destinations {
   regionId Int?
   region   tb_regions? @relation(fields: [regionId], references: [id])
 
+  orders tb_orders[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  schedules tb_schedules[]
   @@index([regionId])
 }
 
@@ -96,25 +97,15 @@ model tb_regions {
 }
 
 model tb_pickup_locations {
-  id        Int      @id @default(autoincrement())
-  name      String
+  id   Int    @id @default(autoincrement())
+  name String
+
+  orders tb_orders[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  schedules tb_schedules[]
 }
 
-model tb_schedules {
-  id               Int                 @id @default(autoincrement())
-  pickupLocation   tb_pickup_locations @relation(fields: [pickupLocationId], references: [id])
-  pickupLocationId Int
-  destination      tb_destinations     @relation(fields: [destinationId], references: [id])
-  destinationId    Int
-  time             String
-  date             DateTime
-  createdAt        DateTime            @default(now())
-  updatedAt        DateTime            @updatedAt
-}
 
 enum PaymentStatus {
   pending
@@ -136,8 +127,14 @@ model tb_orders {
   userId Int
   user tb_user @relation(fields: [userId], references: [id])
 
+  destinationId Int
+  destination tb_destinations @relation(fields: [destinationId], references: [id])
+
+  pickupLocationId Int?
+  pickupLocation tb_pickup_locations? @relation(fields: [pickupLocationId], references: [id])
+
   quantity Int
-  totalPrice Float
+  totalPrice Int
 
   // Snapshot
   userName String
@@ -145,15 +142,15 @@ model tb_orders {
   userEmail String
 
   destinationName String
-  destinationPrice Float
+  destinationPrice Int
+  pickupLocationName String
 
   date DateTime
-  time String
+  departureTime String
   returnTime String?
 
   ticketCode String @unique
 
-  // PAYMENT
   paymentOrderId String @unique
   snapToken String?
   snapRedirectUrl String?
@@ -166,6 +163,10 @@ model tb_orders {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([destinationId])
+  @@index([paymentStatus])
 }
 
 
