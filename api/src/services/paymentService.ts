@@ -2,15 +2,21 @@ import { snap } from "../config/midtrans";
 import { orderService } from "./orderService";
 
 export const paymentService = {
-  async createTransaction(order: any) {
+  async createTransaction(order: {
+    id: number;
+    paymentOrderId: string;
+    totalPrice: number;
+    userName: string;
+    userEmail: string;
+  }) {
     const params = {
       transaction_details: {
-        order_id: `ORDER-${order.id}`,
+        order_id: order.paymentOrderId, 
         gross_amount: order.totalPrice,
       },
       customer_details: {
         first_name: order.userName,
-        email: order.userEmail || "",
+        email: order.userEmail,
       },
       enabled_payments: ["gopay", "bank_transfer", "qris", "credit_card"],
     };
