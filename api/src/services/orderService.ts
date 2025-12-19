@@ -2,7 +2,6 @@ import prisma from "../lib/prisma";
 import { CreateOrderInput } from "../schemas/createOrderSchema";
 import { createError } from "../utilities/createError";
 import { v4 as uuidv4 } from "uuid";
-// Import Enum langsung dari Prisma Client agar sinkron dengan schema
 import { PaymentStatus, PaymentMethod } from "@prisma/client";
 
 export const orderService = {
@@ -12,7 +11,7 @@ export const orderService = {
     pickupLocationId,
     quantity,
     date,
-    departureTime, // Sesuaikan dengan schema (sebelumnya 'time')
+    departureTime, 
     returnTime,
   }: CreateOrderInput & { userId: number }) {
     const user = await prisma.tb_user.findUnique({
@@ -107,14 +106,13 @@ export const orderService = {
   },
 
   async getOrderById(id: number, userId: number) {
-    // Cari order yang ID-nya cocok DAN userId-nya cocok
     const order = await prisma.tb_orders.findFirst({
       where: {
         id,
         userId,
       },
       include: {
-        destination: true, // Opsional: jika ingin detail destinasi saat ini
+        destination: true,
         pickupLocation: true,
       },
     });
@@ -133,8 +131,8 @@ export const orderService = {
       snapToken?: string;
       snapRedirectUrl?: string;
       transactionId?: string;
-      paymentStatus?: PaymentStatus; // Gunakan Enum Prisma
-      paymentMethod?: PaymentMethod; // Gunakan Enum Prisma
+      paymentStatus?: PaymentStatus; 
+      paymentMethod?: PaymentMethod; 
       isPaid?: boolean;
       paidAt?: Date;
     }

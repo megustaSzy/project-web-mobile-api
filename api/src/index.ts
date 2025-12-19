@@ -12,7 +12,6 @@ import userRoute from "./routes/userRoute";
 import authRoute from "./routes/authRoute";
 import destinationRoute from "./routes/destinationRoute";
 import pickupLocationRoute from "./routes/pickupLocationRoute";
-import scheduleRoute from "./routes/scheduleRoute";
 import regionRoute from "./routes/regionRoute";
 import orderRoute from "./routes/orderRoute";
 import adminOrderRoute from "./routes/adminOrderRoute";
@@ -54,7 +53,6 @@ app.get("/", (req, res) => {
 app.use("/api/users", userRoute);
 app.use("/api/auth", authRoute);
 app.use("/api/pickup-locations", pickupLocationRoute);
-app.use("/api/schedules", scheduleRoute);
 app.use("/api/region", regionRoute);
 app.use("/api/orders", orderRoute);
 app.use("/api/admin/orders", adminOrderRoute);
