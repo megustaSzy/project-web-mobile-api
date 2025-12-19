@@ -13,46 +13,40 @@ import {
 
 export const destinationService = {
   async getAllDestinations(page: number, limit: number, category?: string) {
-    // limit 10
     const pagination = new Pagination(page, limit);
 
-    const count = await prisma.tb_destinations.count({
-      where: category
-        ? {
-            category: {
-              name: {
-                contains: category,
-                mode: "insensitive",
-              },
+    const whereCondition = category
+      ? {
+          category: {
+            name: {
+              contains: category,
+              mode: "insensitive" as const, 
             },
-          }
-        : undefined,
-    });
-
-    const rows = await prisma.tb_destinations.findMany({
-      where: category
-        ? {
-            category: {
-              name: {
-                contains: category,
-                mode: "insensitive",
-              },
-            },
-          }
-        : undefined,
-      include: {
-        category: true,
-        region: {
-          select: {
-            id: true,
-            name: true
-          }
+          },
         }
-      },
-      orderBy: { id: "asc" },
-      skip: pagination.offset,
-      take: pagination.limit,
-    });
+      : undefined;
+
+    const [count, rows] = await Promise.all([
+      prisma.tb_destinations.count({
+        where: whereCondition,
+      }),
+
+      prisma.tb_destinations.findMany({
+        where: whereCondition,
+        include: {
+          category: true,
+          region: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+        orderBy: { id: "asc" },
+        skip: pagination.offset,
+        take: pagination.limit,
+      }),
+    ]);
 
     const mappedRows = rows.map((d) => ({
       ...d,
