@@ -7,19 +7,19 @@ export const valueService = {
   async getAllValue(page: number, limit: number) {
     const pagination = new Pagination(page, limit);
 
-    const count = await prisma.tb_values.count();
-
-    const rows = await prisma.tb_values.findMany({
-      skip: pagination.offset,
-      take: pagination.limit,
-      orderBy: {
-        id: "asc",
-      },
-    });
+    const [count, rows] = await Promise.all([
+      prisma.tb_values.count(),
+      prisma.tb_values.findMany({
+        skip: pagination.offset,
+        take: pagination.limit,
+        orderBy: {
+          id: "asc",
+        },
+      }),
+    ]);
 
     return pagination.paginate({ count, rows });
   },
-
   async valueById(id: number) {
     const value = await prisma.tb_values.findUnique({
       where: {
@@ -38,7 +38,7 @@ export const valueService = {
         header: data.header,
         name: data.name,
         ...(data.imageUrl && { imageUrl: data.imageUrl }),
-        ...(data.imagePublicId && { imagePublicId: data.imagePublicId })
+        ...(data.imagePublicId && { imagePublicId: data.imagePublicId }),
       },
     });
   },
@@ -53,11 +53,11 @@ export const valueService = {
         ...(data.header && { header: data.header }),
         ...(data.name && { name: data.name }),
         ...(data.imageUrl && { imageUrl: data.imageUrl }),
-        ...(data.imagePublicId && { imagePublicId: data.imagePublicId })
+        ...(data.imagePublicId && { imagePublicId: data.imagePublicId }),
       },
     });
   },
-  
+
   async deleteById(id: number) {
     const value = await prisma.tb_values.findUnique({
       where: {
