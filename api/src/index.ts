@@ -25,8 +25,6 @@ import bannerRoute from "./routes/bannerRoute";
 
 const app = express();
 
-
-
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
@@ -34,8 +32,10 @@ app.use(requestLogger);
 
 app.use(
   cors({
-    origin: true,
+    origin: ["http://localhost:3000", "https://lamigo.vercel.app"],
     credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
@@ -64,6 +64,5 @@ app.use("/api/team", teamRoute);
 app.use("/api/destinations", destinationRoute);
 app.use("/api/banner", bannerRoute);
 app.use("/api/testimoni", testimoniRoute);
-
 
 export default app;
