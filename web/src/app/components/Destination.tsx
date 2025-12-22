@@ -116,7 +116,7 @@ export default function DestinasiSection() {
                     <img
                       src={
                         d.imageUrl
-                          ? `${API_URL}${d.imageUrl}`
+                          ? `${d.imageUrl}`
                           : "/images/default.jpg"
                       }
                       alt={d.name}

@@ -56,11 +56,11 @@ export default function NavBar() {
 
   const [translations] = useState(translationSource);
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   const buildAvatarUrl = (avatar?: string | null) => {
     if (!avatar) return "/images/profile.jpg";
-    return avatar.startsWith("http") ? avatar : `${API_URL}${avatar}`;
+    return avatar.startsWith("http") ? avatar : `${avatar}`;
   };
 
   const langRef = useRef<HTMLDivElement>(null);
@@ -161,12 +161,33 @@ export default function NavBar() {
   // ==========================
   // LOGOUT
   // ==========================
-  const handleLogout = () => {
-    Cookies.remove("accessToken", { path: "/" });
-    window.location.href = "/login";
-    localStorage.removeItem("profile");
-    setIsLoggedIn(false);
-    setUserData({ name: "User", avatar: "/images/profile.jpg" });
+  const handleLogout = async () => {
+    try {
+      // Panggil API logout backend (hapus refresh token)
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/logout`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      // Hapus access token di frontend
+      Cookies.remove("accessToken", { path: "/" });
+      Cookies.remove("refreshToken", { path: "/" });
+
+      // Hapus local storage
+      localStorage.removeItem("profile");
+
+      // Reset state
+      setIsLoggedIn(false);
+      setUserData({ name: "User", avatar: "/images/profile.jpg" });
+
+      // Redirect
+      window.location.href = "/login";
+    }
   };
 
   const textColor = scrolled ? "text-gray-800" : "text-white";
