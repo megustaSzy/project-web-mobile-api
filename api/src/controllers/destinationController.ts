@@ -51,10 +51,19 @@ export const destinationController = {
 
       const result: any = await uploadToCloudinary(req.file.buffer);
 
+      if (!result?.public_id || !result?.secure_url) {
+        return ResponseData.serverError(res, "Upload gambar gagal");
+      }
+
       const destination = await destinationService.addDestination({
-        ...req.body,
+        name: req.body.name,
+        description: req.body.description,
+        price: Number(req.body.price),
+        categoryId: Number(req.body.categoryId),
+        regionId: Number(req.body.regionId),
+
         imageUrl: result.secure_url,
-        imagePublicId: result.public_id
+        imagePublicId: result.public_id,
       });
 
       return ResponseData.created(res, destination);
@@ -68,28 +77,49 @@ export const destinationController = {
       if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
 
       const destination = await destinationService.getDestinationById(id);
-      if(!destination) {
-        return ResponseData.badRequest(res, "destination tidak ditemukan")
+      if (!destination) {
+        return ResponseData.badRequest(res, "destination tidak ditemukan");
       }
 
       let imageUrl: string | undefined;
       let imagePublicId: string | undefined;
 
-      // Upload ke Cloudinary jika ada file baru
       if (req.file) {
         const result: any = await uploadToCloudinary(req.file.buffer);
+
+        if (!result?.public_id || !result?.secure_url) {
+          return ResponseData.serverError(res, "Upload gambar gagal");
+        }
+
+        if (destination.imagePublicId !== null) {
+          try {
+            await cloudinary.uploader.destroy(destination.imagePublicId);
+          } catch (err) {
+            console.error("Gagal hapus gambar lama:", err);
+          }
+        }
+
         imageUrl = result.secure_url;
         imagePublicId = result.public_id;
-
-        if(destination.imagePublicId) {
-          await cloudinary.uploader.destroy(destination.imagePublicId);
-        }
       }
 
       const updatedDestination = await destinationService.editDestination(id, {
-        ...req.body,
-        ...(imageUrl && { imageUrl }),
-        ...(imagePublicId && { imagePublicId })
+        ...(req.body.name !== undefined && { name: req.body.name }),
+        ...(req.body.description !== undefined && {
+          description: req.body.description,
+        }),
+        ...(req.body.price !== undefined && {
+          price: Number(req.body.price),
+        }),
+        ...(req.body.categoryId !== undefined && {
+          categoryId: Number(req.body.categoryId),
+        }),
+        ...(req.body.regionId !== undefined && {
+          regionId: Number(req.body.regionId),
+        }),
+
+        ...(imageUrl !== undefined && { imageUrl }),
+        ...(imagePublicId !== undefined && { imagePublicId }),
       });
 
       return ResponseData.ok(res, updatedDestination);
