@@ -32,12 +32,10 @@ export default function SearchCard() {
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const { latitude, longitude } = pos.coords;
-
         try {
           const res = await fetch(
             `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
           );
-
           const data: ReverseGeocodeResponse = await res.json();
 
           const kecamatan =
@@ -46,9 +44,7 @@ export default function SearchCard() {
             data.address?.village ||
             "Lokasi tidak diketahui";
 
-          const kabupaten =
-            data.address?.county || data.address?.city || "";
-
+          const kabupaten = data.address?.county || data.address?.city || "";
           const provinsi = data.address?.state || "";
 
           setLocation(
@@ -76,18 +72,16 @@ export default function SearchCard() {
         console.error("Gagal load kategori:", err);
       }
     }
-
     loadCategories();
   }, []);
 
   /* =======================
-     LOAD REGIONS
+     LOAD AREAS
   ======================= */
   useEffect(() => {
     async function loadAreas() {
       try {
         const res = await apiFetch<RegionApiResponse>("/api/region");
-
         if (res.status === 200 && res.data?.items) {
           setAreas(
             res.data.items.map((item) => ({
@@ -100,7 +94,6 @@ export default function SearchCard() {
         console.error("Gagal load daerah:", err);
       }
     }
-
     loadAreas();
   }, []);
 
@@ -112,12 +105,9 @@ export default function SearchCard() {
       alert("Silakan pilih kategori atau daerah");
       return;
     }
-
     const params = new URLSearchParams();
-
     if (selectedCategory) params.append("category", selectedCategory);
     if (selectedArea) params.append("area", selectedArea);
-
     router.push(`/search?${params.toString()}`);
   };
 
@@ -129,33 +119,29 @@ export default function SearchCard() {
       {/* HEADER */}
       <div className="border-b pb-3">
         <p className="text-sm text-gray-400">Lokasi Kamu</p>
-        <h2 className="text-xl font-semibold text-gray-800">
-          {location}
-        </h2>
+        <h2 className="text-xl font-semibold text-gray-800">{location}</h2>
       </div>
 
       {/* FORM */}
-      <div className="mt-5 grid grid-cols-1 md:grid-cols-5 gap-6 items-center">
-
+      <div className="mt-4 grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
         {/* KATEGORI */}
         <div className="md:col-span-2">
           <label className="text-xs text-gray-400 mb-1 block">
             Kategori Wisata
           </label>
-
           <div
-            className="relative flex items-center gap-3 rounded-full border border-gray-200 bg-white px-4 py-3
-                       hover:border-gray-300 focus-within:border-blue-500
-                       focus-within:ring-2 focus-within:ring-blue-100 transition"
+            className="relative flex items-center gap-2 rounded-full border border-gray-200 bg-white
+                       px-4 h-11 hover:border-gray-300
+                       focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-100 transition"
             onClick={() => setIsCategoryOpen((p) => !p)}
           >
             <MapPin className="w-4 h-4 text-gray-400 shrink-0" />
-
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
               onBlur={() => setIsCategoryOpen(false)}
-              className="w-full bg-transparent text-sm text-gray-800 outline-none appearance-none cursor-pointer pr-6"
+              className="w-full bg-transparent text-sm text-gray-700 outline-none appearance-none
+                         cursor-pointer pr-6"
             >
               <option value="">Pilih Kategori</option>
               {categories.map((cat) => (
@@ -164,7 +150,6 @@ export default function SearchCard() {
                 </option>
               ))}
             </select>
-
             <ChevronDown
               className={`absolute right-4 w-4 h-4 text-gray-400 pointer-events-none transition-transform duration-200 ${
                 isCategoryOpen ? "rotate-180" : ""
@@ -175,23 +160,20 @@ export default function SearchCard() {
 
         {/* DAERAH */}
         <div className="md:col-span-2">
-          <label className="text-xs text-gray-400 mb-1 block">
-            Daerah
-          </label>
-
+          <label className="text-xs text-gray-400 mb-1 block">Daerah</label>
           <div
-            className="relative flex items-center gap-3 rounded-full border border-gray-200 bg-white px-4 py-3
-                       hover:border-gray-300 focus-within:border-blue-500
-                       focus-within:ring-2 focus-within:ring-blue-100 transition"
+            className="relative flex items-center gap-2 rounded-full border border-gray-200 bg-white
+                       px-4 h-11 hover:border-gray-300
+                       focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-100 transition"
             onClick={() => setIsAreaOpen((p) => !p)}
           >
             <MapPin className="w-4 h-4 text-gray-400 shrink-0" />
-
             <select
               value={selectedArea}
               onChange={(e) => setSelectedArea(e.target.value)}
               onBlur={() => setIsAreaOpen(false)}
-              className="w-full bg-transparent text-sm text-gray-800 outline-none appearance-none cursor-pointer pr-6"
+              className="w-full bg-transparent text-sm text-gray-700 outline-none appearance-none
+                         cursor-pointer pr-6"
             >
               <option value="">Pilih Daerah</option>
               {areas.map((a) => (
@@ -200,7 +182,6 @@ export default function SearchCard() {
                 </option>
               ))}
             </select>
-
             <ChevronDown
               className={`absolute right-4 w-4 h-4 text-gray-400 pointer-events-none transition-transform duration-200 ${
                 isAreaOpen ? "rotate-180" : ""
@@ -212,8 +193,8 @@ export default function SearchCard() {
         {/* BUTTON */}
         <button
           onClick={handleSearch}
-          className="bg-blue-500 text-white rounded-full py-3 text-sm font-medium
-                     hover:bg-blue-600 transition"
+          className="h-11 px-6 rounded-full bg-blue-500 text-white text-sm font-medium
+                     hover:bg-blue-600 transition w-full md:w-auto"
         >
           Search
         </button>
