@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
+import { CheckCircle2 } from "lucide-react";
 
 import {
   Card,
@@ -63,7 +64,9 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+
   const [openLogout, setOpenLogout] = useState(false);
+  const [openSuccess, setOpenSuccess] = useState(false);
 
   const buildAvatarUrl = (avatar?: string | null) => {
     if (!avatar) return "/images/default-avatar.png";
@@ -73,7 +76,7 @@ export default function ProfilePage() {
   };
 
   /* =============================
-     FETCH PROFILE (GET)
+     FETCH PROFILE
   ============================= */
   const fetchProfile = async () => {
     const token = Cookies.get("accessToken");
@@ -112,7 +115,7 @@ export default function ProfilePage() {
   };
 
   /* =============================
-     UPDATE PROFILE (PATCH /:id)
+     UPDATE PROFILE
   ============================= */
   const updateProfile = async () => {
     if (!user.name.trim()) {
@@ -133,7 +136,7 @@ export default function ProfilePage() {
       formData.append("name", user.name);
 
       if (file) {
-        formData.append("avatar", file); // HARUS "avatar"
+        formData.append("avatar", file);
       }
 
       const res = await fetch(
@@ -148,7 +151,6 @@ export default function ProfilePage() {
       );
 
       const text = await res.text();
-      console.log("PATCH RESPONSE:", text);
 
       if (!res.ok) {
         alert("Gagal menyimpan profil");
@@ -168,7 +170,10 @@ export default function ProfilePage() {
       setFile(null);
       setPreview(null);
 
-      alert("Profil berhasil diperbarui ✅");
+      setOpenSuccess(true);
+
+      // auto close (optional)
+      setTimeout(() => setOpenSuccess(false), 2000);
     } catch (error) {
       console.error("UPDATE PROFILE ERROR:", error);
       alert("Terjadi kesalahan");
@@ -295,6 +300,35 @@ export default function ProfilePage() {
               Ya, Logout
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* DIALOG SUCCESS (ELEGAN) */}
+      <Dialog open={openSuccess} onOpenChange={setOpenSuccess}>
+        <DialogContent className="sm:max-w-md rounded-2xl p-0 overflow-hidden">
+          <div className="flex flex-col items-center gap-4 px-8 py-10 text-center">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100">
+              <CheckCircle2 className="h-10 w-10 text-emerald-600" />
+            </div>
+
+            <DialogHeader className="space-y-2">
+              <DialogTitle className="text-xl font-semibold">
+                Profil Berhasil Diperbarui
+              </DialogTitle>
+              <DialogDescription className="text-sm text-muted-foreground">
+                Perubahan profil kamu telah berhasil disimpan.
+              </DialogDescription>
+            </DialogHeader>
+
+            <DialogFooter className="w-full">
+              <Button
+                className="w-full rounded-xl"
+                onClick={() => setOpenSuccess(false)}
+              >
+                Tutup
+              </Button>
+            </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
     </>
