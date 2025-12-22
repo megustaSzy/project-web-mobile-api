@@ -110,6 +110,7 @@ export const destinationService = {
       data: {
         name: data.name,
         imageUrl: data.imageUrl!,
+        imagePublicId: data.imagePublicId,
         description: data.description,
         price: data.price,
 
