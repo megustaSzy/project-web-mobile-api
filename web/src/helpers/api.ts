@@ -15,18 +15,16 @@ export async function apiFetch<T>(
 
   const headers: HeadersInit = {
     "Content-Type": "application/json",
-    ...(options.headers ?? {}),
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(options.headers ?? {}),
   };
 
   const response = await fetch(fullUrl, {
     ...options,
     method: options.method ?? "GET",
-    credentials: "include",
     headers,
   });
 
-  const contentType = response.headers.get("content-type");
   const text = await response.text();
 
   if (!response.ok) {
@@ -38,19 +36,5 @@ export async function apiFetch<T>(
     throw new Error(`HTTP ${response.status}`);
   }
 
-  if (!contentType || !contentType.includes("application/json")) {
-    console.error("❌ RESPONSE BUKAN JSON:", {
-      url: fullUrl,
-      contentType,
-      response: text,
-    });
-    throw new Error("Response is not JSON");
-  }
-
-  try {
-    return JSON.parse(text) as T;
-  } catch {
-    console.error("❌ GAGAL PARSE JSON:", text);
-    throw new Error("Invalid JSON");
-  }
+  return JSON.parse(text) as T;
 }
