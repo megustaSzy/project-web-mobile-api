@@ -8,6 +8,7 @@ import { Menu, X, ChevronDown } from "lucide-react";
 import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
 import { apiFetch } from "@/helpers/api";
+import { usePathname } from "next/navigation"; // untuk highlight otomatis
 
 // ========================
 // TIPE API
@@ -42,6 +43,8 @@ export default function NavBar() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [logoutConfirm, setLogoutConfirm] = useState(false);
 
+  const [activeMenu, setActiveMenu] = useState("home"); // menu aktif default
+
   const translationSource = {
     home: "Beranda",
     about: "Tentang Kami",
@@ -57,6 +60,7 @@ export default function NavBar() {
   const [translations] = useState(translationSource);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
+  const pathname = usePathname(); // untuk highlight otomatis berdasarkan route
 
   const buildAvatarUrl = (avatar?: string | null) => {
     if (!avatar) return "/images/profile.jpg";
@@ -140,6 +144,17 @@ export default function NavBar() {
   }, []);
 
   // ==========================
+  // HIGHLIGHT MENU OTOMATIS BERDASARKAN ROUTE
+  // ==========================
+  useEffect(() => {
+    if (pathname === "/") setActiveMenu("home");
+    else if (pathname.startsWith("/about")) setActiveMenu("about");
+    else if (pathname.startsWith("/tourlist")) setActiveMenu("tour");
+    else if (pathname.startsWith("/tiket")) setActiveMenu("ticket");
+    else setActiveMenu(""); // default
+  }, [pathname]);
+
+  // ==========================
   // CLOSE DROPDOWN ON OUTSIDE CLICK
   // ==========================
   useEffect(() => {
@@ -163,7 +178,6 @@ export default function NavBar() {
   // ==========================
   const handleLogout = async () => {
     try {
-      // Panggil API logout backend (hapus refresh token)
       await fetch(`${process.env.NEXT_PUBLIC_API_URL}/logout`, {
         method: "POST",
         credentials: "include",
@@ -174,18 +188,11 @@ export default function NavBar() {
     } catch (error) {
       console.error("Logout error:", error);
     } finally {
-      // Hapus access token di frontend
       Cookies.remove("accessToken", { path: "/" });
       Cookies.remove("refreshToken", { path: "/" });
-
-      // Hapus local storage
       localStorage.removeItem("profile");
-
-      // Reset state
       setIsLoggedIn(false);
       setUserData({ name: "User", avatar: "/images/profile.jpg" });
-
-      // Redirect
       window.location.href = "/login";
     }
   };
@@ -207,18 +214,54 @@ export default function NavBar() {
 
         {/* DESKTOP MENU */}
         <nav
-          className={`hidden md:flex absolute left-1/2 -translate-x-1/2 gap-8 ${textColor}`}
+          className={`hidden md:flex absolute left-1/2 -translate-x-1/2 gap-8`}
         >
-          <Link href="/">{translations.home}</Link>
-          <Link href="/about">{translations.about}</Link>
-          <Link href="/tourlist">{translations.tour}</Link>
-          <Link href="/tiket">{translations.ticket}</Link>
+          <Link
+            href="/"
+            onClick={() => setActiveMenu("home")}
+            className={`transition-colors duration-200 ${
+              activeMenu === "home" ? "text-blue-600" : textColor
+            }`}
+          >
+            {translations.home}
+          </Link>
+          <Link
+            href="/about"
+            onClick={() => setActiveMenu("about")}
+            className={`transition-colors duration-200 ${
+              activeMenu === "about" ? "text-blue-600" : textColor
+            }`}
+          >
+            {translations.about}
+          </Link>
+          <Link
+            href="/tourlist"
+            onClick={() => setActiveMenu("tour")}
+            className={`transition-colors duration-200 ${
+              activeMenu === "tour" ? "text-blue-600" : textColor
+            }`}
+          >
+            {translations.tour}
+          </Link>
+          <Link
+            href="/tiket"
+            onClick={() => setActiveMenu("ticket")}
+            className={`transition-colors duration-200 ${
+              activeMenu === "ticket" ? "text-blue-600" : textColor
+            }`}
+          >
+            {translations.ticket}
+          </Link>
           <button
-            onClick={() =>
+            onClick={() => {
+              setActiveMenu("contact");
               document
                 .getElementById("contact")
-                ?.scrollIntoView({ behavior: "smooth" })
-            }
+                ?.scrollIntoView({ behavior: "smooth" });
+            }}
+            className={`transition-colors duration-200 ${
+              activeMenu === "contact" ? "text-blue-600" : textColor
+            }`}
           >
             {translations.contact}
           </button>
@@ -345,19 +388,56 @@ export default function NavBar() {
       >
         <div className="bg-white border-t px-4 py-4 text-gray-800">
           <nav className="flex flex-col gap-4 text-center">
-            <Link href="/" onClick={() => setOpen(false)}>
+            <Link
+              href="/"
+              onClick={() => {
+                setActiveMenu("home");
+                setOpen(false);
+              }}
+              className={`${activeMenu === "home" ? "text-blue-600" : ""}`}
+            >
               {translations.home}
             </Link>
-            <Link href="/about" onClick={() => setOpen(false)}>
+            <Link
+              href="/about"
+              onClick={() => {
+                setActiveMenu("about");
+                setOpen(false);
+              }}
+              className={`${activeMenu === "about" ? "text-blue-600" : ""}`}
+            >
               {translations.about}
             </Link>
-            <Link href="/tourlist" onClick={() => setOpen(false)}>
+            <Link
+              href="/tourlist"
+              onClick={() => {
+                setActiveMenu("tour");
+                setOpen(false);
+              }}
+              className={`${activeMenu === "tour" ? "text-blue-600" : ""}`}
+            >
               {translations.tour}
             </Link>
-            <Link href="/tiket" onClick={() => setOpen(false)}>
+            <Link
+              href="/tiket"
+              onClick={() => {
+                setActiveMenu("ticket");
+                setOpen(false);
+              }}
+              className={`${activeMenu === "ticket" ? "text-blue-600" : ""}`}
+            >
               {translations.ticket}
             </Link>
-            <button onClick={() => setOpen(false)}>
+            <button
+              onClick={() => {
+                setActiveMenu("contact");
+                setOpen(false);
+                document
+                  .getElementById("contact")
+                  ?.scrollIntoView({ behavior: "smooth" });
+              }}
+              className={`${activeMenu === "contact" ? "text-blue-600" : ""}`}
+            >
               {translations.contact}
             </button>
 
@@ -401,6 +481,7 @@ export default function NavBar() {
           </nav>
         </div>
       </div>
+
       {/* ===================== */}
       {/* LOGOUT CONFIRM MODAL */}
       {/* ===================== */}
