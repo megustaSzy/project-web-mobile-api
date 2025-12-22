@@ -26,7 +26,7 @@ export default function SearchPage({ setSelectedData, setOpenModal }: Props) {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedDataInternal, setSelectedDataInternal] = useState<DestinationsType | null>(null);
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+  // const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   // Mapping ApiDestinationItem -> DestinationsType
   const mapToDestinationsType = (item: ApiDestinationItem): DestinationsType => ({
@@ -110,7 +110,7 @@ export default function SearchPage({ setSelectedData, setOpenModal }: Props) {
           >
             <div className="relative h-64 overflow-hidden">
               <img
-                src={item.imageUrl ? `${API_URL}${item.imageUrl}` : "/images/default.jpg"}
+                src={item.imageUrl ? `${item.imageUrl}` : "/images/default.jpg"}
                 alt={item.name || "Destinasi"}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />

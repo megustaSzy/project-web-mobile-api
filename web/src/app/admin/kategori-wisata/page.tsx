@@ -134,7 +134,7 @@ export default function KategoriWisataPage() {
                 <div>
                   <p className="font-medium">{c.name}</p>
                   <p className="text-xs text-gray-500">
-                    {c.destinations.length} destinasi
+                    {c.destinations?.length ?? 0} destinasi
                   </p>
                 </div>
 

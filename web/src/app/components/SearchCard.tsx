@@ -11,9 +11,6 @@ import {
   ReverseGeocodeResponse,
 } from "@/types/ChardRegion";
 
-/* =======================
-   COMPONENT
-======================= */
 export default function SearchCard() {
   const router = useRouter();
 
@@ -89,12 +86,11 @@ export default function SearchCard() {
   useEffect(() => {
     async function loadAreas() {
       try {
-        const res = await fetch("http://192.168.100.141:3001/api/region");
-        const json: RegionApiResponse = await res.json();
+        const res = await apiFetch<RegionApiResponse>("/api/region");
 
-        if (json.status === 200 && json.data?.items) {
+        if (res.status === 200 && res.data?.items) {
           setAreas(
-            json.data.items.map((item) => ({
+            res.data.items.map((item) => ({
               id: item.id,
               nama: item.name,
             }))
@@ -140,6 +136,7 @@ export default function SearchCard() {
 
       {/* FORM */}
       <div className="mt-5 grid grid-cols-1 md:grid-cols-5 gap-6 items-center">
+
         {/* KATEGORI */}
         <div className="md:col-span-2">
           <label className="text-xs text-gray-400 mb-1 block">
@@ -147,16 +144,18 @@ export default function SearchCard() {
           </label>
 
           <div
-            className="relative flex items-center gap-2 border rounded-full px-4 py-2"
+            className="relative flex items-center gap-3 rounded-full border border-gray-200 bg-white px-4 py-3
+                       hover:border-gray-300 focus-within:border-blue-500
+                       focus-within:ring-2 focus-within:ring-blue-100 transition"
             onClick={() => setIsCategoryOpen((p) => !p)}
           >
-            <MapPin className="w-4 h-4 text-gray-500" />
+            <MapPin className="w-4 h-4 text-gray-400 shrink-0" />
 
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
               onBlur={() => setIsCategoryOpen(false)}
-              className="w-full bg-transparent text-sm outline-none appearance-none"
+              className="w-full bg-transparent text-sm text-gray-800 outline-none appearance-none cursor-pointer pr-6"
             >
               <option value="">Pilih Kategori</option>
               {categories.map((cat) => (
@@ -167,7 +166,7 @@ export default function SearchCard() {
             </select>
 
             <ChevronDown
-              className={`absolute right-4 w-4 h-4 transition ${
+              className={`absolute right-4 w-4 h-4 text-gray-400 pointer-events-none transition-transform duration-200 ${
                 isCategoryOpen ? "rotate-180" : ""
               }`}
             />
@@ -181,16 +180,18 @@ export default function SearchCard() {
           </label>
 
           <div
-            className="relative flex items-center gap-2 border rounded-full px-4 py-2"
+            className="relative flex items-center gap-3 rounded-full border border-gray-200 bg-white px-4 py-3
+                       hover:border-gray-300 focus-within:border-blue-500
+                       focus-within:ring-2 focus-within:ring-blue-100 transition"
             onClick={() => setIsAreaOpen((p) => !p)}
           >
-            <MapPin className="w-4 h-4 text-gray-500" />
+            <MapPin className="w-4 h-4 text-gray-400 shrink-0" />
 
             <select
               value={selectedArea}
               onChange={(e) => setSelectedArea(e.target.value)}
               onBlur={() => setIsAreaOpen(false)}
-              className="w-full bg-transparent text-sm outline-none appearance-none"
+              className="w-full bg-transparent text-sm text-gray-800 outline-none appearance-none cursor-pointer pr-6"
             >
               <option value="">Pilih Daerah</option>
               {areas.map((a) => (
@@ -201,7 +202,7 @@ export default function SearchCard() {
             </select>
 
             <ChevronDown
-              className={`absolute right-4 w-4 h-4 transition ${
+              className={`absolute right-4 w-4 h-4 text-gray-400 pointer-events-none transition-transform duration-200 ${
                 isAreaOpen ? "rotate-180" : ""
               }`}
             />
@@ -211,7 +212,8 @@ export default function SearchCard() {
         {/* BUTTON */}
         <button
           onClick={handleSearch}
-          className="bg-blue-500 text-white rounded-full py-2.5 text-sm font-medium hover:bg-blue-600 transition"
+          className="bg-blue-500 text-white rounded-full py-3 text-sm font-medium
+                     hover:bg-blue-600 transition"
         >
           Search
         </button>

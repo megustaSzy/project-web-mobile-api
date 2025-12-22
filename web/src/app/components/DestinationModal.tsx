@@ -34,11 +34,7 @@ export default function DestinationModal({
         {/* LEFT IMAGE */}
         <div className="relative h-64 md:h-full">
           <img
-            src={
-              data.imageUrl
-                ? process.env.NEXT_PUBLIC_API_URL + data.imageUrl
-                : "/images/default.jpg"
-            }
+            src={data.imageUrl ? `${data.imageUrl}` : "/images/default.jpg"}
             alt={data.name}
             className="w-full h-full object-cover"
           />

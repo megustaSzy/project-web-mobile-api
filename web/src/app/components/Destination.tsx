@@ -18,7 +18,7 @@ export default function DestinasiSection() {
     null
   );
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+  // const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   /* LOAD CATEGORY */
   const loadCategories = useCallback(async () => {
