@@ -27,14 +27,22 @@ export async function apiFetch<T>(
 
   const text = await response.text();
 
+  // ❌ API ERROR
   if (!response.ok) {
     console.error("❌ API ERROR:", {
       url: fullUrl,
       status: response.status,
       response: text,
     });
-    throw new Error(`HTTP ${response.status}`);
+
+    throw new Error(text || `HTTP ${response.status}`);
   }
 
+  // ✅ RESPONSE KOSONG (DELETE / 204)
+  if (!text) {
+    return {} as T;
+  }
+
+  // ✅ RESPONSE JSON NORMAL
   return JSON.parse(text) as T;
 }
