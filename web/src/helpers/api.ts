@@ -10,12 +10,14 @@ export async function apiFetch<T>(
   }
 
   const fullUrl = `${baseUrl.replace(/\/+$/, "")}${endpoint}`;
-
   const token = Cookies.get("accessToken");
 
+  // ⬇️ JANGAN SET CONTENT-TYPE JIKA FormData
+  const isFormData = options.body instanceof FormData;
+
   const headers: HeadersInit = {
-    "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(isFormData ? {} : { "Content-Type": "application/json" }),
     ...(options.headers ?? {}),
   };
 
@@ -27,22 +29,16 @@ export async function apiFetch<T>(
 
   const text = await response.text();
 
-  // ❌ API ERROR
   if (!response.ok) {
     console.error("❌ API ERROR:", {
       url: fullUrl,
       status: response.status,
       response: text,
     });
-
     throw new Error(text || `HTTP ${response.status}`);
   }
 
-  // ✅ RESPONSE KOSONG (DELETE / 204)
-  if (!text) {
-    return {} as T;
-  }
+  if (!text) return {} as T;
 
-  // ✅ RESPONSE JSON NORMAL
   return JSON.parse(text) as T;
 }
