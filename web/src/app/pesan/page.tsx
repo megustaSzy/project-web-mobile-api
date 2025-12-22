@@ -54,8 +54,9 @@ export default function PesanPage() {
   if (!destination)
     return <p className="text-center mt-20">Destinasi tidak ditemukan</p>;
 
+  /* ================= IMAGE ================= */
   const imageUrl = destination.imageUrl
-    ? `${process.env.NEXT_PUBLIC_API_URL}${destination.imageUrl}`
+    ? `${destination.imageUrl}`
     : "/images/default.jpg";
 
   const totalPrice = destination.price * people;
@@ -135,7 +136,7 @@ export default function PesanPage() {
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
                 className="w-full bg-transparent outline-none text-sm
-                  [&::-webkit-calendar-picker-indicator]:opacity-0"
+                [&::-webkit-calendar-picker-indicator]:opacity-0"
               />
             </Field>
 
@@ -150,7 +151,7 @@ export default function PesanPage() {
                 value={departTime}
                 onChange={(e) => setDepartTime(e.target.value)}
                 className="w-full bg-transparent outline-none text-sm
-                  [&::-webkit-calendar-picker-indicator]:opacity-0"
+                [&::-webkit-calendar-picker-indicator]:opacity-0"
               />
             </Field>
 
@@ -165,7 +166,7 @@ export default function PesanPage() {
                 value={returnTime}
                 onChange={(e) => setReturnTime(e.target.value)}
                 className="w-full bg-transparent outline-none text-sm
-                  [&::-webkit-calendar-picker-indicator]:opacity-0"
+                [&::-webkit-calendar-picker-indicator]:opacity-0"
               />
             </Field>
 
@@ -175,17 +176,15 @@ export default function PesanPage() {
                 <button
                   type="button"
                   onClick={() => setPeople(Math.max(1, people - 1))}
-                  className="w-8 h-8 rounded-full bg-neutral-100 flex items-center justify-center text-lg hover:bg-neutral-200"
+                  className="w-8 h-8 rounded-full bg-neutral-100"
                 >
                   −
                 </button>
-
-                <span className="font-medium w-4 text-center">{people}</span>
-
+                <span className="font-medium">{people}</span>
                 <button
                   type="button"
                   onClick={() => setPeople(Math.min(16, people + 1))}
-                  className="w-8 h-8 rounded-full bg-neutral-100 flex items-center justify-center text-lg hover:bg-neutral-200"
+                  className="w-8 h-8 rounded-full bg-neutral-100"
                 >
                   +
                 </button>
