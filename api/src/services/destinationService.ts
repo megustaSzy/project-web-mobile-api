@@ -110,6 +110,7 @@ export const destinationService = {
       data: {
         name: data.name,
         imageUrl: data.imageUrl!,
+        imagePublicId: data.imagePublicId!,
         description: data.description,
         price: data.price,
 
@@ -148,6 +149,9 @@ export const destinationService = {
       data: {
         ...(data.name !== undefined && { name: data.name }),
         ...(data.imageUrl !== undefined && { imageUrl: data.imageUrl }),
+        ...(data.imagePublicId !== undefined && {
+          imagePublicId: data.imagePublicId,
+        }),
         ...(data.description !== undefined && {
           description: data.description,
         }),
