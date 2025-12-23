@@ -138,9 +138,7 @@ export default function KategoriKabupaten() {
       <div className="bg-white rounded-2xl border shadow-sm">
         {/* HEADER */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 px-4 sm:px-6 py-4 border-b">
-          <h3 className="font-semibold text-gray-800">
-            Daftar Kabupaten
-          </h3>
+          <h3 className="font-semibold text-gray-800">Daftar Kabupaten</h3>
           <button
             onClick={openAddModal}
             className="w-full sm:w-auto px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm"
@@ -176,9 +174,7 @@ export default function KategoriKabupaten() {
 
                   <div className="flex-1">
                     <p className="text-xs text-gray-500">#{i + 1}</p>
-                    <p className="font-medium text-gray-800">
-                      {r.name}
-                    </p>
+                    <p className="font-medium text-gray-800">{r.name}</p>
 
                     <div className="flex gap-2 mt-3">
                       <button
@@ -192,9 +188,7 @@ export default function KategoriKabupaten() {
                         disabled={deletingId === r.id}
                         className="flex-1 px-3 py-1.5 bg-red-600 text-white rounded-lg text-xs"
                       >
-                        {deletingId === r.id
-                          ? "Menghapus..."
-                          : "Hapus"}
+                        {deletingId === r.id ? "Menghapus..." : "Hapus"}
                       </button>
                     </div>
                   </div>
@@ -250,9 +244,7 @@ export default function KategoriKabupaten() {
                             disabled={deletingId === r.id}
                             className="px-3 py-1.5 bg-red-600 text-white rounded-full text-xs"
                           >
-                            {deletingId === r.id
-                              ? "Menghapus..."
-                              : "Hapus"}
+                            {deletingId === r.id ? "Menghapus..." : "Hapus"}
                           </button>
                         </div>
                       </td>
@@ -283,9 +275,7 @@ export default function KategoriKabupaten() {
             <input
               type="file"
               accept="image/*"
-              onChange={(e) =>
-                setLogo(e.target.files?.[0] ?? null)
-              }
+              onChange={(e) => setLogo(e.target.files?.[0] ?? null)}
               className="w-full border rounded-lg px-3 py-2 mb-5"
             />
 
@@ -312,9 +302,7 @@ export default function KategoriKabupaten() {
       {confirmDeleteOpen && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl shadow-xl w-[90%] sm:w-96 p-6">
-            <h3 className="text-lg font-semibold mb-2">
-              Konfirmasi
-            </h3>
+            <h3 className="text-lg font-semibold mb-2">Konfirmasi</h3>
             <p className="text-sm text-gray-600 mb-6">
               Yakin ingin menghapus kabupaten ini?
             </p>

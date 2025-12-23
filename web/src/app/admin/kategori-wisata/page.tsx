@@ -119,9 +119,7 @@ export default function KategoriWisataPage() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold text-blue-700">
-        Kategori Wisata
-      </h2>
+      <h2 className="text-xl font-semibold text-blue-700">Kategori Wisata</h2>
 
       {/* SUCCESS POPUP */}
       {successMsg && (
@@ -133,9 +131,7 @@ export default function KategoriWisataPage() {
       <div className="bg-white rounded-2xl border shadow-sm">
         {/* HEADER */}
         <div className="flex justify-between items-center px-6 py-4 border-b">
-          <h3 className="font-semibold text-gray-800">
-            Daftar Kategori
-          </h3>
+          <h3 className="font-semibold text-gray-800">Daftar Kategori</h3>
 
           <button
             onClick={openAddModal}
@@ -149,35 +145,22 @@ export default function KategoriWisataPage() {
         {loading ? (
           <p className="p-6 text-gray-500">Memuat data...</p>
         ) : cats.length === 0 ? (
-          <p className="p-6 text-gray-500">
-            Belum ada kategori.
-          </p>
+          <p className="p-6 text-gray-500">Belum ada kategori.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full table-fixed text-sm">
               <thead className="bg-gray-50 border-b">
                 <tr className="text-gray-600">
-                  <th className="w-16 px-4 py-3 text-center">
-                    No
-                  </th>
-                  <th className="px-4 py-3 text-left">
-                    Nama Kategori
-                  </th>
-                  <th className="w-40 px-4 py-3 text-center">
-                    Jumlah
-                  </th>
-                  <th className="w-40 px-4 py-3 text-center">
-                    Aksi
-                  </th>
+                  <th className="w-16 px-4 py-3 text-center">No</th>
+                  <th className="px-4 py-3 text-left">Nama Kategori</th>
+                  <th className="w-40 px-4 py-3 text-center">Jumlah</th>
+                  <th className="w-40 px-4 py-3 text-center">Aksi</th>
                 </tr>
               </thead>
 
               <tbody className="divide-y">
                 {cats.map((c, i) => (
-                  <tr
-                    key={c.id}
-                    className="hover:bg-gray-50 transition"
-                  >
+                  <tr key={c.id} className="hover:bg-gray-50 transition">
                     {/* NO */}
                     <td className="px-4 py-3 text-center text-gray-400">
                       {i + 1}
@@ -206,15 +189,11 @@ export default function KategoriWisataPage() {
                         </button>
 
                         <button
-                          onClick={() =>
-                            openDeleteConfirm(c.id)
-                          }
+                          onClick={() => openDeleteConfirm(c.id)}
                           disabled={deletingId === c.id}
                           className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-full text-xs"
                         >
-                          {deletingId === c.id
-                            ? "Menghapus..."
-                            : "Hapus"}
+                          {deletingId === c.id ? "Menghapus..." : "Hapus"}
                         </button>
                       </div>
                     </td>
@@ -265,9 +244,7 @@ export default function KategoriWisataPage() {
       {confirmDeleteOpen && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-2xl shadow-xl w-96">
-            <h3 className="text-lg font-semibold mb-2">
-              Konfirmasi
-            </h3>
+            <h3 className="text-lg font-semibold mb-2">Konfirmasi</h3>
             <p className="text-sm text-gray-600 mb-6">
               Yakin ingin menghapus kategori ini?
             </p>
