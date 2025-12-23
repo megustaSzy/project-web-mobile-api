@@ -78,31 +78,32 @@ export const orderController = {
   },
 
   async getTicketPDF(req: Request, res: Response) {
-    try {
-      const id = Number(req.params.id);
-      if (isNaN(id)) {
-        return ResponseData.badRequest(res, "id tidak valid");
-      }
-
-      const userId = (req as any).user.id;
-      const order = await orderService.getOrderById(id, userId);
-
-      if (!order.isPaid) {
-        return ResponseData.badRequest(res, "tiket belum dibayar");
-      }
-
-      const pdfBuffer = await ticketService.generateTicketPDFBuffer(id);
-
-      res.setHeader("Content-Type", "application/pdf");
-      res.setHeader(
-        "Content-Disposition",
-        `attachment; filename="ticket-${order.ticketCode}.pdf"`
-      );
-
-      return res.send(pdfBuffer);
-    } catch (error) {
-      return ResponseData.serverError(res, error);
+    const id = Number(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "id tidak valid" });
     }
+
+    const userId = (req as any).user.id;
+    const order = await orderService.getOrderById(id, userId);
+
+    if (!order.isPaid) {
+      return res.status(400).json({ message: "tiket belum dibayar" });
+    }
+
+    const pdfBuffer = await ticketService.generateTicketPDFBuffer(id);
+
+    if (!pdfBuffer || pdfBuffer.length === 0) {
+      return res.status(500).json({ message: "PDF gagal dibuat" });
+    }
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `inline; filename="ticket-${order.ticketCode}.pdf"`
+    );
+    res.setHeader("Content-Length", pdfBuffer.length);
+
+    res.end(pdfBuffer);
   },
   async payOrder(req: Request, res: Response) {
     try {
