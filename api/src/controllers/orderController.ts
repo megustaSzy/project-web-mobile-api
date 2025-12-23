@@ -7,7 +7,6 @@ import { paymentService } from "../services/paymentService";
 export const orderController = {
   async createOrder(req: Request, res: Response) {
     try {
-
       const userId = (req as any).user.id;
 
       const order = await orderService.createOrder({
@@ -92,12 +91,19 @@ export const orderController = {
         return ResponseData.badRequest(res, "tiket belum dibayar");
       }
 
-      await ticketService.generateTicketPDF(id, userId, res);
+      const pdfBuffer = await ticketService.generateTicketPDFBuffer(id);
+
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="ticket-${order.ticketCode}.pdf"`
+      );
+
+      return res.send(pdfBuffer);
     } catch (error) {
       return ResponseData.serverError(res, error);
     }
   },
-
   async payOrder(req: Request, res: Response) {
     try {
       const id = Number(req.params.id);
