@@ -23,106 +23,82 @@ export default function PickupPage() {
   // ==================================================
   // GET DATA
   type PickupListResponse = {
-  status: number;
-  message: string;
-  data: ApiPickupItem[];
-};
+    status: number;
+    message: string;
+    data: ApiPickupItem[];
+  };
 
-async function getData(): Promise<void> {
-  try {
-    setLoading(true);
-    setErrorMsg(null);
+  async function getData(): Promise<void> {
+    try {
+      setLoading(true);
+      setErrorMsg(null);
 
-    const res = await apiFetch<PickupListResponse>("/api/pickup-locations");
+      const res = await apiFetch<PickupListResponse>("/api/pickup-locations");
 
-    console.log("RESPONSE PICKUP (RAW):", res);
-    console.log("RESPONSE DATA:", res.data);
+      const rawItems: ApiPickupItem[] = Array.isArray(res.data)
+        ? res.data
+        : [];
 
-    const rawItems: ApiPickupItem[] = Array.isArray(res.data)
-      ? res.data
-      : [];
+      const mapped: PickupType[] = rawItems.map((i) => ({
+        id: i.id,
+        name: i.name,
+      }));
 
-    console.log("RAW ITEMS AFTER CHECK:", rawItems);
-
-    const mapped: PickupType[] = rawItems.map((i) => ({
-      id: i.id,
-      name: i.name,
-    }));
-
-    console.log("MAPPED ITEMS:", mapped);
-
-    setItems(mapped);
-  } catch (err) {
-    console.error("GET PICKUP ERROR:", err);
-    const msg =
-      err instanceof Error ? err.message : "Gagal memuat data pickup";
-    setErrorMsg(msg);
-    setItems([]);
-  } finally {
-    setLoading(false);
+      setItems(mapped);
+    } catch (err) {
+      const msg =
+        err instanceof Error ? err.message : "Gagal memuat data pickup";
+      setErrorMsg(msg);
+      setItems([]);
+    } finally {
+      setLoading(false);
+    }
   }
-}
-
 
   // ==================================================
-  // SAVE (ADD / EDIT)
-async function savePickup(): Promise<void> {
-  if (!nameInput.trim()) {
-    alert("Nama lokasi wajib diisi.");
-    return;
-  }
-
-  const token = localStorage.getItem("token");
-  if (!token) {
-    alert("Sesi login habis. Silakan login ulang.");
-    return;
-  }
-
-  setSaving(true);
-
-  const payload = { name: nameInput.trim() };
-  const method = editId ? "PUT" : "POST";
-  const endpoint = editId
-    ? `/api/pickup-locations/${editId}`
-    : "/api/pickup-locations";
-
-  console.log("SAVE PAYLOAD:", payload);
-  console.log("SAVE METHOD:", method);
-  console.log("SAVE ENDPOINT:", endpoint);
-  console.log("TOKEN:", token);
-
-  try {
-    const res = await apiFetch<ApiPickupResponse>(endpoint, {
-      method,
-      body: JSON.stringify(payload),
-    });
-
-    console.log("SAVE RESPONSE:", res);
-
-    setModalOpen(false);
-    setEditId(null);
-    setNameInput("");
-
-    await getData();
-  } catch (err) {
-    console.error("ERROR SAVE PICKUP:", err);
-
-    let msg = "Gagal menyimpan data pickup";
-
-    if (err instanceof Error) {
-      msg = err.message.replace(/["{}]/g, "");
-
-      if (msg.includes("token tidak ditemukan") || msg.includes("401")) {
-        msg = "Sesi login habis. Silakan login ulang.";
-      }
+  // SAVE (ADD / EDIT)  ✅ FIXED
+  async function savePickup(): Promise<void> {
+    if (!nameInput.trim()) {
+      alert("Nama lokasi wajib diisi.");
+      return;
     }
 
-    alert(msg);
-    setErrorMsg(msg);
-  } finally {
-    setSaving(false);
+    setSaving(true);
+
+    const payload = { name: nameInput.trim() };
+    const method = editId ? "PUT" : "POST";
+    const endpoint = editId
+      ? `/api/pickup-locations/${editId}`
+      : "/api/pickup-locations";
+
+    try {
+      const res = await apiFetch<ApiPickupResponse>(endpoint, {
+        method,
+        body: JSON.stringify(payload),
+      });
+
+      setModalOpen(false);
+      setEditId(null);
+      setNameInput("");
+
+      await getData();
+    } catch (err) {
+      let msg = "Gagal menyimpan data pickup";
+
+      if (err instanceof Error) {
+        msg = err.message.replace(/["{}]/g, "");
+
+        if (msg.includes("token tidak ditemukan") || msg.includes("401")) {
+          msg = "Sesi login habis. Silakan login ulang.";
+        }
+      }
+
+      alert(msg);
+      setErrorMsg(msg);
+    } finally {
+      setSaving(false);
+    }
   }
-}
 
   // ==================================================
   // DELETE
@@ -131,19 +107,13 @@ async function savePickup(): Promise<void> {
 
     setDeletingId(id);
 
-    console.log("DELETE ID:", id);
-
     try {
-      const res = await apiFetch(`/api/pickup-locations/${id}`, {
+      await apiFetch(`/api/pickup-locations/${id}`, {
         method: "DELETE",
       });
 
-      console.log("DELETE RESPONSE:", res);
-
       await getData();
     } catch (err) {
-      console.error("ERROR DELETE PICKUP:", err);
-
       const msg =
         err instanceof Error ? err.message : "Gagal menghapus data pickup";
       alert(msg);
