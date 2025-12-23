@@ -1,7 +1,7 @@
 export interface RegionItem {
   id: number;
   name: string;
-  image_url?: string;
+  imageUrl?: string;
 }
 
 export interface RegionApiResponse {
