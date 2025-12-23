@@ -4,7 +4,7 @@ import prisma from "../lib/prisma";
 import { createError } from "../utilities/createError";
 
 export const ticketService = {
-  async generateTicketPDFBuffer(orderId: number) {
+  async generateTicketPDFBuffer(orderId: number): Promise<Buffer> {
     const order = await prisma.tb_orders.findUnique({
       where: { id: orderId },
     });
@@ -18,81 +18,85 @@ export const ticketService = {
     const WIDTH = 900;
     const HEIGHT = 350;
 
-    const doc = new PDFDocument({ size: [WIDTH, HEIGHT], margin: 0 });
+    return new Promise((resolve, reject) => {
+      const doc = new PDFDocument({ size: [WIDTH, HEIGHT], margin: 0 });
+      const buffers: Buffer[] = [];
 
-    const buffers: Buffer[] = [];
-    doc.on("data", buffers.push.bind(buffers));
+      // 🔥 PENTING: tunggu data & end
+      doc.on("data", (chunk) => buffers.push(chunk));
+      doc.on("end", () => {
+        const pdfBuffer = Buffer.concat(buffers);
+        resolve(pdfBuffer);
+      });
+      doc.on("error", (err) => reject(err));
 
-    doc.on("end", () => {});
+      // ===== DESIGN (TIDAK DIUBAH) =====
+      const orange = "#f97316";
+      const dark = "#111827";
+      const gray = "#4b5563";
 
-    // === DESIGN (SAMA DENGAN PUNYA KAMU) ===
-    const orange = "#f97316";
-    const dark = "#111827";
-    const gray = "#4b5563";
+      doc.rect(0, 0, WIDTH, 80).fill(orange);
+      doc
+        .fillColor("white")
+        .font("Helvetica-Bold")
+        .fontSize(26)
+        .text("BOARDING PASS", 30, 25);
 
-    doc.rect(0, 0, WIDTH, 80).fill(orange);
-    doc
-      .fillColor("white")
-      .font("Helvetica-Bold")
-      .fontSize(26)
-      .text("BOARDING PASS", 30, 25);
+      doc
+        .moveTo(0, 80)
+        .lineTo(WIDTH, 80)
+        .strokeColor("#ffffff")
+        .lineWidth(1)
+        .stroke();
 
-    doc
-      .moveTo(0, 80)
-      .lineTo(WIDTH, 80)
-      .strokeColor("#ffffff")
-      .lineWidth(1)
-      .stroke();
+      const leftX = 30;
+      let y = 100;
 
-    const leftX = 30;
-    let y = 100;
+      doc.fontSize(12).fillColor(gray).text("Nama", leftX, y);
+      doc
+        .font("Helvetica-Bold")
+        .fontSize(16)
+        .fillColor(dark)
+        .text(order.userName, leftX, y + 15);
 
-    doc.fontSize(12).fillColor(gray).text("Nama", leftX, y);
-    doc
-      .font("Helvetica-Bold")
-      .fontSize(16)
-      .fillColor(dark)
-      .text(order.userName, leftX, y + 15);
+      y += 55;
 
-    y += 55;
+      doc
+        .font("Helvetica")
+        .fontSize(12)
+        .fillColor(gray)
+        .text("Destinasi", leftX, y);
+      doc
+        .font("Helvetica-Bold")
+        .fontSize(18)
+        .fillColor(dark)
+        .text(order.destinationName, leftX, y + 15, { width: 380 });
 
-    doc
-      .font("Helvetica")
-      .fontSize(12)
-      .fillColor(gray)
-      .text("Destinasi", leftX, y);
-    doc
-      .font("Helvetica-Bold")
-      .fontSize(18)
-      .fillColor(dark)
-      .text(order.destinationName, leftX, y + 15, { width: 380 });
+      const rightX = 520;
 
-    const rightX = 520;
+      doc
+        .rect(rightX - 20, 100, 360, 230)
+        .strokeColor("#e5e7eb")
+        .lineWidth(1)
+        .stroke();
 
-    doc
-      .rect(rightX - 20, 100, 360, 230)
-      .strokeColor("#e5e7eb")
-      .lineWidth(1)
-      .stroke();
+      doc
+        .font("Helvetica")
+        .fontSize(12)
+        .fillColor(gray)
+        .text("Kode Tiket", rightX, 120);
+      doc
+        .font("Helvetica-Bold")
+        .fontSize(22)
+        .fillColor(orange)
+        .text(order.ticketCode, rightX, 140);
 
-    doc
-      .font("Helvetica")
-      .fontSize(12)
-      .fillColor(gray)
-      .text("Kode Tiket", rightX, 120);
-    doc
-      .font("Helvetica-Bold")
-      .fontSize(22)
-      .fillColor(orange)
-      .text(order.ticketCode, rightX, 140);
+      doc.image(Buffer.from(qrBase64, "base64"), rightX + 200, 140, {
+        width: 130,
+        height: 130,
+      });
 
-    doc.image(Buffer.from(qrBase64, "base64"), rightX + 200, 140, {
-      width: 130,
-      height: 130,
+      doc.end();
     });
-
-    doc.end();
-
-    return Buffer.concat(buffers);
   },
 };
