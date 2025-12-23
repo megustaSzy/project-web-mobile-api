@@ -10,34 +10,39 @@ import {
 
 export default function KategoriWisataPage() {
   const [cats, setCats] = useState<CategoryItem[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const [modalOpen, setModalOpen] = useState<boolean>(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
-  const [nameInput, setNameInput] = useState<string>("");
+  const [nameInput, setNameInput] = useState("");
 
-  const [saving, setSaving] = useState<boolean>(false);
+  const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
-  async function getData(): Promise<void> {
+  // 🔹 confirm delete
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
+
+  // 🔹 success popup
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
+
+  async function getData() {
     try {
       setLoading(true);
       const res = await apiFetch<ApiCategoryResponse>("/api/category");
       setCats(res.data.items);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Gagal memuat data";
-      setErrorMsg(msg);
+      setErrorMsg("Gagal memuat data");
     } finally {
       setLoading(false);
     }
   }
 
-  async function saveCategory(): Promise<void> {
-    if (!nameInput.trim()) {
-      alert("Nama kategori wajib diisi.");
-      return;
-    }
+  async function saveCategory() {
+    if (!nameInput.trim()) return;
 
     setSaving(true);
 
@@ -55,33 +60,42 @@ export default function KategoriWisataPage() {
       setModalOpen(false);
       setNameInput("");
       setEditId(null);
+
+      setSuccessMsg(
+        method === "POST"
+          ? "Kategori berhasil ditambahkan"
+          : "Kategori berhasil diperbarui"
+      );
+
+      setTimeout(() => setSuccessMsg(null), 2000);
       await getData();
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "Gagal menyimpan";
-      setErrorMsg(msg);
-      alert(msg);
+    } catch {
+      setErrorMsg("Gagal menyimpan data");
     } finally {
       setSaving(false);
     }
   }
 
-  async function deleteCategory(id: number): Promise<void> {
-    if (!confirm("Yakin ingin menghapus kategori ini?")) return;
+  async function deleteCategory() {
+    if (!pendingDeleteId) return;
 
-    setDeletingId(id);
+    setDeletingId(pendingDeleteId);
 
     try {
-      await apiFetch<ApiBaseResponse>(`/api/category/${id}`, {
+      await apiFetch<ApiBaseResponse>(`/api/category/${pendingDeleteId}`, {
         method: "DELETE",
       });
 
+      setSuccessMsg("Kategori berhasil dihapus");
+      setTimeout(() => setSuccessMsg(null), 2000);
+
       await getData();
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "Gagal menghapus";
-      setErrorMsg(msg);
-      alert(msg);
+    } catch {
+      setErrorMsg("Gagal menghapus data");
     } finally {
       setDeletingId(null);
+      setPendingDeleteId(null);
+      setConfirmDeleteOpen(false);
     }
   }
 
@@ -97,6 +111,11 @@ export default function KategoriWisataPage() {
     setModalOpen(true);
   }
 
+  function openDeleteConfirm(id: number) {
+    setPendingDeleteId(id);
+    setConfirmDeleteOpen(true);
+  }
+
   useEffect(() => {
     getData();
   }, []);
@@ -107,29 +126,35 @@ export default function KategoriWisataPage() {
         Kategori Wisata
       </h2>
 
-      <div className="bg-white p-4 rounded shadow">
-        <button
-          onClick={openAddModal}
-          className="px-4 py-2 bg-blue-600 text-white rounded mb-4"
-          disabled={saving}
-        >
-          + Tambah Kategori
-        </button>
+      {/* Success Popup */}
+      {successMsg && (
+        <div className="fixed top-6 right-6 bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg z-50 animate-fade-in">
+          {successMsg}
+        </div>
+      )}
 
-        {errorMsg && (
-          <p className="text-red-600 font-medium mb-2">{errorMsg}</p>
-        )}
+      <div className="bg-white rounded-xl shadow-sm border">
+        <div className="flex justify-between items-center p-4 border-b">
+          <h3 className="font-semibold text-gray-700">Daftar Kategori</h3>
+
+          <button
+            onClick={openAddModal}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm"
+          >
+            + Tambah
+          </button>
+        </div>
 
         {loading ? (
-          <p className="text-gray-500">Memuat...</p>
+          <p className="p-4 text-gray-500">Memuat...</p>
         ) : cats.length === 0 ? (
-          <p className="text-gray-500">Tidak ada kategori tersedia.</p>
+          <p className="p-4 text-gray-500">Belum ada kategori.</p>
         ) : (
-          <ul className="space-y-2">
+          <ul className="divide-y">
             {cats.map((c) => (
               <li
                 key={c.id}
-                className="flex justify-between items-center border-b pb-2 text-sm"
+                className="flex justify-between items-center p-4 hover:bg-gray-50"
               >
                 <div>
                   <p className="font-medium">{c.name}</p>
@@ -138,21 +163,20 @@ export default function KategoriWisataPage() {
                   </p>
                 </div>
 
-                <div className="space-x-2">
+                <div className="flex gap-2">
                   <button
                     onClick={() => openEditModal(c)}
-                    className="px-2 py-1 bg-yellow-500 text-white rounded"
-                    disabled={saving || deletingId !== null}
+                    className="px-3 py-1 bg-yellow-500 text-white rounded-lg text-sm"
                   >
                     Edit
                   </button>
 
                   <button
-                    onClick={() => deleteCategory(c.id)}
-                    className="px-2 py-1 bg-red-600 text-white rounded"
+                    onClick={() => openDeleteConfirm(c.id)}
                     disabled={deletingId === c.id}
+                    className="px-3 py-1 bg-red-600 text-white rounded-lg text-sm"
                   >
-                    {deletingId === c.id ? "Menghapus..." : "Delete"}
+                    {deletingId === c.id ? "Menghapus..." : "Hapus"}
                   </button>
                 </div>
               </li>
@@ -161,35 +185,63 @@ export default function KategoriWisataPage() {
         )}
       </div>
 
+      {/* Modal Add/Edit */}
       {modalOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded shadow w-96">
+          <div className="bg-white p-6 rounded-xl shadow w-96">
             <h3 className="text-lg font-semibold mb-4">
-              {editId !== null ? "Edit Kategori" : "Tambah Kategori"}
+              {editId ? "Edit Kategori" : "Tambah Kategori"}
             </h3>
 
             <input
-              type="text"
               value={nameInput}
               onChange={(e) => setNameInput(e.target.value)}
-              placeholder="Nama kategori"
               className="w-full border px-3 py-2 rounded mb-4"
+              placeholder="Nama kategori"
             />
 
-            <div className="flex justify-end space-x-2">
+            <div className="flex justify-end gap-2">
               <button
                 onClick={() => setModalOpen(false)}
-                className="px-3 py-2 bg-gray-300 rounded"
+                className="px-4 py-2 bg-gray-200 rounded-lg"
               >
                 Batal
               </button>
 
               <button
                 onClick={saveCategory}
-                className="px-3 py-2 bg-blue-600 text-white rounded"
                 disabled={saving}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg"
               >
                 {saving ? "Menyimpan..." : "Simpan"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Confirm Delete */}
+      {confirmDeleteOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-xl shadow w-96">
+            <h3 className="text-lg font-semibold mb-2">Konfirmasi</h3>
+            <p className="text-sm text-gray-600 mb-6">
+              Yakin ingin menghapus kategori ini?
+            </p>
+
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setConfirmDeleteOpen(false)}
+                className="px-4 py-2 bg-gray-200 rounded-lg"
+              >
+                Batal
+              </button>
+
+              <button
+                onClick={deleteCategory}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg"
+              >
+                Ya, Hapus
               </button>
             </div>
           </div>
