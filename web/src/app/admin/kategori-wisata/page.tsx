@@ -21,11 +21,9 @@ export default function KategoriWisataPage() {
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
-  // 🔹 confirm delete
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
 
-  // 🔹 success popup
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   async function getData() {
@@ -33,8 +31,7 @@ export default function KategoriWisataPage() {
       setLoading(true);
       const res = await apiFetch<ApiCategoryResponse>("/api/category");
       setCats(res.data.items);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (err) {
+    } catch {
       setErrorMsg("Gagal memuat data");
     } finally {
       setLoading(false);
@@ -121,74 +118,118 @@ export default function KategoriWisataPage() {
   }, []);
 
   return (
-    <div>
-      <h2 className="text-xl font-semibold text-blue-700 mb-4">
+    <div className="space-y-4">
+      <h2 className="text-xl font-semibold text-blue-700">
         Kategori Wisata
       </h2>
 
-      {/* Success Popup */}
+      {/* SUCCESS POPUP */}
       {successMsg && (
-        <div className="fixed top-6 right-6 bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg z-50 animate-fade-in">
+        <div className="fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg z-50">
           {successMsg}
         </div>
       )}
 
-      <div className="bg-white rounded-xl shadow-sm border">
-        <div className="flex justify-between items-center p-4 border-b">
-          <h3 className="font-semibold text-gray-700">Daftar Kategori</h3>
+      <div className="bg-white rounded-2xl border shadow-sm">
+        {/* HEADER */}
+        <div className="flex justify-between items-center px-6 py-4 border-b">
+          <h3 className="font-semibold text-gray-800">
+            Daftar Kategori
+          </h3>
 
           <button
             onClick={openAddModal}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm"
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm"
           >
             + Tambah
           </button>
         </div>
 
+        {/* CONTENT */}
         {loading ? (
-          <p className="p-4 text-gray-500">Memuat...</p>
+          <p className="p-6 text-gray-500">Memuat data...</p>
         ) : cats.length === 0 ? (
-          <p className="p-4 text-gray-500">Belum ada kategori.</p>
+          <p className="p-6 text-gray-500">
+            Belum ada kategori.
+          </p>
         ) : (
-          <ul className="divide-y">
-            {cats.map((c) => (
-              <li
-                key={c.id}
-                className="flex justify-between items-center p-4 hover:bg-gray-50"
-              >
-                <div>
-                  <p className="font-medium">{c.name}</p>
-                  <p className="text-xs text-gray-500">
-                    {c.destinations?.length ?? 0} destinasi
-                  </p>
-                </div>
+          <div className="overflow-x-auto">
+            <table className="w-full table-fixed text-sm">
+              <thead className="bg-gray-50 border-b">
+                <tr className="text-gray-600">
+                  <th className="w-16 px-4 py-3 text-center">
+                    No
+                  </th>
+                  <th className="px-4 py-3 text-left">
+                    Nama Kategori
+                  </th>
+                  <th className="w-40 px-4 py-3 text-center">
+                    Jumlah
+                  </th>
+                  <th className="w-40 px-4 py-3 text-center">
+                    Aksi
+                  </th>
+                </tr>
+              </thead>
 
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => openEditModal(c)}
-                    className="px-3 py-1 bg-yellow-500 text-white rounded-lg text-sm"
+              <tbody className="divide-y">
+                {cats.map((c, i) => (
+                  <tr
+                    key={c.id}
+                    className="hover:bg-gray-50 transition"
                   >
-                    Edit
-                  </button>
+                    {/* NO */}
+                    <td className="px-4 py-3 text-center text-gray-400">
+                      {i + 1}
+                    </td>
 
-                  <button
-                    onClick={() => openDeleteConfirm(c.id)}
-                    disabled={deletingId === c.id}
-                    className="px-3 py-1 bg-red-600 text-white rounded-lg text-sm"
-                  >
-                    {deletingId === c.id ? "Menghapus..." : "Hapus"}
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
+                    {/* NAMA */}
+                    <td className="px-4 py-3 font-medium text-gray-800">
+                      {c.name}
+                    </td>
+
+                    {/* JUMLAH */}
+                    <td className="px-4 py-3 text-center">
+                      <span className="px-2 py-1 bg-gray-100 rounded-full text-xs text-gray-600">
+                        {c.destinations?.length ?? 0} destinasi
+                      </span>
+                    </td>
+
+                    {/* AKSI */}
+                    <td className="px-4 py-3">
+                      <div className="flex justify-center gap-2">
+                        <button
+                          onClick={() => openEditModal(c)}
+                          className="px-3 py-1.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded-full text-xs"
+                        >
+                          Edit
+                        </button>
+
+                        <button
+                          onClick={() =>
+                            openDeleteConfirm(c.id)
+                          }
+                          disabled={deletingId === c.id}
+                          className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-full text-xs"
+                        >
+                          {deletingId === c.id
+                            ? "Menghapus..."
+                            : "Hapus"}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 
-      {/* Modal Add/Edit */}
+      {/* MODAL ADD / EDIT */}
       {modalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-xl shadow w-96">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-2xl shadow-xl w-96">
             <h3 className="text-lg font-semibold mb-4">
               {editId ? "Edit Kategori" : "Tambah Kategori"}
             </h3>
@@ -196,14 +237,14 @@ export default function KategoriWisataPage() {
             <input
               value={nameInput}
               onChange={(e) => setNameInput(e.target.value)}
-              className="w-full border px-3 py-2 rounded mb-4"
+              className="w-full border rounded-lg px-3 py-2 mb-4 focus:ring-2 focus:ring-blue-500 outline-none"
               placeholder="Nama kategori"
             />
 
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setModalOpen(false)}
-                className="px-4 py-2 bg-gray-200 rounded-lg"
+                className="px-4 py-2 bg-gray-100 rounded-lg"
               >
                 Batal
               </button>
@@ -220,11 +261,13 @@ export default function KategoriWisataPage() {
         </div>
       )}
 
-      {/* Modal Confirm Delete */}
+      {/* MODAL DELETE */}
       {confirmDeleteOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-xl shadow w-96">
-            <h3 className="text-lg font-semibold mb-2">Konfirmasi</h3>
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-2xl shadow-xl w-96">
+            <h3 className="text-lg font-semibold mb-2">
+              Konfirmasi
+            </h3>
             <p className="text-sm text-gray-600 mb-6">
               Yakin ingin menghapus kategori ini?
             </p>
@@ -232,7 +275,7 @@ export default function KategoriWisataPage() {
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setConfirmDeleteOpen(false)}
-                className="px-4 py-2 bg-gray-200 rounded-lg"
+                className="px-4 py-2 bg-gray-100 rounded-lg"
               >
                 Batal
               </button>
