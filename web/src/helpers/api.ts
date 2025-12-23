@@ -13,8 +13,8 @@ export async function apiFetch<T>(
   const token = Cookies.get("accessToken");
 
   // 🔍 DEBUG TOKEN
-  console.log("🔑 ACCESS TOKEN:", token);
-  console.log("🌐 API URL:", fullUrl);
+  // console.log("🔑 ACCESS TOKEN:", token);
+  // console.log("🌐 API URL:", fullUrl);
 
   // ⬇️ JANGAN SET CONTENT-TYPE JIKA FormData
   const isFormData = options.body instanceof FormData;
