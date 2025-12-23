@@ -66,52 +66,63 @@ async function getData(): Promise<void> {
 
   // ==================================================
   // SAVE (ADD / EDIT)
-  async function savePickup(): Promise<void> {
-    if (!nameInput.trim()) {
-      alert("Nama lokasi wajib diisi.");
-      return;
-    }
-
-    setSaving(true);
-
-    const payload = { name: nameInput.trim() };
-    const method = editId ? "PUT" : "POST";
-    const endpoint = editId
-      ? `/api/pickup-locations/${editId}`
-      : "/api/pickup-locations";
-
-    console.log("SAVE PAYLOAD:", payload);
-    console.log("SAVE METHOD:", method);
-    console.log("SAVE ENDPOINT:", endpoint);
-
-    try {
-      const res = await apiFetch<ApiPickupResponse>(endpoint, {
-        method,
-        body: JSON.stringify(payload),
-      });
-
-      console.log("SAVE RESPONSE:", res);
-
-      setModalOpen(false);
-      setEditId(null);
-      setNameInput("");
-
-      await getData();
-    } catch (err) {
-  console.error("ERROR SAVE PICKUP:", err);
-
-  const msg =
-    err instanceof Error
-      ? err.message.replace(/["{}]/g, "")
-      : "Gagal menyimpan data pickup";
-
-  alert(msg);
-  setErrorMsg(msg);
-}
- finally {
-      setSaving(false);
-    }
+async function savePickup(): Promise<void> {
+  if (!nameInput.trim()) {
+    alert("Nama lokasi wajib diisi.");
+    return;
   }
+
+  const token = localStorage.getItem("token");
+  if (!token) {
+    alert("Sesi login habis. Silakan login ulang.");
+    return;
+  }
+
+  setSaving(true);
+
+  const payload = { name: nameInput.trim() };
+  const method = editId ? "PUT" : "POST";
+  const endpoint = editId
+    ? `/api/pickup-locations/${editId}`
+    : "/api/pickup-locations";
+
+  console.log("SAVE PAYLOAD:", payload);
+  console.log("SAVE METHOD:", method);
+  console.log("SAVE ENDPOINT:", endpoint);
+  console.log("TOKEN:", token);
+
+  try {
+    const res = await apiFetch<ApiPickupResponse>(endpoint, {
+      method,
+      body: JSON.stringify(payload),
+    });
+
+    console.log("SAVE RESPONSE:", res);
+
+    setModalOpen(false);
+    setEditId(null);
+    setNameInput("");
+
+    await getData();
+  } catch (err) {
+    console.error("ERROR SAVE PICKUP:", err);
+
+    let msg = "Gagal menyimpan data pickup";
+
+    if (err instanceof Error) {
+      msg = err.message.replace(/["{}]/g, "");
+
+      if (msg.includes("token tidak ditemukan") || msg.includes("401")) {
+        msg = "Sesi login habis. Silakan login ulang.";
+      }
+    }
+
+    alert(msg);
+    setErrorMsg(msg);
+  } finally {
+    setSaving(false);
+  }
+}
 
   // ==================================================
   // DELETE
