@@ -2,44 +2,70 @@
 
 import { useEffect, useState } from "react";
 import { apiFetch } from "@/helpers/api";
-import {  ApiPickupItem, ApiPickupResponse, PickupType } from "@/types/pickupLocation";
+import {
+  ApiPickupItem,
+  ApiPickupResponse,
+  PickupType,
+} from "@/types/pickupLocation";
 
 export default function PickupPage() {
   const [items, setItems] = useState<PickupType[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const [modalOpen, setModalOpen] = useState<boolean>(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
-  const [nameInput, setNameInput] = useState<string>("");
+  const [nameInput, setNameInput] = useState("");
 
-  const [saving, setSaving] = useState<boolean>(false);
+  const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
-  // ────────────────────────────────────────────────
-  // GET DATA dari backend
-  async function getData(): Promise<void> {
-    try {
-      setLoading(true);
-      const res = await apiFetch<ApiPickupResponse>("/api/pickup-locations");
+  // ==================================================
+  // GET DATA
+  type PickupListResponse = {
+  status: number;
+  message: string;
+  data: ApiPickupItem[];
+};
 
-      const mapped: PickupType[] = res.data.items.map((i: ApiPickupItem) => ({
-        id: i.id,
-        name: i.name,
-      }));
+async function getData(): Promise<void> {
+  try {
+    setLoading(true);
+    setErrorMsg(null);
 
-      setItems(mapped);
-    } catch (err) {
-      const msg =
-        err instanceof Error ? err.message : "Gagal memuat data pickup";
-      setErrorMsg(msg);
-    } finally {
-      setLoading(false);
-    }
+    const res = await apiFetch<PickupListResponse>("/api/pickup-locations");
+
+    console.log("RESPONSE PICKUP (RAW):", res);
+    console.log("RESPONSE DATA:", res.data);
+
+    const rawItems: ApiPickupItem[] = Array.isArray(res.data)
+      ? res.data
+      : [];
+
+    console.log("RAW ITEMS AFTER CHECK:", rawItems);
+
+    const mapped: PickupType[] = rawItems.map((i) => ({
+      id: i.id,
+      name: i.name,
+    }));
+
+    console.log("MAPPED ITEMS:", mapped);
+
+    setItems(mapped);
+  } catch (err) {
+    console.error("GET PICKUP ERROR:", err);
+    const msg =
+      err instanceof Error ? err.message : "Gagal memuat data pickup";
+    setErrorMsg(msg);
+    setItems([]);
+  } finally {
+    setLoading(false);
   }
+}
 
-  // ────────────────────────────────────────────────
-  // SIMPAN (ADD / EDIT)
+
+  // ==================================================
+  // SAVE (ADD / EDIT)
   async function savePickup(): Promise<void> {
     if (!nameInput.trim()) {
       alert("Nama lokasi wajib diisi.");
@@ -49,66 +75,81 @@ export default function PickupPage() {
     setSaving(true);
 
     const payload = { name: nameInput.trim() };
-    const method = editId !== null ? "PUT" : "POST";
-    const endpoint =
-      editId !== null
-        ? `/api/pickup-locations/${editId}`
-        : `/api/pickup-locations`;
+    const method = editId ? "PUT" : "POST";
+    const endpoint = editId
+      ? `/api/pickup-locations/${editId}`
+      : "/api/pickup-locations";
+
+    console.log("SAVE PAYLOAD:", payload);
+    console.log("SAVE METHOD:", method);
+    console.log("SAVE ENDPOINT:", endpoint);
 
     try {
-      await apiFetch<ApiPickupResponse>(endpoint, {
+      const res = await apiFetch<ApiPickupResponse>(endpoint, {
         method,
         body: JSON.stringify(payload),
       });
 
+      console.log("SAVE RESPONSE:", res);
+
       setModalOpen(false);
-      setNameInput("");
       setEditId(null);
+      setNameInput("");
 
       await getData();
     } catch (err) {
-      const msg =
-        err instanceof Error ? err.message : "Gagal menyimpan data pickup";
-      setErrorMsg(msg);
-      alert(msg);
-    } finally {
+  console.error("ERROR SAVE PICKUP:", err);
+
+  const msg =
+    err instanceof Error
+      ? err.message.replace(/["{}]/g, "")
+      : "Gagal menyimpan data pickup";
+
+  alert(msg);
+  setErrorMsg(msg);
+}
+ finally {
       setSaving(false);
     }
   }
 
-  // ────────────────────────────────────────────────
+  // ==================================================
   // DELETE
   async function deletePickup(id: number): Promise<void> {
     if (!confirm("Yakin ingin menghapus lokasi ini?")) return;
 
     setDeletingId(id);
 
+    console.log("DELETE ID:", id);
+
     try {
-      await apiFetch<ApiPickupResponse>(`/api/pickup-locations/${id}`, {
+      const res = await apiFetch(`/api/pickup-locations/${id}`, {
         method: "DELETE",
       });
 
+      console.log("DELETE RESPONSE:", res);
+
       await getData();
     } catch (err) {
+      console.error("ERROR DELETE PICKUP:", err);
+
       const msg =
         err instanceof Error ? err.message : "Gagal menghapus data pickup";
-      setErrorMsg(msg);
       alert(msg);
+      setErrorMsg(msg);
     } finally {
       setDeletingId(null);
     }
   }
 
-  // ────────────────────────────────────────────────
-  // Open Modal Untuk Tambah
-  function openAddModal(): void {
+  // ==================================================
+  function openAddModal() {
     setEditId(null);
     setNameInput("");
     setModalOpen(true);
   }
 
-  // Open Modal Untuk Edit
-  function openEditModal(item: PickupType): void {
+  function openEditModal(item: PickupType) {
     setEditId(item.id);
     setNameInput(item.name);
     setModalOpen(true);
@@ -118,7 +159,7 @@ export default function PickupPage() {
     getData();
   }, []);
 
-  // ────────────────────────────────────────────────
+  // ==================================================
   return (
     <div>
       <h2 className="text-xl font-semibold text-blue-700 mb-4">
@@ -129,7 +170,6 @@ export default function PickupPage() {
         <button
           onClick={openAddModal}
           className="px-4 py-2 bg-blue-600 text-white rounded mb-4"
-          disabled={saving}
         >
           + Tambah Lokasi Pickup
         </button>
@@ -153,7 +193,6 @@ export default function PickupPage() {
                   <button
                     onClick={() => openEditModal(item)}
                     className="px-2 py-1 bg-yellow-500 text-white rounded"
-                    disabled={saving || deletingId !== null}
                   >
                     Edit
                   </button>
@@ -177,7 +216,7 @@ export default function PickupPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded shadow w-96">
             <h3 className="text-lg font-semibold mb-4">
-              {editId !== null ? "Edit Lokasi Pickup" : "Tambah Lokasi Pickup"}
+              {editId ? "Edit Lokasi Pickup" : "Tambah Lokasi Pickup"}
             </h3>
 
             <input

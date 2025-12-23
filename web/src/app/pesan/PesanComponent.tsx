@@ -24,6 +24,11 @@ type PayResponse = {
   redirectUrl: string | null;
 };
 
+type PickupType = {
+  id: number;
+  name: string;
+};
+
 /* ================= COMPONENT ================= */
 
 export default function PesanComponent() {
@@ -31,6 +36,7 @@ export default function PesanComponent() {
   const destinationId = Number(searchParams.get("destinationId"));
 
   const [destination, setDestination] = useState<DestinationsType | null>(null);
+  const [pickupLocations, setPickupLocations] = useState<PickupType[]>([]);
   const [loading, setLoading] = useState(true);
 
   /* form state */
@@ -54,7 +60,7 @@ export default function PesanComponent() {
   useEffect(() => {
     if (!destinationId) return;
 
-    const fetchData = async () => {
+    const fetchDestination = async () => {
       try {
         const res = await apiFetch<ApiResponse<DestinationsType>>(
           `/api/destinations/${destinationId}`
@@ -67,8 +73,30 @@ export default function PesanComponent() {
       }
     };
 
-    fetchData();
+    fetchDestination();
   }, [destinationId]);
+
+  /* ================= FETCH PICKUP LOCATION ================= */
+
+  useEffect(() => {
+  const fetchPickup = async () => {
+    try {
+      const res = await apiFetch<ApiResponse<PickupType[]>>(
+        "/api/pickup-locations"
+      );
+
+      console.log("PICKUP RESPONSE:", res);
+
+      setPickupLocations(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      console.error("Gagal memuat pickup location", err);
+      setPickupLocations([]);
+    }
+  };
+
+  fetchPickup();
+}, []);
+
 
   if (loading) return <p className="text-center mt-20">Loading...</p>;
   if (!destination)
@@ -76,6 +104,9 @@ export default function PesanComponent() {
 
   const imageUrl = destination.imageUrl || "/images/default.jpg";
   const estimasiTotal = destination.price * people;
+
+  const selectedPickup =
+    pickupLocations.find((p) => p.id === pickupLocationId) ?? null;
 
   /* ================= RENDER ================= */
 
@@ -115,12 +146,19 @@ export default function PesanComponent() {
             <Field icon={<MapPin size={16} />}>
               <select
                 value={pickupLocationId ?? ""}
-                onChange={(e) => setPickupLocationId(Number(e.target.value))}
+                onChange={(e) =>
+                  setPickupLocationId(
+                    e.target.value ? Number(e.target.value) : null
+                  )
+                }
                 className="w-full bg-transparent outline-none text-sm"
               >
                 <option value="">Pilih Lokasi</option>
-                <option value="1">Terminal Rajabasa</option>
-                <option value="2">Stasiun Tanjung Karang</option>
+                {pickupLocations.map((loc) => (
+                  <option key={loc.id} value={loc.id}>
+                    {loc.name}
+                  </option>
+                ))}
               </select>
             </Field>
 
@@ -139,48 +177,65 @@ export default function PesanComponent() {
             </Field>
 
             <Label>Waktu Berangkat</Label>
-            <Field
-              icon={<Clock size={16} />}
-              onIconClick={() => departRef.current?.showPicker()}
-            >
-              <input
-                ref={departRef}
-                type="time"
+            <Field icon={<Clock size={16} />}>
+              <select
                 value={departTime}
                 onChange={(e) => setDepartTime(e.target.value)}
-                className="w-full bg-transparent outline-none text-sm [&::-webkit-calendar-picker-indicator]:opacity-0"
-              />
+                className="w-full bg-transparent outline-none text-sm appearance-none"
+              >
+                <option value="">Pilih Jam</option>
+                {Array.from({ length: 8 }, (_, i) => {
+                  const hour = 7 + i;
+                  const value = `${hour.toString().padStart(2, "0")}:00`;
+                  return (
+                    <option key={value} value={value}>
+                      {value}
+                    </option>
+                  );
+                })}
+              </select>
             </Field>
 
             <Label>Waktu Pulang</Label>
-            <Field
-              icon={<Clock size={16} />}
-              onIconClick={() => returnRef.current?.showPicker()}
-            >
-              <input
-                ref={returnRef}
-                type="time"
+            <Field icon={<Clock size={16} />}>
+              <select
                 value={returnTime}
                 onChange={(e) => setReturnTime(e.target.value)}
-                className="w-full bg-transparent outline-none text-sm [&::-webkit-calendar-picker-indicator]:opacity-0"
-              />
+                className="w-full bg-transparent outline-none text-sm appearance-none"
+              >
+                <option value="">Pilih Jam</option>
+                {Array.from({ length: 6 }, (_, i) => {
+                  const hour = 14 + i;
+                  const value = `${hour.toString().padStart(2, "0")}:00`;
+                  return (
+                    <option key={value} value={value}>
+                      {value}
+                    </option>
+                  );
+                })}
+              </select>
             </Field>
 
             <Label>Jumlah Tiket</Label>
             <Field icon={<User size={16} />}>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => setPeople(Math.max(1, people - 1))}
-                  className="w-8 h-8 rounded-full bg-neutral-100"
+                  onClick={() => setPeople((prev) => Math.max(1, prev - 1))}
+                  disabled={people <= 1}
+                  className="w-6 h-6 rounded-full bg-neutral-200 disabled:opacity-40"
                 >
                   −
                 </button>
-                <span className="font-medium">{people}</span>
+                <span className="font-medium w-4 text-center">
+                  {people}
+                </span>
+
                 <button
                   type="button"
-                  onClick={() => setPeople(Math.min(16, people + 1))}
-                  className="w-8 h-8 rounded-full bg-neutral-100"
+                  onClick={() => setPeople((prev) => Math.min(16, prev + 1))}
+                  disabled={people >= 16}
+                  className="w-6 h-6 rounded-full bg-neutral-200 disabled:opacity-40"
                 >
                   +
                 </button>
@@ -209,7 +264,7 @@ export default function PesanComponent() {
       {showConfirm && (
         <ConfirmPopup
           destination={destination}
-          pickupLocationId={pickupLocationId!}
+          pickupName={selectedPickup?.name || "-"}
           date={date}
           departTime={departTime}
           returnTime={returnTime}
@@ -221,7 +276,6 @@ export default function PesanComponent() {
             try {
               setPaying(true);
 
-              // 1️⃣ CREATE ORDER
               const orderRes = await apiFetch<ApiResponse<OrderResponse>>(
                 "/api/orders",
                 {
@@ -237,15 +291,11 @@ export default function PesanComponent() {
                 }
               );
 
-              // 2️⃣ PAY ORDER
               const payRes = await apiFetch<ApiResponse<PayResponse>>(
                 `/api/orders/${orderRes.data.id}/pay`,
-                {
-                  method: "POST",
-                }
+                { method: "POST" }
               );
 
-              // 3️⃣ REDIRECT
               if (payRes.data.redirectUrl) {
                 window.location.href = payRes.data.redirectUrl;
               } else {
@@ -261,7 +311,6 @@ export default function PesanComponent() {
         />
       )}
 
-      {/* ERROR */}
       {showError && (
         <Popup
           title="Gagal ❌"
@@ -325,7 +374,7 @@ function Popup({
 
 function ConfirmPopup({
   destination,
-  pickupLocationId,
+  pickupName,
   date,
   departTime,
   returnTime,
@@ -336,7 +385,7 @@ function ConfirmPopup({
   onConfirm,
 }: {
   destination: DestinationsType;
-  pickupLocationId: number;
+  pickupName: string;
   date: string;
   departTime: string;
   returnTime: string;
@@ -346,9 +395,6 @@ function ConfirmPopup({
   onCancel: () => void;
   onConfirm: () => void;
 }) {
-  const pickupName =
-    pickupLocationId === 1 ? "Terminal Rajabasa" : "Stasiun Tanjung Karang";
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
       <div className="w-full max-w-sm bg-white rounded-2xl p-6 space-y-4">
@@ -357,21 +403,11 @@ function ConfirmPopup({
         </h3>
 
         <div className="text-sm space-y-2 text-neutral-600">
-          <p>
-            <b>Destinasi:</b> {destination.name}
-          </p>
-          <p>
-            <b>Pickup:</b> {pickupName}
-          </p>
-          <p>
-            <b>Tanggal:</b> {date}
-          </p>
-          <p>
-            <b>Waktu:</b> {departTime} - {returnTime}
-          </p>
-          <p>
-            <b>Jumlah:</b> {people} orang
-          </p>
+          <p><b>Destinasi:</b> {destination.name}</p>
+          <p><b>Pickup:</b> {pickupName}</p>
+          <p><b>Tanggal:</b> {date}</p>
+          <p><b>Waktu:</b> {departTime} - {returnTime}</p>
+          <p><b>Jumlah:</b> {people} orang</p>
         </div>
 
         <div className="flex justify-between font-semibold">
