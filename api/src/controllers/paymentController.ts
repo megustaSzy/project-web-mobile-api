@@ -3,6 +3,8 @@ import { Request, Response } from "express";
 import { ResponseData } from "../utilities/Response";
 import { orderService } from "../services/orderService";
 import { PaymentStatus, PaymentMethod } from "@prisma/client";
+import { ticketService } from "../services/ticketService";
+import { sendTicketEmail } from "../services/mailService";
 
 export const paymentController = {
   async midtransNotification(req: Request, res: Response) {
@@ -10,7 +12,7 @@ export const paymentController = {
       const core = coreApi as any;
       const status = await core.transaction.notification(req.body);
 
-      console.log("MIDTRANS STATUS:", status);
+      // console.log("MIDTRANS STATUS:", status);
 
       const paymentOrderId = status.order_id; // ambil string utuh
       const transactionStatus = status.transaction_status;
@@ -47,13 +49,24 @@ export const paymentController = {
         return ResponseData.badRequest(res, "Order tidak ditemukan");
       }
 
-      await orderService.updateOrderPaymentData(order.id, {
-        transactionId,
-        paymentMethod,
-        paymentStatus,
-        isPaid: paymentStatus === PaymentStatus.paid,
-        paidAt: paymentStatus === PaymentStatus.paid ? new Date() : undefined,
-      });
+      if (paymentStatus === PaymentStatus.paid) {
+        await orderService.updateOrderPaymentData(order.id, {
+          transactionId,
+          paymentMethod,
+          paymentStatus,
+          isPaid: true,
+          paidAt: new Date(),
+        });
+
+        const pdfBuffer = await ticketService.generateTicketPDFBuffer(order.id);
+
+        await sendTicketEmail(
+          order.userEmail,
+          order.userName,
+          order.ticketCode,
+          pdfBuffer
+        )
+      }
 
       return ResponseData.ok(res, {
         paymentOrderId,
