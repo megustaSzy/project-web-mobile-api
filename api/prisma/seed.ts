@@ -2,7 +2,7 @@ import prisma from "../src/lib/prisma";
 import bcrypt from "bcryptjs";
 
 async function main() {
-  const hashedPassword = await bcrypt.hash("admin123", 10);
+  const hashedPassword = await bcrypt.hash("admin123@", 10);
 
   await prisma.tb_user.upsert({
     where: {
