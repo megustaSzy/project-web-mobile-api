@@ -1,155 +1,198 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
-import Image from "next/image";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { Mail, Loader2, CheckCircle2, ArrowLeft } from "lucide-react";
 
-export default function ResetPasswordForm() {
-  const [password, setPassword] = useState("");
-  const [confirm, setConfirm] = useState("");
-  const [success, setSuccess] = useState(false);
-  const [loading, setLoading] = useState(false);
+interface ForgotPasswordFormData {
+  email: string;
+}
 
-  //  Ambil email dari URL (wajib sesuai dengan BE kamu)
-  const params = new URLSearchParams(
-    typeof window !== "undefined" ? window.location.search : ""
-  );
-  const email = params.get("email");
+interface ApiErrorResponse {
+  message?: string;
+}
 
-  const handleReset = async (e: React.FormEvent) => {
-    e.preventDefault();
+export function ForgotPasswordForm() {
+  const [isSuccess, setIsSuccess] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
-    if (password !== confirm) {
-      alert("Password tidak sama!");
-      return;
-    }
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    getValues,
+  } = useForm<ForgotPasswordFormData>();
 
-    if (!email) {
-      alert("Email tidak ditemukan di URL!");
-      return;
-    }
-
-    setLoading(true);
-
+  const onSubmit = async (data: ForgotPasswordFormData) => {
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/reset-password`,
+      setErrorMessage("");
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/forgot-password`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            email: email,
-            newPassword: password,
-          }),
+          body: JSON.stringify({ email: data.email }),
         }
       );
 
-      const data = await res.json();
+      const result: ApiErrorResponse | null = await response
+        .json()
+        .catch(() => null);
 
-      if (res.ok) {
-        setSuccess(true);
-      } else {
-        alert(data.message || "Gagal reset password");
+      if (!response.ok) {
+        throw new Error(result?.message ?? "Email tidak ditemukan");
       }
-    } catch (err) {
-      console.error(err);
-      alert("Terjadi kesalahan server");
-    }
 
-    setLoading(false);
+      setIsSuccess(true);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setErrorMessage(error.message);
+      } else {
+        setErrorMessage("Terjadi kesalahan. Silakan coba lagi.");
+      }
+    }
   };
 
+  /* ================= SUCCESS STATE ================= */
+  if (isSuccess) {
+    return (
+      <div className="w-full max-w-md mx-auto">
+        <Card className="border border-slate-200 shadow-md">
+          <CardHeader className="space-y-1 text-center pb-6">
+            <div className="flex justify-center mb-4">
+              <div className="rounded-full bg-green-100 p-4">
+                <CheckCircle2 className="h-10 w-10 text-green-600" />
+              </div>
+            </div>
+            <CardTitle className="text-2xl font-bold text-slate-900">
+              Email Terkirim!
+            </CardTitle>
+            <CardDescription className="text-slate-600">
+              Kami telah mengirimkan link reset password ke email Anda
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent className="space-y-6">
+            <Alert className="border-blue-200 bg-blue-50 text-blue-800">
+              <AlertDescription>
+                Periksa inbox email{" "}
+                <span className="font-semibold">{getValues("email")}</span> dan
+                klik link reset password.
+              </AlertDescription>
+            </Alert>
+
+            <div className="flex flex-col gap-3">
+              <Button
+                variant="outline"
+                className="border-slate-300 text-slate-700 hover:bg-slate-50"
+                onClick={() => setIsSuccess(false)}
+              >
+                Kirim Ulang Email
+              </Button>
+
+              <Link href="/login">
+                <Button
+                  variant="outline"
+                  className="w-full border-slate-300 text-slate-700 hover:bg-slate-50"
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Kembali ke Login
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  /* ================= FORM STATE ================= */
   return (
-    <section className="flex flex-col items-center justify-center min-h-screen px-4 bg-linear-to-b from-blue-50 to-white">
-      <Card className="w-full max-w-md shadow-lg border border-gray-100 rounded-2xl bg-white/80 backdrop-blur">
-        <CardHeader className="text-center pb-2 flex flex-col items-center">
-          <Image
-            src="/images/logo.png"
-            alt="Logo"
-            width={61}
-            height={61}
-            className="w-16 h-16 object-contain mb-3"
-          />
-          <CardTitle className="text-2xl font-bold text-gray-800">
-            Reset Password
+    <div className="w-full max-w-md mx-auto">
+      <Card className="border-neutral-200 shadow-lg">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold text-slate-900">
+            Lupa Password?
           </CardTitle>
-          <CardDescription className="text-gray-500">
-            Buat password baru untuk akun Anda
+          <CardDescription className="text-slate-600">
+            Masukkan email Anda untuk reset password
           </CardDescription>
         </CardHeader>
 
         <CardContent>
-          {!success ? (
-            <form onSubmit={handleReset} className="space-y-5">
-              <div>
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Password Baru
-                </label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  className="w-full"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {errorMessage && (
+              <Alert variant="destructive">
+                <AlertDescription>{errorMessage}</AlertDescription>
+              </Alert>
+            )}
 
-              <div>
-                <label
-                  htmlFor="confirm"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Konfirmasi Password
-                </label>
-                <Input
-                  id="confirm"
-                  type="password"
-                  placeholder="••••••••"
-                  className="w-full"
-                  required
-                  value={confirm}
-                  onChange={(e) => setConfirm(e.target.value)}
-                />
-              </div>
+            <FieldGroup>
+              <Field>
+                <FieldLabel>Email</FieldLabel>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <Input
+                    type="email"
+                    placeholder="email@example.com"
+                    className="pl-10"
+                    disabled={isSubmitting}
+                    {...register("email", {
+                      required: "Email wajib diisi",
+                      pattern: {
+                        value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                        message: "Format email tidak valid",
+                      },
+                    })}
+                  />
+                </div>
+                {errors.email && (
+                  <p className="text-sm text-red-600 mt-1">
+                    {errors.email.message}
+                  </p>
+                )}
+              </Field>
+            </FieldGroup>
 
-              <Button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition-all duration-200"
-              >
-                {loading ? "Menyimpan..." : "Simpan Password Baru"}
-              </Button>
-            </form>
-          ) : (
-            <div className="text-center space-y-4 py-6">
-              <p className="text-gray-600 text-sm">
-                Password kamu berhasil diubah! 🎉
-              </p>
-              <a
-                href="/login"
-                className="text-blue-600 text-sm hover:underline font-medium"
-              >
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Mengirim...
+                </>
+              ) : (
+                "Kirim Link Reset Password"
+              )}
+            </Button>
+
+            <Link href="/login">
+              <Button className="w-full bg-white border border-slate-300 text-slate-700 hover:bg-slate-50">
+                <ArrowLeft className="mr-2 h-4 w-4" />
                 Kembali ke Login
-              </a>
-            </div>
-          )}
+              </Button>
+            </Link>
+          </form>
         </CardContent>
       </Card>
-    </section>
+    </div>
   );
 }
