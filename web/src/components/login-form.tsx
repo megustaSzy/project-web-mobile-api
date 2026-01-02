@@ -16,7 +16,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle, XCircle } from "lucide-react";
+import { CheckCircle, XCircle, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 
 /* ============================================================
@@ -75,7 +75,10 @@ function AuthModal({
 /* ============================================================
     LOGIN FORM
 ============================================================= */
-export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
+export function LoginForm({
+  className,
+  ...props
+}: React.ComponentProps<"div">) {
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
@@ -85,13 +88,42 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
   );
   const [modalMessage, setModalMessage] = useState("");
 
-  /* --- Save cookie (untuk BEARER) --- */
+  const [showPassword, setShowPassword] = useState(false);
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+
   function setCookie(name: string, value: string, days = 1) {
     const expires = new Date(Date.now() + days * 864e5).toUTCString();
     document.cookie = `${name}=${value}; path=/; expires=${expires}`;
   }
 
-  /* --- Handle OAuth Google Callback --- */
+  const validateEmail = (email: string) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!regex.test(email)) {
+      setEmailError("Format email tidak valid");
+      return false;
+    }
+    setEmailError("");
+    return true;
+  };
+
+  const validatePassword = (password: string) => {
+    if (password.length < 8) {
+      setPasswordError("Password minimal 8 karakter");
+      return false;
+    }
+    if (!/[A-Z]/.test(password)) {
+      setPasswordError("Password harus mengandung huruf besar");
+      return false;
+    }
+    if (!/[!@#$%^&*(),.?\":{}|<>]/.test(password)) {
+      setPasswordError("Password harus mengandung karakter unik");
+      return false;
+    }
+    setPasswordError("");
+    return true;
+  };
+
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -100,7 +132,6 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
     const accessToken = params.get("accessToken");
     const refreshToken = params.get("refreshToken");
 
-    // Jika backend redirect membawa token langsung → simpan
     if (accessToken && refreshToken) {
       setCookie("accessToken", accessToken);
       setCookie("refreshToken", refreshToken);
@@ -115,29 +146,25 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
         setModalOpen(false);
         router.push("/");
       }, 1200);
-
       return;
     }
 
-    // Jika hanya membawa kode Google OAuth
     if (code) {
       (async () => {
         try {
           const res = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/api/auth/google/callback?code=${code}`
           );
-
           const data = await res.json();
 
           if (!res.ok) {
             setModalStatus("error");
-            setModalMessage(data.message || "Gagal memproses login Google.");
+            setModalMessage(data.message || "Gagal login Google.");
             setModalOpen(true);
             setTimeout(() => setModalOpen(false), 1500);
             return;
           }
 
-          // Backend menggunakan Bearer → simpan ke cookie
           setCookie("accessToken", data.data?.accessToken);
           setCookie("refreshToken", data.data?.refreshToken);
 
@@ -153,7 +180,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
           }, 1200);
         } catch {
           setModalStatus("error");
-          setModalMessage("Tidak dapat terhubung ke server Google.");
+          setModalMessage("Tidak dapat terhubung ke server.");
           setModalOpen(true);
           setTimeout(() => setModalOpen(false), 1500);
         }
@@ -161,9 +188,6 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
     }
   }, [router]);
 
-  /* ============================================================
-        LOGIN MANUAL EMAIL + PASSWORD
-  ============================================================= */
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -171,9 +195,12 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
     const password = (document.getElementById("password") as HTMLInputElement)
       ?.value;
 
-    if (!email || !password) {
+    const isEmailValid = validateEmail(email);
+    const isPasswordValid = validatePassword(password);
+
+    if (!isEmailValid || !isPasswordValid) {
       setModalStatus("error");
-      setModalMessage("Masukkan email dan password!");
+      setModalMessage("Periksa kembali email dan password");
       setModalOpen(true);
       setTimeout(() => setModalOpen(false), 1500);
       return;
@@ -195,8 +222,6 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
 
       if (response.ok) {
         const role = (data.data?.user?.role || "user").toLowerCase();
-
-        // Simpan token (Bearer)
         setCookie("accessToken", data.data?.accessToken);
         setCookie("role", role);
 
@@ -224,16 +249,10 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
     }
   };
 
-  /* ============================================================
-        LOGIN GOOGLE BUTTON
-  ============================================================= */
   const handleGoogleLogin = () => {
     router.push(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/google`);
   };
 
-  /* ============================================================
-        UI
-  ============================================================= */
   return (
     <>
       <section
@@ -263,46 +282,64 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-5">
               <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Email
                 </label>
-                <Input id="email" type="email" placeholder="you@example.com" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  onBlur={(e) => validateEmail(e.target.value)}
+                />
+                {emailError && (
+                  <p className="text-xs text-red-500 mt-1">{emailError}</p>
+                )}
               </div>
 
               <div>
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Password
                 </label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  required
-                />
-              </div>
 
-              <div className="flex items-center justify-between">
-                <Link href="/forgot-password" className="text-sm text-gray-500">
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    onBlur={(e) => validatePassword(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  >
+                    {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+                  </button>
+                </div>
+
+                {/* PINDAH KE SINI */}
+                <Link
+                  href="/forgot-password"
+                  className="block text-right text-gray-500"
+                >
                   Lupa password?
                 </Link>
+
+                {passwordError && (
+                  <p className="text-xs text-red-500 mt-1">{passwordError}</p>
+                )}
               </div>
 
               <Button
                 type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                 disabled={loading}
               >
                 {loading ? "Sedang masuk..." : "Login"}
               </Button>
 
               <div className="relative">
-                <hr className="border-gray-200" />
+                <hr />
                 <span className="absolute left-1/2 -translate-x-1/2 -top-2 bg-white px-2 text-gray-400 text-sm">
                   atau
                 </span>
@@ -312,17 +349,17 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                 variant="outline"
                 type="button"
                 onClick={handleGoogleLogin}
-                className="w-full border-gray-300 hover:bg-gray-50 py-2 rounded-lg flex items-center justify-center gap-2"
+                className="w-full flex gap-2"
               >
                 <FcGoogle size={20} />
                 Login dengan Google
               </Button>
 
-              <p className="text-center text-sm text-gray-500 pt-2">
+              <p className="text-center text-sm text-gray-500">
                 Belum punya akun?{" "}
-                <a href="/signup" className="text-blue-600 hover:underline">
+                <Link href="/signup" className="text-blue-600 hover:underline">
                   Daftar sekarang
-                </a>
+                </Link>
               </p>
             </form>
           </CardContent>
