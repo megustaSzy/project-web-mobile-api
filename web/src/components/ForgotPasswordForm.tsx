@@ -35,36 +35,39 @@ export function ForgotPasswordForm() {
     getValues,
   } = useForm<ForgotPasswordFormData>();
 
-  const onSubmit = async (data: ForgotPasswordFormData) => {
-    try {
-      setErrorMessage("");
+  const onSubmit = async (data: ForgotPasswordFormData): Promise<void> => {
+    setErrorMessage("");
 
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+    if (!apiUrl) {
+      setErrorMessage("Konfigurasi API belum tersedia");
+      return;
+    }
+
+    try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/forgot-password`,
+        `${apiUrl}/api/auth/forgot-password`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ email: data.email }),
+          body: JSON.stringify({
+            email: data.email.trim().toLowerCase(),
+          }),
         }
       );
 
-      const result: ApiErrorResponse | null = await response
-        .json()
-        .catch(() => null);
-
       if (!response.ok) {
-        throw new Error(result?.message ?? "Email tidak ditemukan");
+        const result: ApiErrorResponse = await response.json();
+        setErrorMessage(result.message ?? "Gagal mengirim email reset");
+        return;
       }
 
       setIsSuccess(true);
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        setErrorMessage(error.message);
-      } else {
-        setErrorMessage("Terjadi kesalahan. Silakan coba lagi.");
-      }
+    } catch {
+      setErrorMessage("Tidak dapat terhubung ke server");
     }
   };
 
@@ -73,48 +76,44 @@ export function ForgotPasswordForm() {
     return (
       <div className="w-full max-w-md mx-auto">
         <Card className="border border-slate-200 shadow-md">
-          <CardHeader className="space-y-1 text-center pb-6">
-            <div className="flex justify-center mb-4">
+          <CardHeader className="text-center space-y-2">
+            <div className="flex justify-center">
               <div className="rounded-full bg-green-100 p-4">
                 <CheckCircle2 className="h-10 w-10 text-green-600" />
               </div>
             </div>
-            <CardTitle className="text-2xl font-bold text-slate-900">
+            <CardTitle className="text-2xl font-bold">
               Email Terkirim!
             </CardTitle>
-            <CardDescription className="text-slate-600">
-              Kami telah mengirimkan link reset password ke email Anda
+            <CardDescription>
+              Jika email terdaftar, link reset password telah dikirim
             </CardDescription>
           </CardHeader>
 
-          <CardContent className="space-y-6">
-            <Alert className="border-blue-200 bg-blue-50 text-blue-800">
+          <CardContent className="space-y-4">
+            <Alert className="bg-blue-50 border-blue-200">
               <AlertDescription>
                 Periksa inbox email{" "}
-                <span className="font-semibold">{getValues("email")}</span> dan
-                klik link reset password.
+                <span className="font-semibold">
+                  {getValues("email")}
+                </span>
               </AlertDescription>
             </Alert>
 
-            <div className="flex flex-col gap-3">
-              <Button
-                variant="outline"
-                className="border-slate-300 text-slate-700 hover:bg-slate-50"
-                onClick={() => setIsSuccess(false)}
-              >
-                Kirim Ulang Email
-              </Button>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => setIsSuccess(false)}
+            >
+              Kirim Ulang Email
+            </Button>
 
-              <Link href="/login">
-                <Button
-                  variant="outline"
-                  className="w-full border-slate-300 text-slate-700 hover:bg-slate-50"
-                >
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Kembali ke Login
-                </Button>
-              </Link>
-            </div>
+            <Link href="/login">
+              <Button variant="outline" className="w-full">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Kembali ke Login
+              </Button>
+            </Link>
           </CardContent>
         </Card>
       </div>
@@ -124,13 +123,13 @@ export function ForgotPasswordForm() {
   /* ================= FORM STATE ================= */
   return (
     <div className="w-full max-w-md mx-auto">
-      <Card className="border-neutral-200 shadow-lg">
+      <Card className="shadow-lg">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold text-slate-900">
+          <CardTitle className="text-2xl font-bold">
             Lupa Password?
           </CardTitle>
-          <CardDescription className="text-slate-600">
-            Masukkan email Anda untuk reset password
+          <CardDescription>
+            Masukkan email untuk menerima link reset password
           </CardDescription>
         </CardHeader>
 
@@ -172,7 +171,7 @@ export function ForgotPasswordForm() {
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
             >
               {isSubmitting ? (
                 <>
@@ -185,7 +184,7 @@ export function ForgotPasswordForm() {
             </Button>
 
             <Link href="/login">
-              <Button className="w-full bg-white border border-slate-300 text-slate-700 hover:bg-slate-50">
+              <Button variant="outline" className="w-full">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Kembali ke Login
               </Button>
