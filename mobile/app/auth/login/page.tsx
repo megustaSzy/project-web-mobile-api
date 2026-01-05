@@ -15,7 +15,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
-const API_URL = "http://192.168.100.141:3001"; // 🔥 sesuaikan dengan backendmu
+const API_URL = process.env.EXPO_PUBLIC_API_URL!;
+ // 🔥 sesuaikan dengan backendmu
 
 export default function LoginForm() {
   const router = useRouter();

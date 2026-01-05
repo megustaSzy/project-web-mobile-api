@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation"; // tambahkan useRouter
+import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Mountain,
@@ -13,8 +13,7 @@ import {
 } from "lucide-react";
 
 export default function Sidebar({ isOpen }: { isOpen: boolean }) {
-  const path = usePathname();
-  const router = useRouter(); // inisialisasi router
+  const pathname = usePathname();
 
   const menu = [
     { title: "Dashboard", href: "/admin", icon: <LayoutDashboard size={16} /> },
@@ -56,21 +55,36 @@ export default function Sidebar({ isOpen }: { isOpen: boolean }) {
     },
   ];
 
-  // fungsi logout
-  const handleLogout = () => {
-    localStorage.removeItem("token"); // hapus token login jika ada
-    router.push("/login"); // redirect ke halaman login
+  // 🔥 LOGOUT FIX (COOKIE + ROLE BENAR-BENAR HILANG)
+  const handleLogout = async () => {
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch (err) {
+      console.error("Logout error:", err);
+    } finally {
+      document.cookie = "accessToken=; path=/; max-age=0";
+      document.cookie = "refreshToken=; path=/; max-age=0";
+      document.cookie = "role=; path=/; max-age=0";
+
+      localStorage.clear();
+      sessionStorage.clear();
+
+      window.location.href = "/login";
+    }
   };
 
   return (
     <aside
       className={`
-    fixed left-0 top-0 h-full z-40 
-    bg-blue-700 text-white p-5 shadow-lg w-64
-    transition-transform duration-300 ease-in-out
-    ${isOpen ? "translate-x-0" : "-translate-x-full"}
-    flex flex-col
-  `}
+        fixed left-0 top-0 h-full z-40 
+        bg-blue-700 text-white p-5 shadow-lg w-64
+        transition-transform duration-300 ease-in-out
+        ${isOpen ? "translate-x-0" : "-translate-x-full"}
+        flex flex-col
+      `}
     >
       <div className="mb-6 text-center">
         <h1 className="text-2xl font-bold">Admin Panel</h1>
@@ -83,7 +97,7 @@ export default function Sidebar({ isOpen }: { isOpen: boolean }) {
             key={m.href}
             href={m.href}
             className={`flex items-center gap-3 px-3 py-2 rounded-lg transition ${
-              path === m.href ? "bg-blue-500 shadow" : "hover:bg-blue-600"
+              pathname === m.href ? "bg-blue-500 shadow" : "hover:bg-blue-600"
             }`}
           >
             {m.icon}
@@ -92,7 +106,6 @@ export default function Sidebar({ isOpen }: { isOpen: boolean }) {
         ))}
       </nav>
 
-      {/* Logout button tetap di bawah */}
       <div className="mt-auto">
         <button
           onClick={handleLogout}

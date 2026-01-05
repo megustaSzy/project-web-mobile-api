@@ -87,8 +87,9 @@ export default function NavBar() {
   };
   useEffect(() => {
     const token = Cookies.get("accessToken");
+    const role = Cookies.get("role") || localStorage.getItem("role");
 
-    if (!token) {
+    if (!token || !role) {
       setIsLoggedIn(false);
       return;
     }
@@ -190,6 +191,10 @@ export default function NavBar() {
     } finally {
       Cookies.remove("accessToken", { path: "/" });
       Cookies.remove("refreshToken", { path: "/" });
+      Cookies.remove("role", { path: "/" });
+
+      localStorage.clear();
+      sessionStorage.clear();
       localStorage.removeItem("profile");
       setIsLoggedIn(false);
       setUserData({ name: "User", avatar: "/images/profile.jpg" });

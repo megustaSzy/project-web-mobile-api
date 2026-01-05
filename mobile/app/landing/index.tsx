@@ -23,119 +23,122 @@ type DestinationType = {
   imageUrl: string;
   description: string;
   category?: {
+    id?: number;
     name: string;
   };
 };
 
-// ============================
-// MAIN COMPONENT
-// ============================
-export default function HomeScreen() {
-  const router = useRouter();
-
-  const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
-
-  const [filteredDestinations, setFilteredDestinations] = useState<DestinationType[]>([]);
-
-  const [kategori, setKategori] = useState<string>("");
-  const [daerah, setDaerah] = useState<string | null>(null);
-
-  const [historyModal, setHistoryModal] = useState(false);
-
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
-
-  const [currentLocation, setCurrentLocation] = useState("Memuat lokasi...");
-
-  // API STATE
-  type CategoryType = {
+type CategoryType = {
   id: number;
   name: string;
-  };
-
-  const [apiCategories, setApiCategories] = useState<CategoryType[]>([]);
-  const [apiDestinations, setApiDestinations] = useState<DestinationType[]>([]);
-
-  type HistoryType = {
-  kategori: string;
-  daerah: string;
-  date: string;
 };
-
-const [historyList, setHistoryList] = useState<HistoryType[]>([]);
 
 type AreaType = {
   id: number;
   nama: string;
 };
 
-const [apiAreas, setApiAreas] = useState<AreaType[]>([]);
+type HistoryType = {
+  kategori: string;
+  daerah: string;
+  date: string;
+};
 
+export default function HomeScreen() {
+  const router = useRouter();
+  const BASE_URL = process.env.EXPO_PUBLIC_API_URL!;
 
+  // ================= STATE =================
+  const [kategoriId, setKategoriId] = useState<number | null>(null);
+  const [kategoriName, setKategoriName] = useState<string | null>(null);
+  const [daerah, setDaerah] = useState<string | null>(null);
 
+  const [apiCategories, setApiCategories] = useState<CategoryType[]>([]);
+  const [apiDestinations, setApiDestinations] = useState<DestinationType[]>([]);
+  const [filteredDestinations, setFilteredDestinations] = useState<DestinationType[]>([]);
+  const [apiAreas, setApiAreas] = useState<AreaType[]>([]);
 
-  // ============================
-  // USE EFFECT
-  // ============================
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [historyList, setHistoryList] = useState<HistoryType[]>([]);
+  const [historyModal, setHistoryModal] = useState(false);
+  const [currentLocation, setCurrentLocation] = useState("Memuat lokasi...");
+
+  // ================= EFFECT =================
   useEffect(() => {
     loadHistory();
     getLocation();
     fetchCategories();
     fetchDestinations();
-    fetchAreas(); 
+    fetchAreas();
   }, []);
 
   useEffect(() => {
-  if (!kategori) {
-    setFilteredDestinations(apiDestinations);
-    return;
-  }
+    if (!kategoriName) {
+      setFilteredDestinations(apiDestinations);
+      return;
+    }
 
-  const hasil = apiDestinations.filter(
-    (item) => item.category?.name === kategori
-  );
+    const hasil = apiDestinations.filter(
+      (item) => item.category?.name === kategoriName
+    );
 
-  setFilteredDestinations(hasil);
-}, [kategori, apiDestinations]);
+    setFilteredDestinations(hasil);
+  }, [kategoriName, apiDestinations]);
 
-  // ============================
-  // FETCH CATEGORY
-  // ============================
+  // ================= API =================
   const fetchCategories = async () => {
   try {
     const res = await fetch(`${BASE_URL}/api/category`);
     const json = await res.json();
 
-    let categoryData = [];
+    let categories: CategoryType[] = [];
 
     if (Array.isArray(json)) {
-      categoryData = json;                     // FORMAT A
-    } else if (json.data && Array.isArray(json.data)) {
-      categoryData = json.data;                // FORMAT B
-    } else if (json.data?.items && Array.isArray(json.data.items)) {
-      categoryData = json.data.items;          // FORMAT C
+      categories = json;
+    } else if (Array.isArray(json.data)) {
+      categories = json.data;
+    } else if (Array.isArray(json.data?.items)) {
+      categories = json.data.items;
+    } else {
+      console.log("FORMAT CATEGORY API TIDAK DIKENAL:", json);
     }
 
-    setApiCategories(categoryData);
+    setApiCategories(categories);
   } catch (e) {
     console.log("Category API error:", e);
+    setApiCategories([]);
   }
 };
 
-const fetchAreas = async () => {
+
+  const fetchDestinations = async () => {
+    try {
+      const res = await fetch(`${BASE_URL}/api/destinations`);
+      const json = await res.json();
+      setApiDestinations(json.data?.items || []);
+      setFilteredDestinations(json.data?.items || []);
+    } catch (e) {
+      console.log("Destination API error:", e);
+    }
+  };
+
+  const fetchAreas = async () => {
   try {
-    const res = await fetch(`${BASE_URL}/api/region/regencies/19`);
+    const res = await fetch(`${BASE_URL}/api/region`);
     const json = await res.json();
 
-    if (json.status === 200 && Array.isArray(json.data)) {
-      const formatted = json.data.map((item: any) => ({
+    let areas: AreaType[] = [];
+
+    if (json?.data?.items && Array.isArray(json.data.items)) {
+      areas = json.data.items.map((item: any) => ({
         id: item.id,
         nama: item.name,
       }));
-
-      setApiAreas(formatted);
     } else {
-      setApiAreas([]);
+      console.log("FORMAT REGION API TIDAK SESUAI:", json);
     }
+
+    setApiAreas(areas);
   } catch (e) {
     console.log("Area API error:", e);
     setApiAreas([]);
@@ -143,38 +146,12 @@ const fetchAreas = async () => {
 };
 
 
-  // ============================
-  // FETCH DESTINATIONS
-  // ============================
-  const fetchDestinations = async () => {
-  try {
-    const res = await fetch(`${BASE_URL}/api/destinations`);
-    const json = await res.json();
 
-    // cek struktur API
-    if (json && json.data && Array.isArray(json.data.items)) {
-      setApiDestinations(json.data.items);
-    } else {
-      console.log("DEST API not match:", json);
-      setApiDestinations([]);
-    }
-  } catch (e) {
-    console.log("Error fetch Destinations:", e);
-    setApiDestinations([]);
-  }
-};
-
-
-  // ============================
-  // GET LOCATION
-  // ============================
+  // ================= LOCATION =================
   const getLocation = async () => {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        setCurrentLocation("Lokasi tidak tersedia");
-        return;
-      }
+      if (status !== "granted") return;
 
       const loc = await Location.getCurrentPositionAsync({});
       const geo = await Location.reverseGeocodeAsync(loc.coords);
@@ -183,32 +160,22 @@ const fetchAreas = async () => {
         const place = geo[0];
         setCurrentLocation(`${place.city || place.subregion}, ${place.region}`);
       }
-    } catch (e) {
-      console.log("Lokasi error", e);
+    } catch {
       setCurrentLocation("Lokasi tidak tersedia");
     }
   };
 
-  // ============================
-  // LOAD HISTORY
-  // ============================
+  // ================= HISTORY =================
   const loadHistory = async () => {
-    try {
-      const data = await AsyncStorage.getItem("searchHistory");
-      if (data) setHistoryList(JSON.parse(data));
-    } catch (e) {
-      console.log("loadHistory error", e);
-    }
+    const data = await AsyncStorage.getItem("searchHistory");
+    if (data) setHistoryList(JSON.parse(data));
   };
 
-  // ============================
-  // SAVE HISTORY
-  // ============================
   const saveHistory = async () => {
-    if (!kategori || !daerah) return;
+    if (!kategoriName || !daerah) return;
 
-    const newData = {
-      kategori,
+    const newData: HistoryType = {
+      kategori: kategoriName,
       daerah,
       date: new Date().toLocaleString("id-ID"),
     };
@@ -216,27 +183,20 @@ const fetchAreas = async () => {
     const updated = [newData, ...historyList];
     setHistoryList(updated);
     await AsyncStorage.setItem("searchHistory", JSON.stringify(updated));
-
-    alert("Pencarian disimpan ke history!");
   };
 
-  // ============================
-  // HANDLE CATEGORY CLICK
-  // ============================
-  const handleCategoryPress = (catName: string) => {
-    if (activeCategory === catName) {
+  // ================= HANDLER =================
+  const handleCategoryPress = (name: string) => {
+    if (activeCategory === name) {
       setActiveCategory(null);
-      setKategori("");
+      setKategoriName(null);
     } else {
-      setActiveCategory(catName);
-      setKategori(catName);
+      setActiveCategory(name);
+      setKategoriName(name);
     }
   };
 
-  // ============================
-  // GO DETAIL PAGE
-  // ============================
-  const handleDestinationPress = (d: { id: any; name?: string; location?: string; price?: number; imageUrl?: string; description?: string; category?: { name: string; } | undefined; }) => {
+  const handleDestinationPress = (d: DestinationType) => {
     router.push(`../deskripsi/${d.id}`);
   };
 
@@ -265,19 +225,26 @@ const fetchAreas = async () => {
             <Text style={styles.inputLabel}>Kategori Wisata</Text>
 
             <Dropdown
-              style={styles.dropdown}
-              placeholderStyle={styles.placeholderStyle}
-              selectedTextStyle={styles.selectedTextStyle}
-              data={apiCategories.map((c) => ({
-                label: c.name,
-                value: c.name,
-              }))}
-              labelField="label"
-              valueField="value"
-              placeholder="Pilih Kategori"
-              value={kategori}
-              onChange={(item) => setKategori(item.value)}
-            />
+            style={styles.dropdown}
+            placeholderStyle={styles.placeholderStyle}
+            selectedTextStyle={styles.selectedTextStyle}
+            data={apiCategories.map((c) => ({
+              label: c.name,
+              value: c.id,
+            }))}
+            labelField="label"
+            valueField="value"
+            placeholder="Pilih Kategori"
+            value={kategoriId}
+            onChange={(item) => {
+              setKategoriId(item.value);
+
+              const selected = apiCategories.find(
+                (c) => c.id === item.value
+              );
+              setKategoriName(selected?.name || null);
+            }}
+          />
           </View>
 
           {/* DAERAH DROPDOWN */}
@@ -285,22 +252,21 @@ const fetchAreas = async () => {
             <Text style={styles.inputLabel}>Daerah</Text>
 
             <Dropdown
-                    style={styles.dropdown}
-                    placeholderStyle={styles.placeholderStyle}
-                    selectedTextStyle={styles.selectedTextStyle}
-                    data={apiAreas.map(a => ({
-                      label: a.nama,   // tampil di dropdown
-                      value: a.nama,   // value yang disimpan
-                    }))}
-                    labelField="label"
-                    valueField="value"
-                    placeholder="Pilih Daerah"
-                    value={daerah}
-                    onChange={(item) => {
-                      console.log("Daerah terpilih:", item);
-                      setDaerah(item.value);
-                    }}
-                  />
+              style={styles.dropdown}
+              placeholderStyle={styles.placeholderStyle}
+              selectedTextStyle={styles.selectedTextStyle}
+              data={apiAreas.map((a) => ({
+                label: a.nama,
+                value: a.id,   // ⬅️ GUNAKAN ID (PENTING)
+              }))}
+              labelField="label"
+              valueField="value"
+              placeholder="Pilih Daerah"
+              value={daerah}
+              onChange={(item) => {
+                setDaerah(item.value);
+              }}
+            />
           </View>
         </View>
 
