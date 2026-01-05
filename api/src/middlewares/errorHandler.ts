@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import { ResponseData } from "../utilities/Response";
 
 export function errorHandler(
   err: any,
@@ -6,10 +7,5 @@ export function errorHandler(
   res: Response,
   _next: NextFunction
 ) {
-  console.error(err);
-  const statusCode = err.statusCode || err.status || 500;
-  res.status(statusCode).json({
-    success: false,
-    message: err.message || "Internal Server Error",
-  });
+  ResponseData.serverError(res, err?.message ?? err);
 }
