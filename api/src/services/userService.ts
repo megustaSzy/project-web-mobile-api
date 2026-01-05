@@ -9,26 +9,26 @@ export const userService = {
   async getAllUsers(page: number, limit: number) {
     const pagination = new Pagination(page, limit);
 
-    const count = await prisma.tb_user.count();
-
-    const rows = await prisma.tb_user.findMany({
-      skip: pagination.offset,
-      take: pagination.limit,
-      where: {
-        role: "User",
-      },
-      orderBy: {
-        id: "asc",
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        notelp: true,
-        avatar: true,
-      },
-    });
+    const [count, rows] = await Promise.all([
+      prisma.tb_user.count(),
+      prisma.tb_user.findMany({
+        skip: pagination.offset,
+        take: pagination.limit,
+        where: {
+          role: "User",
+        },
+        orderBy: {
+          createdAt: "asc",
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          notelp: true,
+          avatar: true,
+        },
+      }),
+    ]);
 
     return pagination.paginate({ count, rows });
   },
@@ -80,7 +80,7 @@ export const userService = {
       data,
     });
   },
-  
+
   // DELETE user by ID
   async deleteUserById(id: number) {
     const user = await prisma.tb_user.findUnique({

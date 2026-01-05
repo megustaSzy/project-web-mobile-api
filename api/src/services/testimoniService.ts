@@ -13,10 +13,10 @@ export const testimoniService = {
         skip: pagination.offset,
         take: pagination.limit,
         orderBy: {
-          id: 'asc'
-        }
-      })
-    ])
+          id: "asc",
+        },
+      }),
+    ]);
 
     return pagination.paginate({ count, rows });
   },
@@ -38,7 +38,7 @@ export const testimoniService = {
       take: pagination.limit,
       orderBy: {
         createdAt: "desc",
-      }
+      },
     });
 
     return pagination.paginate({ count, rows });
@@ -66,7 +66,7 @@ export const testimoniService = {
 
   async createTestimoni(data: TestimoniData) {
     const testimoni = await prisma.tb_testimoni.create({
-      data
+      data,
     });
 
     return testimoni;
@@ -76,7 +76,7 @@ export const testimoniService = {
     const testimoni = await prisma.tb_testimoni.findUnique({
       where: {
         id,
-      }
+      },
     });
 
     if (!testimoni) throw createError("id tidak ditemukan", 404);
