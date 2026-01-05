@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { createError } from "../utilities/createError";
 import { Pagination } from "../utilities/Pagination";
 import { UpdateUserData } from "../schemas/updateSchema";
+import { hashPassword } from "../lib/hash";
 
 export const userService = {
   // GET all users
@@ -72,7 +73,7 @@ export const userService = {
     }
 
     if (data.password) {
-      data.password = await bcrypt.hash(data.password, 10);
+      data.password = await hashPassword(data.password);
     }
 
     return prisma.tb_user.update({
