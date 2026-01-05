@@ -1,21 +1,12 @@
-// import { Request, Response, NextFunction } from "express"
+import { Request, Response, NextFunction } from "express";
+import { ResponseData } from "../utilities/Response";
 
-// interface AppError extends Error {
-//     statusCode?: number
-// }
-
-// export const errorHandler = (
-//     err: AppError,
-//     req: Request,
-//     res: Response,
-//     next: NextFunction
-// ) => {
-//     console.log("error", err);
-
-//     const statusCode = err.statusCode || 500;
-
-//     res.status(statusCode).json({
-//         message: err.message || "internal server error",
-//         success: false
-//     });
-// };
+export function errorHandler(
+  err: any,
+  _req: Request,
+  res: Response,
+  _next: NextFunction
+) {
+  console.log("ERROR STATUS:", err.statusCode);
+  ResponseData.serverError(res, err);
+}

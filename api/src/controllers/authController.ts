@@ -1,19 +1,19 @@
 import { ResponseData } from "../utilities/Response";
 import { authService } from "../services/authService";
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { loginSchema, registerSchema } from "../schemas/authSchema";
 
 export const authController = {
-  async register(req: Request, res: Response) {
+  async register(req: Request, res: Response, next: NextFunction) {
     try {
       const user = await authService.registerUser(req.body);
-      return ResponseData.created(res, user)
+      return ResponseData.created(res, user);
     } catch (error) {
-      return ResponseData.serverError(res, error)
+      next(error);
     }
   },
 
-  async login(req: Request, res: Response) {
+  async login(req: Request, res: Response, next: NextFunction) {
     const result = loginSchema.safeParse(req.body);
 
     if (!result.success) {
@@ -33,12 +33,12 @@ export const authController = {
         { user, accessToken, refreshToken },
         "login berhasil"
       );
-    } catch (error: any) {
-      return ResponseData.unauthorized(res, error.message);
+    } catch (error) {
+      next(error);
     }
   },
 
-  async refreshToken(req: Request, res: Response) {
+  async refreshToken(req: Request, res: Response, next: NextFunction) {
     try {
       const { refreshToken } = req.body;
 
@@ -53,12 +53,12 @@ export const authController = {
         { accessToken: newAccessToken },
         "token diperbarui"
       );
-    } catch (error: any) {
-      return ResponseData.unauthorized(res, error.message);
+    } catch (error) {
+      next(error);
     }
   },
 
-  async logout(req: Request, res: Response) {
+  async logout(req: Request, res: Response, next: NextFunction) {
     try {
       const { refreshToken } = req.body;
 
@@ -67,32 +67,12 @@ export const authController = {
       }
 
       return ResponseData.ok(res, null, "logout berhasil");
-    } catch (error: any) {
-      return ResponseData.serverError(res, error.message);
+    } catch (error) {
+      next(error);
     }
   },
 
-  // async googleCallback(req: Request, res: Response) {
-  //   try {
-  //     const profile = (req as any).user;
-  //     if (!profile) {
-  //       return ResponseData.unauthorized(res, "Profil Google tidak ditemukan");
-  //     }
-
-  //     const { user, accessToken, refreshToken } =
-  //       await authService.loginWithGoogle(profile);
-
-  //     return ResponseData.ok(
-  //       res,
-  //       { user, accessToken, refreshToken },
-  //       "login google berhasil"
-  //     );
-  //   } catch (err: any) {
-  //     return ResponseData.serverError(res, err.message);
-  //   }
-  // },
-
-  async googleCallback(req: Request, res: Response) {
+  async googleCallback(req: Request, res: Response, next: NextFunction) {
     try {
       const profile = (req as any).user;
 
@@ -108,12 +88,12 @@ export const authController = {
       const redirectUrl = `${process.env.FRONTEND_URL}/login?accessToken=${accessToken}&refreshToken=${refreshToken}`;
 
       return res.redirect(redirectUrl);
-    } catch (err: any) {
-      return ResponseData.serverError(res, err.message);
+    } catch (error) {
+      next(error);
     }
   },
 
-  async forgotPassword(req: Request, res: Response) {
+  async forgotPassword(req: Request, res: Response, next: NextFunction) {
     try {
       const { email } = req.body;
 
@@ -121,11 +101,11 @@ export const authController = {
 
       return ResponseData.ok(res, result, "link password telah dikirim");
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error);
     }
   },
 
-  async verifyResetSession(req: Request, res: Response) {
+  async verifyResetSession(req: Request, res: Response, next: NextFunction) {
     try {
       // fe kirim query
       const sessionToken = req.query.sessionToken as string;
@@ -133,11 +113,11 @@ export const authController = {
       const result = await authService.verifySession(sessionToken);
       return ResponseData.ok(res, result, "token valid");
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error);
     }
   },
 
-  async resetPassword(req: Request, res: Response) {
+  async resetPassword(req: Request, res: Response, next: NextFunction) {
     try {
       const { sessionToken, newPassword } = req.body;
 
@@ -145,7 +125,7 @@ export const authController = {
 
       return ResponseData.ok(res, result, "password berhasil direset");
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error);
     }
   },
 };

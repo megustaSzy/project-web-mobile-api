@@ -1,9 +1,9 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { categoryService } from "../services/categoryService";
 import { ResponseData } from "../utilities/Response";
 
 export const categoryController = {
-  async getCategory(req: Request, res: Response) {
+  async getCategory(req: Request, res: Response, next: NextFunction) {
     try {
       const page = Number(req.query.page) || 1;
       const limit = Number(req.query.limit) || 10;
@@ -12,11 +12,11 @@ export const categoryController = {
 
       return ResponseData.ok(res, category);
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error)
     }
   },
 
-  async getCategoryById(req: Request, res: Response) {
+  async getCategoryById(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
 
@@ -26,22 +26,22 @@ export const categoryController = {
 
       return ResponseData.ok(res, category);
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error)
     }
   },
 
-  async createCategoty(req: Request, res: Response) {
+  async createCategoty(req: Request, res: Response, next: NextFunction) {
     try {
       const { name } = req.body;
       const category = await categoryService.addCategory({ name });
 
       return ResponseData.created(res, category);
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error)
     }
   },
 
-  async updateCategory(req: Request, res: Response) {
+  async updateCategory(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
 
@@ -51,11 +51,11 @@ export const categoryController = {
 
       return ResponseData.ok(res, category);
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error)
     }
   },
 
-  async deleteCategories(req: Request, res: Response) {
+  async deleteCategories(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
 
@@ -65,7 +65,7 @@ export const categoryController = {
 
       return ResponseData.ok(res, "kategori berhasil dihapus");
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error)
     }
   },
 };

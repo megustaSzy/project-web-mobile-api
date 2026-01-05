@@ -1,11 +1,11 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { valueService } from "../services/valueService";
 import { ResponseData } from "../utilities/Response";
 import { uploadToCloudinary } from "../utilities/uploadToCloudinary";
 import cloudinary from "../config/cloudinary";
 
 export const valueController = {
-  async getAll(req: Request, res: Response) {
+  async getAll(req: Request, res: Response, next: NextFunction) {
     try {
       const page = Number(req.query.page) || 1;
       const limit = Number(req.query.limit) || 5;
@@ -13,11 +13,11 @@ export const valueController = {
       const values = await valueService.getAllValue(page, limit);
       return ResponseData.ok(res, values);
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error)
     }
   },
 
-  async getValueById(req: Request, res: Response) {
+  async getValueById(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
 
@@ -26,11 +26,11 @@ export const valueController = {
       const value = await valueService.valueById(id);
       return ResponseData.ok(res, value);
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error)
     }
   },
 
-  async createValue(req: Request, res: Response) {
+  async createValue(req: Request, res: Response, next: NextFunction) {
     try {
       if (!req.file) {
         return ResponseData.badRequest(res, "image wajib diupload");
@@ -46,11 +46,11 @@ export const valueController = {
 
       return ResponseData.created(res, value);
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error)
     }
   },
 
-  async editById(req: Request, res: Response) {
+  async editById(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
       if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
@@ -79,11 +79,11 @@ export const valueController = {
 
       return ResponseData.ok(res, updateValue);
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error)
     }
   },
 
-  async deleteById(req: Request, res: Response) {
+  async deleteById(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
 
@@ -93,7 +93,7 @@ export const valueController = {
 
       return ResponseData.ok(res, value);
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error)
     }
   },
 };
