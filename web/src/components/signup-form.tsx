@@ -2,6 +2,10 @@
 "use client";
 
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,27 +20,31 @@ import { FcGoogle } from "react-icons/fc";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-export default function SignupForm({
-  ...props
-}: React.ComponentProps<typeof Card>) {
+import { registerSchema } from "@/schema/registerSchema";
+
+/* =========================
+   TYPE KHUSUS FORM (INPUT)
+========================= */
+type RegisterFormInput = z.input<typeof registerSchema>;
+
+export default function SignupForm(props: React.ComponentProps<typeof Card>) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<RegisterFormInput>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      role: "User",
+      notelp: "",
+    },
+  });
 
-    const name = (document.getElementById("name") as HTMLInputElement)?.value;
-    const email = (document.getElementById("email") as HTMLInputElement)?.value;
-    const password = (document.getElementById("password") as HTMLInputElement)
-      ?.value;
-    const notelp = (document.getElementById("notelp") as HTMLInputElement)?.value;
-
-    if (!name || !email || !password || !notelp) {
-      setMessage("Semua field harus diisi!");
-      return;
-    }
-
+  const handleSignup = async (data: RegisterFormInput): Promise<void> => {
     try {
       setLoading(true);
       setMessage("");
@@ -45,26 +53,19 @@ export default function SignupForm({
         `${process.env.NEXT_PUBLIC_API_URL}/api/auth/register`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ name, email, password, notelp }),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
         }
       );
 
-      const data = await response.json();
+      const result: { message?: string } = await response.json();
 
       if (!response.ok) {
-        setMessage(data.message || "Pendaftaran gagal. Coba lagi.");
-        setLoading(false);
+        setMessage(result.message ?? "Pendaftaran gagal. Coba lagi.");
         return;
       }
 
-      // Sukses
       setMessage("Pendaftaran berhasil! Mengarahkan ke login...");
-      console.log("User registered:", data);
-
-      // Redirect ke login
       setTimeout(() => router.push("/login"), 1200);
     } catch (error) {
       console.error(error);
@@ -99,11 +100,21 @@ export default function SignupForm({
         </CardHeader>
 
         <CardContent>
-          <form onSubmit={handleSignup} className="space-y-4">
+          <form onSubmit={handleSubmit(handleSignup)} className="space-y-4">
             <FieldGroup className="space-y-0">
               <Field>
                 <FieldLabel htmlFor="name">Full Name</FieldLabel>
-                <Input id="name" type="text" placeholder="LamiGo" required />
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="LamiGo"
+                  {...register("name")}
+                />
+                {errors.name && (
+                  <p className="text-xs text-red-500 mt-1">
+                    {errors.name.message}
+                  </p>
+                )}
               </Field>
 
               <Field>
@@ -112,8 +123,13 @@ export default function SignupForm({
                   id="email"
                   type="email"
                   placeholder="example@gmail.com"
-                  required
+                  {...register("email")}
                 />
+                {errors.email && (
+                  <p className="text-xs text-red-500 mt-1">
+                    {errors.email.message}
+                  </p>
+                )}
               </Field>
 
               <Field>
@@ -122,8 +138,13 @@ export default function SignupForm({
                   id="password"
                   type="password"
                   placeholder="••••••••"
-                  required
+                  {...register("password")}
                 />
+                {errors.password && (
+                  <p className="text-xs text-red-500 mt-1">
+                    {errors.password.message}
+                  </p>
+                )}
               </Field>
 
               <Field>
@@ -132,15 +153,19 @@ export default function SignupForm({
                   id="notelp"
                   type="text"
                   placeholder="08xxxxxxxxxx"
-                  required
+                  {...register("notelp")}
                 />
+                {errors.notelp && (
+                  <p className="text-xs text-red-500 mt-1">
+                    {errors.notelp.message}
+                  </p>
+                )}
               </Field>
             </FieldGroup>
 
             <div className="flex flex-col gap-3">
               <Button
                 type="submit"
-                variant="default"
                 className="w-full bg-blue-500 hover:bg-blue-700 text-white"
                 disabled={loading}
               >
