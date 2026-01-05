@@ -1,51 +1,42 @@
 import { pickupLocationService } from "../services/pickupLocationService";
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { ResponseData } from "../utilities/Response";
 
 export const pickupLocationController = {
-  async getAllPickup(req: Request, res: Response) {
+  async getAllPickup(req: Request, res: Response, next: NextFunction) {
     try {
       const page = Number(req.query.page) || 1;
       const limit = Number(req.query.limit) || 10;
 
       const pickups = await pickupLocationService.getAllPickups();
-      return ResponseData.ok(
-        res,
-        pickups,
-      );
+      return ResponseData.ok(res, pickups);
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error);
     }
   },
 
-  async getPickupById(req: Request, res: Response) {
+  async getPickupById(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
       if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
 
       const pickup = await pickupLocationService.getPickupById(id);
-      return ResponseData.ok(
-        res,
-        pickup,
-      );
+      return ResponseData.ok(res, pickup);
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error);
     }
   },
 
-  async addPickup(req: Request, res: Response) {
+  async addPickup(req: Request, res: Response, next: NextFunction) {
     try {
       const pickup = await pickupLocationService.createPickupLocation(req.body);
-      return ResponseData.created(
-        res,
-        pickup,
-      );
+      return ResponseData.created(res, pickup);
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error);
     }
   },
 
-  async updatePickupLocation(req: Request, res: Response) {
+  async updatePickupLocation(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
       if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
@@ -54,16 +45,13 @@ export const pickupLocationController = {
         id,
         req.body
       );
-      return ResponseData.ok(
-        res,
-        updatedPickup,
-      );
+      return ResponseData.ok(res, updatedPickup);
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error);
     }
   },
 
-  async deletePickup(req: Request, res: Response) {
+  async deletePickup(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
       if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
@@ -75,7 +63,7 @@ export const pickupLocationController = {
         "lokasi penjemputan berhasil dihapus"
       );
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error);
     }
   },
 };

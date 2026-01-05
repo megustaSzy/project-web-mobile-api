@@ -1,12 +1,11 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { destinationService } from "../services/destinationService";
 import { ResponseData } from "../utilities/Response";
 import { uploadToCloudinary } from "../utilities/uploadToCloudinary";
-import { UpdateDestinationDTO } from "../schemas/destinationSchema";
 import cloudinary from "../config/cloudinary";
 
 export const destinationController = {
-  async getDestinations(req: Request, res: Response) {
+  async getDestinations(req: Request, res: Response, next: NextFunction) {
     try {
       const page = Number(req.query.page) || 1;
       const limit = 10;
@@ -26,11 +25,11 @@ export const destinationController = {
           : "semua destinasi berhasil diambil"
       );
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error);
     }
   },
 
-  async getDestinationById(req: Request, res: Response) {
+  async getDestinationById(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
       if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
@@ -39,11 +38,11 @@ export const destinationController = {
 
       return ResponseData.ok(res, destination);
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error);
     }
   },
 
-  async addDestination(req: Request, res: Response) {
+  async addDestination(req: Request, res: Response, next: NextFunction) {
     try {
       if (!req.file) {
         return ResponseData.badRequest(res, "image wajib diupload");
@@ -68,10 +67,10 @@ export const destinationController = {
 
       return ResponseData.created(res, destination);
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error);
     }
   },
-  async updateDestination(req: Request, res: Response) {
+  async updateDestination(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
       if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
@@ -124,10 +123,10 @@ export const destinationController = {
 
       return ResponseData.ok(res, updatedDestination);
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error);
     }
   },
-  async deleteDestination(req: Request, res: Response) {
+  async deleteDestination(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
       if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
@@ -136,7 +135,7 @@ export const destinationController = {
 
       return ResponseData.ok(res, null, "destinasi berhasil dihapus");
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error);
     }
   },
 };
