@@ -3,6 +3,9 @@
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,28 +20,31 @@ import { FcGoogle } from "react-icons/fc";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-type SignupFormData = {
-  name: string;
-  email: string;
-  password: string;
-  notelp: string;
-};
+import { registerSchema } from "@/schema/registerSchema";
+
+/* =========================
+   TYPE KHUSUS FORM (INPUT)
+========================= */
+type RegisterFormInput = z.input<typeof registerSchema>;
 
 export default function SignupForm(props: React.ComponentProps<typeof Card>) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  const { register, handleSubmit } = useForm<SignupFormData>();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<RegisterFormInput>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      role: "User",
+      notelp: "",
+    },
+  });
 
-  const handleSignup = async (data: SignupFormData): Promise<void> => {
-    const { name, email, password, notelp } = data;
-
-    if (!name || !email || !password || !notelp) {
-      setMessage("Semua field harus diisi!");
-      return;
-    }
-
+  const handleSignup = async (data: RegisterFormInput): Promise<void> => {
     try {
       setLoading(true);
       setMessage("");
@@ -47,10 +53,8 @@ export default function SignupForm(props: React.ComponentProps<typeof Card>) {
         `${process.env.NEXT_PUBLIC_API_URL}/api/auth/register`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ name, email, password, notelp }),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
         }
       );
 
@@ -63,7 +67,7 @@ export default function SignupForm(props: React.ComponentProps<typeof Card>) {
 
       setMessage("Pendaftaran berhasil! Mengarahkan ke login...");
       setTimeout(() => router.push("/login"), 1200);
-    } catch (error: unknown) {
+    } catch (error) {
       console.error(error);
       setMessage("Tidak dapat terhubung ke server.");
     } finally {
@@ -106,6 +110,11 @@ export default function SignupForm(props: React.ComponentProps<typeof Card>) {
                   placeholder="LamiGo"
                   {...register("name")}
                 />
+                {errors.name && (
+                  <p className="text-xs text-red-500 mt-1">
+                    {errors.name.message}
+                  </p>
+                )}
               </Field>
 
               <Field>
@@ -116,6 +125,11 @@ export default function SignupForm(props: React.ComponentProps<typeof Card>) {
                   placeholder="example@gmail.com"
                   {...register("email")}
                 />
+                {errors.email && (
+                  <p className="text-xs text-red-500 mt-1">
+                    {errors.email.message}
+                  </p>
+                )}
               </Field>
 
               <Field>
@@ -126,6 +140,11 @@ export default function SignupForm(props: React.ComponentProps<typeof Card>) {
                   placeholder="••••••••"
                   {...register("password")}
                 />
+                {errors.password && (
+                  <p className="text-xs text-red-500 mt-1">
+                    {errors.password.message}
+                  </p>
+                )}
               </Field>
 
               <Field>
@@ -136,13 +155,17 @@ export default function SignupForm(props: React.ComponentProps<typeof Card>) {
                   placeholder="08xxxxxxxxxx"
                   {...register("notelp")}
                 />
+                {errors.notelp && (
+                  <p className="text-xs text-red-500 mt-1">
+                    {errors.notelp.message}
+                  </p>
+                )}
               </Field>
             </FieldGroup>
 
             <div className="flex flex-col gap-3">
               <Button
                 type="submit"
-                variant="default"
                 className="w-full bg-blue-500 hover:bg-blue-700 text-white"
                 disabled={loading}
               >
