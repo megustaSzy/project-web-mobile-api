@@ -1,6 +1,6 @@
 import { ResponseData } from "../utilities/Response";
 import { authService } from "../services/authService";
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { loginSchema, registerSchema } from "../schemas/authSchema";
 
 export const authController = {
@@ -13,7 +13,7 @@ export const authController = {
     }
   },
 
-  async login(req: Request, res: Response) {
+  async login(req: Request, res: Response, next: NextFunction) {
     const result = loginSchema.safeParse(req.body);
 
     if (!result.success) {
@@ -33,8 +33,8 @@ export const authController = {
         { user, accessToken, refreshToken },
         "login berhasil"
       );
-    } catch (error: any) {
-      return ResponseData.unauthorized(res, error.message);
+    } catch (error) {
+      next(error);
     }
   },
 
