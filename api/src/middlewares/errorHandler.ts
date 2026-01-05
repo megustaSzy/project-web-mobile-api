@@ -7,5 +7,5 @@ export function errorHandler(
   res: Response,
   _next: NextFunction
 ) {
-  ResponseData.serverError(res, err?.message ?? err);
+  ResponseData.serverError(res, err);
 }

@@ -1,21 +1,21 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { bannerService } from "../services/bannerService";
 import { ResponseData } from "../utilities/Response";
 import { uploadToCloudinary } from "../utilities/uploadToCloudinary";
 import cloudinary from "../config/cloudinary";
 
 export const bannerController = {
-  async getBanner(req: Request, res: Response) {
+  async getBanner(req: Request, res: Response, next: NextFunction) {
     try {
       const banner = await bannerService.getAllBanner();
 
       return ResponseData.ok(res, banner, "berhasil mengambil data");
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error);
     }
   },
 
-  async getByIdBanner(req: Request, res: Response) {
+  async getByIdBanner(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
       if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
@@ -24,11 +24,11 @@ export const bannerController = {
 
       return ResponseData.ok(res, banner);
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error);
     }
   },
 
-  async create(req: Request, res: Response) {
+  async create(req: Request, res: Response, next: NextFunction) {
     try {
       if (!req.file) {
         return ResponseData.badRequest(res, "image wajib diupload");
@@ -43,11 +43,11 @@ export const bannerController = {
       });
       return ResponseData.created(res, banner);
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error);
     }
   },
 
-  async edit(req: Request, res: Response) {
+  async edit(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
       if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
@@ -76,11 +76,11 @@ export const bannerController = {
 
       return ResponseData.ok(res, banner);
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error);
     }
   },
 
-  async deleteBanner(req: Request, res: Response) {
+  async deleteBanner(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
 
@@ -90,7 +90,7 @@ export const bannerController = {
 
       return ResponseData.ok(res, banner);
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error);
     }
   },
 };

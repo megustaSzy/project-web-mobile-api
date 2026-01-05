@@ -1,4 +1,4 @@
-import { Response, Request, response } from "express";
+import { Response, Request, NextFunction } from "express";
 import { aboutService } from "../services/aboutService";
 import { ResponseData } from "../utilities/Response";
 
@@ -6,28 +6,28 @@ import { ResponseData } from "../utilities/Response";
 
 export const aboutController = {
 
-    async getAbout(req: Request, res: Response) {
+    async getAbout(req: Request, res: Response, next: NextFunction) {
         try {
             const about = await aboutService.getAbout();
 
             return ResponseData.ok(res, about)
         } catch (error) {
-            return ResponseData.serverError(res, error)
+            next(error)
         }
     },
     
-    async createAbout(req: Request, res: Response) {
+    async createAbout(req: Request, res: Response, next: NextFunction) {
         try {
             const data = await aboutService.createAbout(req.body);
     
             return ResponseData.created(res, data);
     
         } catch (error) {
-            return ResponseData.serverError(res, error)
+            next(error)
         }
     },
 
-    async updateAbout(req: Request, res: Response) {
+    async updateAbout(req: Request, res: Response, next: NextFunction) {
         try {
             const id = Number(req.params.id);
 
@@ -37,11 +37,11 @@ export const aboutController = {
 
             return ResponseData.ok(res, data)
         } catch (error) {
-            return ResponseData.serverError(res, error)
+            next(error)
         }
     },
 
-    async deleteAbout(req: Request, res: Response) {
+    async deleteAbout(req: Request, res: Response, next: NextFunction) {
         try {
             const id = Number(req.params.id);
 
@@ -49,7 +49,7 @@ export const aboutController = {
 
             return ResponseData.ok(res, data)
         } catch (error) {
-            return ResponseData.serverError(res, error)
+            next(error)
         }
     }
 }
