@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,21 +17,22 @@ import { FcGoogle } from "react-icons/fc";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-export default function SignupForm({
-  ...props
-}: React.ComponentProps<typeof Card>) {
+type SignupFormData = {
+  name: string;
+  email: string;
+  password: string;
+  notelp: string;
+};
+
+export default function SignupForm(props: React.ComponentProps<typeof Card>) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const { register, handleSubmit } = useForm<SignupFormData>();
 
-    const name = (document.getElementById("name") as HTMLInputElement)?.value;
-    const email = (document.getElementById("email") as HTMLInputElement)?.value;
-    const password = (document.getElementById("password") as HTMLInputElement)
-      ?.value;
-    const notelp = (document.getElementById("notelp") as HTMLInputElement)?.value;
+  const handleSignup = async (data: SignupFormData): Promise<void> => {
+    const { name, email, password, notelp } = data;
 
     if (!name || !email || !password || !notelp) {
       setMessage("Semua field harus diisi!");
@@ -52,21 +54,16 @@ export default function SignupForm({
         }
       );
 
-      const data = await response.json();
+      const result: { message?: string } = await response.json();
 
       if (!response.ok) {
-        setMessage(data.message || "Pendaftaran gagal. Coba lagi.");
-        setLoading(false);
+        setMessage(result.message ?? "Pendaftaran gagal. Coba lagi.");
         return;
       }
 
-      // Sukses
       setMessage("Pendaftaran berhasil! Mengarahkan ke login...");
-      console.log("User registered:", data);
-
-      // Redirect ke login
       setTimeout(() => router.push("/login"), 1200);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(error);
       setMessage("Tidak dapat terhubung ke server.");
     } finally {
@@ -99,11 +96,16 @@ export default function SignupForm({
         </CardHeader>
 
         <CardContent>
-          <form onSubmit={handleSignup} className="space-y-4">
+          <form onSubmit={handleSubmit(handleSignup)} className="space-y-4">
             <FieldGroup className="space-y-0">
               <Field>
                 <FieldLabel htmlFor="name">Full Name</FieldLabel>
-                <Input id="name" type="text" placeholder="LamiGo" required />
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="LamiGo"
+                  {...register("name")}
+                />
               </Field>
 
               <Field>
@@ -112,7 +114,7 @@ export default function SignupForm({
                   id="email"
                   type="email"
                   placeholder="example@gmail.com"
-                  required
+                  {...register("email")}
                 />
               </Field>
 
@@ -122,7 +124,7 @@ export default function SignupForm({
                   id="password"
                   type="password"
                   placeholder="••••••••"
-                  required
+                  {...register("password")}
                 />
               </Field>
 
@@ -132,7 +134,7 @@ export default function SignupForm({
                   id="notelp"
                   type="text"
                   placeholder="08xxxxxxxxxx"
-                  required
+                  {...register("notelp")}
                 />
               </Field>
             </FieldGroup>

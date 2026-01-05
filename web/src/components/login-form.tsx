@@ -19,6 +19,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle, XCircle, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 
+import { loginSchema } from "@/schema/loginSchema";
+
 /* ============================================================
    MODAL STATUS
 ============================================================= */
@@ -97,33 +99,41 @@ export function LoginForm({
     document.cookie = `${name}=${value}; path=/; expires=${expires}`;
   }
 
+  /* ================= VALIDASI (ZOD) ================= */
   const validateEmail = (email: string) => {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!regex.test(email)) {
-      setEmailError("Format email tidak valid");
-      return false;
+    const result = loginSchema.safeParse({ email, password: "dummy" });
+
+    if (!result.success) {
+      const emailError = result.error.flatten().fieldErrors.email?.[0];
+      if (emailError) {
+        setEmailError(emailError);
+        return false;
+      }
     }
+
     setEmailError("");
     return true;
   };
 
   const validatePassword = (password: string) => {
-    if (password.length < 8) {
-      setPasswordError("Password minimal 8 karakter");
-      return false;
+    const result = loginSchema.safeParse({
+      email: "test@email.com",
+      password,
+    });
+
+    if (!result.success) {
+      const passwordError = result.error.flatten().fieldErrors.password?.[0];
+      if (passwordError) {
+        setPasswordError(passwordError);
+        return false;
+      }
     }
-    if (!/[A-Z]/.test(password)) {
-      setPasswordError("Password harus mengandung huruf besar");
-      return false;
-    }
-    if (!/[!@#$%^&*(),.?\":{}|<>]/.test(password)) {
-      setPasswordError("Password harus mengandung karakter unik");
-      return false;
-    }
+
     setPasswordError("");
     return true;
   };
 
+  /* ================= GOOGLE CALLBACK ================= */
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -188,6 +198,7 @@ export function LoginForm({
     }
   }, [router]);
 
+  /* ================= LOGIN HANDLER ================= */
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -195,10 +206,14 @@ export function LoginForm({
     const password = (document.getElementById("password") as HTMLInputElement)
       ?.value;
 
-    const isEmailValid = validateEmail(email);
-    const isPasswordValid = validatePassword(password);
+    const result = loginSchema.safeParse({ email, password });
 
-    if (!isEmailValid || !isPasswordValid) {
+    if (!result.success) {
+      const errors = result.error.flatten().fieldErrors;
+
+      setEmailError(errors.email?.[0] || "");
+      setPasswordError(errors.password?.[0] || "");
+
       setModalStatus("error");
       setModalMessage("Periksa kembali email dan password");
       setModalOpen(true);
@@ -214,7 +229,7 @@ export function LoginForm({
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
+          body: JSON.stringify(result.data),
         }
       );
 
@@ -317,7 +332,6 @@ export function LoginForm({
                   </button>
                 </div>
 
-                {/* PINDAH KE SINI */}
                 <Link
                   href="/forgot-password"
                   className="block text-right text-gray-500"
