@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { teamService } from "../services/teamService";
 import { ResponseData } from "../utilities/Response";
 import { uploadToCloudinary } from "../utilities/uploadToCloudinary";
@@ -6,17 +6,17 @@ import cloudinary from "../config/cloudinary";
 
 // testing
 export const teamController = {
-  async getTeam(req: Request, res: Response) {
+  async getTeam(req: Request, res: Response, next: NextFunction) {
     try {
       const team = await teamService.getTeam();
 
       return ResponseData.ok(res, team);
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error);
     }
   },
 
-  async getByIdTeam(req: Request, res: Response) {
+  async getByIdTeam(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
 
@@ -26,11 +26,11 @@ export const teamController = {
 
       return ResponseData.ok(res, team);
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error);
     }
   },
 
-  async createTeam(req: Request, res: Response) {
+  async createTeam(req: Request, res: Response, next: NextFunction) {
     try {
       if (!req.file) {
         return ResponseData.badRequest(res, "image wajib diupload");
@@ -41,16 +41,16 @@ export const teamController = {
       const team = await teamService.createTeam({
         ...req.body,
         imageUrl: result.secure_url,
-        imagePublicId: result.public_id
+        imagePublicId: result.public_id,
       });
 
       return ResponseData.created(res, team);
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error);
     }
   },
 
-  async editTeam(req: Request, res: Response) {
+  async editTeam(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
       if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
@@ -79,11 +79,11 @@ export const teamController = {
 
       return ResponseData.ok(res, updateTeam);
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error);
     }
   },
 
-  async deleteTeamById(req: Request, res: Response) {
+  async deleteTeamById(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
 
@@ -93,7 +93,7 @@ export const teamController = {
 
       return ResponseData.ok(res, team);
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error);
     }
   },
 };

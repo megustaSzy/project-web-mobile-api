@@ -1,9 +1,9 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { regionService } from "../services/regionService";
 import { ResponseData } from "../utilities/Response";
 
 export const regionController = {
-  async getRegencies(req: Request, res: Response) {
+  async getRegencies(req: Request, res: Response, next: NextFunction) {
     try {
       const page = Number(req.query.page) || 1;
       const limit = Number(req.query.limit) || 10;
@@ -12,65 +12,65 @@ export const regionController = {
 
       return ResponseData.ok(res, region);
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error);
     }
   },
 
-  async getById(req: Request, res: Response) {
+  async getById(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
 
-      if(isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
+      if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
 
       const region = await regionService.getById(id);
 
       return ResponseData.ok(res, region);
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error);
     }
   },
 
-  async create(req: Request, res: Response) {
+  async create(req: Request, res: Response, next: NextFunction) {
     try {
       const { name } = req.body;
 
-      if(!name) {
-        return ResponseData.badRequest(res, "nama region wajib diisi")
+      if (!name) {
+        return ResponseData.badRequest(res, "nama region wajib diisi");
       }
 
       const region = await regionService.createRegion(req.body);
 
       return ResponseData.ok(res, region);
     } catch (error) {
-      return ResponseData.serverError(res, error)
+      next(error);
     }
   },
 
-  async edit(req: Request, res: Response) {
+  async edit(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
 
-      if(isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
+      if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
 
       const region = await regionService.editRegion(id, req.body);
 
-      return ResponseData.ok(res, region)
+      return ResponseData.ok(res, region);
     } catch (error) {
-      return ResponseData.serverError(res, error)
+      next(error);
     }
   },
 
-  async deleteRegion(req: Request, res: Response) {
+  async deleteRegion(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
 
-      if(isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
+      if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
 
       const region = await regionService.deleteRegion(id);
 
-      return ResponseData.ok(res, region)
+      return ResponseData.ok(res, region);
     } catch (error) {
-      return ResponseData.serverError(res, error)
+      next(error);
     }
-  }
+  },
 };

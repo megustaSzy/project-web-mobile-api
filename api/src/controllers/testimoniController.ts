@@ -1,10 +1,10 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { testimoniService } from "../services/testimoniService";
 import { ResponseData } from "../utilities/Response";
 import { testimoniSchema } from "../schemas/testimoniSchema";
 
 export const testimoniController = {
-  async getAll(req: Request, res: Response) {
+  async getAll(req: Request, res: Response, next: NextFunction) {
     try {
       const page = Number(req.query.page) || 1;
       const limit = Number(req.query.limit) || 10;
@@ -13,11 +13,11 @@ export const testimoniController = {
 
       return ResponseData.ok(res, testimoni);
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error);
     }
   },
 
-  async getApproved(req: Request, res: Response) {
+  async getApproved(req: Request, res: Response, next: NextFunction) {
     try {
       const page = Number(req.query.page) || 1;
       const limit = Number(req.query.limit) || 10;
@@ -29,11 +29,11 @@ export const testimoniController = {
 
       return ResponseData.ok(res, testimoni);
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error);
     }
   },
 
-  async getPending(req: Request, res: Response) {
+  async getPending(req: Request, res: Response, next: NextFunction) {
     try {
       const page = Number(req.query.page) || 1;
       const limit = Number(req.query.limit) || 10;
@@ -41,11 +41,11 @@ export const testimoniController = {
       const testimoni = await testimoniService.getPendingTestimoni(page, limit);
       return ResponseData.ok(res, testimoni);
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error);
     }
   },
 
-  async getById(req: Request, res: Response) {
+  async getById(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
 
@@ -55,11 +55,11 @@ export const testimoniController = {
 
       return ResponseData.ok(res, testimoni);
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error);
     }
   },
 
-  async create(req: Request, res: Response) {
+  async create(req: Request, res: Response, next: NextFunction) {
     const result = await testimoniSchema.safeParse(req.body);
 
     if (!result.success) {
@@ -71,11 +71,11 @@ export const testimoniController = {
 
       return ResponseData.created(res, testimoni);
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error);
     }
   },
 
-  async edit(req: Request, res: Response) {
+  async edit(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
       const userId = (req as any).user.id;
@@ -89,11 +89,11 @@ export const testimoniController = {
       );
       return ResponseData.ok(res, testimoni);
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error);
     }
   },
 
-  async delete(req: Request, res: Response) {
+  async delete(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
 
@@ -103,11 +103,11 @@ export const testimoniController = {
 
       return ResponseData.ok(res, testimoni);
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error);
     }
   },
 
-  async approve(req: Request, res: Response) {
+  async approve(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
       if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
@@ -116,11 +116,11 @@ export const testimoniController = {
 
       return ResponseData.ok(res, testimoni);
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error);
     }
   },
 
-  async reject(req: Request, res: Response) {
+  async reject(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
 
@@ -130,7 +130,7 @@ export const testimoniController = {
 
       return ResponseData.ok(res, testimoni);
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error);
     }
   },
 };
