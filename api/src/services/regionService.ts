@@ -18,6 +18,8 @@ export const regionService = {
         select: {
           id: true,
           name: true,
+          imageUrl: true,
+          imagePublicId: true,
           destinations: true, // ambil semua destinasi terkait
         },
       }),
