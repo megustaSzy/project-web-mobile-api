@@ -1,11 +1,11 @@
 import { userService } from "../services/userService";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { ResponseData } from "../utilities/Response";
 import { uploadToCloudinary } from "../utilities/uploadToCloudinary";
 import cloudinary from "../config/cloudinary";
 
 export const userController = {
-  async getAllUsers(req: Request, res: Response) {
+  async getAllUsers(req: Request, res: Response, next: NextFunction) {
     try {
       const page = Number(req.query.page) || 1;
       const limit = Number(req.query.limit) || 10;
@@ -14,11 +14,11 @@ export const userController = {
 
       return ResponseData.ok(res, users);
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error);
     }
   },
 
-  async getUserById(req: Request, res: Response) {
+  async getUserById(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
 
@@ -28,11 +28,11 @@ export const userController = {
 
       return ResponseData.ok(res, user);
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error);
     }
   },
 
-  async editUser(req: Request, res: Response) {
+  async editUser(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
       if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
@@ -68,10 +68,10 @@ export const userController = {
 
       return ResponseData.ok(res, updatedUser);
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error);
     }
   },
-  async deleteUser(req: Request, res: Response) {
+  async deleteUser(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
 
@@ -87,11 +87,11 @@ export const userController = {
 
       return ResponseData.ok(res, null);
     } catch (error) {
-      return ResponseData.serverError(res, error);
+      next(error);
     }
   },
 
-  async getProfile(req: Request, res: Response) {
+  async getProfile(req: Request, res: Response, next: NextFunction) {
     return ResponseData.ok(res, (req as any).user);
   },
 };

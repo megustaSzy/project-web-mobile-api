@@ -7,6 +7,6 @@ export function errorHandler(
   res: Response,
   _next: NextFunction
 ) {
-  console.log("ERROR STATUS:", err.statusCode);
+//   console.log("ERROR STATUS:", err.statusCode);
   ResponseData.serverError(res, err);
 }

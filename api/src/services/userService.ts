@@ -3,32 +3,33 @@ import bcrypt from "bcryptjs";
 import { createError } from "../utilities/createError";
 import { Pagination } from "../utilities/Pagination";
 import { UpdateUserData } from "../schemas/updateSchema";
+import { hashPassword } from "../lib/hash";
 
 export const userService = {
   // GET all users
   async getAllUsers(page: number, limit: number) {
     const pagination = new Pagination(page, limit);
 
-    const count = await prisma.tb_user.count();
-
-    const rows = await prisma.tb_user.findMany({
-      skip: pagination.offset,
-      take: pagination.limit,
-      where: {
-        role: "User",
-      },
-      orderBy: {
-        id: "asc",
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        notelp: true,
-        avatar: true,
-      },
-    });
+    const [count, rows] = await Promise.all([
+      prisma.tb_user.count(),
+      prisma.tb_user.findMany({
+        skip: pagination.offset,
+        take: pagination.limit,
+        where: {
+          role: "User",
+        },
+        orderBy: {
+          createdAt: "asc",
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          notelp: true,
+          avatar: true,
+        },
+      }),
+    ]);
 
     return pagination.paginate({ count, rows });
   },
@@ -72,7 +73,7 @@ export const userService = {
     }
 
     if (data.password) {
-      data.password = await bcrypt.hash(data.password, 10);
+      data.password = await hashPassword(data.password);
     }
 
     return prisma.tb_user.update({
@@ -80,7 +81,7 @@ export const userService = {
       data,
     });
   },
-  
+
   // DELETE user by ID
   async deleteUserById(id: number) {
     const user = await prisma.tb_user.findUnique({

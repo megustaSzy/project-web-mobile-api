@@ -9,20 +9,22 @@ import {
   decodeSessionToken,
 } from "../utilities/sessionToken";
 import { AuthData } from "../schemas/authSchema";
+import { comparePassword, hashPassword } from "../lib/hash";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET!;
 
 export const authService = {
   async registerUser(data: AuthData, createRole?: "Admin" | "User") {
-    const roleSave = data.role === "Admin" && createRole === "Admin" ? "Admin" : "User";
+    const roleSave =
+      data.role === "Admin" && createRole === "Admin" ? "Admin" : "User";
     const existing = await prisma.tb_user.findUnique({
       where: { email: data.email },
     });
 
     if (existing) throw createError("email sudah digunakan", 409);
 
-    const hash = await bcrypt.hash(data.password, 10);
+    const hash = await hashPassword(data.password);
 
     return prisma.tb_user.create({
       data: {
@@ -35,29 +37,30 @@ export const authService = {
     });
   },
 
-
   async createTokens(userId: number) {
     const user = await prisma.tb_user.findFirst({
       where: {
-        id: userId
+        id: userId,
       },
       select: {
         name: true,
-        email: true
-      }
+        email: true,
+      },
     });
 
-    if(!user) throw createError("user tidak ditemukan", 404);
+    if (!user) throw createError("user tidak ditemukan", 404);
 
     const accessTokenId = uuidv4();
     const refreshTokenId = uuidv4();
 
     // access token 1 jam
     const accessToken = jwt.sign(
-      { id: userId, 
+      {
+        id: userId,
         name: user.name,
         email: user.email,
-        tokenId: accessTokenId }, // add name, email
+        tokenId: accessTokenId,
+      }, // add name, email
       JWT_SECRET,
       { expiresIn: "1h" }
     );
@@ -73,11 +76,12 @@ export const authService = {
 
     // refresh token 7 hari
     const refreshToken = jwt.sign(
-      { 
+      {
         id: userId,
         name: user.email,
-        email: user.email, 
-        tokenId: refreshTokenId },
+        email: user.email,
+        tokenId: refreshTokenId,
+      },
       JWT_REFRESH_SECRET,
       { expiresIn: "7d" }
     );
@@ -98,7 +102,7 @@ export const authService = {
     const user = await prisma.tb_user.findUnique({ where: { email } });
     if (!user) throw createError("email tidak ditemukan", 404);
 
-    const isMatch = await bcrypt.compare(password, user.password!);
+    const isMatch = await comparePassword(password, user.password!);
     if (!isMatch) throw createError("password salah", 400);
 
     // hapus semua sisa token user

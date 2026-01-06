@@ -87,10 +87,12 @@ model tb_destinations {
 }
 
 model tb_regions {
-  id   Int    @id @default(autoincrement())
-  name String @unique
+  id            Int     @id @default(autoincrement())
+  name          String  @unique
+  imageUrl      String?
+  imagePublicId String?
 
-  destinations tb_destinations[] 
+  destinations tb_destinations[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -105,7 +107,6 @@ model tb_pickup_locations {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
-
 
 enum PaymentStatus {
   pending
@@ -125,41 +126,41 @@ model tb_orders {
   id Int @id @default(autoincrement())
 
   userId Int
-  user tb_user @relation(fields: [userId], references: [id])
+  user   tb_user @relation(fields: [userId], references: [id])
 
   destinationId Int
-  destination tb_destinations @relation(fields: [destinationId], references: [id])
+  destination   tb_destinations @relation(fields: [destinationId], references: [id])
 
   pickupLocationId Int?
-  pickupLocation tb_pickup_locations? @relation(fields: [pickupLocationId], references: [id])
+  pickupLocation   tb_pickup_locations? @relation(fields: [pickupLocationId], references: [id])
 
-  quantity Int
+  quantity   Int
   totalPrice Int
 
   // Snapshot
-  userName String
+  userName  String
   userPhone String
   userEmail String
 
-  destinationName String
-  destinationPrice Int
+  destinationName    String
+  destinationPrice   Int
   pickupLocationName String
 
-  date DateTime
+  date          DateTime
   departureTime String
-  returnTime String?
+  returnTime    String?
 
   ticketCode String @unique
 
-  paymentOrderId String @unique
-  snapToken String?
+  paymentOrderId  String  @unique
+  snapToken       String?
   snapRedirectUrl String?
-  transactionId String?
+  transactionId   String?
 
-  paymentStatus PaymentStatus @default(pending)
+  paymentStatus PaymentStatus  @default(pending)
   paymentMethod PaymentMethod?
-  isPaid Boolean @default(false)
-  paidAt DateTime?
+  isPaid        Boolean        @default(false)
+  paidAt        DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -168,7 +169,6 @@ model tb_orders {
   @@index([destinationId])
   @@index([paymentStatus])
 }
-
 
 model tb_category {
   id           Int               @id @default(autoincrement())
