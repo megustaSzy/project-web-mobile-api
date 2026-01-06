@@ -39,7 +39,8 @@ export const teamController = {
       const result: any = await uploadToCloudinary(req.file.buffer);
 
       const team = await teamService.createTeam({
-        ...req.body,
+        name: req.body.name,
+        job: req.body.job,
         imageUrl: result.secure_url,
         imagePublicId: result.public_id,
       });

@@ -4,9 +4,9 @@ export const createTeamSchema = z.object({
     name: z.string().min(1, "name wajib diisi"),
     job: z.string().min(1, "job wajib diisi"),
 
-    imageUrl: z.string().url("imageUrl wajib valid").optional(),
+    imageUrl: z.string().optional(),
     imagePublicId: z.string().optional(),
-}).strict()
+})
 
 export const updateTeamSchema = createTeamSchema.partial();
 
