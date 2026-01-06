@@ -61,6 +61,7 @@ export const regionController = {
 
       if (req.file) {
         const result: any = await uploadToCloudinary(req.file.buffer);
+        console.log("Cloudinary result:", result);
         imageUrl = result.secure_url;
         imagePublicId = result.public_id;
 
