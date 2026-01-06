@@ -2,14 +2,25 @@ import cloudinary from "../config/cloudinary";
 
 export const uploadToCloudinary = (fileBuffer: Buffer) => {
   return new Promise((resolve, reject) => {
-    cloudinary.uploader
-      .upload_stream(
-        { folder: "uploads" },
-        (error, result) => {
-          if (error) return reject(error);
-          resolve(result);
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: "uploads",
+        resource_type: "image",
+        timeout: 60000,
+      },
+      (error, result) => {
+        if (error) {
+          return reject(error);
         }
-      )
-      .end(fileBuffer);
+
+        if (!result) {
+          return reject(new Error("Upload ke Cloudinary gagal"));
+        }
+
+        resolve(result);
+      }
+    );
+
+    stream.end(fileBuffer);
   });
 };
