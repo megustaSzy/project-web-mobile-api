@@ -1,17 +1,14 @@
 // app/admin/destinasi/page.tsx
 "use client";
+
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { apiFetch } from "@/helpers/api";
-
-type ApiDestinationItem = {
-  id: number;
-  name: string;
-  imageUrl?: string | null;
-  description?: string;
-  price?: number;
-  category?: { id:number; name:string };
-};
+import {
+  ApiDestinationItem,
+  ApiDestinationsResponse,
+} from "@/types/destination";
 
 export default function DestinasiList() {
   const [items, setItems] = useState<ApiDestinationItem[]>([]);
@@ -20,8 +17,11 @@ export default function DestinasiList() {
   async function load() {
     setLoading(true);
     try {
-      const res = await apiFetch<{ data: { items: ApiDestinationItem[] } }>("/api/destinations");
-      setItems(res?.data?.items ?? []);
+      const res = await apiFetch<ApiDestinationsResponse>(
+        "/api/destinations"
+      );
+
+      setItems(res.data.items);
     } catch (err) {
       console.error(err);
       setItems([]);
@@ -30,7 +30,9 @@ export default function DestinasiList() {
     }
   }
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
   async function handleDelete(id: number) {
     if (!confirm("Hapus destinasi ini?")) return;
@@ -39,42 +41,99 @@ export default function DestinasiList() {
       load();
     } catch (err) {
       console.error(err);
-      alert("Gagal menghapus");
+      alert("Gagal menghapus destinasi");
     }
   }
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold text-blue-700">Manajemen Destinasi</h2>
-        <Link href="/admin/destinasi/tambah" className="px-4 py-2 bg-blue-600 text-white rounded">+ Tambah</Link>
+    <div className="space-y-4">
+      {/* HEADER */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+        <h2 className="text-xl font-semibold text-blue-700">
+          Manajemen Destinasi
+        </h2>
+
+        <Link
+          href="/admin/destinasi/tambah"
+          className="w-full sm:w-auto px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm text-center"
+        >
+          + Tambah Destinasi
+        </Link>
       </div>
 
-      <div className="bg-white rounded-xl shadow p-4">
+      {/* TABLE */}
+      <div className="bg-white rounded-2xl border shadow-sm overflow-x-auto">
         {loading ? (
-          <p>Loading...</p>
+          <p className="p-6 text-gray-500">Memuat data...</p>
+        ) : items.length === 0 ? (
+          <p className="p-6 text-gray-500">Belum ada destinasi.</p>
         ) : (
           <table className="w-full text-sm">
-            <thead className="text-left text-gray-500">
-              <tr>
-                <th className="py-2">#</th>
-                <th>Nama</th>
-                <th>Kategori</th>
-                <th>Harga</th>
-                <th>Action</th>
+            <thead className="bg-gray-50 border-b">
+              <tr className="text-gray-600">
+                <th className="px-6 py-4 text-center w-12">No</th>
+                <th className="px-6 py-4 text-center w-24">Foto</th>
+                <th className="px-6 py-4 text-left">Nama Destinasi</th>
+                <th className="px-6 py-4 text-left">Kategori</th>
+                <th className="px-6 py-4 text-left">Harga</th>
+                <th className="px-6 py-4 text-center w-40">Aksi</th>
               </tr>
             </thead>
-            <tbody>
-              {items.map((it) => (
-                <tr key={it.id} className="border-t">
-                  <td className="py-3">{it.id}</td>
-                  <td>{it.name}</td>
-                  <td>{it.category?.name ?? "-"}</td>
-                  <td>Rp.{(it.price ?? 0).toLocaleString("id-ID")}</td>
-                  <td>
-                    <div className="flex gap-2">
-                      <Link href={`/admin/destinasi/edit/${it.id}`} className="px-2 py-1 bg-yellow-400 rounded">Edit</Link>
-                      <button onClick={() => handleDelete(it.id)} className="px-2 py-1 bg-red-500 text-white rounded">Hapus</button>
+
+            <tbody className="divide-y">
+              {items.map((it, i) => (
+                <tr key={it.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 text-center text-gray-500">
+                    {i + 1}
+                  </td>
+
+                  {/* IMAGE */}
+                  <td className="px-6 py-4">
+                    <div className="flex justify-center">
+                      {it.imageUrl ? (
+                        <Image
+                          src={it.imageUrl}
+                          alt={it.name}
+                          width={48}
+                          height={48}
+                          unoptimized
+                          className="w-12 h-12 rounded-lg object-cover ring-1 ring-gray-200"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 flex items-center justify-center rounded-lg bg-gray-100 text-gray-400 text-xs">
+                          N/A
+                        </div>
+                      )}
+                    </div>
+                  </td>
+
+                  <td className="px-6 py-4 font-medium text-gray-800">
+                    {it.name}
+                  </td>
+
+                  <td className="px-6 py-4">
+                    {it.category.name}
+                  </td>
+
+                  <td className="px-6 py-4">
+                    Rp.{it.price.toLocaleString("id-ID")}
+                  </td>
+
+                  <td className="px-6 py-4">
+                    <div className="flex justify-center gap-2">
+                      <Link
+                        href={`/admin/destinasi/edit/${it.id}`}
+                        className="px-3 py-1.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded-full text-xs"
+                      >
+                        Edit
+                      </Link>
+
+                      <button
+                        onClick={() => handleDelete(it.id)}
+                        className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-full text-xs"
+                      >
+                        Hapus
+                      </button>
                     </div>
                   </td>
                 </tr>
