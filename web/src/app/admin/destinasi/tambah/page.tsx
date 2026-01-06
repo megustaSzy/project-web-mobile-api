@@ -93,6 +93,10 @@ return (
         Destinasi berhasil ditambahkan
       </div>
     )}
+
+    {/* MODAL */}
+    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+      <div className="bg-white w-full max-w-xl rounded-2xl shadow-xl animate-in fade-in zoom-in">
         {/* HEADER */}
         <div className="px-6 py-4 border-b">
           <h2 className="text-lg font-semibold text-gray-800">
@@ -217,7 +221,8 @@ return (
             </div>
           </form>
         )}
-    
+      </div>
+    </div>
   </>
 );
 

@@ -1,9 +1,17 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { apiFetch } from "@/helpers/api";
 import { RegionApiResponse, RegionItem } from "@/types/region";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationPrevious,
+  PaginationNext,
+} from "@/components/ui/pagination";
 
 export default function KategoriKabupaten() {
   const [regions, setRegions] = useState<RegionItem[]>([]);
@@ -12,8 +20,8 @@ export default function KategoriKabupaten() {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
-  const [name, setName] = useState("");
-  const [logo, setLogo] = useState<File | null>(null);
+  const [nameInput, setNameInput] = useState("");
+  const [image, setImage] = useState<File | null>(null);
 
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
@@ -23,41 +31,57 @@ export default function KategoriKabupaten() {
 
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
+  /* ================= PAGINATION ================= */
+  const [page, setPage] = useState(1);
+  const perPage = 10;
+  const [totalPages, setTotalPages] = useState(1);
+
   /* ================= LOAD DATA ================= */
-  async function loadData() {
+  const getData = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await apiFetch<RegionApiResponse>("/api/region");
+      const res = await apiFetch<RegionApiResponse>(
+        `/api/region?page=${page}&per_page=${perPage}`
+      );
       setRegions(res.data.items);
+      setTotalPages(res.data.total_pages);
     } catch {
       setErrorMsg("Gagal memuat data");
     } finally {
       setLoading(false);
     }
-  }
+  }, [page]);
 
   useEffect(() => {
-    loadData();
-  }, []);
+    getData();
+  }, [getData]);
 
-  /* ================= SIMPAN ================= */
-  async function save() {
-    if (!name.trim()) return;
+  /* ================= SAVE ================= */
+  async function saveRegion() {
+    if (!nameInput.trim()) return;
+
     setSaving(true);
 
     try {
       const fd = new FormData();
-      fd.append("name", name);
-      if (logo) fd.append("image", logo);
+      fd.append("name", nameInput.trim());
+      if (image) fd.append("image", image);
 
-      const endpoint = editId ? `/api/region/${editId}` : "/api/region";
-      if (editId) fd.append("_method", "PUT");
-
-      await apiFetch(endpoint, { method: "POST", body: fd });
+      if (editId !== null) {
+        await apiFetch(`/api/region/${editId}`, {
+          method: "PUT",
+          body: fd,
+        });
+      } else {
+        await apiFetch(`/api/region`, {
+          method: "POST",
+          body: fd,
+        });
+      }
 
       setModalOpen(false);
-      setName("");
-      setLogo(null);
+      setNameInput("");
+      setImage(null);
       setEditId(null);
 
       setSuccessMsg(
@@ -67,7 +91,7 @@ export default function KategoriKabupaten() {
       );
       setTimeout(() => setSuccessMsg(null), 2000);
 
-      await loadData();
+      await getData();
     } catch {
       setErrorMsg("Gagal menyimpan data");
     } finally {
@@ -75,9 +99,10 @@ export default function KategoriKabupaten() {
     }
   }
 
-  /* ================= HAPUS ================= */
+  /* ================= DELETE ================= */
   async function deleteRegion() {
     if (!pendingDeleteId) return;
+
     setDeletingId(pendingDeleteId);
 
     try {
@@ -87,7 +112,8 @@ export default function KategoriKabupaten() {
 
       setSuccessMsg("Kabupaten berhasil dihapus");
       setTimeout(() => setSuccessMsg(null), 2000);
-      await loadData();
+
+      await getData();
     } catch {
       setErrorMsg("Gagal menghapus data");
     } finally {
@@ -97,17 +123,18 @@ export default function KategoriKabupaten() {
     }
   }
 
+  /* ================= MODAL HANDLER ================= */
   function openAddModal() {
     setEditId(null);
-    setName("");
-    setLogo(null);
+    setNameInput("");
+    setImage(null);
     setModalOpen(true);
   }
 
   function openEditModal(region: RegionItem) {
     setEditId(region.id);
-    setName(region.name);
-    setLogo(null);
+    setNameInput(region.name);
+    setImage(null);
     setModalOpen(true);
   }
 
@@ -124,7 +151,7 @@ export default function KategoriKabupaten() {
 
       {/* SUCCESS */}
       {successMsg && (
-        <div className="fixed top-4 right-4 left-4 sm:left-auto bg-green-600 text-white px-5 py-3 rounded-xl shadow-lg z-50 text-center sm:text-left">
+        <div className="fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg z-50">
           {successMsg}
         </div>
       )}
@@ -137,11 +164,11 @@ export default function KategoriKabupaten() {
 
       <div className="bg-white rounded-2xl border shadow-sm">
         {/* HEADER */}
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 px-4 sm:px-6 py-4 border-b">
+        <div className="flex justify-between items-center px-6 py-4 border-b">
           <h3 className="font-semibold text-gray-800">Daftar Kabupaten</h3>
           <button
             onClick={openAddModal}
-            className="w-full sm:w-auto px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm"
           >
             + Tambah
           </button>
@@ -154,84 +181,39 @@ export default function KategoriKabupaten() {
           <p className="p-6 text-gray-500">Belum ada kabupaten.</p>
         ) : (
           <>
-            {/* MOBILE CARD */}
-            <div className="md:hidden divide-y">
-              {regions.map((r, i) => (
-                <div key={r.id} className="p-4 flex gap-4">
-                  <div className="shrink-0">
-                    {r.imageUrl ? (
-                      <img
-                        src={r.imageUrl}
-                        alt={r.name}
-                        className="w-14 h-14 rounded-lg object-cover ring-1 ring-gray-200"
-                      />
-                    ) : (
-                      <div className="w-14 h-14 flex items-center justify-center rounded-lg bg-gray-100 text-gray-400 text-xs">
-                        N/A
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex-1">
-                    <p className="text-xs text-gray-500">#{i + 1}</p>
-                    <p className="font-medium text-gray-800">{r.name}</p>
-
-                    <div className="flex gap-2 mt-3">
-                      <button
-                        onClick={() => openEditModal(r)}
-                        className="flex-1 px-3 py-1.5 bg-yellow-500 text-white rounded-lg text-xs"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => openDeleteConfirm(r.id)}
-                        disabled={deletingId === r.id}
-                        className="flex-1 px-3 py-1.5 bg-red-600 text-white rounded-lg text-xs"
-                      >
-                        {deletingId === r.id ? "Menghapus..." : "Hapus"}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* DESKTOP TABLE */}
-            <div className="hidden md:block overflow-x-auto">
+            <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 border-b">
-                  <tr className="text-gray-600">
-                    <th className="px-6 py-4 text-center w-12">No</th>
-                    <th className="px-6 py-4 text-center w-24">Foto</th>
-                    <th className="px-6 py-4 text-left">Nama Kabupaten</th>
-                    <th className="px-6 py-4 text-center w-40">Aksi</th>
+                  <tr>
+                    <th className="w-16 px-4 py-3 text-center">No</th>
+                    <th className="w-24 px-4 py-3 text-center">Foto</th>
+                    <th className="px-4 py-3 text-left">Nama Kabupaten</th>
+                    <th className="w-40 px-4 py-3 text-center">Aksi</th>
                   </tr>
                 </thead>
+
                 <tbody className="divide-y">
                   {regions.map((r, i) => (
-                    <tr key={r.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 text-center text-gray-500">
-                        {i + 1}
+                    <tr key={r.id}>
+                      <td className="text-center text-gray-400">
+                        {(page - 1) * perPage + i + 1}
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="flex justify-center">
-                          {r.imageUrl ? (
-                            <img
-                              src={r.imageUrl}
-                              alt={r.name}
-                              className="w-12 h-12 rounded-lg object-cover ring-1 ring-gray-200"
-                            />
-                          ) : (
-                            <div className="w-12 h-12 flex items-center justify-center rounded-lg bg-gray-100 text-gray-400 text-xs">
-                              N/A
-                            </div>
-                          )}
-                        </div>
+
+                      <td className="text-center">
+                        {r.imageUrl ? (
+                          // eslint-disable-next-line jsx-a11y/alt-text
+                          <img
+                            src={r.imageUrl}
+                            className="w-12 h-12 mx-auto rounded-lg object-cover"
+                          />
+                        ) : (
+                          "-"
+                        )}
                       </td>
-                      <td className="px-6 py-4 font-medium text-gray-800">
-                        {r.name}
-                      </td>
-                      <td className="px-6 py-4">
+
+                      <td className="px-4 py-3 font-medium">{r.name}</td>
+
+                      <td className="px-4 py-3">
                         <div className="flex justify-center gap-2">
                           <button
                             onClick={() => openEditModal(r)}
@@ -239,6 +221,7 @@ export default function KategoriKabupaten() {
                           >
                             Edit
                           </button>
+
                           <button
                             onClick={() => openDeleteConfirm(r.id)}
                             disabled={deletingId === r.id}
@@ -253,6 +236,36 @@ export default function KategoriKabupaten() {
                 </tbody>
               </table>
             </div>
+
+            {/* PAGINATION */}
+            {totalPages > 1 && (
+              <Pagination className="py-4">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      onClick={() => page > 1 && setPage(page - 1)}
+                    />
+                  </PaginationItem>
+
+                  {Array.from({ length: totalPages }).map((_, i) => (
+                    <PaginationItem key={i}>
+                      <PaginationLink
+                        isActive={page === i + 1}
+                        onClick={() => setPage(i + 1)}
+                      >
+                        {i + 1}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
+
+                  <PaginationItem>
+                    <PaginationNext
+                      onClick={() => page < totalPages && setPage(page + 1)}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            )}
           </>
         )}
       </div>
@@ -260,36 +273,36 @@ export default function KategoriKabupaten() {
       {/* MODAL ADD / EDIT */}
       {modalOpen && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl shadow-xl w-[90%] sm:w-96 p-6">
+          <div className="bg-white p-6 rounded-2xl shadow-xl w-96">
             <h3 className="text-lg font-semibold mb-4">
               {editId ? "Edit Kabupaten" : "Tambah Kabupaten"}
             </h3>
 
             <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              value={nameInput}
+              onChange={(e) => setNameInput(e.target.value)}
+              className="w-full border rounded-lg px-3 py-2 mb-3"
               placeholder="Nama kabupaten"
-              className="w-full border rounded-lg px-3 py-2 mb-3 focus:ring-2 focus:ring-blue-500 outline-none"
             />
 
             <input
               type="file"
-              accept="image/*"
-              onChange={(e) => setLogo(e.target.files?.[0] ?? null)}
-              className="w-full border rounded-lg px-3 py-2 mb-5"
+              onChange={(e) => setImage(e.target.files?.[0] ?? null)}
+              className="w-full border rounded-lg px-3 py-2 mb-4"
             />
 
-            <div className="flex flex-col sm:flex-row justify-end gap-2">
+            <div className="flex justify-end gap-2">
               <button
                 onClick={() => setModalOpen(false)}
-                className="px-4 py-2 bg-gray-100 rounded-lg text-sm"
+                className="px-4 py-2 bg-gray-100 rounded-lg"
               >
                 Batal
               </button>
+
               <button
-                onClick={save}
+                onClick={saveRegion}
                 disabled={saving}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg"
               >
                 {saving ? "Menyimpan..." : "Simpan"}
               </button>
@@ -301,22 +314,23 @@ export default function KategoriKabupaten() {
       {/* MODAL DELETE */}
       {confirmDeleteOpen && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl shadow-xl w-[90%] sm:w-96 p-6">
+          <div className="bg-white p-6 rounded-2xl shadow-xl w-96">
             <h3 className="text-lg font-semibold mb-2">Konfirmasi</h3>
             <p className="text-sm text-gray-600 mb-6">
               Yakin ingin menghapus kabupaten ini?
             </p>
 
-            <div className="flex flex-col sm:flex-row justify-end gap-2">
+            <div className="flex justify-end gap-2">
               <button
                 onClick={() => setConfirmDeleteOpen(false)}
-                className="px-4 py-2 bg-gray-100 rounded-lg text-sm"
+                className="px-4 py-2 bg-gray-100 rounded-lg"
               >
                 Batal
               </button>
+
               <button
                 onClick={deleteRegion}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm"
+                className="px-4 py-2 bg-red-600 text-white rounded-lg"
               >
                 Ya, Hapus
               </button>
