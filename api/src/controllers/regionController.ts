@@ -3,6 +3,8 @@ import { regionService } from "../services/regionService";
 import { ResponseData } from "../utilities/Response";
 import { uploadToCloudinary } from "../utilities/uploadToCloudinary";
 import cloudinary from "../config/cloudinary";
+import { validate } from "../middlewares/validate";
+import { updateRegionSchema } from "../schemas/regionSchema";
 
 export const regionController = {
   async getRegencies(req: Request, res: Response, next: NextFunction) {
@@ -56,6 +58,8 @@ export const regionController = {
       const region = await regionService.getById(id);
       if (!region) return ResponseData.notFound(res, "region tidak ditemukan");
 
+      if (res.headersSent) return;
+
       let imageUrl: string | undefined;
       let imagePublicId: string | undefined;
 
@@ -80,7 +84,6 @@ export const regionController = {
       next(error);
     }
   },
-
   async deleteRegion(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
