@@ -54,12 +54,10 @@ export const regionService = {
     const region = await prisma.tb_regions.findUnique({ where: { id } });
     if (!region) throw createError("id tidak ditemukan", 404);
 
-    const updated = await prisma.tb_regions.update({
+    return prisma.tb_regions.update({
       where: { id },
       data,
     });
-
-    return updated;
   },
 
   async deleteRegion(id: number) {
