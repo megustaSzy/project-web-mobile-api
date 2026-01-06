@@ -18,16 +18,50 @@ export default function PesanPage() {
   const router = useRouter();
   const params = useLocalSearchParams();
 
-  const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
+  const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? "";
 
-  const id = params?.id ?? null;
-  const title = params?.title ?? "Nama Destinasi";
-  const location = params?.location ?? "Lokasi";
-  const price = params?.price ?? "100000";
-  const imageUrl = params?.imageUrl ?? "";   // ⬅️ ambil dari detail page
+  // ===============================
+  // NORMALISASI PARAM (TYPE SAFE)
+  // ===============================
+  const id =
+    typeof params.id === "string"
+      ? params.id
+      : Array.isArray(params.id)
+      ? params.id[0]
+      : null;
 
-  // === States ===
-  const [penjemputan, setPenjemputan] = useState(""); 
+  const title =
+    typeof params.title === "string"
+      ? params.title
+      : Array.isArray(params.title)
+      ? params.title[0]
+      : "Nama Destinasi";
+
+  const location =
+    typeof params.location === "string"
+      ? params.location
+      : Array.isArray(params.location)
+      ? params.location[0]
+      : "Lokasi";
+
+  const price =
+    typeof params.price === "string"
+      ? params.price
+      : Array.isArray(params.price)
+      ? params.price[0]
+      : "100000";
+
+  const imageUrl =
+    typeof params.imageUrl === "string"
+      ? params.imageUrl
+      : Array.isArray(params.imageUrl)
+      ? params.imageUrl[0]
+      : "";
+
+  // ===============================
+  // STATES
+  // ===============================
+  const [penjemputan, setPenjemputan] = useState("");
   const [jumlahTiket, setJumlahTiket] = useState("1");
   const [tanggal, setTanggal] = useState<Date>(new Date());
   const [waktuBerangkat, setWaktuBerangkat] = useState<Date>(new Date());
@@ -36,15 +70,17 @@ export default function PesanPage() {
   const [showTimeBerangkat, setShowTimeBerangkat] = useState(false);
   const [showTimeJemput, setShowTimeJemput] = useState(false);
 
-  const onChangeDate = (event: any, selected?: Date) => {
+  const onChangeDate = (_: any, selected?: Date) => {
     setShowDate(Platform.OS === "ios");
     if (selected) setTanggal(selected);
   };
-  const onChangeTimeBerangkat = (event: any, selected?: Date) => {
+
+  const onChangeTimeBerangkat = (_: any, selected?: Date) => {
     setShowTimeBerangkat(Platform.OS === "ios");
     if (selected) setWaktuBerangkat(selected);
   };
-  const onChangeTimeJemput = (event: any, selected?: Date) => {
+
+  const onChangeTimeJemput = (_: any, selected?: Date) => {
     setShowTimeJemput(Platform.OS === "ios");
     if (selected) setWaktuJemput(selected);
   };
@@ -54,44 +90,55 @@ export default function PesanPage() {
       alert("Pilih titik penjemputan.");
       return;
     }
+
     if (!jumlahTiket || Number(jumlahTiket) < 1) {
       alert("Masukkan jumlah tiket (minimal 1).");
       return;
     }
 
-    const q = {
-      id,
-      title,
-      location,
-      price,
-      penjemputan,
-      tanggal: tanggal.toISOString(),
-      waktuBerangkat: waktuBerangkat.toISOString(),
-      waktuJemput: waktuJemput.toISOString(),
-      jumlahTiket,
-    };
-
     router.push({
       pathname: `../pesan/${id ?? ""}`,
-      params: q,
+      params: {
+        id,
+        title,
+        location,
+        price,
+        penjemputan,
+        tanggal: tanggal.toISOString(),
+        waktuBerangkat: waktuBerangkat.toISOString(),
+        waktuJemput: waktuJemput.toISOString(),
+        jumlahTiket,
+      },
     });
   };
 
   const fmtDate = (d: Date) =>
-    d ? d.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : "";
+    d.toLocaleDateString("id-ID", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+
   const fmtTime = (d: Date) =>
-    d ? d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) : "";
+    d.toLocaleTimeString("id-ID", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
 
   return (
     <View style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 180 }}>
-
-        {/* HEADER IMAGE (API) */}
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 180 }}
+      >
+        {/* HEADER IMAGE */}
         <View style={styles.headerImageWrapper}>
           <Image
             source={{
               uri: imageUrl
-                ? `${BASE_URL}${imageUrl}`
+                ? imageUrl.startsWith("http")
+                  ? imageUrl
+                  : `${BASE_URL}${imageUrl}`
                 : "https://via.placeholder.com/600x400",
             }}
             style={styles.headerImage}
@@ -99,15 +146,14 @@ export default function PesanPage() {
           <View style={styles.overlay} />
         </View>
 
-        {/* WHITE CARD */}
+        {/* CARD */}
         <View style={styles.card}>
-          <Text style={styles.title}>{String(title)}</Text>
+          <Text style={styles.title}>{title}</Text>
 
           <View style={styles.rowLocation}>
             <Ionicons name="location-outline" size={16} color="#7B7B8B" />
-            <Text style={styles.location}>{String(location)}</Text>
+            <Text style={styles.location}>{location}</Text>
           </View>
-
 
           <View style={styles.infoRow}>
             <View style={styles.infoBoxLeft}>
@@ -118,27 +164,33 @@ export default function PesanPage() {
             </View>
           </View>
 
-          {/* FORM */}
           <Text style={styles.label}>Pilih lokasi penjemputan</Text>
           <View style={styles.inputBox}>
             <Ionicons name="location-outline" size={18} color="#777" />
             <Picker
               selectedValue={penjemputan}
-              onValueChange={(value) => setPenjemputan(String(value))}
+              onValueChange={(v) => setPenjemputan(String(v))}
               style={styles.picker}
             >
               <Picker.Item label="-- Pilih titik penjemputan --" value="" />
               <Picker.Item label="Terminal Kemiling" value="terminal_kemiling" />
               <Picker.Item label="Terminal Rajabasa" value="terminal_rajabasa" />
-              <Picker.Item label="Stasiun Tanjung Karang" value="stasiun_tanjung_karang" />
+              <Picker.Item
+                label="Stasiun Tanjung Karang"
+                value="stasiun_tanjung_karang"
+              />
             </Picker>
           </View>
 
           <Text style={styles.label}>Pilih tanggal pemberangkatan</Text>
-          <TouchableOpacity style={styles.inputBox} onPress={() => setShowDate(true)}>
+          <TouchableOpacity
+            style={styles.inputBox}
+            onPress={() => setShowDate(true)}
+          >
             <Ionicons name="calendar-outline" size={18} color="#777" />
             <Text style={styles.inputText}>{fmtDate(tanggal)}</Text>
           </TouchableOpacity>
+
           {showDate && (
             <DateTimePicker
               value={tanggal}
@@ -149,31 +201,39 @@ export default function PesanPage() {
           )}
 
           <Text style={styles.label}>Pilih waktu pemberangkatan</Text>
-          <TouchableOpacity style={styles.inputBox} onPress={() => setShowTimeBerangkat(true)}>
+          <TouchableOpacity
+            style={styles.inputBox}
+            onPress={() => setShowTimeBerangkat(true)}
+          >
             <Ionicons name="time-outline" size={18} color="#777" />
             <Text style={styles.inputText}>{fmtTime(waktuBerangkat)}</Text>
           </TouchableOpacity>
+
           {showTimeBerangkat && (
             <DateTimePicker
               value={waktuBerangkat}
               mode="time"
               is24Hour
-              display={Platform.OS === "ios" ? "spinner" : "spinner"}
+              display="spinner"
               onChange={onChangeTimeBerangkat}
             />
           )}
 
           <Text style={styles.label}>Pilih waktu penjemputan</Text>
-          <TouchableOpacity style={styles.inputBox} onPress={() => setShowTimeJemput(true)}>
+          <TouchableOpacity
+            style={styles.inputBox}
+            onPress={() => setShowTimeJemput(true)}
+          >
             <Ionicons name="time-outline" size={18} color="#777" />
             <Text style={styles.inputText}>{fmtTime(waktuJemput)}</Text>
           </TouchableOpacity>
+
           {showTimeJemput && (
             <DateTimePicker
               value={waktuJemput}
               mode="time"
               is24Hour
-              display={Platform.OS === "ios" ? "spinner" : "spinner"}
+              display="spinner"
               onChange={onChangeTimeJemput}
             />
           )}
@@ -182,7 +242,6 @@ export default function PesanPage() {
           <View style={styles.inputBox}>
             <Ionicons name="person-outline" size={18} color="#777" />
             <TextInput
-              placeholder="1"
               keyboardType="numeric"
               style={styles.input}
               value={jumlahTiket}
@@ -192,18 +251,19 @@ export default function PesanPage() {
         </View>
       </ScrollView>
 
-      {/* BOTTOM BUTTON FIXED */}
+      {/* BOTTOM BUTTON */}
       <View style={styles.bottomContainer}>
         <TouchableOpacity style={styles.orderBtn} onPress={handlePayNow}>
           <Text style={styles.orderText}>Bayar Sekarang</Text>
           <Text style={styles.orderPrice}>
-            IDR {Number(String(price)).toLocaleString("id-ID")} ,-
+            IDR {Number(price).toLocaleString("id-ID")} ,-
           </Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: 
