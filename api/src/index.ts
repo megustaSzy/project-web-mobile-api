@@ -26,9 +26,6 @@ import { errorHandler } from "./middlewares/errorHandler";
 
 const app = express();
 
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ limit: "10mb", extended: true }));
-
 app.use(requestLogger);
 
 app.use(
@@ -51,21 +48,25 @@ app.get("/", (req, res) => {
   });
 });
 
-app.use("/api/users", userRoute);
+app.use("/api/users", userRoute); // avatar
+app.use("/api/team", teamRoute); // image
+app.use("/api/region", regionRoute); // image
+app.use("/api/destinations", destinationRoute); // image
+app.use("/api/banner", bannerRoute); // image
+app.use("/api/about", aboutRoute); // image
+
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ limit: "10mb", extended: true }));
+
 app.use("/api/auth", authRoute);
 app.use("/api/pickup-locations", pickupLocationRoute);
-app.use("/api/region", regionRoute);
 app.use("/api/orders", orderRoute);
 app.use("/api/admin/orders", adminOrderRoute);
 app.use("/api/category", categoryRoute);
-app.use("/api/about", aboutRoute);
 app.use("/api/count", statRoute);
 app.use("/api/payment", paymentRoute);
-app.use("/api/team", teamRoute);
-app.use("/api/destinations", destinationRoute);
-app.use("/api/banner", bannerRoute);
 app.use("/api/testimoni", testimoniRoute);
 
-app.use(errorHandler)
+app.use(errorHandler);
 
 export default app;
