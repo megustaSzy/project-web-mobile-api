@@ -1,6 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { regionService } from "../services/regionService";
 import { ResponseData } from "../utilities/Response";
+import { uploadToCloudinary } from "../utilities/uploadToCloudinary";
+import cloudinary from "../config/cloudinary";
 
 export const regionController = {
   async getRegencies(req: Request, res: Response, next: NextFunction) {
@@ -49,12 +51,31 @@ export const regionController = {
   async edit(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
-
       if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
 
-      const region = await regionService.editRegion(id, req.body);
+      const region = await regionService.getById(id);
+      if (!region) return ResponseData.notFound(res, "region tidak ditemukan");
 
-      return ResponseData.ok(res, region);
+      let imageUrl: string | undefined;
+      let imagePublicId: string | undefined;
+
+      if (req.file) {
+        const result: any = await uploadToCloudinary(req.file.buffer);
+        imageUrl = result.secure_url;
+        imagePublicId = result.public_id;
+
+        if (region.imagePublicId) {
+          await cloudinary.uploader.destroy(region.imagePublicId);
+        }
+      }
+
+      const updateRegion = await regionService.editRegion(id, {
+        ...req.body,
+        ...(imageUrl && { imageUrl }),
+        ...(imagePublicId && { imagePublicId }),
+      });
+
+      return ResponseData.ok(res, updateRegion);
     } catch (error) {
       next(error);
     }
