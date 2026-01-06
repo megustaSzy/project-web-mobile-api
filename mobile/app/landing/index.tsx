@@ -335,9 +335,14 @@ export default function HomeScreen() {
             style={styles.popularItem}
           >
             <Image
-              source={{ uri: `${BASE_URL}${d.imageUrl}` }}
-              style={styles.popularBG}
-            />
+            source={{
+              uri: d.imageUrl.startsWith("http")
+                ? d.imageUrl
+                : `${BASE_URL}${d.imageUrl}`,
+            }}
+            style={styles.popularBG}
+          />
+
 
             <View style={styles.popularOverlay} />
 
