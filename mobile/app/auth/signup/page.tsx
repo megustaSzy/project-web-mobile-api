@@ -31,52 +31,57 @@ export default function SignupForm() {
   const [modalMessage, setModalMessage] = useState("");
 
   const handleSignup = async () => {
-    if (!name || !email || !password || !phone) {
-      setModalStatus("error");
-      setModalMessage("Semua field harus diisi!");
-      setModalVisible(true);
-      return;
-    }
+  if (!name || !email || !password || !phone) {
+    setModalStatus("error");
+    setModalMessage("Semua field harus diisi!");
+    setModalVisible(true);
+    return;
+  }
 
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      const res = await fetch("http://192.168.100.141:3001/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+    const API_URL = process.env.EXPO_PUBLIC_API_URL;
+
+    const res = await fetch(`${API_URL}/api/auth/register`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
         name,
         email,
         password,
         notelp: phone,
       }),
+    });
 
-      });
+    const data = await res.json();
 
-      const data = await res.json();
-
-      if (res.ok) {
-        setModalStatus("success");
-        setModalMessage("Pendaftaran berhasil! Silakan login.");
-        setModalVisible(true);
-
-        setTimeout(() => {
-          setModalVisible(false);
-          router.push("../login/page");
-        }, 1500);
-      } else {
-        setModalStatus("error");
-        setModalMessage(data.message || "Pendaftaran gagal.");
-        setModalVisible(true);
-      }
-    } catch (error) {
-      setModalStatus("error");
-      setModalMessage("Tidak dapat terhubung ke server.");
+    if (res.ok) {
+      setModalStatus("success");
+      setModalMessage("Pendaftaran berhasil! Silakan login.");
       setModalVisible(true);
-    } finally {
-      setLoading(false);
+
+      setTimeout(() => {
+        setModalVisible(false);
+        router.push("../login/page");
+      }, 1500);
+    } else {
+      setModalStatus("error");
+      setModalMessage(data.message || "Pendaftaran gagal.");
+      setModalVisible(true);
     }
-  };
+  } catch (error) {
+    console.log("REGISTER ERROR:", error);
+    setModalStatus("error");
+    setModalMessage("Tidak dapat terhubung ke server.");
+    setModalVisible(true);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <ScrollView contentContainerStyle={styles.container}>

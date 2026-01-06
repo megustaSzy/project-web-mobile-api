@@ -1,14 +1,43 @@
 import React, { useState } from "react";
-import { View, Text, Image, ImageBackground, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  ImageBackground,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+
+type CategoryType = {
+  id: number;
+  name: string;
+  icon: any;
+};
+
+type KabupatenType = {
+  id: number;
+  name: string;
+  description: string;
+  logo: any;
+  hero: any;
+};
+
+type DestinationType = {
+  id: number;
+  name: string;
+  location: string;
+  image: any;
+};
 
 export default function KabupatenDetail() {
   const router = useRouter();
 
-  const [activeCategory, setActiveCategory] = useState("semua");
+  const [activeCategory, setActiveCategory] = useState<string>("semua");
 
-  const CATEGORY_DATA = [
+  const CATEGORY_DATA: CategoryType[] = [
     { id: 1, name: "Pantai", icon: require("../../assets/images/kategori1.png") },
     { id: 2, name: "Gunung", icon: require("../../assets/images/kategori2.png") },
     { id: 3, name: "Bukit", icon: require("../../assets/images/kategori3.png") },
@@ -16,7 +45,7 @@ export default function KabupatenDetail() {
     { id: 5, name: "Air Terjun", icon: require("../../assets/images/kategori5.png") },
   ];
 
-  const kabupatenList = [
+  const kabupatenList: KabupatenType[] = [
     {
       id: 1,
       name: "Kabupaten Tanggamus",
@@ -35,18 +64,20 @@ export default function KabupatenDetail() {
     },
   ];
 
-  const [index, setIndex] = useState(0);
+  const [index, setIndex] = useState<number>(0);
   const data = kabupatenList[index];
 
-  const next = () => setIndex((prev) => (prev + 1) % kabupatenList.length);
-  const prev = () => setIndex((prev) => (prev - 1 + kabupatenList.length) % kabupatenList.length);
+  const next = () =>
+    setIndex((prev) => (prev + 1) % kabupatenList.length);
 
-  const handleCategoryPress = (name: React.SetStateAction<string>) => {
+  const prev = () =>
+    setIndex((prev) => (prev - 1 + kabupatenList.length) % kabupatenList.length);
+
+  const handleCategoryPress = (name: string) => {
     setActiveCategory(name);
   };
 
-  // Contoh data destinasi
-  const destinations = [
+  const destinations: DestinationType[] = [
     {
       id: 1,
       name: "Green Elty",
@@ -73,9 +104,11 @@ export default function KabupatenDetail() {
     },
   ];
 
-  const handleDestinationPress = (destination: { id?: number; name: any; location?: string; image?: any; }) => {
-    // Contoh navigasi
+  const handleDestinationPress = (destination: DestinationType) => {
     console.log("Destination pressed:", destination.name);
+
+    // contoh navigasi (jika dibutuhkan)
+    // router.push(`/destination/${destination.id}`);
   };
 
   return (
@@ -105,9 +138,14 @@ export default function KabupatenDetail() {
         <Text style={styles.description}>{data.description}</Text>
 
         {/* CATEGORY */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 15, paddingLeft: 12 }}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={{ marginTop: 15, paddingLeft: 12 }}
+        >
           {CATEGORY_DATA.map((cat) => {
             const isActive = activeCategory === cat.name;
+
             return (
               <TouchableOpacity
                 key={cat.id}
@@ -115,12 +153,21 @@ export default function KabupatenDetail() {
                 style={[
                   styles.categoryChip,
                   isActive
-                    ? { backgroundColor: "#007BFF20", borderColor: "#007BFF", borderWidth: 2 }
+                    ? {
+                        backgroundColor: "#007BFF20",
+                        borderColor: "#007BFF",
+                        borderWidth: 2,
+                      }
                     : { backgroundColor: "#fff" },
                 ]}
               >
                 <Image source={cat.icon} style={styles.categoryIcon} />
-                <Text style={[styles.categoryChipText, isActive ? { color: "#007BFF" } : { color: "#333" }]}>
+                <Text
+                  style={[
+                    styles.categoryChipText,
+                    isActive ? { color: "#007BFF" } : { color: "#333" },
+                  ]}
+                >
                   {cat.name}
                 </Text>
               </TouchableOpacity>
@@ -130,6 +177,7 @@ export default function KabupatenDetail() {
 
         {/* POPULER DESTINATION */}
         <Text style={styles.sectionTitle}>Populer Destination</Text>
+
         <View style={styles.popularGrid}>
           {destinations.map((d) => (
             <TouchableOpacity
@@ -153,6 +201,7 @@ export default function KabupatenDetail() {
     </ScrollView>
   );
 }
+
 
 const styles = StyleSheet.create({
   heroImage: {
