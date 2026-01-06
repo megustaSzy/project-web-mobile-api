@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import { apiFetch } from "@/helpers/api";
 import { ApiCategoryResponse } from "@/types/category";
+import { CheckCircle } from "lucide-react";
 
 interface Option {
   id: number;
@@ -17,27 +18,28 @@ export default function TambahDestinasi() {
 
   const [name, setName] = useState("");
   const [desc, setDesc] = useState("");
-  const [price, setPrice] = useState<number | "">("");
-  const [categoryId, setCategoryId] = useState<number | "">("");
-  const [kabupatenId, setKabupatenId] = useState<number | "">("");
+  const [price, setPrice] = useState("");
+  const [categoryId, setCategoryId] = useState("");
+  const [regionId, setRegionId] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
 
   const [categories, setCategories] = useState<Option[]>([]);
-  const [kabupaten, setKabupaten] = useState<Option[]>([]);
+  const [regions, setRegions] = useState<Option[]>([]);
+
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   /* ================= LOAD DROPDOWN ================= */
   useEffect(() => {
     async function loadDropdown() {
       try {
-        // ✅ KATEGORI WISATA (SAMA DENGAN DASHBOARD)
         const catRes = await apiFetch<ApiCategoryResponse>("/api/category");
         setCategories(catRes.data.items);
 
-        // ✅ KATEGORI KABUPATEN (HARUS DARI API)
-        const kabRes = await apiFetch<{ data: { items: Option[] } }>(
-          "/api/kabupaten"
+        const regionRes = await apiFetch<{ data: { items: Option[] } }>(
+          "/api/region"
         );
-        setKabupaten(kabRes.data.items);
+        setRegions(regionRes.data.items);
       } catch (err) {
         console.error("Gagal load dropdown", err);
       }
@@ -49,14 +51,15 @@ export default function TambahDestinasi() {
   /* ================= SUBMIT ================= */
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setLoading(true);
 
     try {
       const fd = new FormData();
       fd.append("name", name);
       fd.append("description", desc);
-      fd.append("price", String(price));
-      fd.append("category_id", String(categoryId));
-      fd.append("kabupaten_id", String(kabupatenId));
+      fd.append("price", price);
+      fd.append("categoryId", categoryId);
+      fd.append("regionId", regionId);
       if (imageFile) fd.append("image", imageFile);
 
       const res = await fetch(
@@ -68,102 +71,154 @@ export default function TambahDestinasi() {
         }
       );
 
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text);
-      }
+      if (!res.ok) throw new Error("Gagal");
 
-      router.push("/admin/destinasi");
+      setSuccess(true);
+      setTimeout(() => {
+        router.push("/admin/destinasi");
+      }, 1300);
     } catch (err) {
       console.error(err);
       alert("Gagal menambah destinasi");
+    } finally {
+      setLoading(false);
     }
   }
-
-  /* ================= UI ================= */
-  return (
-    <div>
-      <h2 className="text-xl font-semibold text-blue-700 mb-4">
-        Tambah Destinasi
-      </h2>
-
-      <form className="bg-white p-6 rounded-xl shadow" onSubmit={handleSubmit}>
-        <div className="grid gap-4">
-          <input
-            required
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="border p-2 rounded"
-            placeholder="Nama destinasi"
-          />
-
-          <textarea
-            required
-            value={desc}
-            onChange={(e) => setDesc(e.target.value)}
-            className="border p-2 rounded"
-            placeholder="Deskripsi"
-            rows={4}
-          />
-
-          <input
-            type="number"
-            value={price}
-            onChange={(e) => setPrice(Number(e.target.value))}
-            className="border p-2 rounded"
-            placeholder="Harga"
-          />
-
-          {/* ✅ KATEGORI WISATA */}
-          <select
-            required
-            value={categoryId}
-            onChange={(e) => setCategoryId(Number(e.target.value))}
-            className="border p-2 rounded"
-          >
-            <option value="">Pilih Kategori Wisata</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-
-          {/* ✅ KATEGORI KABUPATEN */}
-          <select
-            required
-            value={kabupatenId}
-            onChange={(e) => setKabupatenId(Number(e.target.value))}
-            className="border p-2 rounded"
-          >
-            <option value="">Pilih Kabupaten</option>
-            {kabupaten.map((k) => (
-              <option key={k.id} value={k.id}>
-                {k.name}
-              </option>
-            ))}
-          </select>
-
-          <input
-            type="file"
-            onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
-            className="border p-2 rounded"
-          />
-
-          <div className="flex gap-2">
-            <button className="px-4 py-2 bg-blue-600 text-white rounded">
-              Simpan
-            </button>
-            <button
-              type="button"
-              onClick={() => router.back()}
-              className="px-4 py-2 bg-gray-100 rounded"
-            >
-              Batal
-            </button>
-          </div>
+/* ================= UI ================= */
+return (
+  <>
+    {/* SUCCESS TOAST */}
+    {success && (
+      <div className="fixed top-4 right-4 z-50 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg animate-in slide-in-from-top">
+        Destinasi berhasil ditambahkan
+      </div>
+    )}
+        {/* HEADER */}
+        <div className="px-6 py-4 border-b">
+          <h2 className="text-lg font-semibold text-gray-800">
+            Tambah Destinasi
+          </h2>
         </div>
-      </form>
-    </div>
-  );
+
+        {/* BODY */}
+        {success ? (
+          <div className="flex flex-col items-center py-16 animate-in fade-in zoom-in">
+            <CheckCircle className="w-16 h-16 text-green-500 mb-4" />
+            <h3 className="text-lg font-semibold text-gray-800">
+              Berhasil!
+            </h3>
+            <p className="text-gray-500 text-sm">
+              Destinasi berhasil ditambahkan
+            </p>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Nama Destinasi
+              </label>
+              <input
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Deskripsi
+              </label>
+              <textarea
+                required
+                rows={3}
+                value={desc}
+                onChange={(e) => setDesc(e.target.value)}
+                className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Harga</label>
+              <input
+                type="number"
+                min={1}
+                required
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Kategori Wisata
+              </label>
+              <select
+                required
+                value={categoryId}
+                onChange={(e) => setCategoryId(e.target.value)}
+                className="w-full border rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500 outline-none"
+              >
+                <option value="">Pilih Kategori</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Region</label>
+              <select
+                required
+                value={regionId}
+                onChange={(e) => setRegionId(e.target.value)}
+                className="w-full border rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500 outline-none"
+              >
+                <option value="">Pilih Region</option>
+                {regions.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Gambar Destinasi
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+                className="text-sm"
+              />
+            </div>
+
+            {/* FOOTER */}
+            <div className="flex justify-end gap-2 pt-4 border-t">
+              <button
+                type="button"
+                onClick={() => router.back()}
+                className="px-4 py-2 bg-gray-100 rounded-lg"
+              >
+                Batal
+              </button>
+
+              <button
+                disabled={loading}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-60"
+              >
+                {loading ? "Menyimpan..." : "Simpan"}
+              </button>
+            </div>
+          </form>
+        )}
+    
+  </>
+);
+
 }
