@@ -84,9 +84,14 @@ export default function DestinationDetail() {
         {/* HEADER IMAGE dari API */}
         <View style={styles.imageWrapper}>
           <Image
-            source={{ uri: `${BASE_URL}${detail.imageUrl}` }}
+            source={{
+              uri: detail.imageUrl.startsWith("http")
+                ? detail.imageUrl
+                : `${BASE_URL}${detail.imageUrl}`,
+            }}
             style={styles.headerImage}
           />
+
           <View style={styles.overlay} />
         </View>
 
