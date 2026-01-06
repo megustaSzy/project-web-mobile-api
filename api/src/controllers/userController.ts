@@ -43,22 +43,25 @@ export const userController = {
         return ResponseData.forbidden(res, "akses ditolak");
       }
 
-      const user = await userService.getUserById(id); // ambil user lama
+      const user = await userService.getUserById(id);
       if (!user) return ResponseData.notFound(res, "user tidak ditemukan");
 
       let avatarUrl: string | undefined;
       let avatarPublicId: string | undefined;
 
       if (req.file) {
+        // hapus avatar lama + invalidate cache
+        if (user.avatarPublicId) {
+          await cloudinary.uploader.destroy(user.avatarPublicId, {
+            invalidate: true,
+            resource_type: "image",
+          });
+        }
+
         // upload avatar baru
         const result: any = await uploadToCloudinary(req.file.buffer);
         avatarUrl = result.secure_url;
         avatarPublicId = result.public_id;
-
-        // hapus avatar lama dari Cloudinary
-        if (user.avatarPublicId) {
-          await cloudinary.uploader.destroy(user.avatarPublicId);
-        }
       }
 
       const updatedUser = await userService.updateUserById(id, {

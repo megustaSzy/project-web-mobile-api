@@ -48,6 +48,39 @@ export const regionController = {
     }
   },
 
+  // async edit(req: Request, res: Response, next: NextFunction) {
+  //   try {
+  //     const id = Number(req.params.id);
+  //     if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
+
+  //     const region = await regionService.getById(id);
+  //     if (!region) return ResponseData.notFound(res, "region tidak ditemukan");
+
+  //     let imageUrl: string | undefined;
+  //     let imagePublicId: string | undefined;
+
+  //     if (req.file) {
+  //       const result: any = await uploadToCloudinary(req.file.buffer);
+  //       imageUrl = result.secure_url;
+  //       imagePublicId = result.public_id;
+
+  //       if (region.imagePublicId) {
+  //         await cloudinary.uploader.destroy(region.imagePublicId);
+  //       }
+  //     }
+
+  //     const updateRegion = await regionService.editRegion(id, {
+  //       ...req.body,
+  //       ...(imageUrl && { imageUrl }),
+  //       ...(imagePublicId && { imagePublicId }),
+  //     });
+
+  //     return ResponseData.ok(res, updateRegion);
+  //   } catch (error) {
+  //     next(error);
+  //   }
+  // },
+
   async edit(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
@@ -60,15 +93,21 @@ export const regionController = {
       let imagePublicId: string | undefined;
 
       if (req.file) {
+        // Hapus image lama dulu, paksa CDN refresh
+        if (region.imagePublicId) {
+          await cloudinary.uploader.destroy(region.imagePublicId, {
+            invalidate: true,
+            resource_type: "image",
+          });
+        }
+
+        // Upload image baru
         const result: any = await uploadToCloudinary(req.file.buffer);
         imageUrl = result.secure_url;
         imagePublicId = result.public_id;
-
-        if (region.imagePublicId) {
-          await cloudinary.uploader.destroy(region.imagePublicId);
-        }
       }
 
+      // Update record di DB
       const updateRegion = await regionService.editRegion(id, {
         ...req.body,
         ...(imageUrl && { imageUrl }),
@@ -80,7 +119,6 @@ export const regionController = {
       next(error);
     }
   },
-
   async deleteRegion(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);

@@ -6,7 +6,7 @@ export const uploadToCloudinary = (fileBuffer: Buffer) => {
       {
         folder: "uploads",
         resource_type: "image",
-        timeout: 60000,
+        timeout: 60000, // 60 detik
       },
       (error, result) => {
         if (error) {
