@@ -11,7 +11,7 @@ const router = Router();
 router.get("/", regionController.getRegencies);
 router.get("/:id", regionController.getById);
 router.post("/", authMiddleware, authorizeRoles("Admin"), validate(createRegionSchema), regionController.create);
-router.patch("/:id", authMiddleware, authorizeRoles("Admin"), upload.single("image"), validate(updateRegionSchema), regionController.edit);
+router.put("/:id", authMiddleware, authorizeRoles("Admin"), upload.single("image"), validate(updateRegionSchema), regionController.edit);
 router.delete("/:id", authMiddleware, authorizeRoles("Admin"), regionController.deleteRegion);
 
 export default router;
