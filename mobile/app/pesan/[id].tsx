@@ -132,13 +132,19 @@ export default function PesanPage() {
         </View>
 
 
-        {/* CARD */}
+       {/* CARD */}
         <View style={styles.card}>
           {/* TITLE */}
-        <Text style={styles.title}>{title}</Text>
-        <Text style={styles.category}>
-          {category.toLowerCase()}
-        </Text>
+          <Text style={styles.title}>{title}</Text>
+
+          {/* CATEGORY BADGE */}
+          {category && category !== "Kategori" && (
+            <View style={styles.categoryBadge}>
+              <Text style={styles.categoryText}>
+                {category.toLowerCase()}
+              </Text>
+            </View>
+          )}
 
           {/* PICKUP */}
           <Text style={styles.label}>Lokasi Penjemputan</Text>
@@ -312,6 +318,23 @@ category: {
   color: "#2F80ED",
   fontSize: 14,
   textTransform: "capitalize",
+},
+
+  categoryText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#2F80ED",
+    textTransform: "capitalize",
+  },
+
+categoryBadge: {
+  alignSelf: "flex-start",
+  backgroundColor: "#E8F1FF",
+  paddingHorizontal: 12,
+  paddingVertical: 4,
+  borderRadius: 20,
+  marginTop: 6,
+  marginBottom: 10,
 },
 
 
