@@ -23,31 +23,22 @@ export default function SearchCard() {
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isAreaOpen, setIsAreaOpen] = useState(false);
 
-  // Geolokasi
+  // State untuk pesan error
+  const [errorMessage, setErrorMessage] = useState("");
+
+  /* =======================
+     GEOLOCATION
+  ======================= */
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (!navigator.geolocation) {
-      setLocation("Browser tidak mendukung geolocation");
-      return;
-    }
+    if (!navigator.geolocation) return;
 
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const { latitude, longitude } = pos.coords;
-
         try {
           const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`,
-            {
-              headers: {
-                "User-Agent": "FadlySearchCardApp/1.0 (your_email@example.com)",
-                "Accept-Language": "id",
-              },
-            }
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
           );
-
-          if (!res.ok) throw new Error("Gagal fetch lokasi");
-
           const data: ReverseGeocodeResponse = await res.json();
 
           const kecamatan =
@@ -55,6 +46,7 @@ export default function SearchCard() {
             data.address?.suburb ||
             data.address?.village ||
             "Lokasi tidak diketahui";
+
           const kabupaten = data.address?.county || data.address?.city || "";
           const provinsi = data.address?.state || "";
 
@@ -63,32 +55,11 @@ export default function SearchCard() {
               provinsi ? ", " + provinsi : ""
             }`
           );
-        } catch (err) {
-          console.error("Error reverse geocode:", err);
+        } catch {
           setLocation("Gagal mendeteksi lokasi");
         }
       },
-      (err) => {
-        console.error("Error geolocation:", err);
-        switch (err.code) {
-          case 1:
-            setLocation("Izin lokasi ditolak");
-            break;
-          case 2:
-            setLocation("Lokasi tidak tersedia");
-            break;
-          case 3:
-            setLocation("Timeout mendeteksi lokasi");
-            break;
-          default:
-            setLocation("Gagal mendapatkan lokasi");
-        }
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0,
-      }
+      () => setLocation("Izin lokasi ditolak")
     );
   }, []);
 
@@ -134,9 +105,16 @@ export default function SearchCard() {
   ======================= */
   const handleSearch = () => {
     if (!selectedCategory && !selectedArea) {
-      alert("Silakan pilih kategori atau daerah");
+      // Tampilkan error inline
+      setErrorMessage("Silakan pilih kategori atau daerah");
+      // Hilangkan otomatis setelah 3 detik
+      setTimeout(() => setErrorMessage(""), 3000);
       return;
     }
+
+    // Reset error jika ada
+    setErrorMessage("");
+
     const params = new URLSearchParams();
     if (selectedCategory) params.append("category", selectedCategory);
     if (selectedArea) params.append("area", selectedArea);
@@ -231,6 +209,13 @@ export default function SearchCard() {
           Search
         </button>
       </div>
+
+      {/* ERROR MESSAGE */}
+      {errorMessage && (
+        <p className="text-red-500 text-sm mt-2 md:col-span-5">
+          {errorMessage}
+        </p>
+      )}
     </div>
   );
 }

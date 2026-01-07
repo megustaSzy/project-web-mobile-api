@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 export default function Footer() {
   return (
     <footer
@@ -9,7 +10,7 @@ export default function Footer() {
       <div
         className="absolute inset-0 z-0 opacity-10 pointer-events-none"
         style={{
-          backgroundImage: "url('/images/footer-pattern.png')",
+          // backgroundImage: "url('/images/texturegaris.svg')",
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
