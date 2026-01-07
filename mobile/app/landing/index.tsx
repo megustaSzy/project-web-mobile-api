@@ -385,11 +385,53 @@ export default function HomeScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* 🔥 MODAL NOT FOUND */}
+      <Modal visible={notFoundModal} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.notFoundBox}>
+            <Ionicons name="alert-circle" size={60} color="#DC2626" />
+            <Text style={styles.notFoundTitle}>
+              Destinasi Tidak Ditemukan
+            </Text>
+            <Text style={styles.notFoundText}>
+              Coba pilih kategori atau daerah lain
+            </Text>
+
+            <TouchableOpacity
+              style={styles.closeBtn}
+              onPress={() => setNotFoundModal(false)}
+            >
+              <Text style={{ color: "#fff", fontWeight: "700" }}>Tutup</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  notFoundBox: {
+  width: "85%",
+  backgroundColor: "#fff",
+  padding: 25,
+  borderRadius: 15,
+  alignItems: "center",
+},
+notFoundTitle: {
+  fontSize: 18,
+  fontWeight: "700",
+  marginTop: 10,
+  color: "#111827",
+},
+notFoundText: {
+  fontSize: 14,
+  color: "#6B7280",
+  textAlign: "center",
+  marginVertical: 8,
+},
+
   container: {
     flex: 1,
     backgroundColor: "#F8F9FA",

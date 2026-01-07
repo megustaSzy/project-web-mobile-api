@@ -14,9 +14,9 @@ import Modal from "react-native-modal";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import * as ExpoLinking from "expo-linking";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL!;
+ // 🔥 sesuaikan dengan backendmu
 
 export default function LoginForm() {
   const router = useRouter();
@@ -26,75 +26,129 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false);
 
   const [modalVisible, setModalVisible] = useState(false);
-  const [modalStatus, setModalStatus] = useState<"success" | "error" | null>(null);
+  const [modalStatus, setModalStatus] = useState<"success" | "error" | null>(
+    null
+  );
   const [modalMessage, setModalMessage] = useState("");
 
   /* ============================================================
-      🔥 HANDLE GOOGLE DEEP LINK (FIXED & CLEAN)
-============================================================ */
-useEffect(() => {
-  const handleDeepLink = async ({ url }: { url: string }) => {
-    console.log("DEEPLINK MASUK:", url);
+        HANDLE OAUTH GOOGLE CALLBACK (SETELAH REDIRECT)
+  ============================================================ */
+  useEffect(() => {
+    const handleDeepLink = async (event: { url: string }) => {
+      const url = event.url;
 
-    // hanya tangani callback google
-    if (!url.includes("/auth/google")) return;
+      // Contoh URL: myapp://auth/google?accessToken=xxx&refreshToken=yyy
+      if (url.includes("auth/google")) {
+        const params = new URLSearchParams(url.split("?")[1]);
 
-    const parsed = ExpoLinking.parse(url);
-    console.log("PARSED:", parsed.queryParams);
+        const accessToken = params.get("accessToken");
+        const refreshToken = params.get("refreshToken");
 
-    const accessToken = parsed.queryParams?.accessToken as string;
-    const refreshToken = parsed.queryParams?.refreshToken as string;
+        if (accessToken && refreshToken) {
+          await AsyncStorage.setItem("accessToken", accessToken);
+          await AsyncStorage.setItem("refreshToken", refreshToken);
 
-    if (!accessToken || !refreshToken) {
-      console.log("TOKEN TIDAK DITEMUKAN");
+          setModalStatus("success");
+          setModalMessage("Login Google berhasil!");
+          setModalVisible(true);
+
+          setTimeout(() => {
+            setModalVisible(false);
+            router.replace("/landing");
+          }, 1200);
+        }
+      }
+    };
+
+    const subscription = Linking.addEventListener("url", handleDeepLink);
+
+    return () => subscription.remove();
+  }, []);
+
+  /* ============================================================
+        LOGIN MANUAL EMAIL + PASSWORD
+  ============================================================ */
+  const handleLogin = async () => {
+  if (!email || !password) {
+    setModalStatus("error");
+    setModalMessage("Masukkan email dan password!");
+    setModalVisible(true);
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    const res = await fetch(`${API_URL}/api/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const json = await res.json();
+
+    if (!res.ok) {
+      setModalStatus("error");
+      setModalMessage(json.message || "Email atau password salah.");
+      setModalVisible(true);
       return;
     }
 
-    // simpan token
-    await AsyncStorage.setItem("accessToken", accessToken);
-    await AsyncStorage.setItem("refreshToken", refreshToken);
+    // =========================
+    // ✅ DATA DARI API
+    // =========================
+    const token = json.data.accessToken;
+    const user = json.data.user;
 
-    // trigger navbar update
+    // =========================
+    // ✅ SIMPAN TOKEN & PROFILE
+    // =========================
+    await AsyncStorage.setItem("token", token);
+
+    const profile = {
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      avatar: user.avatar ? `${API_URL}${user.avatar}` : null,
+    };
+
+    await AsyncStorage.setItem("profile", JSON.stringify(profile));
+
+    // =========================
+    // 🔔 TRIGGER NAVBAR UPDATE
+    // =========================
     DeviceEventEmitter.emit("loginSuccess");
 
     setModalStatus("success");
-    setModalMessage("Login Google berhasil!");
+    setModalMessage("Login berhasil!");
     setModalVisible(true);
 
     setTimeout(() => {
       setModalVisible(false);
       router.replace("/landing");
-    }, 1200);
-  };
+    }, 1500);
 
-  const subscription = Linking.addEventListener("url", handleDeepLink);
-
-  return () => subscription.remove();
-}, []);
-
-
-  /* ============================================================
-        🔥 LOGIN GOOGLE (FIXED)
-  ============================================================ */
-  const handleGoogleLogin = async () => {
-  // 🔥 HARUS ADA /--/ agar balik ke Expo Go
-  const redirectUri = ExpoLinking.createURL("auth/google");
-
-  console.log("REDIRECT URI:", redirectUri);
-  // contoh hasil:
-  // exp://192.168.100.132:8081/--/auth/google
-
-  const googleAuthUrl =
-    `${API_URL}/api/auth/google?redirect_uri=${encodeURIComponent(
-      redirectUri
-    )}`;
-
-  await Linking.openURL(googleAuthUrl);
+  } catch (err) {
+    setModalStatus("error");
+    setModalMessage("Tidak dapat terhubung ke server.");
+    setModalVisible(true);
+  } finally {
+    setLoading(false);
+  }
 };
 
 
   /* ============================================================
-        UI (TIDAK DIUBAH)
+        LOGIN GOOGLE
+  ============================================================ */
+  const handleGoogleLogin = () => {
+    const googleUrl = `${API_URL}/api/auth/google`;
+    Linking.openURL(googleUrl);
+  };
+
+  /* ============================================================
+        UI
   ============================================================ */
   return (
     <View style={styles.container}>
@@ -135,7 +189,7 @@ useEffect(() => {
 
         <TouchableOpacity
           style={styles.button}
-          onPress={() => {}}
+          onPress={handleLogin}
           disabled={loading}
         >
           {loading ? (
@@ -167,8 +221,20 @@ useEffect(() => {
         </Text>
       </View>
 
-      <Modal isVisible={modalVisible}>
-        <View style={styles.modalBox}>
+      <Modal
+        isVisible={modalVisible}
+        onBackdropPress={() => setModalVisible(false)}
+        animationIn="zoomIn"
+        animationOut="zoomOut"
+      >
+        <View
+          style={[
+            styles.modalBox,
+            modalStatus === "success"
+              ? { backgroundColor: "#ECFDF5" }
+              : { backgroundColor: "#FEF2F2" },
+          ]}
+        >
           <Ionicons
             name={
               modalStatus === "success" ? "checkmark-circle" : "close-circle"
@@ -176,7 +242,14 @@ useEffect(() => {
             size={60}
             color={modalStatus === "success" ? "#059669" : "#DC2626"}
           />
-          <Text style={styles.modalTitle}>
+          <Text
+            style={[
+              styles.modalTitle,
+              modalStatus === "success"
+                ? { color: "#059669" }
+                : { color: "#DC2626" },
+            ]}
+          >
             {modalStatus === "success" ? "Berhasil!" : "Gagal!"}
           </Text>
           <Text style={styles.modalMessage}>{modalMessage}</Text>
@@ -185,7 +258,6 @@ useEffect(() => {
     </View>
   );
 }
-
 
 const styles = StyleSheet.create({
   container: {
