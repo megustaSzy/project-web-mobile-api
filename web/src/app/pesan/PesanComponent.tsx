@@ -50,10 +50,7 @@ export default function PesanComponent() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [showError, setShowError] = useState(false);
   const [paying, setPaying] = useState(false);
-
   const dateRef = useRef<HTMLInputElement>(null);
-  const departRef = useRef<HTMLInputElement>(null);
-  const returnRef = useRef<HTMLInputElement>(null);
 
   /* ================= FETCH DESTINATION ================= */
 
@@ -79,24 +76,23 @@ export default function PesanComponent() {
   /* ================= FETCH PICKUP LOCATION ================= */
 
   useEffect(() => {
-  const fetchPickup = async () => {
-    try {
-      const res = await apiFetch<ApiResponse<PickupType[]>>(
-        "/api/pickup-locations"
-      );
+    const fetchPickup = async () => {
+      try {
+        const res = await apiFetch<ApiResponse<PickupType[]>>(
+          "/api/pickup-locations"
+        );
 
-      console.log("PICKUP RESPONSE:", res);
+        // console.log("PICKUP RESPONSE:", res);
 
-      setPickupLocations(Array.isArray(res.data) ? res.data : []);
-    } catch (err) {
-      console.error("Gagal memuat pickup location", err);
-      setPickupLocations([]);
-    }
-  };
+        setPickupLocations(Array.isArray(res.data) ? res.data : []);
+      } catch (err) {
+        console.error("Gagal memuat pickup location", err);
+        setPickupLocations([]);
+      }
+    };
 
-  fetchPickup();
-}, []);
-
+    fetchPickup();
+  }, []);
 
   if (loading) return <p className="text-center mt-20">Loading...</p>;
   if (!destination)
@@ -227,9 +223,7 @@ export default function PesanComponent() {
                 >
                   −
                 </button>
-                <span className="font-medium w-4 text-center">
-                  {people}
-                </span>
+                <span className="font-medium w-4 text-center">{people}</span>
 
                 <button
                   type="button"
@@ -403,11 +397,21 @@ function ConfirmPopup({
         </h3>
 
         <div className="text-sm space-y-2 text-neutral-600">
-          <p><b>Destinasi:</b> {destination.name}</p>
-          <p><b>Pickup:</b> {pickupName}</p>
-          <p><b>Tanggal:</b> {date}</p>
-          <p><b>Waktu:</b> {departTime} - {returnTime}</p>
-          <p><b>Jumlah:</b> {people} orang</p>
+          <p>
+            <b>Destinasi:</b> {destination.name}
+          </p>
+          <p>
+            <b>Pickup:</b> {pickupName}
+          </p>
+          <p>
+            <b>Tanggal:</b> {date}
+          </p>
+          <p>
+            <b>Waktu:</b> {departTime} - {returnTime}
+          </p>
+          <p>
+            <b>Jumlah:</b> {people} orang
+          </p>
         </div>
 
         <div className="flex justify-between font-semibold">
