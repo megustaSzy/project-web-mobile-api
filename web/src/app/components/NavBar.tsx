@@ -9,6 +9,8 @@ import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
 import { apiFetch } from "@/helpers/api";
 import { usePathname } from "next/navigation";
+import { Poppins } from "next/font/google";
+
 // ========================
 // TIPE API
 // ========================
@@ -23,6 +25,10 @@ export type ApiProfileResponse = {
     avatar?: string | null;
   };
 };
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+});
 
 // ========================
 // KOMPONEN NAVBAR
@@ -206,11 +212,11 @@ export default function NavBar() {
 
   return (
     <header
-      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-        scrolled
-          ? "bg-white shadow-md border-b border-gray-200"
-          : "bg-transparent"
-      }`}
+      className={`${poppins.className} fixed top-0 left-0 w-full z-50
+  text-sm
+  transition-all duration-300 ${
+    scrolled ? "bg-white shadow-md border-b border-gray-200" : "bg-transparent"
+  }`}
     >
       <div className="max-w-7xl mx-auto px-4 flex items-center h-16">
         {/* LOGO */}
@@ -298,26 +304,39 @@ export default function NavBar() {
             </button>
 
             {langOpen && (
-              <div className="absolute right-0 mt-1 w-36 bg-white shadow rounded-md overflow-hidden z-50">
+              <div
+                className={`absolute right-0 mt-1 w-36 bg-white shadow rounded-md overflow-hidden z-50 ${poppins.className}`}
+              >
                 <button
                   onClick={() => {
                     setLanguage("id");
                     localStorage.setItem("language", "id");
                     setLangOpen(false);
                   }}
-                  className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                  className="w-full flex items-center gap-2 px-4 py-2 
+                 font-normal text-gray-700
+                 hover:bg-blue-50 hover:text-blue-600
+                 active:bg-blue-100
+                 transition-colors duration-150"
                 >
-                  🇮🇩 Indonesia
+                  <span className="text-lg">🇮🇩</span>
+                  <span>Indonesia</span>
                 </button>
+
                 <button
                   onClick={() => {
                     setLanguage("en");
                     localStorage.setItem("language", "en");
                     setLangOpen(false);
                   }}
-                  className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                  className="w-full flex items-center gap-2 px-4 py-2
+                 font-normal text-gray-700
+                 hover:bg-blue-50 hover:text-blue-600
+                 active:bg-blue-100
+                 transition-colors duration-150"
                 >
-                  🇺🇸 English
+                  <span className="text-lg">🇺🇸</span>
+                  <span>English</span>
                 </button>
               </div>
             )}
