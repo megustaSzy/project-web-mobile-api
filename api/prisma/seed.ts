@@ -20,33 +20,6 @@ async function main() {
 
   console.log("Admin user seeded");
 
-  const regions = [
-    "Lampung Selatan",
-    "Lampung Timur",
-    "Lampung Tengah",
-    "Lampung Utara",
-    "Lampung Barat",
-    "Pesawaran",
-    "Tulang Bawang",
-    "Way Kanan",
-    "Mesuji",
-    "Pringsewu",
-    "Tanggamus",
-    "Pesisir Barat",
-    "Bandar Lampung",
-    "Metro",
-  ];
-
-  for (const name of regions) {
-    await prisma.tb_regions.upsert({
-      where: { name },
-      update: {},
-      create: { name },
-    });
-  }
-
-  console.log("regions seeded");
-
   const category = ["Air Terjun", "Bukit", "Pantai", "Pulau", "Gunung"];
 
   for (const name of category) {
