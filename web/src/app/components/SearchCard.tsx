@@ -23,6 +23,9 @@ export default function SearchCard() {
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isAreaOpen, setIsAreaOpen] = useState(false);
 
+  // State untuk pesan error
+  const [errorMessage, setErrorMessage] = useState("");
+
   /* =======================
      GEOLOCATION
   ======================= */
@@ -102,9 +105,16 @@ export default function SearchCard() {
   ======================= */
   const handleSearch = () => {
     if (!selectedCategory && !selectedArea) {
-      alert("Silakan pilih kategori atau daerah");
+      // Tampilkan error inline
+      setErrorMessage("Silakan pilih kategori atau daerah");
+      // Hilangkan otomatis setelah 3 detik
+      setTimeout(() => setErrorMessage(""), 3000);
       return;
     }
+
+    // Reset error jika ada
+    setErrorMessage("");
+
     const params = new URLSearchParams();
     if (selectedCategory) params.append("category", selectedCategory);
     if (selectedArea) params.append("area", selectedArea);
@@ -199,6 +209,13 @@ export default function SearchCard() {
           Search
         </button>
       </div>
+
+      {/* ERROR MESSAGE */}
+      {errorMessage && (
+        <p className="text-red-500 text-sm mt-2 md:col-span-5">
+          {errorMessage}
+        </p>
+      )}
     </div>
   );
 }

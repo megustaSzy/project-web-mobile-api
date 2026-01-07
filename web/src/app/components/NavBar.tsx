@@ -8,8 +8,7 @@ import { Menu, X, ChevronDown } from "lucide-react";
 import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
 import { apiFetch } from "@/helpers/api";
-import { usePathname } from "next/navigation"; // untuk highlight otomatis
-
+import { usePathname } from "next/navigation";
 // ========================
 // TIPE API
 // ========================
@@ -43,7 +42,7 @@ export default function NavBar() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [logoutConfirm, setLogoutConfirm] = useState(false);
 
-  const [activeMenu, setActiveMenu] = useState("home"); // menu aktif default
+  const [activeMenu, setActiveMenu] = useState("home");
 
   const translationSource = {
     home: "Beranda",
@@ -60,7 +59,7 @@ export default function NavBar() {
   const [translations] = useState(translationSource);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
-  const pathname = usePathname(); // untuk highlight otomatis berdasarkan route
+  const pathname = usePathname();
 
   const buildAvatarUrl = (avatar?: string | null) => {
     if (!avatar) return "/images/profile.jpg";
@@ -215,7 +214,16 @@ export default function NavBar() {
     >
       <div className="max-w-7xl mx-auto px-4 flex items-center h-16">
         {/* LOGO */}
-        <Image src="/images/logo.png" alt="Logo" width={40} height={40} />
+        <div className="relative w-10 h-10">
+          <Image
+            src="/images/logo.png"
+            alt="Logo"
+            fill
+            sizes="(max-width: 768px) 30px, 40px"
+            style={{ objectFit: "contain" }}
+            priority
+          />
+        </div>
 
         {/* DESKTOP MENU */}
         <nav

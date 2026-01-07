@@ -1,10 +1,11 @@
-/* eslint-disable @next/next/no-img-element */
+// /* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useEffect, useState } from "react";
 import { Star, Quote } from "lucide-react";
 import { apiFetch } from "@/helpers/api";
 import { TestimoniItem, ApiResponse } from "@/types/testimoni";
+
 export default function TestimoniSection() {
   const [testimonials, setTestimonials] = useState<TestimoniItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -68,23 +69,13 @@ export default function TestimoniSection() {
                 ))}
               </div>
 
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full overflow-hidden">
-                  <img
-                    src="/images/default-user.png"
-                    alt="User"
-                    className="w-10 h-10 object-cover"
-                  />
-                </div>
-
-                <div>
-                  <h4 className="font-semibold text-blue-600">
-                    {item.name || "Anonymous"}
-                  </h4>
-                  <p className="text-gray-500 text-xs">
-                    {item.profession || "Pengguna"}
-                  </p>
-                </div>
+              <div className="flex flex-col items-start gap-1">
+                <h4 className="font-semibold text-blue-600">
+                  {item.name || "Anonymous"}
+                </h4>
+                <p className="text-gray-500 text-xs">
+                  {item.profession || "Pengguna"}
+                </p>
               </div>
             </div>
           ))}

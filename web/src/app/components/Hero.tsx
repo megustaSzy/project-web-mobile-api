@@ -50,10 +50,11 @@ export default function Hero() {
           <div className="relative z-10 flex flex-col justify-center items-center text-center px-4 py-0 md:py-0">
             <div className="w-24 h-24 md:w-40 md:h-40 relative mb-6 md:mb-0">
               <Image
-                src="/images/best.png" 
-                alt="Best Travel Experience"
+                src="/images/best.png"
+                alt="Best"
                 fill
-                className="object-contain"
+                sizes="(max-width: 768px) 100vw, 50vw"
+                style={{ objectFit: "cover" }}
               />
             </div>
           </div>
