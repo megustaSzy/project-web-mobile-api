@@ -60,13 +60,18 @@ export default function HomeScreen() {
   const [filteredDestinations, setFilteredDestinations] = useState<DestinationType[]>([]);
   const [apiAreas, setApiAreas] = useState<AreaType[]>([]);
 
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [historyList, setHistoryList] = useState<HistoryType[]>([]);
   const [historyModal, setHistoryModal] = useState(false);
   const [currentLocation, setCurrentLocation] = useState("Memuat lokasi...");
   const [notFoundModal, setNotFoundModal] = useState(false);
   const [daerahId, setDaerahId] = useState<number | null>(null);
   const [daerahName, setDaerahName] = useState<string | null>(null);
+  // 1️⃣ Untuk DROPDOWN (SEARCH)
+  const [searchKategoriId, setSearchKategoriId] = useState<number | null>(null);
+  const [searchKategoriName, setSearchKategoriName] = useState<string | null>(null);
+
+  // 2️⃣ Untuk CATEGORY LIST (CHIP)
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   // ================= EFFECT =================
   useEffect(() => {
@@ -191,15 +196,14 @@ export default function HomeScreen() {
   };
 
   // ================= HANDLER =================
-  const handleCategoryPress = (name: string) => {
-    if (activeCategory === name) {
-      setActiveCategory(null);
-      setKategoriName(null);
-    } else {
-      setActiveCategory(name);
-      setKategoriName(name);
-    }
+const handleCategoryPress = (name: string) => {
+  if (activeCategory === name) {
+    setActiveCategory(null);
+  } else {
+    setActiveCategory(name);
+  }
   };
+
 
   const handleDestinationPress = (d: DestinationType) => {
     router.push(`../deskripsi/${d.id}`);
@@ -290,14 +294,12 @@ export default function HomeScreen() {
             labelField="label"
             valueField="value"
             placeholder="Pilih Kategori"
-            value={kategoriId}
+            value={searchKategoriId}
             onChange={(item) => {
-              setKategoriId(item.value);
+              const selected = apiCategories.find((c) => c.id === item.value);
 
-              const selected = apiCategories.find(
-                (c) => c.id === item.value
-              );
-              setKategoriName(selected?.name || null);
+              setSearchKategoriId(item.value);
+              setSearchKategoriName(selected?.name || null);
             }}
           />
           </View>
