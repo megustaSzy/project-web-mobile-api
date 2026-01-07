@@ -72,6 +72,8 @@ export default function HomeScreen() {
 
   // 2️⃣ Untuk CATEGORY LIST (CHIP)
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [resultModal, setResultModal] = useState(false);
+  const [searchResults, setSearchResults] = useState<DestinationType[]>([]);
 
   // ================= EFFECT =================
   useEffect(() => {
@@ -221,17 +223,15 @@ const handleCategoryPress = (name: string) => {
   const handleSearch = () => {
   let result = [...apiDestinations];
 
-  console.log("TOTAL DESTINASI:", result.length);
-
-  // FILTER KATEGORI
-  if (kategoriName) {
+  // FILTER KATEGORI (pakai searchKategoriName)
+  if (searchKategoriName) {
     result = result.filter(
-      (d) => d.category?.name === kategoriName
+      (d) => d.category?.name === searchKategoriName
     );
-    console.log("SETELAH FILTER KATEGORI:", result.length);
   }
 
-  // FILTER DAERAH (AMAN)
+
+  // FILTER DAERAH (SESUAI DATA ADMIN)
   if (daerahName) {
     const daerahNormalized = normalizeText(daerahName);
 
@@ -240,24 +240,22 @@ const handleCategoryPress = (name: string) => {
 
       const locationNormalized = normalizeText(d.location);
 
-      return locationNormalized
-        .split(" ")
-        .some((word) => word === daerahNormalized);
+      return locationNormalized.includes(daerahNormalized);
     });
-
-    console.log("SETELAH FILTER DAERAH:", result.length);
   }
 
+
   if (result.length === 0) {
-    setFilteredDestinations([]);
+    setSearchResults([]);
     setNotFoundModal(true);
   } else {
-    setFilteredDestinations(result);
-    setNotFoundModal(false);
+    setSearchResults(result);
+    setResultModal(true); // 🔥 POPUP HASIL
   }
 
   saveHistory();
-};
+  };
+
 
   // ============================
   // RENDER UI
@@ -469,6 +467,67 @@ const handleCategoryPress = (name: string) => {
         </View>
       </View>
     </Modal>
+
+    {/* 🔍 MODAL HASIL PENCARIAN */}
+      <Modal visible={resultModal} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalBox, { maxHeight: "80%" }]}>
+            <Text style={styles.modalTitle}>Hasil Pencarian</Text>
+
+            <ScrollView>
+              {searchResults.map((d) => (
+                <TouchableOpacity
+                  key={d.id}
+                  onPress={() => {
+                    setResultModal(false);
+                    handleDestinationPress(d);
+                  }}
+                  style={{
+                    flexDirection: "row",
+                    marginBottom: 12,
+                    borderBottomWidth: 1,
+                    borderColor: "#EEE",
+                    paddingBottom: 10,
+                  }}
+                >
+                  <Image
+                    source={{
+                      uri: d.imageUrl.startsWith("http")
+                        ? d.imageUrl
+                        : `${BASE_URL}${d.imageUrl}`,
+                    }}
+                    style={{
+                      width: 70,
+                      height: 70,
+                      borderRadius: 10,
+                      marginRight: 10,
+                    }}
+                  />
+
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontSize: 15, fontWeight: "700" }}>
+                      {d.name}
+                    </Text>
+                    <Text style={{ fontSize: 13, color: "#6B7280" }}>
+                      {d.category?.name}
+                    </Text>
+                    <Text style={{ fontSize: 13, color: "#6B7280" }}>
+                      {d.location}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+
+            <TouchableOpacity
+              style={styles.closeBtn}
+              onPress={() => setResultModal(false)}
+            >
+              <Text style={{ color: "#fff", fontWeight: "700" }}>Tutup</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
 
     </ScrollView>
   );
