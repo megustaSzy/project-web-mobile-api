@@ -14,6 +14,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { Dropdown } from "react-native-element-dropdown";
 import { useRouter } from "expo-router";
 import * as Location from "expo-location";
+import { Alert } from "react-native";
+
 
 type DestinationType = {
   id: string | number;
@@ -204,48 +206,54 @@ export default function HomeScreen() {
   };
 
   const normalizeText = (text: string) => {
-  return text
-    .toLowerCase()
-    .replace(/kab\.|kota|provinsi/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
+    return text
+      .toLowerCase()
+      .replace(/kabupaten|kab\.|kota|provinsi|prov\.|,/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
   };
+
 
   const handleSearch = () => {
-    let result = apiDestinations;
+  let result = [...apiDestinations];
 
-    // filter kategori
-    if (kategoriName) {
-      result = result.filter(
-        (d) => d.category?.name === kategoriName
-      );
-    }
+  console.log("TOTAL DESTINASI:", result.length);
 
-    // filter daerah (SUPER AMAN)
-    if (daerahName) {
-      const daerahNormalized = normalizeText(daerahName);
+  // FILTER KATEGORI
+  if (kategoriName) {
+    result = result.filter(
+      (d) => d.category?.name === kategoriName
+    );
+    console.log("SETELAH FILTER KATEGORI:", result.length);
+  }
 
-      result = result.filter((d) => {
-        if (!d.location) return false;
+  // FILTER DAERAH (AMAN)
+  if (daerahName) {
+    const daerahNormalized = normalizeText(daerahName);
 
-        const locationNormalized = normalizeText(d.location);
+    result = result.filter((d) => {
+      if (!d.location) return false;
 
-        return locationNormalized.includes(daerahNormalized);
-      });
-    }
+      const locationNormalized = normalizeText(d.location);
 
-    if (result.length === 0) {
-      setFilteredDestinations([]);
-      setNotFoundModal(true);
-    } else {
-      setFilteredDestinations(result);
-      setNotFoundModal(false);
-    }
+      return locationNormalized
+        .split(" ")
+        .some((word) => word === daerahNormalized);
+    });
 
-    saveHistory();
-  };
+    console.log("SETELAH FILTER DAERAH:", result.length);
+  }
 
+  if (result.length === 0) {
+    setFilteredDestinations([]);
+    setNotFoundModal(true);
+  } else {
+    setFilteredDestinations(result);
+    setNotFoundModal(false);
+  }
 
+  saveHistory();
+};
 
   // ============================
   // RENDER UI
@@ -708,3 +716,4 @@ notFoundText: {
     alignItems: "center",
   },
 });
+
