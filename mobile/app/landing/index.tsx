@@ -62,6 +62,7 @@ export default function HomeScreen() {
   const [historyList, setHistoryList] = useState<HistoryType[]>([]);
   const [historyModal, setHistoryModal] = useState(false);
   const [currentLocation, setCurrentLocation] = useState("Memuat lokasi...");
+  const [notFoundModal] = useState(false);
 
   // ================= EFFECT =================
   useEffect(() => {
@@ -199,6 +200,10 @@ export default function HomeScreen() {
   const handleDestinationPress = (d: DestinationType) => {
     router.push(`../deskripsi/${d.id}`);
   };
+
+  function setNotFoundModal(arg0: boolean): void {
+    throw new Error("Function not implemented.");
+  }
 
   // ============================
   // RENDER UI
@@ -388,25 +393,26 @@ export default function HomeScreen() {
 
       {/* 🔥 MODAL NOT FOUND */}
       <Modal visible={notFoundModal} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
-          <View style={styles.notFoundBox}>
-            <Ionicons name="alert-circle" size={60} color="#DC2626" />
-            <Text style={styles.notFoundTitle}>
-              Destinasi Tidak Ditemukan
-            </Text>
-            <Text style={styles.notFoundText}>
-              Coba pilih kategori atau daerah lain
-            </Text>
+      <View style={styles.modalOverlay}>
+        <View style={styles.notFoundBox}>
+          <Ionicons name="alert-circle" size={60} color="#DC2626" />
+          <Text style={styles.notFoundTitle}>
+            Destinasi Tidak Ditemukan
+          </Text>
+          <Text style={styles.notFoundText}>
+            Coba pilih kategori atau daerah lain
+          </Text>
 
-            <TouchableOpacity
-              style={styles.closeBtn}
-              onPress={() => setNotFoundModal(false)}
-            >
-              <Text style={{ color: "#fff", fontWeight: "700" }}>Tutup</Text>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity
+            style={styles.closeBtn}
+            onPress={() => setNotFoundModal(false)}
+          >
+            <Text style={{ color: "#fff", fontWeight: "700" }}>Tutup</Text>
+          </TouchableOpacity>
         </View>
-      </Modal>
+      </View>
+    </Modal>
+
     </ScrollView>
   );
 }
