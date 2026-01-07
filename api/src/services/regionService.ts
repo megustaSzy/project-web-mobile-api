@@ -1,5 +1,5 @@
 import prisma from "../lib/prisma";
-import { CreateRegionDTO, UpdateeRegionDTO } from "../schemas/regionSchema";
+import { CreateRegionDTO, UpdateRegionDTO } from "../types/region";
 import { createError } from "../utilities/createError";
 import { Pagination } from "../utilities/Pagination";
 
@@ -50,8 +50,10 @@ export const regionService = {
     });
   },
 
-  async editRegion(id: number, data: UpdateeRegionDTO) {
+  async editRegion(id: number, data: UpdateRegionDTO) {
+
     const region = await prisma.tb_regions.findUnique({ where: { id } });
+
     if (!region) throw createError("id tidak ditemukan", 404);
 
     return prisma.tb_regions.update({
