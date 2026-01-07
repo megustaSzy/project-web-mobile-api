@@ -63,6 +63,8 @@ export default function HomeScreen() {
   const [historyModal, setHistoryModal] = useState(false);
   const [currentLocation, setCurrentLocation] = useState("Memuat lokasi...");
   const [notFoundModal, setNotFoundModal] = useState(false);
+  const [daerahId, setDaerahId] = useState<number | null>(null);
+  const [daerahName, setDaerahName] = useState<string | null>(null);
 
   // ================= EFFECT =================
   useEffect(() => {
@@ -201,34 +203,49 @@ export default function HomeScreen() {
     router.push(`../deskripsi/${d.id}`);
   };
 
-const handleSearch = () => {
-  let result = apiDestinations;
+  const normalizeText = (text: string) => {
+  return text
+    .toLowerCase()
+    .replace(/kab\.|kota|provinsi/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  };
 
-  if (kategoriName) {
-    result = result.filter(
-      (d) => d.category?.name === kategoriName
-    );
-  }
+  const handleSearch = () => {
+    let result = apiDestinations;
 
-  if (daerah) {
-    result = result.filter(
-      (d) =>
-        d.location?.toLowerCase().includes(
-          String(daerah).toLowerCase()
-        )
-    );
-  }
+    // filter kategori
+    if (kategoriName) {
+      result = result.filter(
+        (d) => d.category?.name === kategoriName
+      );
+    }
 
-  if (result.length === 0) {
-    setFilteredDestinations([]);
-    setNotFoundModal(true);
-  } else {
-    setFilteredDestinations(result);
-    setNotFoundModal(false);
-  }
+    // filter daerah (SUPER AMAN)
+    if (daerahName) {
+      const daerahNormalized = normalizeText(daerahName);
 
-  saveHistory();
-};
+      result = result.filter((d) => {
+        if (!d.location) return false;
+
+        const locationNormalized = normalizeText(d.location);
+
+        return locationNormalized.includes(daerahNormalized);
+      });
+    }
+
+    if (result.length === 0) {
+      setFilteredDestinations([]);
+      setNotFoundModal(true);
+    } else {
+      setFilteredDestinations(result);
+      setNotFoundModal(false);
+    }
+
+    saveHistory();
+  };
+
+
 
   // ============================
   // RENDER UI
@@ -282,21 +299,26 @@ const handleSearch = () => {
             <Text style={styles.inputLabel}>Daerah</Text>
 
             <Dropdown
-              style={styles.dropdown}
-              placeholderStyle={styles.placeholderStyle}
-              selectedTextStyle={styles.selectedTextStyle}
-              data={apiAreas.map((a) => ({
-                label: a.nama,
-                value: a.id,   // ⬅️ GUNAKAN ID (PENTING)
-              }))}
-              labelField="label"
-              valueField="value"
-              placeholder="Pilih Daerah"
-              value={daerah}
-              onChange={(item) => {
-                setDaerah(item.value);
-              }}
-            />
+            style={styles.dropdown}
+            placeholderStyle={styles.placeholderStyle}
+            selectedTextStyle={styles.selectedTextStyle}
+            data={apiAreas.map((a) => ({
+              label: a.nama,
+              value: a.id,
+            }))}
+            labelField="label"
+            valueField="value"
+            placeholder="Pilih Daerah"
+            value={daerahId}
+            onChange={(item) => {
+              setDaerahId(item.value);
+
+              const selected = apiAreas.find(
+                (a) => a.id === item.value
+              );
+              setDaerahName(selected?.nama || null);
+            }}
+          />
           </View>
         </View>
 
