@@ -62,7 +62,7 @@ export default function HomeScreen() {
   const [historyList, setHistoryList] = useState<HistoryType[]>([]);
   const [historyModal, setHistoryModal] = useState(false);
   const [currentLocation, setCurrentLocation] = useState("Memuat lokasi...");
-  const [notFoundModal] = useState(false);
+  const [notFoundModal, setNotFoundModal] = useState(false);
 
   // ================= EFFECT =================
   useEffect(() => {
@@ -201,9 +201,34 @@ export default function HomeScreen() {
     router.push(`../deskripsi/${d.id}`);
   };
 
-  function setNotFoundModal(arg0: boolean): void {
-    throw new Error("Function not implemented.");
+const handleSearch = () => {
+  let result = apiDestinations;
+
+  if (kategoriName) {
+    result = result.filter(
+      (d) => d.category?.name === kategoriName
+    );
   }
+
+  if (daerah) {
+    result = result.filter(
+      (d) =>
+        d.location?.toLowerCase().includes(
+          String(daerah).toLowerCase()
+        )
+    );
+  }
+
+  if (result.length === 0) {
+    setFilteredDestinations([]);
+    setNotFoundModal(true);
+  } else {
+    setFilteredDestinations(result);
+    setNotFoundModal(false);
+  }
+
+  saveHistory();
+};
 
   // ============================
   // RENDER UI
@@ -276,7 +301,7 @@ export default function HomeScreen() {
         </View>
 
         <View style={styles.rowBetween}>
-          <TouchableOpacity style={styles.searchBtn} onPress={saveHistory}>
+          <TouchableOpacity style={styles.searchBtn} onPress={handleSearch}>
             <Text style={styles.searchText}>Cari</Text>
           </TouchableOpacity>
         </View>
