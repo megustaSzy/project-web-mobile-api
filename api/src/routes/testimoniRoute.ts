@@ -5,23 +5,52 @@ import { authorizeRoles } from "../middlewares/roleMiddleware";
 
 const router = Router();
 
-// tampil di website (hanya APPROVED)
-router.get("/", testimoniController.getApproved);
-router.get("/:id", testimoniController.getById);
 
+router.get("/", testimoniController.getApproved);
 router.post("/", testimoniController.create);
 
-router.delete("/:id", authMiddleware, authorizeRoles("Admin"), testimoniController.delete ); 
+router.get(
+  "/admin",
+  authMiddleware,
+  authorizeRoles("Admin"),
+  testimoniController.getAll
+);
+router.get(
+  "/admin/pending",
+  authMiddleware,
+  authorizeRoles("Admin"),
+  testimoniController.getPending
+);
 
-router.get("/admin", authMiddleware, authorizeRoles("Admin"), testimoniController.getAll);
+// Admin approve/reject
+router.patch(
+  "/admin/:id/approve",
+  authMiddleware,
+  authorizeRoles("Admin"),
+  testimoniController.approve
+);
+router.patch(
+  "/admin/:id/reject",
+  authMiddleware,
+  authorizeRoles("Admin"),
+  testimoniController.reject
+);
 
-router.get("/admin/pending", authMiddleware, authorizeRoles("Admin"), testimoniController.getPending);
+// Route dinamis harus di paling bawah
+router.get("/:id", testimoniController.getById);
 
-router.put("/:id", authMiddleware, authorizeRoles("Admin"), testimoniController.edit);  // user pemilik testimoni
-
-router.patch("/admin/:id/approve", authMiddleware, authorizeRoles("Admin"), testimoniController.approve);
-
-router.patch("/admin/:id/reject", authMiddleware, authorizeRoles("Admin"), testimoniController.reject);
-
+// Admin edit / delete testimoni
+router.put(
+  "/:id",
+  authMiddleware,
+  authorizeRoles("Admin"),
+  testimoniController.edit
+);
+router.delete(
+  "/:id",
+  authMiddleware,
+  authorizeRoles("Admin"),
+  testimoniController.delete
+);
 
 export default router;
