@@ -64,6 +64,7 @@ export const teamController = {
 
       if (req.file) {
         const result: any = await uploadToCloudinary(req.file.buffer);
+
         imageUrl = result.secure_url;
         imagePublicId = result.public_id;
 
