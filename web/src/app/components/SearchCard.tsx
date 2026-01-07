@@ -23,19 +23,31 @@ export default function SearchCard() {
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isAreaOpen, setIsAreaOpen] = useState(false);
 
-  /* =======================
-     GEOLOCATION
-  ======================= */
+  // Geolokasi
   useEffect(() => {
-    if (!navigator.geolocation) return;
+    if (typeof window === "undefined") return;
+    if (!navigator.geolocation) {
+      setLocation("Browser tidak mendukung geolocation");
+      return;
+    }
 
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const { latitude, longitude } = pos.coords;
+
         try {
           const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`,
+            {
+              headers: {
+                "User-Agent": "FadlySearchCardApp/1.0 (your_email@example.com)",
+                "Accept-Language": "id",
+              },
+            }
           );
+
+          if (!res.ok) throw new Error("Gagal fetch lokasi");
+
           const data: ReverseGeocodeResponse = await res.json();
 
           const kecamatan =
@@ -43,7 +55,6 @@ export default function SearchCard() {
             data.address?.suburb ||
             data.address?.village ||
             "Lokasi tidak diketahui";
-
           const kabupaten = data.address?.county || data.address?.city || "";
           const provinsi = data.address?.state || "";
 
@@ -52,11 +63,32 @@ export default function SearchCard() {
               provinsi ? ", " + provinsi : ""
             }`
           );
-        } catch {
+        } catch (err) {
+          console.error("Error reverse geocode:", err);
           setLocation("Gagal mendeteksi lokasi");
         }
       },
-      () => setLocation("Izin lokasi ditolak")
+      (err) => {
+        console.error("Error geolocation:", err);
+        switch (err.code) {
+          case 1:
+            setLocation("Izin lokasi ditolak");
+            break;
+          case 2:
+            setLocation("Lokasi tidak tersedia");
+            break;
+          case 3:
+            setLocation("Timeout mendeteksi lokasi");
+            break;
+          default:
+            setLocation("Gagal mendapatkan lokasi");
+        }
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      }
     );
   }, []);
 
