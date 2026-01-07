@@ -7,8 +7,9 @@ import {
   FlatList,
   StyleSheet,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useRouter } from "expo-router";
 
+/* ================= TYPE ================= */
 type Ticket = {
   id: number;
   code: string;
@@ -17,13 +18,14 @@ type Ticket = {
   status: "Sudah Dibayar" | "Menunggu Konfirmasi" | "Dibatalkan";
 };
 
-export default function TiketScreen() {
-  const navigation: any = useNavigation();
+/* ================= PAGE ================= */
+export default function TiketPage() {
+  const router = useRouter();
 
   const [query, setQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | Ticket["status"]>(
-    "all"
-  );
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | Ticket["status"]
+  >("all");
 
   const [tickets] = useState<Ticket[]>([
     {
@@ -42,11 +44,14 @@ export default function TiketScreen() {
     },
   ]);
 
+  /* ================= FILTER ================= */
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
 
     return tickets
-      .filter((t) => (statusFilter === "all" ? true : t.status === statusFilter))
+      .filter((t) =>
+        statusFilter === "all" ? true : t.status === statusFilter
+      )
       .filter(
         (t) =>
           !q ||
@@ -55,10 +60,13 @@ export default function TiketScreen() {
           t.tanggal.includes(q)
       )
       .sort(
-        (a, b) => new Date(a.tanggal).getTime() - new Date(b.tanggal).getTime()
+        (a, b) =>
+          new Date(a.tanggal).getTime() -
+          new Date(b.tanggal).getTime()
       );
   }, [tickets, query, statusFilter]);
 
+  /* ================= HELPERS ================= */
   const formatDate = (iso: string) =>
     new Date(iso).toLocaleDateString("id-ID", {
       weekday: "short",
@@ -78,6 +86,7 @@ export default function TiketScreen() {
     }
   };
 
+  /* ================= COMPONENT ================= */
   const FilterChip = ({ label }: { label: "all" | Ticket["status"] }) => (
     <TouchableOpacity
       onPress={() => setStatusFilter(label)}
@@ -97,6 +106,7 @@ export default function TiketScreen() {
     </TouchableOpacity>
   );
 
+  /* ================= RENDER ================= */
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Tiket Saya</Text>
@@ -106,6 +116,7 @@ export default function TiketScreen() {
         value={query}
         onChangeText={setQuery}
         placeholder="Cari destinasi, kode, atau tanggal"
+        placeholderTextColor="#9CA3AF"
         style={styles.search}
       />
 
@@ -120,28 +131,44 @@ export default function TiketScreen() {
       {/* LIST */}
       {filtered.length === 0 ? (
         <View style={styles.emptyBox}>
-          <Text style={styles.emptyText}>Tidak ada tiket ditemukan</Text>
+          <Text style={styles.emptyText}>
+            Tidak ada tiket ditemukan
+          </Text>
         </View>
       ) : (
         <FlatList
           data={filtered}
           keyExtractor={(item) => item.id.toString()}
-          contentContainerStyle={{ paddingBottom: 80 }}
+          contentContainerStyle={{ paddingBottom: 100 }}
           renderItem={({ item }) => (
             <TouchableOpacity
               style={styles.card}
-              onPress={() =>
-                navigation.navigate("TiketDetail", { id: item.id })
-              }
+              onPress={() => router.push(`../tiket/${item.id}`)}
+              activeOpacity={0.85}
             >
               <View style={{ flex: 1 }}>
-                <Text style={styles.destinasi}>{item.destinasi}</Text>
-                <Text style={styles.info}>{formatDate(item.tanggal)}</Text>
-                <Text style={styles.kode}>Kode • {item.code}</Text>
+                <Text style={styles.destinasi}>
+                  {item.destinasi}
+                </Text>
+
+                <Text style={styles.info}>
+                  {formatDate(item.tanggal)}
+                </Text>
+
+                <Text style={styles.kode}>
+                  Kode • {item.code}
+                </Text>
               </View>
 
-              <View style={[styles.badge, badgeStyle(item.status)]}>
-                <Text style={styles.badgeText}>{item.status}</Text>
+              <View
+                style={[
+                  styles.badge,
+                  badgeStyle(item.status),
+                ]}
+              >
+                <Text style={styles.badgeText}>
+                  {item.status}
+                </Text>
               </View>
             </TouchableOpacity>
           )}
@@ -163,8 +190,8 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: "700",
+    color: "#111827",
     marginBottom: 14,
-    color: "#111",
   },
 
   search: {
@@ -218,7 +245,7 @@ const styles = StyleSheet.create({
   destinasi: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#111",
+    color: "#111827",
   },
 
   info: {
@@ -245,9 +272,17 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
 
-  badgeGreen: { backgroundColor: "#D1FAE5", color: "#065F46" },
-  badgeYellow: { backgroundColor: "#FEF3C7", color: "#92400E" },
-  badgeRed: { backgroundColor: "#FEE2E2", color: "#991B1B" },
+  badgeGreen: {
+    backgroundColor: "#D1FAE5",
+  },
+
+  badgeYellow: {
+    backgroundColor: "#FEF3C7",
+  },
+
+  badgeRed: {
+    backgroundColor: "#FEE2E2",
+  },
 
   emptyBox: {
     backgroundColor: "#fff",
@@ -258,5 +293,6 @@ const styles = StyleSheet.create({
 
   emptyText: {
     color: "#6B7280",
+    fontSize: 14,
   },
 });
