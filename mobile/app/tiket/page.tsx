@@ -143,7 +143,7 @@ export default function TiketPage() {
           renderItem={({ item }) => (
             <TouchableOpacity
               style={styles.card}
-              onPress={() => router.push(`../tiket/${item.id}`)}
+              onPress={() => router.push(`/tiket/${item.id}/page`)}
               activeOpacity={0.85}
             >
               <View style={{ flex: 1 }}>
