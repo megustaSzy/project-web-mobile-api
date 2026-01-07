@@ -14,6 +14,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { Dropdown } from "react-native-element-dropdown";
 import { useRouter } from "expo-router";
 import * as Location from "expo-location";
+import { Alert } from "react-native";
+
 
 type DestinationType = {
   id: string | number;
@@ -62,6 +64,9 @@ export default function HomeScreen() {
   const [historyList, setHistoryList] = useState<HistoryType[]>([]);
   const [historyModal, setHistoryModal] = useState(false);
   const [currentLocation, setCurrentLocation] = useState("Memuat lokasi...");
+  const [notFoundModal, setNotFoundModal] = useState(false);
+  const [daerahId, setDaerahId] = useState<number | null>(null);
+  const [daerahName, setDaerahName] = useState<string | null>(null);
 
   // ================= EFFECT =================
   useEffect(() => {
@@ -200,6 +205,56 @@ export default function HomeScreen() {
     router.push(`../deskripsi/${d.id}`);
   };
 
+  const normalizeText = (text: string) => {
+    return text
+      .toLowerCase()
+      .replace(/kabupaten|kab\.|kota|provinsi|prov\.|,/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+  };
+
+
+  const handleSearch = () => {
+  let result = [...apiDestinations];
+
+  console.log("TOTAL DESTINASI:", result.length);
+
+  // FILTER KATEGORI
+  if (kategoriName) {
+    result = result.filter(
+      (d) => d.category?.name === kategoriName
+    );
+    console.log("SETELAH FILTER KATEGORI:", result.length);
+  }
+
+  // FILTER DAERAH (AMAN)
+  if (daerahName) {
+    const daerahNormalized = normalizeText(daerahName);
+
+    result = result.filter((d) => {
+      if (!d.location) return false;
+
+      const locationNormalized = normalizeText(d.location);
+
+      return locationNormalized
+        .split(" ")
+        .some((word) => word === daerahNormalized);
+    });
+
+    console.log("SETELAH FILTER DAERAH:", result.length);
+  }
+
+  if (result.length === 0) {
+    setFilteredDestinations([]);
+    setNotFoundModal(true);
+  } else {
+    setFilteredDestinations(result);
+    setNotFoundModal(false);
+  }
+
+  saveHistory();
+};
+
   // ============================
   // RENDER UI
   // ============================
@@ -252,26 +307,31 @@ export default function HomeScreen() {
             <Text style={styles.inputLabel}>Daerah</Text>
 
             <Dropdown
-              style={styles.dropdown}
-              placeholderStyle={styles.placeholderStyle}
-              selectedTextStyle={styles.selectedTextStyle}
-              data={apiAreas.map((a) => ({
-                label: a.nama,
-                value: a.id,   // ⬅️ GUNAKAN ID (PENTING)
-              }))}
-              labelField="label"
-              valueField="value"
-              placeholder="Pilih Daerah"
-              value={daerah}
-              onChange={(item) => {
-                setDaerah(item.value);
-              }}
-            />
+            style={styles.dropdown}
+            placeholderStyle={styles.placeholderStyle}
+            selectedTextStyle={styles.selectedTextStyle}
+            data={apiAreas.map((a) => ({
+              label: a.nama,
+              value: a.id,
+            }))}
+            labelField="label"
+            valueField="value"
+            placeholder="Pilih Daerah"
+            value={daerahId}
+            onChange={(item) => {
+              setDaerahId(item.value);
+
+              const selected = apiAreas.find(
+                (a) => a.id === item.value
+              );
+              setDaerahName(selected?.nama || null);
+            }}
+          />
           </View>
         </View>
 
         <View style={styles.rowBetween}>
-          <TouchableOpacity style={styles.searchBtn} onPress={saveHistory}>
+          <TouchableOpacity style={styles.searchBtn} onPress={handleSearch}>
             <Text style={styles.searchText}>Cari</Text>
           </TouchableOpacity>
         </View>
@@ -385,11 +445,54 @@ export default function HomeScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* 🔥 MODAL NOT FOUND */}
+      <Modal visible={notFoundModal} transparent animationType="fade">
+      <View style={styles.modalOverlay}>
+        <View style={styles.notFoundBox}>
+          <Ionicons name="alert-circle" size={60} color="#DC2626" />
+          <Text style={styles.notFoundTitle}>
+            Destinasi Tidak Ditemukan
+          </Text>
+          <Text style={styles.notFoundText}>
+            Coba pilih kategori atau daerah lain
+          </Text>
+
+          <TouchableOpacity
+            style={styles.closeBtn}
+            onPress={() => setNotFoundModal(false)}
+          >
+            <Text style={{ color: "#fff", fontWeight: "700" }}>Tutup</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  notFoundBox: {
+  width: "85%",
+  backgroundColor: "#fff",
+  padding: 25,
+  borderRadius: 15,
+  alignItems: "center",
+},
+notFoundTitle: {
+  fontSize: 18,
+  fontWeight: "700",
+  marginTop: 10,
+  color: "#111827",
+},
+notFoundText: {
+  fontSize: 14,
+  color: "#6B7280",
+  textAlign: "center",
+  marginVertical: 8,
+},
+
   container: {
     flex: 1,
     backgroundColor: "#F8F9FA",
@@ -613,3 +716,4 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 });
+

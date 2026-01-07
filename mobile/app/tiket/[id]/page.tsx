@@ -1,64 +1,115 @@
-import React from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import React, { useMemo } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+} from "react-native";
 import QRCode from "react-native-qrcode-svg";
+import { useLocalSearchParams } from "expo-router";
 
-export default function DetailTiketScreen({ route }: any) {
-  const { id } = route.params;
+type Ticket = {
+  id: string;
+  destinasi: string;
+  nama: string;
+  tanggal: string;
+  jumlah: number;
+  code: string;
+  status: "Sudah Dibayar" | "Menunggu Konfirmasi";
+};
 
-  // Dummy data — nanti diganti fetch dari API/database
-  const tiket = {
-    id: id,
-    destinasi: "Pantai Sari Ringgung",
-    nama: "Muhammad Arif Alfa'iz",
-    tanggal: "2025-11-20",
-    jumlah: 2,
-    code: `TIK-${id}ABC123`,
-    status: "Sudah Dibayar",
-  };
+export default function DetailTiketPage() {
+  const { id } = useLocalSearchParams<{ id: string }>();
 
-  const badgeColor =
-    tiket.status === "Sudah Dibayar"
-      ? styles.badgeSuccess
-      : styles.badgeWaiting;
+  /* DUMMY DATABASE */
+  const tickets: Ticket[] = [
+    {
+      id: "1",
+      destinasi: "Pantai Sari Ringgung",
+      nama: "Muhammad Arif Alfa'iz",
+      tanggal: "2025-11-20",
+      jumlah: 2,
+      code: "TIK-1ABC123",
+      status: "Sudah Dibayar",
+    },
+    {
+      id: "2",
+      destinasi: "Puncak Mas",
+      nama: "Muhammad Arif Alfa'iz",
+      tanggal: "2025-12-01",
+      jumlah: 1,
+      code: "TIK-2XYZ999",
+      status: "Menunggu Konfirmasi",
+    },
+  ];
+
+  /* AMBIL SESUAI ID */
+  const tiket = useMemo(
+    () => tickets.find((t) => t.id === id),
+    [id]
+  );
+
+  if (!tiket) {
+    return (
+      <View style={styles.container}>
+        <Text style={{ color: "red" }}>Tiket tidak ditemukan</Text>
+      </View>
+    );
+  }
+
+  const isPaid = tiket.status === "Sudah Dibayar";
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Detail Tiket</Text>
 
       <View style={styles.card}>
-        {/* KODE TIKET */}
-        <Text style={styles.label}>Kode Tiket</Text>
-        <Text style={styles.ticketCode}>{tiket.code}</Text>
-
-        {/* INFORMASI */}
-        <View style={styles.info}>
-          <Text>Destinasi: {tiket.destinasi}</Text>
-          <Text>Nama Pemesan: {tiket.nama}</Text>
-          <Text>Tanggal Kunjungan: {tiket.tanggal}</Text>
-          <Text>Jumlah Tiket: {tiket.jumlah}</Text>
-
-          <View style={[styles.badge, badgeColor]}>
-            <Text style={styles.badgeText}>{tiket.status}</Text>
-          </View>
+        <View
+          style={[
+            styles.statusBadge,
+            isPaid ? styles.badgePaid : styles.badgeWaiting,
+          ]}
+        >
+          <Text style={styles.statusText}>{tiket.status}</Text>
         </View>
 
-        {/* QR CODE */}
+        <Text style={styles.code}>{tiket.code}</Text>
+        <Text style={styles.subtitle}>Kode Tiket</Text>
+
+        <View style={styles.infoBox}>
+          <InfoRow label="Destinasi" value={tiket.destinasi} />
+          <InfoRow label="Nama Pemesan" value={tiket.nama} />
+          <InfoRow label="Tanggal Kunjungan" value={tiket.tanggal} />
+          <InfoRow label="Jumlah Tiket" value={`${tiket.jumlah} Orang`} />
+        </View>
+
         <View style={styles.qrWrapper}>
-          <QRCode value={tiket.code} size={200} />
+          <QRCode value={tiket.code} size={180} />
         </View>
 
         <Text style={styles.note}>
-          Tunjukkan QR Code ini di loket untuk masuk
+          Tunjukkan QR Code ini kepada petugas
         </Text>
       </View>
     </ScrollView>
   );
 }
 
+/* COMPONENT */
+const InfoRow = ({ label, value }: { label: string; value: string }) => (
+  <View style={styles.infoRow}>
+    <Text style={styles.infoLabel}>{label}</Text>
+    <Text style={styles.infoValue}>{value}</Text>
+  </View>
+);
+
+/* STYLE */
 const styles = StyleSheet.create({
   container: {
     padding: 16,
-    alignItems: "center",
+    paddingTop: 90,
+    backgroundColor: "#F4F6F8",
+    flexGrow: 1,
   },
   title: {
     fontSize: 22,
@@ -67,50 +118,46 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: "#fff",
-    width: "100%",
+    borderRadius: 20,
     padding: 20,
-    borderRadius: 14,
-    elevation: 3,
-    borderWidth: 1,
-    borderColor: "#ddd",
   },
-  label: {
-    fontSize: 13,
-    color: "#666",
+  statusBadge: {
+    alignSelf: "flex-start",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    marginBottom: 12,
   },
-  ticketCode: {
-    fontSize: 18,
+  badgePaid: { backgroundColor: "#DCFCE7" },
+  badgeWaiting: { backgroundColor: "#FEF3C7" },
+  statusText: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#065F46",
+  },
+  code: {
+    fontSize: 20,
     fontWeight: "700",
   },
-  info: {
-    marginTop: 10,
-    gap: 4,
-  },
-  badge: {
-    marginTop: 6,
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    alignSelf: "flex-start",
-    borderRadius: 6,
-  },
-  badgeSuccess: {
-    backgroundColor: "#CFF9D9",
-  },
-  badgeWaiting: {
-    backgroundColor: "#FFF2B3",
-  },
-  badgeText: {
+  subtitle: {
     fontSize: 12,
-    fontWeight: "600",
+    color: "#6B7280",
+    marginBottom: 16,
   },
-  qrWrapper: {
-    marginTop: 20,
-    alignItems: "center",
+  infoBox: {
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: "#E5E7EB",
+    paddingVertical: 12,
+    marginBottom: 20,
+    gap: 10,
   },
-  note: {
-    textAlign: "center",
-    marginTop: 10,
-    color: "#777",
-    fontSize: 13,
+  infoRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
+  infoLabel: { color: "#6B7280" },
+  infoValue: { fontWeight: "600" },
+  qrWrapper: { alignItems: "center", marginBottom: 12 },
+  note: { textAlign: "center", fontSize: 12, color: "#6B7280" },
 });

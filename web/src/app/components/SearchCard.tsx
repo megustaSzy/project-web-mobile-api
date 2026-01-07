@@ -1,9 +1,24 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { MapPin, ChevronDown } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { MapPin, Check, ChevronsUpDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/helpers/api";
+
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { Button } from "@/components/ui/button";
+
 import { ApiCategoryResponse, CategoryItem } from "@/types/category";
 import {
   RegionApiResponse,
@@ -17,13 +32,15 @@ export default function SearchCard() {
   const [location, setLocation] = useState("Mendeteksi lokasi...");
   const [categories, setCategories] = useState<CategoryItem[]>([]);
   const [areas, setAreas] = useState<Area[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [selectedArea, setSelectedArea] = useState("");
 
-  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
-  const [isAreaOpen, setIsAreaOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<CategoryItem | null>(
+    null
+  );
+  const [selectedArea, setSelectedArea] = useState<Area | null>(null);
 
-  // State untuk pesan error
+  const [openCategory, setOpenCategory] = useState(false);
+  const [openArea, setOpenArea] = useState(false);
+
   const [errorMessage, setErrorMessage] = useState("");
 
   /* =======================
@@ -34,8 +51,8 @@ export default function SearchCard() {
 
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
-        const { latitude, longitude } = pos.coords;
         try {
+          const { latitude, longitude } = pos.coords;
           const res = await fetch(
             `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
           );
@@ -64,71 +81,69 @@ export default function SearchCard() {
   }, []);
 
   /* =======================
-     LOAD CATEGORIES
+     LOAD CATEGORY
   ======================= */
   useEffect(() => {
-    async function loadCategories() {
+    async function load() {
       try {
         const res = await apiFetch<ApiCategoryResponse>("/api/category");
-        setCategories(res.data.items);
-      } catch (err) {
-        console.error("Gagal load kategori:", err);
+        if (res.status === 200 && res.data?.items) {
+          setCategories(res.data.items);
+        }
+      } catch (e) {
+        console.error("Gagal load kategori", e);
       }
     }
-    loadCategories();
+    load();
   }, []);
 
   /* =======================
-     LOAD AREAS
+     LOAD AREA
   ======================= */
   useEffect(() => {
-    async function loadAreas() {
+    async function load() {
       try {
         const res = await apiFetch<RegionApiResponse>("/api/region");
         if (res.status === 200 && res.data?.items) {
           setAreas(
-            res.data.items.map((item) => ({
-              id: item.id,
-              nama: item.name,
+            res.data.items.map((i) => ({
+              id: i.id,
+              nama: i.name,
             }))
           );
         }
-      } catch (err) {
-        console.error("Gagal load daerah:", err);
+      } catch (e) {
+        console.error("Gagal load daerah", e);
       }
     }
-    loadAreas();
+    load();
   }, []);
 
   /* =======================
-     HANDLE SEARCH
+     SEARCH
   ======================= */
   const handleSearch = () => {
     if (!selectedCategory && !selectedArea) {
-      // Tampilkan error inline
       setErrorMessage("Silakan pilih kategori atau daerah");
-      // Hilangkan otomatis setelah 3 detik
       setTimeout(() => setErrorMessage(""), 3000);
       return;
     }
 
-    // Reset error jika ada
-    setErrorMessage("");
-
     const params = new URLSearchParams();
-    if (selectedCategory) params.append("category", selectedCategory);
-    if (selectedArea) params.append("area", selectedArea);
+    if (selectedCategory)
+      params.append("category", String(selectedCategory.id));
+    if (selectedArea) params.append("area", String(selectedArea.id));
+
     router.push(`/search?${params.toString()}`);
   };
 
-  /* =======================
-     RENDER
-  ======================= */
   return (
-    <div className="bg-white rounded-[22px] shadow-sm p-6 w-full max-w-5xl mx-auto border border-gray-200">
+    <div className="bg-white rounded-[22px] p-6 max-w-5xl mx-auto border shadow-sm">
       {/* HEADER */}
       <div className="border-b pb-3">
-        <p className="text-sm text-gray-400">Lokasi Kamu</p>
+        <p className="text-xs font-medium text-gray-500 mb-1 block">
+          Lokasi Kamu
+        </p>
         <h2 className="text-xl font-semibold text-gray-800">{location}</h2>
       </div>
 
@@ -136,85 +151,118 @@ export default function SearchCard() {
       <div className="mt-4 grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
         {/* KATEGORI */}
         <div className="md:col-span-2">
-          <label className="text-xs text-gray-400 mb-1 block">
+          <label className="text-xs font-medium text-gray-500 mb-1 block pl-2">
             Kategori Wisata
           </label>
-          <div
-            className="relative flex items-center gap-2 rounded-full border border-gray-200 bg-white
-                       px-4 h-11 hover:border-gray-300
-                       focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-100 transition"
-            onClick={() => setIsCategoryOpen((p) => !p)}
-          >
-            <MapPin className="w-4 h-4 text-gray-400 shrink-0" />
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              onBlur={() => setIsCategoryOpen(false)}
-              className="w-full bg-transparent text-sm text-gray-700 outline-none appearance-none
-                         cursor-pointer pr-6"
-            >
-              <option value="">Pilih Kategori</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
-            <ChevronDown
-              className={`absolute right-4 w-4 h-4 text-gray-400 pointer-events-none transition-transform duration-200 ${
-                isCategoryOpen ? "rotate-180" : ""
-              }`}
-            />
-          </div>
+
+          <Popover open={openCategory} onOpenChange={setOpenCategory}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                className="w-full h-11 justify-between rounded-full"
+              >
+                <div className="flex items-center gap-2 text-sm font-normal text-gray-600">
+                  <MapPin className="w-4 h-4 text-gray-400" />
+                  {selectedCategory?.name || "Pilih Kategori"}
+                </div>
+
+                <ChevronsUpDown className="w-4 h-4 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+
+            <PopoverContent className="p-0 w-65">
+              <Command>
+                <CommandInput placeholder="Cari kategori..." />
+                <CommandEmpty>Kategori tidak ditemukan</CommandEmpty>
+                <CommandList>
+                  {categories.map((cat) => (
+                    <CommandItem
+                      key={cat.id}
+                      value={cat.name}
+                      onSelect={() => {
+                        setSelectedCategory(cat);
+                        setOpenCategory(false);
+                      }}
+                    >
+                      <Check
+                        className={`mr-2 h-4 w-4 ${
+                          selectedCategory?.id === cat.id
+                            ? "opacity-100"
+                            : "opacity-0"
+                        }`}
+                      />
+                      {cat.name}
+                    </CommandItem>
+                  ))}
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
         </div>
 
         {/* DAERAH */}
         <div className="md:col-span-2">
-          <label className="text-xs text-gray-400 mb-1 block">Daerah</label>
-          <div
-            className="relative flex items-center gap-2 rounded-full border border-gray-200 bg-white
-                       px-4 h-11 hover:border-gray-300
-                       focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-100 transition"
-            onClick={() => setIsAreaOpen((p) => !p)}
-          >
-            <MapPin className="w-4 h-4 text-gray-400 shrink-0" />
-            <select
-              value={selectedArea}
-              onChange={(e) => setSelectedArea(e.target.value)}
-              onBlur={() => setIsAreaOpen(false)}
-              className="w-full bg-transparent text-sm text-gray-700 outline-none appearance-none
-                         cursor-pointer pr-6"
-            >
-              <option value="">Pilih Daerah</option>
-              {areas.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.nama}
-                </option>
-              ))}
-            </select>
-            <ChevronDown
-              className={`absolute right-4 w-4 h-4 text-gray-400 pointer-events-none transition-transform duration-200 ${
-                isAreaOpen ? "rotate-180" : ""
-              }`}
-            />
-          </div>
+          <label className="text-xs font-medium text-gray-500 mb-1 block pl-2">
+            Daerah
+          </label>
+          <Popover open={openArea} onOpenChange={setOpenArea}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                className="w-full h-11 justify-between rounded-full"
+              >
+                <div className="flex items-center gap-2 text-sm font-normal text-gray-600">
+                  <MapPin className="w-4 h-4 text-gray-400" />
+                  {selectedArea?.nama || "Pilih Daerah"}
+                </div>
+                <ChevronsUpDown className="w-4 h-4 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+
+            <PopoverContent className="p-0 w-65">
+              <Command>
+                <CommandInput placeholder="Cari daerah..." />
+                <CommandEmpty>Daerah tidak ditemukan</CommandEmpty>
+                <CommandList>
+                  {areas.map((area) => (
+                    <CommandItem
+                      key={area.id}
+                      value={area.nama}
+                      onSelect={() => {
+                        setSelectedArea(area);
+                        setOpenArea(false);
+                      }}
+                    >
+                      <Check
+                        className={`mr-2 h-4 w-4 ${
+                          selectedArea?.id === area.id
+                            ? "opacity-100"
+                            : "opacity-0"
+                        }`}
+                      />
+                      {area.nama}
+                    </CommandItem>
+                  ))}
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
         </div>
 
         {/* BUTTON */}
-        <button
+        <Button
           onClick={handleSearch}
-          className="h-11 px-6 rounded-full bg-blue-500 text-white text-sm font-medium
-                     hover:bg-blue-600 transition w-full md:w-auto"
+          className="h-11 rounded-full bg-blue-500 hover:bg-blue-600"
         >
           Search
-        </button>
+        </Button>
       </div>
 
-      {/* ERROR MESSAGE */}
+      {/* ERROR */}
       {errorMessage && (
-        <p className="text-red-500 text-sm mt-2 md:col-span-5">
-          {errorMessage}
-        </p>
+        <p className="text-red-500 text-sm mt-2">{errorMessage}</p>
       )}
     </div>
   );
