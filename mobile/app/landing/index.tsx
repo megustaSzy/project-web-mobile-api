@@ -230,19 +230,20 @@ const handleCategoryPress = (name: string) => {
     );
   }
 
-  // FILTER DAERAH
+
+  // FILTER DAERAH (SESUAI DATA ADMIN)
   if (daerahName) {
     const daerahNormalized = normalizeText(daerahName);
 
     result = result.filter((d) => {
       if (!d.location) return false;
+
       const locationNormalized = normalizeText(d.location);
 
-      return locationNormalized
-        .split(" ")
-        .some((word) => word === daerahNormalized);
+      return locationNormalized.includes(daerahNormalized);
     });
   }
+
 
   if (result.length === 0) {
     setSearchResults([]);
