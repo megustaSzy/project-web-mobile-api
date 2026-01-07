@@ -3,6 +3,7 @@ import { regionService } from "../services/regionService";
 import { ResponseData } from "../utilities/Response";
 import { uploadToCloudinary } from "../utilities/uploadToCloudinary";
 import cloudinary from "../config/cloudinary";
+import { UpdateRegionDTO } from "../types/region";
 
 export const regionController = {
   async getRegencies(req: Request, res: Response, next: NextFunction) {
@@ -51,17 +52,17 @@ export const regionController = {
   async edit(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
-      if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
+      if (isNaN(id)) return ResponseData.badRequest(res, "ID tidak valid");
 
       const region = await regionService.getById(id);
-      if (!region) return ResponseData.notFound(res, "region tidak ditemukan");
+      if (!region) return ResponseData.notFound(res, "Region tidak ditemukan");
 
       let imageUrl: string | undefined;
       let imagePublicId: string | undefined;
 
       if (req.file) {
         const result: any = await uploadToCloudinary(req.file.buffer);
-        console.log("Cloudinary result:", result);
+
         imageUrl = result.secure_url;
         imagePublicId = result.public_id;
 
@@ -70,18 +71,19 @@ export const regionController = {
         }
       }
 
-      const updateRegion = await regionService.editRegion(id, {
+      const updateData: UpdateRegionDTO = {
         ...req.body,
         ...(imageUrl && { imageUrl }),
         ...(imagePublicId && { imagePublicId }),
-      });
+      };
 
-      return ResponseData.ok(res, updateRegion);
+      const updatedRegion = await regionService.editRegion(id, updateData);
+
+      return ResponseData.ok(res, updatedRegion);
     } catch (error) {
       next(error);
     }
   },
-
   async deleteRegion(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
