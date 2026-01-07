@@ -1,97 +1,112 @@
 /* eslint-disable @next/next/no-img-element */
+import { Poppins } from "next/font/google";
+import { MapPin, Phone, Mail } from "lucide-react";
+
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
 export default function Footer() {
   return (
     <footer
-  id="contact"
-  className="relative z-10 bg-[#0c1220] text-white pt-16 pb-8 overflow-hidden"
->
-
-      {/* Background pattern */}
-      <div
-        className="absolute inset-0 z-0 opacity-10 pointer-events-none"
-        style={{
-          // backgroundImage: "url('/images/texturegaris.svg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      />
-
-      {/* Konten Footer */}
-      <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-10 grid grid-cols-1 md:grid-cols-4 gap-10">
-        
-        {/* Kiri: Logo & Lokasi */}
+      className={`${poppins.className} bg-[#0c1220] text-white pt-16 pb-12 relative overflow-hidden`}
+    >
+      <div className="max-w-7xl mx-auto px-6 lg:px-10 grid grid-cols-1 md:grid-cols-3 gap-y-8 gap-x-10 space-y-6 md:space-y-0">
+        {/* Logo & Deskripsi */}
         <div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 mb-6">
             <img
               src="/images/logo.png"
               alt="LamiGo Logo"
               className="w-12 h-12 object-contain"
             />
-            <h2 className="text-base font-semibold leading-tight">
-              LamiGo Destination Lampung
-            </h2>
+            <div className="flex flex-col">
+              <h2 className="text-xl font-bold">LamiGo</h2>
+              <span className="text-sm text-gray-400 mt-1">
+                Ayo, jelajahi keindahan bersama LamiGo
+              </span>
+            </div>
           </div>
-          <p className="text-slate-300 text-sm mt-3 leading-relaxed">
-            Kota Bandar Lampung, Lampung<br />Indonesia
+          <p className="text-slate-300 text-sm leading-relaxed">
+            Jelajahi keindahan Lampung bersama LamiGo, dari pantai memukau,
+            pegunungan hijau, hingga pesona alam yang menakjubkan
           </p>
         </div>
 
-        {/* Quick Links */}
-        <div>
-          <h3 className="font-semibold mb-4 text-white">Quick Links</h3>
+        {/* Tautan Cepat */}
+        <div className="md:pl-10">
+          <h3 className="font-semibold mb-4 text-white">Tautan Cepat</h3>
           <ul className="space-y-2 text-slate-300 text-sm">
-            <li><a href="#" className="hover:text-white">About LamiGo</a></li>
-            <li><a href="#" className="hover:text-white">About LamiGo</a></li>
-            <li><a href="#" className="hover:text-white">About LamiGo</a></li>
-            <li><a href="#" className="hover:text-white">About LamiGo</a></li>
-            <li><a href="#" className="hover:text-white">About LamiGo</a></li>
+            <li>
+              <a href="./" className="hover:text-blue-500 transition-colors">
+                Beranda
+              </a>
+            </li>
+            <li>
+              <a
+                href="./about"
+                className="hover:text-blue-500 transition-colors"
+              >
+                Tentang Kami
+              </a>
+            </li>
+            <li>
+              <a
+                href="./wisata"
+                className="hover:text-blue-500 transition-colors"
+              >
+                Daftar Wisata
+              </a>
+            </li>
+            <li>
+              <a
+                href="./tiket"
+                className="hover:text-blue-500 transition-colors"
+              >
+                Tiket Saya
+              </a>
+            </li>
+            <li>
+              <a
+                href="./contact"
+                className="hover:text-blue-500 transition-colors"
+              >
+                Kontak
+              </a>
+            </li>
           </ul>
         </div>
 
-        {/* Top Destination */}
+        {/* Kontak */}
         <div>
-          <h3 className="font-semibold mb-4 text-white">Top Destination</h3>
-          <ul className="space-y-2 text-slate-300 text-sm">
-            <li><a href="#" className="hover:text-white">Rio The Beach</a></li>
-            <li><a href="#" className="hover:text-white">Pahawang</a></li>
-            <li><a href="#" className="hover:text-white">Green Ely Krakatoa</a></li>
-            <li><a href="#" className="hover:text-white">Senaya Beach</a></li>
-            <li><a href="#" className="hover:text-white">Marina Beach</a></li>
-          </ul>
-        </div>
-
-        {/* Contact Info */}
-        <div>
-          <h3 className="font-semibold mb-4 text-white">Contact Info</h3>
+          <h3 className="font-semibold mb-4 text-white">Kontak</h3>
           <ul className="space-y-3 text-slate-300 text-sm">
-            <li className="flex items-start gap-3">
-              <img src="/images/8.png" alt="WhatsApp" className="w-5 h-5 mt-0.5" />
-              <div>
-                <p>Whatsapp</p>
-                <p className="font-semibold text-white">+62851 0088 9876</p>
-              </div>
+            <li className="flex items-center gap-3">
+              <Mail className="w-4 h-4 text-blue-500" />
+              <span>info@lamigo.com</span>
             </li>
-            <li className="flex items-start gap-3">
-              <img src="/images/9.png" alt="Email" className="w-5 h-5 mt-0.5" />
-              <div>
-                <p>Email</p>
-                <p className="font-semibold text-white">LamiGoLampung.com</p>
-              </div>
+
+            <li className="flex items-center gap-3">
+              <Phone className="w-4 h-4 text-blue-500" />
+              <span>+62 821-7846-2234</span>
             </li>
-            <li className="flex items-start gap-3">
-              <img src="/images/10.png" alt="Telpon" className="w-5 h-5 mt-0.5" />
-              <div>
-                <p>Telpon</p>
-                <p className="font-semibold text-white">0876 8800 9876</p>
-              </div>
+            <li className="flex items-center gap-3">
+              <MapPin className="w-4 h-4 text-blue-500" />
+              <span>Bandar Lampung, Indonesia</span>
             </li>
           </ul>
         </div>
       </div>
 
-      {/* Copyright */}
-      <div className="relative z-10 border-t border-slate-800 mt-10 pt-4 text-center text-slate-400 text-sm">
-        Copyright LamiGo 2025
+      {/* Footer bawah */}
+      <div className="mt-10 border-t border-slate-800 pt-10 pb-6 text-center text-slate-400">
+        <div className="flex flex-wrap justify-center gap-6 mb-4">
+          <img src="/images/dikti.png" alt="Partner 1" className="h-13" />
+          <img src="/images/tekno.png" alt="Partner 2" className="h-13" />
+          <img src="/images/if.png" alt="Partner 3" className="h-13" />
+        </div>
+        <p className="text-base">© 2025 LamiGo. Semua hak cipta dilindungi.</p>
       </div>
     </footer>
   );
