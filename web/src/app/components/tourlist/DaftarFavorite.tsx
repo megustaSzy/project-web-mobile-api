@@ -41,13 +41,12 @@ export default function DaftarFavorite() {
               className="bg-white rounded-2xl shadow-md px-5 py-6 flex gap-4 items-start"
             >
               <Image
-  src={item.imageUrl || "/images/fallback.png"}
-  alt={item.name}
-  width={70}
-  height={70}
-  className="rounded-md object-cover"
-/>
-
+                src={item.imageUrl || "/images/fallback.png"}
+                alt={item.name}
+                width={70}
+                height={70}
+                className="rounded-md object-cover"
+              />
 
               <div className="flex flex-col gap-1">
                 <h2 className="font-semibold text-gray-800">{item.name}</h2>
@@ -57,7 +56,7 @@ export default function DaftarFavorite() {
                 </p>
 
                 <Link
-                  href={`/pesanantour?kabupaten=${encodeURIComponent(
+                  href={`/detailtour?kabupaten=${encodeURIComponent(
                     item.name
                   )}`}
                   className="text-blue-500 font-medium text-sm hover:underline"

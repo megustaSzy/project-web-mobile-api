@@ -3,7 +3,7 @@ import Image from "next/image";
 
 export default function HeroTourSection() {
   return (
-    <div className="relative w-full h-[430px] overflow-hidden rounded-b-none shadow-lg">
+    <div className="relative w-full h-107.5 overflow-hidden rounded-b-none shadow-lg">
       {/* Background Image */}
       <Image src="/images/image.png" alt="Hero" fill className="object-cover" />
 
