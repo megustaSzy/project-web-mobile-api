@@ -11,10 +11,13 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
 
 const API_URL = "http://10.93.86.50:3001"; // SAMAKAN DENGAN WEB
 
 export default function ProfileScreen() {
+  const router = useRouter();
+
   const [user, setUser] = useState({
     name: "",
     email: "",
@@ -31,31 +34,31 @@ export default function ProfileScreen() {
     return avatar.startsWith("http") ? avatar : `${API_URL}${avatar}`;
   };
 
-  //------------------------------------------------------
-  // 🔵 PICK IMAGE
-  //------------------------------------------------------
+  // --------------------------------------------------
+  // PICK IMAGE
+  // --------------------------------------------------
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
       aspect: [1, 1],
+      quality: 0.8,
     });
 
     if (!result.canceled) {
       const asset = result.assets[0];
       setPreview(asset.uri);
-      setFile(asset); // Simpan file asli untuk upload
+      setFile(asset);
     }
   };
 
-  //------------------------------------------------------
-  // 🔵 FETCH PROFILE (LOCAL FIRST, THEN API)
-  //------------------------------------------------------
+  // --------------------------------------------------
+  // FETCH PROFILE
+  // --------------------------------------------------
   useEffect(() => {
     const loadProfile = async () => {
       const token = await AsyncStorage.getItem("token");
       const local = await AsyncStorage.getItem("profile");
 
-      // Jika ada profile lokal → tampilkan dulu
       if (local) {
         const p = JSON.parse(local);
         setUser({
@@ -68,6 +71,7 @@ export default function ProfileScreen() {
 
       if (!token) {
         setLoading(false);
+        router.replace("../auth/login/page");
         return;
       }
 
@@ -80,7 +84,6 @@ export default function ProfileScreen() {
 
         if (res.ok) {
           const data = json.data;
-
           const profileData = {
             name: data.name,
             email: data.email,
@@ -94,18 +97,19 @@ export default function ProfileScreen() {
       } catch (err) {
         console.log("Error fetch profile:", err);
       }
+
       setLoading(false);
     };
 
     loadProfile();
   }, []);
 
-  //------------------------------------------------------
-  // 🟢 UPDATE PROFILE (PUT /api/users)
-  //------------------------------------------------------
+  // --------------------------------------------------
+  // UPDATE PROFILE
+  // --------------------------------------------------
   const updateProfile = async () => {
     const token = await AsyncStorage.getItem("token");
-    if (!token) return Alert.alert("Error", "Silakan login terlebih dahulu.");
+    if (!token) return;
 
     try {
       const form = new FormData();
@@ -123,7 +127,6 @@ export default function ProfileScreen() {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
         },
         body: form,
       });
@@ -149,20 +152,42 @@ export default function ProfileScreen() {
       setPreview(null);
       setFile(null);
 
-      Alert.alert("Berhasil", "Profil berhasil diperbarui!");
+      Alert.alert(
+        "Berhasil",
+        "Profil berhasil disimpan",
+        [
+          {
+            text: "OK",
+            onPress: () => router.replace("/(tabs)"),
+          },
+        ]
+      );
     } catch (err) {
       console.log("Error update:", err);
-      Alert.alert("Gagal update profil");
+      Alert.alert("Error", "Terjadi kesalahan saat update profil.");
     }
   };
 
-  //------------------------------------------------------
+  // --------------------------------------------------
+  // LOGOUT
+  // --------------------------------------------------
   const handleLogout = async () => {
     await AsyncStorage.removeItem("token");
     await AsyncStorage.removeItem("profile");
-    Alert.alert("Logout", "Anda telah keluar.");
+
+    Alert.alert(
+      "Logout",
+      "Anda telah logout",
+      [
+        {
+          text: "OK",
+          onPress: () => router.replace("../auth/login/page"),
+        },
+      ]
+    );
   };
 
+  // --------------------------------------------------
   if (loading) {
     return (
       <View style={styles.center}>
@@ -172,9 +197,9 @@ export default function ProfileScreen() {
     );
   }
 
-  //------------------------------------------------------
-  // 🔵 RENDER UI
-  //------------------------------------------------------
+  // --------------------------------------------------
+  // UI
+  // --------------------------------------------------
   return (
     <View style={styles.container}>
       {/* Avatar */}
@@ -197,7 +222,7 @@ export default function ProfileScreen() {
         style={styles.input}
       />
 
-      {/* Email */}
+      {/* Email & Role */}
       <Text style={{ color: "#555", marginBottom: 5 }}>{user.email}</Text>
       <Text style={{ color: "#777", marginBottom: 25 }}>{user.role}</Text>
 
@@ -212,6 +237,9 @@ export default function ProfileScreen() {
   );
 }
 
+// --------------------------------------------------
+// STYLES
+// --------------------------------------------------
 const styles = StyleSheet.create({
   container: {
     padding: 20,
