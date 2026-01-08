@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import PesanComponent from "./PesanComponent";
+import PesanComponent from "@/components/pesan/PesanComponent";
 
 export const dynamic = "force-dynamic";
 
