@@ -62,7 +62,7 @@ export default function TestimoniSection() {
             >
               <Quote className="text-gray-300 mb-2" size={28} />
 
-              <p className="text-gray-700 text-sm mb-4 leading-relaxed">
+              <p className="text-gray-700 text-sm mb-4 leading-relaxed wrap-break-word">
                 {item.comment}
               </p>
 
