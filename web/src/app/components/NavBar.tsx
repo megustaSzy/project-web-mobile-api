@@ -157,6 +157,7 @@ export default function NavBar() {
     else if (pathname.startsWith("/about")) setActiveMenu("about");
     else if (pathname.startsWith("/tourlist")) setActiveMenu("tour");
     else if (pathname.startsWith("/tiket")) setActiveMenu("ticket");
+    else if (pathname.startsWith("/contact")) setActiveMenu("contact");
     else setActiveMenu(""); // default
   }, [pathname]);
 
@@ -237,13 +238,21 @@ export default function NavBar() {
         >
           <Link
             href="/"
-            onClick={() => setActiveMenu("home")}
-            className={`transition-colors duration-200 ${
+            onClick={(e) => {
+              e.preventDefault();
+              setActiveMenu("home");
+              window.scrollTo({
+                top: 0,
+                behavior: "smooth",
+              });
+            }}
+            className={`transition-colors duration-200 cursor-pointer ${
               activeMenu === "home" ? "text-blue-600" : textColor
             }`}
           >
             {translations.home}
           </Link>
+
           <Link
             href="/about"
             onClick={() => setActiveMenu("about")}
@@ -273,12 +282,13 @@ export default function NavBar() {
           </Link>
           <button
             onClick={() => {
-              setActiveMenu("contact");
-              document
-                .getElementById("contact")
-                ?.scrollIntoView({ behavior: "smooth" });
+              setActiveMenu("contact"); // set menu aktif
+              window.scrollTo({
+                top: document.body.scrollHeight, // scroll ke bawah
+                behavior: "smooth",
+              });
             }}
-            className={`transition-colors duration-200 ${
+            className={`transition-colors duration-200 cursor-pointer ${
               activeMenu === "contact" ? "text-blue-600" : textColor
             }`}
           >

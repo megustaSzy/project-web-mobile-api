@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import NavBar from "../components/NavBar";
 import Footer from "../components/Footer";
 
@@ -9,35 +9,52 @@ type Ticket = {
   id: number;
   code: string;
   destinasi: string;
-  tanggal: string; // ISO yyyy-mm-dd
+  tanggal: string;
   status: "Sudah Dibayar" | "Menunggu Konfirmasi" | "Dibatalkan";
 };
 
 export default function TiketPage() {
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const [tickets] = useState<Ticket[]>([
-    {
-      id: 1,
-      code: "TIK-20231101",
-      destinasi: "Pantai Sari Ringgung",
-      tanggal: "2025-11-20",
-      status: "Sudah Dibayar",
-    },
-    {
-      id: 2,
-      code: "TIK-20231102",
-      destinasi: "Puncak Mas",
-      tanggal: "2025-12-01",
-      status: "Menunggu Konfirmasi",
-    },
-  ]);
+  useEffect(() => {
+    const fetchTickets = async () => {
+      try {
+        const bodyData = {
+          userId: 123, // sesuaikan
+        };
+
+        const res = await fetch("/api/tickets", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(bodyData),
+        });
+
+        if (!res.ok) throw new Error("Gagal mengambil tiket");
+
+        const json = await res.json();
+        setTickets(json.data || []);
+      } catch (err) {
+        console.error(err);
+        setTickets([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTickets();
+  }, []);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return tickets
-      .filter((t) => (statusFilter === "all" ? true : t.status === statusFilter))
+      .filter((t) =>
+        statusFilter === "all" ? true : t.status === statusFilter
+      )
       .filter(
         (t) =>
           !q ||
@@ -45,7 +62,9 @@ export default function TiketPage() {
           t.code.toLowerCase().includes(q) ||
           t.tanggal.includes(q)
       )
-      .sort((a, b) => new Date(a.tanggal).getTime() - new Date(b.tanggal).getTime());
+      .sort(
+        (a, b) => new Date(a.tanggal).getTime() - new Date(b.tanggal).getTime()
+      );
   }, [tickets, query, statusFilter]);
 
   const formatDate = (iso: string) => {
@@ -62,124 +81,107 @@ export default function TiketPage() {
   };
 
   const statusBadge = (status: Ticket["status"]) => {
-    if (status === "Sudah Dibayar")
-      return "bg-green-100 text-green-800";
-    if (status === "Menunggu Konfirmasi")
-      return "bg-yellow-100 text-yellow-800";
-    return "bg-red-100 text-red-800";
+    if (status === "Sudah Dibayar") return "bg-green-50 text-green-700";
+    if (status === "Menunggu Konfirmasi") return "bg-yellow-50 text-yellow-700";
+    return "bg-red-50 text-red-700";
   };
 
   return (
     <>
-      {/* NAVBAR FULL WIDTH */}
-      <NavBar />
-
       {/* MAIN CONTENT */}
-      <div className="p-6 max-w-4xl mx-auto pt-24">
-        <h1 className="text-2xl font-semibold mb-4">Tiket Saya</h1>
+      <div className="bg-gray-50 min-h-screen pt-28 pb-16">
+        <div className="max-w-4xl mx-auto px-6">
+          <h1 className="text-3xl font-semibold text-gray-900 mb-6">
+            Tiket Saya
+          </h1>
 
-        {/* Controls */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
-          <div className="flex items-center gap-2 w-full sm:w-2/3">
-            <label htmlFor="search" className="sr-only">Cari tiket</label>
+          {/* Controls */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
             <input
-              id="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Cari berdasarkan destinasi, kode, atau tanggal..."
-              className="w-full p-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-sky-300"
-              aria-label="Cari tiket"
+              className="flex-1 p-3 rounded-xl border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-300 bg-white text-gray-900 placeholder-gray-400"
             />
-          </div>
 
-          <div className="flex items-center gap-2">
-            <label htmlFor="filter" className="text-sm text-gray-600">Filter:</label>
             <select
-              id="filter"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="p-2 rounded border bg-white"
-              aria-label="Filter status tiket"
+              className="p-3 rounded-xl border border-gray-300 bg-white text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-300"
             >
-              <option value="all">Semua</option>
+              <option value="all">Semua Status</option>
               <option value="Sudah Dibayar">Sudah Dibayar</option>
               <option value="Menunggu Konfirmasi">Menunggu Konfirmasi</option>
               <option value="Dibatalkan">Dibatalkan</option>
             </select>
           </div>
-        </div>
 
-        {/* List */}
-        <div className="space-y-4">
-          {filtered.length === 0 && (
-            <div className="p-6 bg-white border rounded-xl text-center text-gray-600">
-              Tidak ada tiket yang cocok.
-            </div>
-          )}
+          {/* Ticket List */}
+          <div className="space-y-6">
+            {loading && (
+              <div className="p-6 bg-white border border-gray-200 rounded-2xl text-center text-gray-500 shadow-sm">
+                Memuat tiket...
+              </div>
+            )}
 
-          {filtered.map((t) => (
-            <Link
-              key={t.id}
-              href={`/tiket/${t.id}`}
-              className="block"
-              aria-label={`Buka detail tiket ${t.destinasi}`}
-            >
-              <article
-                className="p-4 border rounded-xl bg-white shadow-sm hover:shadow-md transition flex flex-col sm:flex-row sm:items-center gap-4"
-                role="button"
-              >
-                <div className="flex-1 min-w-0">
-                  <h2 className="text-lg px-2 font-medium truncate">
-                    {t.destinasi}
-                  </h2>
+            {!loading && filtered.length === 0 && (
+              <div className="p-6 bg-white border border-gray-200 rounded-2xl text-center text-gray-500 shadow-sm">
+                Tidak ada tiket yang cocok.
+              </div>
+            )}
 
-                  <div className="mt-1 flex flex-col sm:flex-row sm:items-center sm:gap-4 text-sm text-gray-600">
-                    <time dateTime={t.tanggal} className="flex items-center gap-2 px-2">
-                      <span>{formatDate(t.tanggal)}</span>
-                    </time>
-
-                    <div className="flex items-center gap-3 mt-1 sm:mt-0">
-                      <div className="text-xs text-gray-500">
-                        Kode: <span className="font-medium">{t.code}</span>
+            {!loading &&
+              filtered.map((t) => (
+                <Link key={t.id} href={`/tiket/${t.id}`} className="block">
+                  <article className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-lg transition flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <h2 className="text-xl font-medium text-gray-900 truncate">
+                        {t.destinasi}
+                      </h2>
+                      <div className="mt-2 flex flex-col sm:flex-row sm:items-center sm:gap-6 text-sm text-gray-500">
+                        <time dateTime={t.tanggal}>
+                          {formatDate(t.tanggal)}
+                        </time>
+                        <div className="truncate">
+                          Kode:{" "}
+                          <span className="font-medium text-gray-700">
+                            {t.code}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </div>
 
-                <div className="flex-shrink-0 flex items-center gap-4 sm:flex-col sm:items-end">
-                  <span
-                    className={`inline-block px-3 py-1 text-xs font-medium rounded-full ${statusBadge(
-                      t.status
-                    )}`}
-                  >
-                    {t.status}
-                  </span>
+                    <div className="shrink-0 flex items-center gap-4 sm:flex-col sm:items-end">
+                      <span
+                        className={`inline-block px-4 py-1 text-sm font-semibold rounded-full ${statusBadge(
+                          t.status
+                        )}`}
+                      >
+                        {t.status}
+                      </span>
 
-                  <span className="hidden sm:inline-block">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5 text-sky-500"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 5l7 7-7 7"
-                      />
-                    </svg>
-                  </span>
-                </div>
-              </article>
-            </Link>
-          ))}
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-6 w-6 text-sky-500 hidden sm:block"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </div>
+                  </article>
+                </Link>
+              ))}
+          </div>
         </div>
       </div>
-
-      {/* FOOTER FULL WIDTH */}
+      <NavBar />
       <Footer />
     </>
   );

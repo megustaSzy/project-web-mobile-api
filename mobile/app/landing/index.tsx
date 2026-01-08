@@ -85,17 +85,19 @@ export default function HomeScreen() {
   }, []);
 
   useEffect(() => {
-    if (!kategoriName) {
-      setFilteredDestinations(apiDestinations);
-      return;
-    }
+  if (!activeCategory) {
+    // tidak klik chip → tampilkan semua
+    setFilteredDestinations(apiDestinations);
+    return;
+  }
 
-    const hasil = apiDestinations.filter(
-      (item) => item.category?.name === kategoriName
-    );
+  const hasil = apiDestinations.filter(
+    (item) => item.category?.name === activeCategory
+  );
 
-    setFilteredDestinations(hasil);
-  }, [kategoriName, apiDestinations]);
+  setFilteredDestinations(hasil);
+}, [activeCategory, apiDestinations]);
+
 
   // ================= API =================
   const fetchCategories = async () => {
@@ -352,37 +354,22 @@ const handleCategoryPress = (name: string) => {
               onPress={() => handleCategoryPress(cat.name)}
               style={[
                 styles.categoryChip,
-                isActive
-                  ? {
-                      backgroundColor: "#007BFF",
-                      borderColor: "#007BFF",
-                      borderWidth: 2,
-                    }
-                  : {
-                      backgroundColor: "#fff",
-                      borderColor: "#000",
-                      borderWidth: 1.2,
-                    },
+                isActive && styles.categoryChipActive,
               ]}
-
             >
-              <Image
-                source={require("../../assets/images/kategori1.png")}
-                style={styles.categoryIcon}
-              />
               <Text
-              style={[
-                styles.categoryChipText,
-                isActive ? { color: "#fff" } : { color: "#000" },
-              ]}
-            >
-              {cat.name}
-            </Text>
-
+                style={[
+                  styles.categoryChipText,
+                  isActive && styles.categoryChipTextActive,
+                ]}
+              >
+                {cat.name}
+              </Text>
             </TouchableOpacity>
           );
         })}
       </ScrollView>
+
 
       {/* POPULAR DESTINATION */}
       <Text style={styles.sectionTitle}>Populer Destination</Text>
@@ -554,6 +541,33 @@ notFoundText: {
   marginVertical: 8,
 },
 
+// CATEGORY CHIP - CLEAN
+categoryChip: {
+  paddingHorizontal: 18,
+  paddingVertical: 9,
+  backgroundColor: "#FFFFFF",
+  borderRadius: 22,
+  marginRight: 10,
+  borderWidth: 1.5,
+  borderColor: "#007BFF",
+},
+
+categoryChipActive: {
+  backgroundColor: "#007BFF",
+},
+
+categoryChipText: {
+  fontSize: 14,
+  fontWeight: "600",
+  color: "#007BFF",
+},
+
+categoryChipTextActive: {
+  color: "#FFFFFF",
+},
+
+
+
   container: {
     flex: 1,
     backgroundColor: "#F8F9FA",
@@ -653,24 +667,24 @@ notFoundText: {
     fontWeight: "700",
   },
 
-  // CATEGORY
-  categoryChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    backgroundColor: "#fff",
-    borderRadius: 20,
-    marginRight: 10,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-  },
-  categoryChipText: {
-    fontSize: 14,
-    marginLeft: 6,
-  },
+  // // CATEGORY
+  // categoryChip: {
+  //   flexDirection: "row",
+  //   alignItems: "center",
+  //   paddingHorizontal: 15,
+  //   paddingVertical: 8,
+  //   backgroundColor: "#fff",
+  //   borderRadius: 20,
+  //   marginRight: 10,
+  //   elevation: 2,
+  //   shadowColor: "#000",
+  //   shadowOpacity: 0.05,
+  //   shadowRadius: 3,
+  // },
+  // categoryChipText: {
+  //   fontSize: 14,
+  //   marginLeft: 6,
+  // },
   categoryIcon: {
     width: 24,
     height: 24,
@@ -694,8 +708,8 @@ notFoundText: {
   },
 
   popularItem: {
-    width: "48%",
-    height: 170,
+    width: 185,
+    height: 220,
     marginBottom: 15,
     borderRadius: 15,
     overflow: "hidden",
@@ -712,7 +726,7 @@ notFoundText: {
   right: 0,
   bottom: 0,
   top: 0,
-  backgroundColor: "rgba(0,0,0,0.60)", // 70% opacity
+  backgroundColor: "rgba(0,0,0,0.70)", // 70% opacity
 },
 
 
