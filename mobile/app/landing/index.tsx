@@ -354,37 +354,22 @@ const handleCategoryPress = (name: string) => {
               onPress={() => handleCategoryPress(cat.name)}
               style={[
                 styles.categoryChip,
-                isActive
-                  ? {
-                      backgroundColor: "#007BFF",
-                      borderColor: "#007BFF",
-                      borderWidth: 2,
-                    }
-                  : {
-                      backgroundColor: "#fff",
-                      borderColor: "#000",
-                      borderWidth: 1.2,
-                    },
+                isActive && styles.categoryChipActive,
               ]}
-
             >
-              <Image
-                source={require("../../assets/images/kategori1.png")}
-                style={styles.categoryIcon}
-              />
               <Text
-              style={[
-                styles.categoryChipText,
-                isActive ? { color: "#fff" } : { color: "#000" },
-              ]}
-            >
-              {cat.name}
-            </Text>
-
+                style={[
+                  styles.categoryChipText,
+                  isActive && styles.categoryChipTextActive,
+                ]}
+              >
+                {cat.name}
+              </Text>
             </TouchableOpacity>
           );
         })}
       </ScrollView>
+
 
       {/* POPULAR DESTINATION */}
       <Text style={styles.sectionTitle}>Populer Destination</Text>
@@ -555,6 +540,32 @@ notFoundText: {
   textAlign: "center",
   marginVertical: 8,
 },
+
+// CATEGORY (CLEAN CHIP)
+categoryChip: {
+  paddingHorizontal: 16,
+  paddingVertical: 8,
+  backgroundColor: "#fff",
+  borderRadius: 20,
+  marginRight: 10,
+  borderWidth: 1.5,
+  borderColor: "#007BFF",
+},
+
+categoryChipActive: {
+  backgroundColor: "#007BFF",
+},
+
+categoryChipText: {
+  fontSize: 14,
+  fontWeight: "600",
+  color: "#007BFF",
+},
+
+categoryChipTextActive: {
+  color: "#fff",
+},
+
 
   container: {
     flex: 1,
