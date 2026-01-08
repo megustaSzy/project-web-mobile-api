@@ -541,12 +541,12 @@ notFoundText: {
   marginVertical: 8,
 },
 
-// CATEGORY (CLEAN CHIP)
+// CATEGORY CHIP - CLEAN
 categoryChip: {
-  paddingHorizontal: 16,
-  paddingVertical: 8,
-  backgroundColor: "#fff",
-  borderRadius: 20,
+  paddingHorizontal: 18,
+  paddingVertical: 9,
+  backgroundColor: "#FFFFFF",
+  borderRadius: 22,
   marginRight: 10,
   borderWidth: 1.5,
   borderColor: "#007BFF",
@@ -563,8 +563,9 @@ categoryChipText: {
 },
 
 categoryChipTextActive: {
-  color: "#fff",
+  color: "#FFFFFF",
 },
+
 
 
   container: {
@@ -666,24 +667,24 @@ categoryChipTextActive: {
     fontWeight: "700",
   },
 
-  // CATEGORY
-  categoryChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    backgroundColor: "#fff",
-    borderRadius: 20,
-    marginRight: 10,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-  },
-  categoryChipText: {
-    fontSize: 14,
-    marginLeft: 6,
-  },
+  // // CATEGORY
+  // categoryChip: {
+  //   flexDirection: "row",
+  //   alignItems: "center",
+  //   paddingHorizontal: 15,
+  //   paddingVertical: 8,
+  //   backgroundColor: "#fff",
+  //   borderRadius: 20,
+  //   marginRight: 10,
+  //   elevation: 2,
+  //   shadowColor: "#000",
+  //   shadowOpacity: 0.05,
+  //   shadowRadius: 3,
+  // },
+  // categoryChipText: {
+  //   fontSize: 14,
+  //   marginLeft: 6,
+  // },
   categoryIcon: {
     width: 24,
     height: 24,
