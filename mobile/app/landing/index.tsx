@@ -708,8 +708,8 @@ categoryChipTextActive: {
   },
 
   popularItem: {
-    width: "48%",
-    height: 170,
+    width: 185,
+    height: 220,
     marginBottom: 15,
     borderRadius: 15,
     overflow: "hidden",
@@ -726,7 +726,7 @@ categoryChipTextActive: {
   right: 0,
   bottom: 0,
   top: 0,
-  backgroundColor: "rgba(0,0,0,0.60)", // 70% opacity
+  backgroundColor: "rgba(0,0,0,0.70)", // 70% opacity
 },
 
 
