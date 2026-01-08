@@ -15,14 +15,14 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
-const API_URL = "http://10.93.86.50:3001";
+const API_URL = process.env.EXPO_PUBLIC_API_URL!;
 
 export default function ProfileScreen() {
   const router = useRouter();
 
   const [user, setUser] = useState({
     id: 0,
-    name: "N/A",
+    name: "",
     email: "",
     role: "",
     avatar: "",
@@ -41,62 +41,69 @@ export default function ProfileScreen() {
     return avatar.startsWith("http") ? avatar : `${API_URL}${avatar}`;
   };
 
-  /* ================= FETCH PROFILE ================= */
-const loadProfile = async () => {
-  const token = await AsyncStorage.getItem("token");
-  if (!token) {
-    router.replace("../auth/login/page");
-    return;
-  }
+  /* ================= INIT LOAD ================= */
+  useEffect(() => {
+    const init = async () => {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        router.replace("../auth/login/page");
+        return;
+      }
 
-  // 🔹 1️⃣ Ambil dari local dulu
-  const localProfile = await AsyncStorage.getItem("profile");
-  if (localProfile) {
-    const p = JSON.parse(localProfile);
-    setUser({
-      id: p.id,
-      name: p.name || "N/A",
-      email: p.email,
-      role: p.role,
-      avatar: buildAvatarUrl(p.avatar),
-    });
-  }
+      // 🔹 tampilkan data lokal dulu (cepat)
+      const localProfile = await AsyncStorage.getItem("profile");
+      if (localProfile) {
+        const p = JSON.parse(localProfile);
+        setUser({
+          id: p.id,
+          name: p.name || "",
+          email: p.email,
+          role: p.role,
+          avatar: buildAvatarUrl(p.avatar),
+        });
+      }
 
-  // 🔹 2️⃣ Ambil dari API (sinkron)
-  try {
-    const res = await fetch(`${API_URL}/api/users/profile`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+      setLoading(false);
 
-    const json = await res.json();
+      // 🔹 sync API background
+      fetchProfile(token);
+    };
 
-    if (res.ok) {
-      const profileData = {
-        id: json.data.id,
-        name: json.data.name || "N/A",
-        email: json.data.email,
-        role: json.data.role,
-        avatar: json.data.avatar,
-      };
+    init();
+  }, []);
 
-      setUser({
-        ...profileData,
-        avatar: buildAvatarUrl(profileData.avatar),
+  /* ================= FETCH PROFILE API ================= */
+  const fetchProfile = async (token: string) => {
+    try {
+      const res = await fetch(`${API_URL}/api/users/profile`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
 
-      // 🔹 Update cache
-      await AsyncStorage.setItem(
-        "profile",
-        JSON.stringify(profileData)
-      );
+      const json = await res.json();
+
+      if (res.ok) {
+        const profileData = {
+          id: json.data.id,
+          name: json.data.name || "",
+          email: json.data.email,
+          role: json.data.role,
+          avatar: json.data.avatar,
+        };
+
+        setUser({
+          ...profileData,
+          avatar: buildAvatarUrl(profileData.avatar),
+        });
+
+        await AsyncStorage.setItem(
+          "profile",
+          JSON.stringify(profileData)
+        );
+      }
+    } catch (err) {
+      console.log("PROFILE FETCH ERROR:", err);
     }
-  } catch (e) {
-    console.log("FETCH PROFILE ERROR:", e);
-  } finally {
-    setLoading(false);
-  }
-};
- 
+  };
 
   /* ================= PICK IMAGE ================= */
   const pickImage = async () => {
@@ -115,7 +122,7 @@ const loadProfile = async () => {
 
   /* ================= UPDATE PROFILE ================= */
   const updateProfile = async () => {
-    if (!user.name.trim() || user.name === "N/A") {
+    if (!user.name.trim()) {
       Alert.alert("Validasi", "Nama tidak boleh kosong");
       return;
     }
@@ -150,14 +157,12 @@ const loadProfile = async () => {
         return;
       }
 
-      // ⬇️ AMAN: ambil ulang profile
-      await loadProfile();
+      await fetchProfile(token);
 
       setFile(null);
       setPreview(null);
       setSuccessModal(true);
     } catch (err) {
-      console.log("UPDATE ERROR:", err);
       Alert.alert("Error", "Terjadi kesalahan server");
     } finally {
       setSaving(false);
@@ -170,69 +175,81 @@ const loadProfile = async () => {
     router.replace("../auth/login/page");
   };
 
+  /* ================= LOADING ================= */
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#2563eb" />
-        <Text>Memuat profil...</Text>
+        <ActivityIndicator size="small" color="#2563eb" />
+        <Text style={{ marginTop: 8, color: "#6b7280" }}>
+          Memuat akun...
+        </Text>
       </View>
     );
   }
 
+  /* ================= UI ================= */
   return (
     <View style={styles.container}>
-      {/* AVATAR */}
-      <View style={{ alignItems: "center", marginBottom: 20 }}>
-        {preview || user.avatar ? (
-          <Image
-            source={{ uri: preview || user.avatar }}
-            style={styles.avatar}
-          />
-        ) : (
-          <View style={styles.avatarFallback}>
-            <Text style={{ color: "#555" }}>N/A</Text>
-          </View>
-        )}
+      <View style={styles.card}>
+        <Text style={styles.title}>Akun Saya</Text>
+        <Text style={styles.subtitle}>
+          Kelola informasi profil Anda
+        </Text>
 
-        <TouchableOpacity style={styles.editBtn} onPress={pickImage}>
-          <Ionicons name="camera" size={20} color="white" />
+        {/* AVATAR */}
+        <View style={styles.avatarWrap}>
+          {preview || user.avatar ? (
+            <Image
+              source={{ uri: preview || user.avatar }}
+              style={styles.avatar}
+            />
+          ) : (
+            <View style={styles.avatarFallback}>
+              <Ionicons name="person" size={40} color="#9ca3af" />
+            </View>
+          )}
+
+          <TouchableOpacity style={styles.editBtn} onPress={pickImage}>
+            <Ionicons name="camera" size={18} color="white" />
+          </TouchableOpacity>
+        </View>
+
+        {/* INPUT */}
+        <Text style={styles.label}>Nama Lengkap</Text>
+        <TextInput
+          style={styles.input}
+          value={user.name}
+          onChangeText={(val) => setUser({ ...user, name: val })}
+        />
+
+        <Text style={styles.textMuted}>{user.email}</Text>
+        <Text style={styles.textMuted}>{user.role}</Text>
+
+        <TouchableOpacity
+          style={styles.saveBtn}
+          onPress={updateProfile}
+          disabled={saving}
+        >
+          <Text style={styles.btnText}>
+            {saving ? "Menyimpan..." : "Simpan Perubahan"}
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.logoutBtn}
+          onPress={() => setLogoutModal(true)}
+        >
+          <Text style={styles.btnText}>Logout</Text>
         </TouchableOpacity>
       </View>
-
-      {/* INPUT */}
-      <TextInput
-        style={styles.input}
-        value={user.name}
-        onChangeText={(val) => setUser({ ...user, name: val })}
-      />
-
-      <Text style={styles.textMuted}>{user.email}</Text>
-      <Text style={styles.textMuted}>{user.role}</Text>
-
-      <TouchableOpacity
-        style={styles.saveBtn}
-        onPress={updateProfile}
-        disabled={saving}
-      >
-        <Text style={styles.btnText}>
-          {saving ? "Menyimpan..." : "Simpan Perubahan"}
-        </Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={styles.logoutBtn}
-        onPress={() => setLogoutModal(true)}
-      >
-        <Text style={styles.btnText}>Logout</Text>
-      </TouchableOpacity>
 
       {/* SUCCESS MODAL */}
       <Modal transparent visible={successModal} animationType="fade">
         <View style={styles.modalBg}>
           <View style={styles.modalBox}>
-            <Ionicons name="checkmark-circle" size={64} color="#22c55e" />
+            <Ionicons name="checkmark-circle" size={60} color="#22c55e" />
             <Text style={styles.modalTitle}>
-              Profil Berhasil Diperbarui
+              Profil berhasil diperbarui
             </Text>
             <TouchableOpacity
               style={styles.modalBtn}
@@ -244,7 +261,7 @@ const loadProfile = async () => {
         </View>
       </Modal>
 
-      {/* LOGOUT CONFIRM */}
+      {/* LOGOUT MODAL */}
       <Modal transparent visible={logoutModal} animationType="fade">
         <View style={styles.modalBg}>
           <View style={styles.modalBox}>
@@ -276,21 +293,37 @@ const loadProfile = async () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#f3f4f6",
     padding: 20,
-    backgroundColor: "#f5f5f5",
+    justifyContent: "center",
+  },
+  card: {
+    backgroundColor: "white",
+    borderRadius: 16,
+    padding: 20,
+    elevation: 4,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "700",
+  },
+  subtitle: {
+    fontSize: 13,
+    color: "#6b7280",
+    marginBottom: 20,
+  },
+  avatarWrap: {
     alignItems: "center",
-    paddingTop: 80,
+    marginBottom: 20,
   },
   avatar: {
-    width: 140,
-    height: 140,
+    width: 120,
+    height: 120,
     borderRadius: 100,
-    borderWidth: 3,
-    borderColor: "#93c5fd",
   },
   avatarFallback: {
-    width: 140,
-    height: 140,
+    width: 120,
+    height: 120,
     borderRadius: 100,
     backgroundColor: "#e5e7eb",
     alignItems: "center",
@@ -299,40 +332,43 @@ const styles = StyleSheet.create({
   editBtn: {
     position: "absolute",
     bottom: 0,
-    right: 90,
+    right: 110,
     backgroundColor: "#2563eb",
-    padding: 10,
-    borderRadius: 30,
+    padding: 8,
+    borderRadius: 20,
+  },
+  label: {
+    fontSize: 13,
+    marginBottom: 6,
+    color: "#374151",
   },
   input: {
-    width: "100%",
-    backgroundColor: "white",
+    backgroundColor: "#f9fafb",
     padding: 12,
     borderRadius: 10,
     marginBottom: 10,
   },
   textMuted: {
-    color: "#666",
-    marginBottom: 5,
+    fontSize: 12,
+    color: "#6b7280",
+    marginBottom: 4,
   },
   saveBtn: {
     backgroundColor: "#2563eb",
-    padding: 15,
+    padding: 14,
     borderRadius: 10,
-    width: "100%",
-    marginTop: 15,
+    marginTop: 14,
   },
   logoutBtn: {
     backgroundColor: "#ef4444",
-    padding: 15,
+    padding: 14,
     borderRadius: 10,
-    width: "100%",
     marginTop: 10,
   },
   btnText: {
     color: "white",
     textAlign: "center",
-    fontWeight: "bold",
+    fontWeight: "600",
   },
   center: {
     flex: 1,
@@ -347,23 +383,22 @@ const styles = StyleSheet.create({
   },
   modalBox: {
     backgroundColor: "white",
-    padding: 25,
+    padding: 24,
     borderRadius: 16,
-    alignItems: "center",
     width: "80%",
+    alignItems: "center",
   },
   modalTitle: {
     fontSize: 16,
     fontWeight: "600",
-    marginBottom: 15,
+    marginVertical: 12,
   },
   modalBtn: {
     backgroundColor: "#2563eb",
-    paddingVertical: 10,
-    paddingHorizontal: 30,
+    padding: 12,
     borderRadius: 10,
-    marginTop: 10,
     width: "100%",
+    marginTop: 8,
     alignItems: "center",
   },
 });
