@@ -238,21 +238,13 @@ export default function NavBar() {
         >
           <Link
             href="/"
-            onClick={(e) => {
-              e.preventDefault();
-              setActiveMenu("home");
-              window.scrollTo({
-                top: 0,
-                behavior: "smooth",
-              });
-            }}
-            className={`transition-colors duration-200 cursor-pointer ${
+            onClick={() => setActiveMenu("home")}
+            className={`transition-colors duration-200 ${
               activeMenu === "home" ? "text-blue-600" : textColor
             }`}
           >
             {translations.home}
           </Link>
-
           <Link
             href="/about"
             onClick={() => setActiveMenu("about")}
