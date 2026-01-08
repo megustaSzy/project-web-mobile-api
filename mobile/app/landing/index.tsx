@@ -85,17 +85,19 @@ export default function HomeScreen() {
   }, []);
 
   useEffect(() => {
-    if (!kategoriName) {
-      setFilteredDestinations(apiDestinations);
-      return;
-    }
+  if (!activeCategory) {
+    // tidak klik chip → tampilkan semua
+    setFilteredDestinations(apiDestinations);
+    return;
+  }
 
-    const hasil = apiDestinations.filter(
-      (item) => item.category?.name === kategoriName
-    );
+  const hasil = apiDestinations.filter(
+    (item) => item.category?.name === activeCategory
+  );
 
-    setFilteredDestinations(hasil);
-  }, [kategoriName, apiDestinations]);
+  setFilteredDestinations(hasil);
+}, [activeCategory, apiDestinations]);
+
 
   // ================= API =================
   const fetchCategories = async () => {
