@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const createAboutSchema = z.object({
-  tittle: z.string().min(1, "tittle wajib diisi"),
+  title: z.string().min(1, "tittle wajib diisi"),
 
   history: z.string().min(1, "history wajib diisi"),
 
