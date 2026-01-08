@@ -39,7 +39,7 @@ export default function HeroSection() {
   }, []);
 
   return (
-    <div className="relative w-full h-[420px] overflow-hidden shadow-lg rounded-b-none">
+    <div className="relative w-full h-105 overflow-hidden shadow-lg rounded-b-none">
       {/* Background Image default dari frontend */}
       <Image
         src="/images/boute.jpg"
