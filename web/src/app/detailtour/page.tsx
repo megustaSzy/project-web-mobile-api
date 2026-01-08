@@ -1,24 +1,27 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState, useCallback } from "react";
 import { apiFetch } from "@/helpers/api";
+import Image from "next/image";
 import { ApiDestinationsResponse, DestinationsType } from "@/types/destination";
 import { ApiCategoryResponse, CategoryItem } from "@/types/category";
-import DestinationModal from "./DestinationModal";
+import DestinationModal from "../components/DestinationModal";
 
-export default function DestinasiSection() {
+export default function DetailTourPage() {
+  const searchParams = useSearchParams();
+  const kabupaten = searchParams.get("kabupaten");
+
   const [data, setData] = useState<DestinationsType[]>([]);
   const [categories, setCategories] = useState<CategoryItem[]>([]);
-  const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<string>("");
+  const [loading, setLoading] = useState(true);
 
   const [openModal, setOpenModal] = useState(false);
   const [selectedData, setSelectedData] = useState<DestinationsType | null>(
     null
   );
-
-  // const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   /* LOAD CATEGORY */
   const loadCategories = useCallback(async () => {
@@ -30,55 +33,64 @@ export default function DestinasiSection() {
       if (items.length > 0) {
         setActiveCategory(items[0].name);
       }
-    } catch {
+    } catch (error) {
+      console.error("Gagal mengambil kategori:", error);
       setCategories([]);
     }
   }, []);
 
   /* LOAD DESTINATIONS */
-  const loadDestinations = useCallback(async () => {
+  const fetchDestinations = useCallback(async () => {
+    if (!kabupaten) return;
     setLoading(true);
     try {
       const res = await apiFetch<ApiDestinationsResponse>("/api/destinations");
 
-      const mapped: DestinationsType[] = res.data.items.map((it) => ({
-        id: it.id,
-        name: it.name ?? "Tanpa Nama",
-        imageUrl: it.imageUrl,
-        description: it.description ?? "Deskripsi belum tersedia",
-        price: it.price,
-        include: it.include ?? [],
-        ketentuan: it.ketentuan ?? [],
-        perhatian: it.perhatian ?? [],
-        category: it.category!,
-        region: it.region!, // ✅ BIARKAN DARI API
-      }));
+      const items = res.data.items
+        .filter((item) => item.region?.name === kabupaten)
+        .map((item) => ({
+          id: item.id,
+          name: item.name ?? "Tanpa Nama",
+          imageUrl: item.imageUrl ?? "/images/default.jpg",
+          description: item.description ?? "Deskripsi belum tersedia",
+          price: item.price ?? 0,
+          include: item.include ?? [],
+          ketentuan: item.ketentuan ?? [],
+          perhatian: item.perhatian ?? [],
+          category: item.category!,
+          region: item.region!,
+        }));
 
-      setData(mapped);
-    } catch {
+      setData(items);
+    } catch (error) {
+      console.error("Gagal mengambil data destinasi:", error);
       setData([]);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [kabupaten]);
 
   useEffect(() => {
     loadCategories();
-    loadDestinations();
-  }, [loadCategories, loadDestinations]);
+    fetchDestinations();
+  }, [loadCategories, fetchDestinations]);
+
+  if (!kabupaten)
+    return <p className="text-center mt-10">Kabupaten tidak ditemukan.</p>;
 
   return (
-    <section className="relative w-full bg-linear-to-b from-[#a7c8e7] to-[#f2f6f9] overflow-hidden">
+    <section className="relative w-full bg-linear-to-b from-[#a7c8e7] to-white py-20">
+      {/* Background */}
       <img
         src="/images/destinasi.svg"
         alt="Background"
-        className="absolute inset-0 w-full h-full object-cover opacity-2"
+        className="absolute inset-0 w-full h-full object-cover opacity-5"
       />
 
-      <div className="relative z-10 max-w-6xl mx-auto px-4 pt-37.5 pb-10 text-center">
-        <h2 className="text-3xl md:text-4xl font-extrabold mb-8 text-gray-800">
-          Tujuan Wisata Favorit
-        </h2>
+      <div className="relative z-10 max-w-6xl mx-auto px-4 text-center">
+        <h1 className="text-3xl md:text-4xl font-extrabold mb-8 text-gray-800">
+          Destinasi di {kabupaten}
+        </h1>
 
         {/* CATEGORY */}
         <div className="flex justify-center flex-wrap gap-4 mb-12">
@@ -100,38 +112,33 @@ export default function DestinasiSection() {
           })}
         </div>
 
-        {/* GRID */}
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {loading ? (
-            <p className="col-span-3 text-gray-500">Loading...</p>
-          ) : (
-            data
-              .filter((d) => d.category && d.category?.name === activeCategory)
+        {loading ? (
+          <p className="text-gray-500">Memuat destinasi...</p>
+        ) : data.length === 0 ? (
+          <p className="text-red-500">Belum ada destinasi di kabupaten ini.</p>
+        ) : (
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            {data
+              .filter((d) => d.category?.name === activeCategory)
               .map((d) => (
                 <div
                   key={d.id}
                   className="bg-white rounded-2xl shadow-md hover:shadow-xl transition overflow-hidden"
                 >
-                  <div className="h-48">
-                    <img
-                      src={
-                        d.imageUrl
-                          ? `${d.imageUrl}`
-                          : "/images/default.jpg"
-                      }
+                  <div className="h-48 relative">
+                    <Image
+                      src={d.imageUrl ?? "/images/default.jpg"}
                       alt={d.name}
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover rounded-t-2xl"
                     />
                   </div>
 
                   <div className="p-5 text-left">
                     <h3 className="font-semibold text-lg mb-1">{d.name}</h3>
-
-                    {/* REGION TERBACA */}
                     <p className="text-sm text-gray-500 mb-4">
                       {d.region?.name ?? "Lokasi tidak diketahui"}
                     </p>
-
                     <div className="flex justify-end">
                       <span
                         onClick={() => {
@@ -145,9 +152,9 @@ export default function DestinasiSection() {
                     </div>
                   </div>
                 </div>
-              ))
-          )}
-        </div>
+              ))}
+          </div>
+        )}
       </div>
 
       <DestinationModal

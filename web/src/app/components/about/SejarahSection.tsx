@@ -78,7 +78,7 @@ export default function SejarahSection() {
 
         {/* Kanan: Gambar */}
         <div className="md:w-1/2 flex justify-center">
-          <div className="w-full max-w-[450px]">
+          <div className="w-full max-w-112.5">
             <Image
               src="/images/18.svg"
               alt="Traveler"

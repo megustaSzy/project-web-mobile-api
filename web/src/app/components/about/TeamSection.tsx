@@ -116,10 +116,12 @@ export default function TeamSection() {
       {/* Maps */}
       <div className="max-w-6xl mx-auto px-6 md:px-10 mt-16">
         <div className="w-full h-80 rounded-3xl overflow-hidden shadow-lg">
+          {/* Gunakan embed "place" supaya marker muncul */}
           <iframe
             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3970.461886868848!2d105.26573777499689!3d-5.382733754080243!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e40dbf48bb3dfdd%3A0x5ec52ffb0a1c1d02!2sUniversitas%20Teknokrat%20Indonesia!5e0!3m2!1sen!2sid!4v1700000000000!5m2!1sen!2sid"
             width="100%"
             height="100%"
+            style={{ border: 0 }}
             loading="lazy"
             allowFullScreen
             referrerPolicy="no-referrer-when-downgrade"
