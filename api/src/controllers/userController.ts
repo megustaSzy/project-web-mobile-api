@@ -1,65 +1,97 @@
-import { userService } from "../services/userService"
-import { Request, Response, NextFunction } from "express";
-import { createError } from "../utils/createError";
+import { userService } from "../services/userService";
+import { NextFunction, Request, Response } from "express";
+import { ResponseData } from "../utilities/Response";
+import { uploadToCloudinary } from "../utilities/uploadToCloudinary";
+import cloudinary from "../config/cloudinary";
 
 export const userController = {
-    
-    async getAllUsers(req: Request, res: Response, next: NextFunction) {
-        try {
-            const users = await userService.getAllUsers();
-    
-            return res.status(200).json({
-                message: true,
-                users
-            });
-        } catch (error) {
-            next(error);
+  async getAllUsers(req: Request, res: Response, next: NextFunction) {
+    try {
+      const page = Number(req.query.page) || 1;
+      const limit = Number(req.query.limit) || 10;
+
+      const users = await userService.getAllUsers(page, limit);
+
+      return ResponseData.ok(res, users);
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async getUserById(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = Number(req.params.id);
+
+      if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
+
+      const user = await userService.getUserById(id);
+
+      return ResponseData.ok(res, user);
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async editUser(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = Number(req.params.id);
+      if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
+
+      const currentUser = (req as any).user;
+
+      if (currentUser.role !== "Admin" && Number(currentUser.id) !== id) {
+        return ResponseData.forbidden(res, "akses ditolak");
+      }
+
+      const user = await userService.getUserById(id); // ambil user lama
+      if (!user) return ResponseData.notFound(res, "user tidak ditemukan");
+
+      let avatarUrl: string | undefined;
+      let avatarPublicId: string | undefined;
+
+      if (req.file) {
+        // upload avatar baru
+        const result: any = await uploadToCloudinary(req.file.buffer);
+        avatarUrl = result.secure_url;
+        avatarPublicId = result.public_id;
+
+        // hapus avatar lama dari Cloudinary
+        if (user.avatarPublicId) {
+          await cloudinary.uploader.destroy(user.avatarPublicId);
         }
-    },
+      }
 
-    async getUserById(req: Request, res: Response, next: NextFunction) {
-        try {
-            
-            const id = Number(req.params.id);
-    
-            if(isNaN(id)) createError("id tidak valid", 400);
-    
-            const user = await userService.getUserById(id);
-    
-            if(!user) createError("user tidak ditemukan", 404);
-    
-            return res.status(200).json({
-                success: true,
-                user
-            })
-        } catch (error) {
-            next(error)
-        };
-    },
+      const updatedUser = await userService.updateUserById(id, {
+        ...req.body,
+        ...(avatarUrl && { avatar: avatarUrl, avatarPublicId }),
+      });
 
-    async editUser(req: Request, res: Response, next: NextFunction) {
-        try {
-            const id = Number(req.params.id)
+      return ResponseData.ok(res, updatedUser);
+    } catch (error) {
+      next(error);
+    }
+  },
+  async deleteUser(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = Number(req.params.id);
 
-            if(isNaN(id)) createError("id tidak valid", 400);
+      if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
 
-            const currentUser = (req as any).user
-            
-            if (currentUser.role !== "Admin" && currentUser.id !== id) {
-                throw createError("akses ditolak", 403);
-            }
+      const currentUser = (req as any).user;
 
-            const updateUser = await userService.updateUserById(id, req.body);
+      if (currentUser.role !== "Admin") {
+        return ResponseData.forbidden(res, "akses ditolak");
+      }
 
-            if(!updateUser) createError("id tidak ditemukan", 404);
+      await userService.deleteUserById(id);
 
-            return res.status(200).json({
-                success: true,
-                message: "user berhasil diperbarui",
-                user: updateUser
-            })
-        } catch (error) {
-            next(error)
-        }
-    },
-}
+      return ResponseData.ok(res, null);
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async getProfile(req: Request, res: Response, next: NextFunction) {
+    return ResponseData.ok(res, (req as any).user);
+  },
+};

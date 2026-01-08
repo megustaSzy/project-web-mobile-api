@@ -1,7 +1,7 @@
 import app from "./src/index";
 
-const PORT = process.env.PORT;
+const PORT = Number(process.env.PORT) || 3001;
 
-app.listen(PORT, () => {
-    console.log(`server is running in port http://localhost:${PORT}`)
-})
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server is running on http://0.0.0.0:${PORT}`);
+});

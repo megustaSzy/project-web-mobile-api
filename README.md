@@ -1,0 +1,161 @@
+# **Lamigo – Aplikasi Pemesanan Tiket Wisata Lampung**
+
+Lamigo adalah aplikasi pemesanan tiket wisata untuk berbagai destinasi di Lampung.
+Project terdiri dari **Backend (API)**, **Frontend Web**, dan **Frontend Mobile**.
+
+---
+
+## 🚀 **Tech Stack**
+
+### **Backend**
+
+- **Programming Langueage**: Express (v5.1.0)
+- **ORM**: Prisma (v6.19.0)
+- **Database**: PostgreSQL (v17.6.1)
+- **Authentication**: Jsonwebtoken (v9.0.2)
+
+### **Frontend Web**
+
+- **Programming Langueage**: NextJS (v16.0.1) 
+- **UI Library**
+* Tailwind CSS (v4)
+
+### **Frontend Mobile**
+
+- **Programming Language**: React Native Expo (v54.0.23)
+- **UI Library**: React Native Paper
+
+---
+
+## 📁 **Project Structure**
+
+```
+/api
+/web
+/mobile
+```
+
+---
+
+# 🛠️ **Backend Setup (Express + TypeScript + Prisma + PostgreSQL)**
+
+### Clone Repository
+
+```bash
+git clone https://github.com/megustaSzy/project-web-mobile-api.git
+cd api
+```
+
+### 1. Set up API
+
+```bash
+cd api
+```
+
+### Install Dependencies
+
+```bash
+npm i
+```
+
+### Setup Environment
+
+Rename `.env.example` → `.env` lalu isi:
+
+```env
+DATABASE_URL="postgresql://username:password@localhost:5432/db_projectlamigo?schema=public"
+JWT_SECRET="your-secret-key"
+```
+
+### Run Migrations
+
+```bash
+npm run migrate
+```
+
+### **5. Start Development Server**
+
+```bash
+npm run dev
+```
+
+---
+
+# 🌐 **Frontend Web Setup (Next.js + Tailwind + Shadcn/UI)**
+
+### **1. Clone Repository**
+
+```bash
+git clone https://github.com/megustaSzy/project-web-mobile-api.git
+cd web
+```
+
+```bash
+cd lamigo-frontend-web
+```
+
+### **2. Install Dependencies**
+
+```bash
+npm i
+```
+
+### **3. Setup Environment**
+
+Rename `.env.example` → `.env` lalu isi:
+
+```env
+NEXT_PUBLIC_API_URL="http://localhost:3000"
+```
+
+### **4. Start Development Server**
+
+```bash
+npm run dev
+```
+
+---
+
+# 📱 **Mobile App Setup (React Native / Expo)**
+
+### **1. Clone Repository**
+
+```bash
+git clone https://github.com/megustaSzy/project-web-mobile-api.git
+cd mobile
+```
+
+### **2. Install Dependencies**
+
+```bash
+npm i
+```
+
+### **3. Setup Environment**
+
+Rename `.env.example` → `.env` lalu isi:
+
+```env
+API_URL=http://localhost:5000
+```
+
+### **4. Run App**
+
+```bash
+npx expo start
+```
+
+---
+
+# ⭐ **Features**
+
+- Pemesanan tiket wisata Lampung secara online
+- Autentikasi pengguna menggunakan JWT
+- Kelola jadwal, destinasi, pembayaran, dan tiket
+- Dashboard admin berbasis web
+- Aplikasi mobile untuk user (React Native)
+
+
+# **Link Dokumentasi API**
+
+https://documenter.getpostman.com/view/49345109/2sB3WwrdGU
