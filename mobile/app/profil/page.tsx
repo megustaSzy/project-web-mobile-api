@@ -8,35 +8,73 @@ import {
   Alert,
   StyleSheet,
   ActivityIndicator,
+  Modal,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
-const API_URL = "http://10.93.86.50:3001"; // SAMAKAN DENGAN WEB
+const API_URL = "http://10.93.86.50:3001";
 
 export default function ProfileScreen() {
   const router = useRouter();
 
   const [user, setUser] = useState({
+    id: 0,
     name: "",
     email: "",
     role: "",
-    avatar: "" as string,
+    avatar: "",
   });
 
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [file, setFile] = useState<any>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [successModal, setSuccessModal] = useState(false);
 
   const buildAvatarUrl = (avatar?: string | null) => {
     if (!avatar) return "https://via.placeholder.com/150";
     return avatar.startsWith("http") ? avatar : `${API_URL}${avatar}`;
   };
 
-  // --------------------------------------------------
-  // PICK IMAGE
-  // --------------------------------------------------
+  /* ================= FETCH PROFILE ================= */
+  useEffect(() => {
+    const loadProfile = async () => {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        router.replace("../auth/login/page");
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_URL}/api/users/profile`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const json = await res.json();
+
+        if (res.ok) {
+          setUser({
+            id: json.data.id,
+            name: json.data.name,
+            email: json.data.email,
+            role: json.data.role,
+            avatar: buildAvatarUrl(json.data.avatar),
+          });
+        }
+      } catch (e) {
+        console.log("FETCH PROFILE ERROR:", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProfile();
+  }, []);
+
+  /* ================= PICK IMAGE ================= */
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
@@ -51,202 +89,158 @@ export default function ProfileScreen() {
     }
   };
 
-  // --------------------------------------------------
-  // FETCH PROFILE
-  // --------------------------------------------------
-  useEffect(() => {
-    const loadProfile = async () => {
-      const token = await AsyncStorage.getItem("token");
-      const local = await AsyncStorage.getItem("profile");
-
-      if (local) {
-        const p = JSON.parse(local);
-        setUser({
-          name: p.name,
-          email: p.email,
-          role: p.role,
-          avatar: buildAvatarUrl(p.avatar),
-        });
-      }
-
-      if (!token) {
-        setLoading(false);
-        router.replace("../auth/login/page");
-        return;
-      }
-
-      try {
-        const res = await fetch(`${API_URL}/api/users/profile`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        const json = await res.json();
-
-        if (res.ok) {
-          const data = json.data;
-          const profileData = {
-            name: data.name,
-            email: data.email,
-            role: data.role,
-            avatar: buildAvatarUrl(data.avatar),
-          };
-
-          setUser(profileData);
-          await AsyncStorage.setItem("profile", JSON.stringify(profileData));
-        }
-      } catch (err) {
-        console.log("Error fetch profile:", err);
-      }
-
-      setLoading(false);
-    };
-
-    loadProfile();
-  }, []);
-
-  // --------------------------------------------------
-  // UPDATE PROFILE
-  // --------------------------------------------------
+  /* ================= UPDATE PROFILE ================= */
   const updateProfile = async () => {
+    if (!user.name.trim()) {
+      Alert.alert("Validasi", "Nama tidak boleh kosong");
+      return;
+    }
+
     const token = await AsyncStorage.getItem("token");
     if (!token) return;
 
+    setSaving(true);
+
     try {
-      const form = new FormData();
-      form.append("name", user.name);
+      const formData = new FormData();
+      formData.append("name", user.name);
 
       if (file) {
-        form.append("avatar", {
+        formData.append("avatar", {
           uri: file.uri,
           name: "avatar.jpg",
           type: "image/jpeg",
         } as any);
       }
 
-      const res = await fetch(`${API_URL}/api/users`, {
-        method: "PUT",
+      const res = await fetch(`${API_URL}/api/users/${user.id}`, {
+        method: "PATCH",
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        body: form,
+        body: formData,
       });
 
-      const json = await res.json();
-
+      const text = await res.text();
       if (!res.ok) {
-        console.log(json);
-        return Alert.alert("Gagal", "Tidak bisa update profil.");
+        console.log(text);
+        Alert.alert("Gagal", "Profil gagal disimpan");
+        return;
       }
 
-      const data = json.data;
+      const json = JSON.parse(text);
 
-      const newProfile = {
-        name: data.name,
-        email: data.email,
-        role: data.role,
-        avatar: buildAvatarUrl(data.avatar),
+      const updatedProfile = {
+        id: json.data.id,
+        name: json.data.name,
+        email: json.data.email,
+        role: json.data.role,
+        avatar: buildAvatarUrl(json.data.avatar),
       };
 
-      setUser(newProfile);
-      await AsyncStorage.setItem("profile", JSON.stringify(newProfile));
-      setPreview(null);
-      setFile(null);
+      setUser(updatedProfile);
+      await AsyncStorage.setItem("profile", JSON.stringify(updatedProfile));
 
-      Alert.alert(
-        "Berhasil",
-        "Profil berhasil disimpan",
-        [
-          {
-            text: "OK",
-            onPress: () => router.replace("/(tabs)"),
-          },
-        ]
-      );
+      setFile(null);
+      setPreview(null);
+      setSuccessModal(true);
     } catch (err) {
-      console.log("Error update:", err);
-      Alert.alert("Error", "Terjadi kesalahan saat update profil.");
+      console.log("UPDATE ERROR:", err);
+      Alert.alert("Error", "Terjadi kesalahan server");
+    } finally {
+      setSaving(false);
     }
   };
 
-  // --------------------------------------------------
-  // LOGOUT
-  // --------------------------------------------------
+  /* ================= LOGOUT ================= */
   const handleLogout = async () => {
-    await AsyncStorage.removeItem("token");
-    await AsyncStorage.removeItem("profile");
-
-    Alert.alert(
-      "Logout",
-      "Anda telah logout",
-      [
-        {
-          text: "OK",
-          onPress: () => router.replace("../auth/login/page"),
-        },
-      ]
-    );
+    await AsyncStorage.clear();
+    router.replace("../auth/login/page");
   };
 
-  // --------------------------------------------------
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#3b82f6" />
+        <ActivityIndicator size="large" color="#2563eb" />
         <Text>Memuat profil...</Text>
       </View>
     );
   }
 
-  // --------------------------------------------------
-  // UI
-  // --------------------------------------------------
   return (
     <View style={styles.container}>
-      {/* Avatar */}
+      {/* AVATAR */}
       <View style={{ alignItems: "center", marginBottom: 20 }}>
         <Image
           source={{ uri: preview || user.avatar }}
           style={styles.avatar}
         />
-
         <TouchableOpacity style={styles.editBtn} onPress={pickImage}>
-          <Text style={{ color: "white", fontSize: 18 }}>✎</Text>
+          <Ionicons name="camera" size={20} color="white" />
         </TouchableOpacity>
       </View>
 
-      {/* Name */}
+      {/* INPUT */}
       <TextInput
-        placeholder="Nama"
+        style={styles.input}
         value={user.name}
         onChangeText={(val) => setUser({ ...user, name: val })}
-        style={styles.input}
+        placeholder="Nama"
       />
 
-      {/* Email & Role */}
-      <Text style={{ color: "#555", marginBottom: 5 }}>{user.email}</Text>
-      <Text style={{ color: "#777", marginBottom: 25 }}>{user.role}</Text>
+      <Text style={styles.textMuted}>{user.email}</Text>
+      <Text style={styles.textMuted}>{user.role}</Text>
 
-      <TouchableOpacity style={styles.saveBtn} onPress={updateProfile}>
-        <Text style={styles.btnText}>Simpan Perubahan</Text>
+      <TouchableOpacity
+        style={styles.saveBtn}
+        onPress={updateProfile}
+        disabled={saving}
+      >
+        <Text style={styles.btnText}>
+          {saving ? "Menyimpan..." : "Simpan Perubahan"}
+        </Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
+      <TouchableOpacity
+        style={styles.logoutBtn}
+        onPress={handleLogout}
+      >
         <Text style={styles.btnText}>Logout</Text>
       </TouchableOpacity>
+
+      {/* SUCCESS MODAL */}
+      <Modal transparent visible={successModal} animationType="fade">
+        <View style={styles.modalBg}>
+          <View style={styles.modalBox}>
+            <Ionicons
+              name="checkmark-circle"
+              size={64}
+              color="#22c55e"
+            />
+            <Text style={styles.modalTitle}>
+              Profil Berhasil Diperbarui
+            </Text>
+            <TouchableOpacity
+              style={styles.modalBtn}
+              onPress={() => setSuccessModal(false)}
+            >
+              <Text style={{ color: "white" }}>Tutup</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
 
-// --------------------------------------------------
-// STYLES
-// --------------------------------------------------
+/* ================= STYLES ================= */
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
     flex: 1,
+    padding: 20,
     backgroundColor: "#f5f5f5",
     alignItems: "center",
-    paddingTop: 100,
+    paddingTop: 80,
   },
   avatar: {
     width: 140,
@@ -259,7 +253,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     right: 90,
-    backgroundColor: "#3b82f6",
+    backgroundColor: "#2563eb",
     padding: 10,
     borderRadius: 30,
   },
@@ -269,15 +263,17 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 10,
     marginBottom: 10,
-    borderWidth: 1,
-    borderColor: "#ddd",
+  },
+  textMuted: {
+    color: "#666",
+    marginBottom: 5,
   },
   saveBtn: {
     backgroundColor: "#2563eb",
     padding: 15,
     borderRadius: 10,
     width: "100%",
-    marginBottom: 10,
+    marginTop: 15,
   },
   logoutBtn: {
     backgroundColor: "#ef4444",
@@ -295,5 +291,30 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  modalBg: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalBox: {
+    backgroundColor: "white",
+    padding: 25,
+    borderRadius: 16,
+    alignItems: "center",
+    width: "80%",
+  },
+  modalTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginVertical: 10,
+  },
+  modalBtn: {
+    backgroundColor: "#2563eb",
+    paddingVertical: 10,
+    paddingHorizontal: 30,
+    borderRadius: 10,
+    marginTop: 10,
   },
 });
