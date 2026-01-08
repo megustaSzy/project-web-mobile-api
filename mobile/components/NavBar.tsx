@@ -192,8 +192,8 @@ const styles = StyleSheet.create({
   backgroundColor: "#FF3B30", // merah
   color: "#fff",              // teks putih
   marginHorizontal: 20,
-  marginTop: 10,
-  padding: 12,
+  marginTop: 0,
+  padding: 5,
   borderRadius: 8,
   textAlign: "center",        // biar teks di tengah
   fontWeight: "600",
