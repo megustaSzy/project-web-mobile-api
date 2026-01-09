@@ -3,6 +3,20 @@ import QRCode from "qrcode";
 import prisma from "../lib/prisma";
 import { createError } from "../utilities/createError";
 
+const formatRupiah = (value: number) =>
+  new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 0,
+  }).format(value);
+
+const formatDate = (date: Date) =>
+  new Intl.DateTimeFormat("id-ID", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  }).format(date);
+
 export const ticketService = {
   async generateTicketPDFBuffer(orderId: number): Promise<Buffer> {
     const order = await prisma.tb_orders.findUnique({
@@ -16,85 +30,100 @@ export const ticketService = {
     const qrBase64 = qrDataUrl.replace(/^data:image\/png;base64,/, "");
 
     const WIDTH = 900;
-    const HEIGHT = 350;
+    const HEIGHT = 420;
 
     return new Promise((resolve, reject) => {
       const doc = new PDFDocument({ size: [WIDTH, HEIGHT], margin: 0 });
       const buffers: Buffer[] = [];
 
-      // 🔥 PENTING: tunggu data & end
       doc.on("data", (chunk) => buffers.push(chunk));
-      doc.on("end", () => {
-        const pdfBuffer = Buffer.concat(buffers);
-        resolve(pdfBuffer);
-      });
-      doc.on("error", (err) => reject(err));
+      doc.on("end", () => resolve(Buffer.concat(buffers)));
+      doc.on("error", reject);
 
-      // ===== DESIGN (TIDAK DIUBAH) =====
       const orange = "#f97316";
       const dark = "#111827";
-      const gray = "#4b5563";
+      const gray = "#6b7280";
 
-      doc.rect(0, 0, WIDTH, 80).fill(orange);
+      /* ===== HEADER ===== */
+      doc.rect(0, 0, WIDTH, 90).fill(orange);
       doc
         .fillColor("white")
         .font("Helvetica-Bold")
         .fontSize(26)
-        .text("BOARDING PASS", 30, 25);
+        .text("BOARDING PASS", 30, 30);
 
-      doc
-        .moveTo(0, 80)
-        .lineTo(WIDTH, 80)
-        .strokeColor("#ffffff")
-        .lineWidth(1)
-        .stroke();
-
+      /* ===== LEFT CONTENT ===== */
       const leftX = 30;
-      let y = 100;
+      let y = 110;
 
-      doc.fontSize(12).fillColor(gray).text("Nama", leftX, y);
-      doc
-        .font("Helvetica-Bold")
-        .fontSize(16)
-        .fillColor(dark)
-        .text(order.userName, leftX, y + 15);
+      const label = (text: string, x: number, y: number) =>
+        doc.font("Helvetica").fontSize(11).fillColor(gray).text(text, x, y);
 
-      y += 55;
+      const value = (text: string, x: number, y: number, size = 14) =>
+        doc
+          .font("Helvetica-Bold")
+          .fontSize(size)
+          .fillColor(dark)
+          .text(text, x, y);
 
-      doc
-        .font("Helvetica")
-        .fontSize(12)
-        .fillColor(gray)
-        .text("Destinasi", leftX, y);
-      doc
-        .font("Helvetica-Bold")
-        .fontSize(18)
-        .fillColor(dark)
-        .text(order.destinationName, leftX, y + 15, { width: 380 });
+      label("Nama Penumpang", leftX, y);
+      value(order.userName, leftX, y + 14, 16);
 
+      y += 45;
+      label("Email", leftX, y);
+      value(order.userEmail, leftX, y + 14);
+
+      y += 40;
+      label("No. Telepon", leftX, y);
+      value(order.userPhone, leftX, y + 14);
+
+      y += 40;
+      label("Destinasi", leftX, y);
+      value(order.destinationName, leftX, y + 14, 16);
+
+      y += 50;
+      label("Tanggal Perjalanan", leftX, y);
+      value(formatDate(order.date), leftX, y + 14);
+
+      y += 40;
+      label("Jam Berangkat", leftX, y);
+      value(order.departureTime, leftX, y + 14);
+
+      y += 40;
+      label("Jam Pulang", leftX, y);
+      value(order.returnTime ?? "-", leftX, y + 14);
+
+      y += 40;
+      label("Jumlah Tiket", leftX, y);
+      value(`${order.quantity} Orang`, leftX, y + 14);
+
+      /* ===== RIGHT CARD ===== */
       const rightX = 520;
 
       doc
-        .rect(rightX - 20, 100, 360, 230)
+        .roundedRect(rightX - 20, 110, 360, 260, 12)
         .strokeColor("#e5e7eb")
         .lineWidth(1)
         .stroke();
 
-      doc
-        .font("Helvetica")
-        .fontSize(12)
-        .fillColor(gray)
-        .text("Kode Tiket", rightX, 120);
+      label("Kode Tiket", rightX, 130);
       doc
         .font("Helvetica-Bold")
         .fontSize(22)
         .fillColor(orange)
-        .text(order.ticketCode, rightX, 140);
+        .text(order.ticketCode, rightX, 150);
 
-      doc.image(Buffer.from(qrBase64, "base64"), rightX + 200, 140, {
-        width: 130,
-        height: 130,
+      doc.image(Buffer.from(qrBase64, "base64"), rightX + 200, 150, {
+        width: 120,
+        height: 120,
       });
+
+      label("Total Pembayaran", rightX, 300);
+      doc
+        .font("Helvetica-Bold")
+        .fontSize(18)
+        .fillColor(dark)
+        .text(formatRupiah(order.totalPrice), rightX, 320);
 
       doc.end();
     });
