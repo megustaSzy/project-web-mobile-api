@@ -24,11 +24,13 @@ type DestinationType = {
   price: number;
   imageUrl: string;
   description: string;
+  regionId?: number;   // 🔥 TAMBAHKAN
   category?: {
     id?: number;
     name: string;
   };
 };
+
 
 type CategoryType = {
   id: number;
@@ -213,50 +215,40 @@ const handleCategoryPress = (name: string) => {
     router.push(`../deskripsi/${d.id}`);
   };
 
-  const normalizeText = (text: string) => {
-    return text
+  const normalizeText = (text: string) =>
+    text
       .toLowerCase()
-      .replace(/kabupaten|kab\.|kota|provinsi|prov\.|,/g, "")
-      .replace(/\s+/g, " ")
+      .replace(/kabupaten|kab\.|kota|provinsi|prov\.|barat|timur|utara|selatan|tengah|,/g, "")
+      .replace(/\s+/g, "")
       .trim();
-  };
 
-
-  const handleSearch = () => {
+const handleSearch = () => {
   let result = [...apiDestinations];
 
-  // FILTER KATEGORI (pakai searchKategoriName)
+  // FILTER KATEGORI
   if (searchKategoriName) {
     result = result.filter(
       (d) => d.category?.name === searchKategoriName
     );
   }
 
-
-  // FILTER DAERAH (SESUAI DATA ADMIN)
-  if (daerahName) {
-    const daerahNormalized = normalizeText(daerahName);
-
-    result = result.filter((d) => {
-      if (!d.location) return false;
-
-      const locationNormalized = normalizeText(d.location);
-
-      return locationNormalized.includes(daerahNormalized);
-    });
+  // 🔥 FILTER DAERAH BERDASARKAN ID
+  if (daerahId) {
+    result = result.filter(
+      (d) => d.regionId === daerahId
+    );
   }
-
 
   if (result.length === 0) {
     setSearchResults([]);
     setNotFoundModal(true);
   } else {
     setSearchResults(result);
-    setResultModal(true); // 🔥 POPUP HASIL
+    setResultModal(true);
   }
 
   saveHistory();
-  };
+};
 
 
   // ============================
