@@ -27,6 +27,30 @@ export const regionService = {
 
     return pagination.paginate({ count, rows });
   },
+
+  async getAllAdmin(page: number, limit: number) {
+    const pagination = new Pagination(page, limit);
+
+    const [count, rows] = await Promise.all([
+      prisma.tb_regions.count(),
+      prisma.tb_regions.findMany({
+        skip: pagination.offset,
+        take: pagination.limit,
+        orderBy: {
+          id: "asc",
+        },
+        select: {
+          id: true,
+          name: true,
+          imageUrl: true,
+          imagePublicId: true,
+          destinations: true,
+        },
+      }),
+    ]);
+
+    return pagination.paginate({ count, rows });
+  },
   async getById(id: number) {
     const region = await prisma.tb_regions.findUnique({
       where: { id },
@@ -51,7 +75,6 @@ export const regionService = {
   },
 
   async editRegion(id: number, data: UpdateRegionDTO) {
-
     const region = await prisma.tb_regions.findUnique({ where: { id } });
 
     if (!region) throw createError("id tidak ditemukan", 404);

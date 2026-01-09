@@ -19,6 +19,19 @@ export const regionController = {
     }
   },
 
+  async getAllRegionAdmin(req: Request, res: Response, next: NextFunction) {
+    try {
+      const page = Number(req.query.page) || 1;
+      const limit = Number(req.query.limit) || 10;
+
+      const region = await regionService.getAllAdmin(page, limit);
+
+      return ResponseData.ok(res, region);
+    } catch (error) {
+      next(error);
+    }
+  },
+
   async getById(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
