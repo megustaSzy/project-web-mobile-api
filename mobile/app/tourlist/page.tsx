@@ -324,8 +324,8 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   popularItem: {
-    width: 180,
-    height: 210,
+    width: 185,
+    height: 220,
     borderRadius: 15,
     overflow: "hidden",
     marginBottom: 15,
