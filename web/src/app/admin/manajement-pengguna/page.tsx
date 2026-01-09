@@ -3,22 +3,26 @@
 import { useEffect, useState } from "react";
 import { apiFetch } from "@/helpers/api";
 
-type UserItem = {
-  id: number;
-  name: string;
-  email: string;
-  notelp: string | null;
-};
+import {
+  UserItem,
+  ApiUsersResponse,
+  ApiBaseResponse,
+} from "@/types/admin/manajemen-pengguna";
 
-type ApiUsersResponse = {
-  data: {
-    items: UserItem[];
-  };
-};
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
-type ApiBaseResponse = {
-  message: string;
-};
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+
+import UsersTable from "@/components/admin/manajemen-pengguna/UsersTable";
+import UserEditModal from "@/components/admin/manajemen-pengguna/UserEditModal";
+import UserDeleteModal from "@/components/admin/manajemen-pengguna/UserDeleteModal";
 
 export default function UsersPage() {
   const [users, setUsers] = useState<UserItem[]>([]);
@@ -39,7 +43,6 @@ export default function UsersPage() {
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
 
-  /* ================= FETCH ================= */
   async function getData() {
     try {
       setLoading(true);
@@ -52,7 +55,6 @@ export default function UsersPage() {
     }
   }
 
-  /* ================= SAVE EDIT ================= */
   async function saveUser() {
     if (!editId) return;
 
@@ -83,7 +85,6 @@ export default function UsersPage() {
     }
   }
 
-  /* ================= DELETE ================= */
   async function deleteUser() {
     if (!pendingDeleteId) return;
 
@@ -107,7 +108,6 @@ export default function UsersPage() {
     }
   }
 
-  /* ================= MODAL ================= */
   function openEditModal(user: UserItem) {
     setEditId(user.id);
     setNameInput(user.name);
@@ -126,165 +126,80 @@ export default function UsersPage() {
   }, []);
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-xl font-semibold text-blue-700">
-        Manajemen Pengguna
-      </h2>
-
-      {successMsg && (
-        <div className="fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg z-50">
-          {successMsg}
-        </div>
-      )}
-
-      {errorMsg && (
-        <div className="fixed top-4 left-4 bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg z-50">
-          {errorMsg}
-        </div>
-      )}
-
-      <div className="bg-white rounded-2xl border shadow-sm">
-        <div className="px-6 py-4 border-b">
-          <h3 className="font-semibold text-gray-800">Daftar Pengguna</h3>
-        </div>
-
-        {loading ? (
-          <p className="p-6 text-gray-500">Memuat data...</p>
-        ) : users.length === 0 ? (
-          <p className="p-6 text-gray-500">Tidak ada data pengguna.</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full table-auto text-sm">
-              <thead className="bg-gray-50 border-b">
-                <tr className="text-gray-600">
-                  <th className="w-14 px-4 py-3 text-center">No</th>
-                  <th className="px-4 py-3 text-left">Nama</th>
-                  <th className="px-4 py-3 text-left">Email</th>
-                  <th className="px-4 py-3 text-left">No. Telp</th>
-                  <th className="w-40 px-4 py-3 text-center">Aksi</th>
-                </tr>
-              </thead>
-
-              <tbody className="divide-y">
-                {users.map((u, i) => (
-                  <tr key={u.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-center text-gray-400">
-                      {i + 1}
-                    </td>
-
-                    <td className="px-4 py-3 font-medium">{u.name}</td>
-
-                    <td
-                      className="px-4 py-3 text-gray-600 break-all max-w-xs"
-                      title={u.email}
-                    >
-                      {u.email}
-                    </td>
-
-                    <td className="px-4 py-3 text-gray-600 whitespace-nowrap">
-                      {u.notelp || "-"}
-                    </td>
-
-                    <td className="px-4 py-3">
-                      <div className="flex justify-center gap-2">
-                        <button
-                          onClick={() => openEditModal(u)}
-                          className="px-3 py-1.5 bg-yellow-500 text-white rounded-full text-xs"
-                        >
-                          Edit
-                        </button>
-
-                        <button
-                          onClick={() => openDeleteConfirm(u.id)}
-                          disabled={deletingId === u.id}
-                          className="px-3 py-1.5 bg-red-600 text-white rounded-full text-xs"
-                        >
-                          {deletingId === u.id ? "Menghapus..." : "Hapus"}
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-semibold text-blue-700 tracking-tight">
+          Manajemen Pengguna
+        </h2>
+        <p className="text-sm text-muted-foreground mt-1">
+          Kelola data pengguna yang terdaftar di sistem
+        </p>
       </div>
 
-      {/* MODAL EDIT */}
-      {modalOpen && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-2xl shadow-xl w-96">
-            <h3 className="text-lg font-semibold mb-4">Edit Pengguna</h3>
-
-            <input
-              value={nameInput}
-              onChange={(e) => setNameInput(e.target.value)}
-              className="w-full border rounded-lg px-3 py-2 mb-2"
-              placeholder="Nama"
-            />
-
-            <input
-              value={emailInput}
-              disabled
-              className="w-full border rounded-lg px-3 py-2 mb-2 bg-gray-100 cursor-not-allowed"
-              placeholder="Email"
-            />
-
-            <input
-              value={notelpInput}
-              onChange={(e) => setNotelpInput(e.target.value)}
-              className="w-full border rounded-lg px-3 py-2 mb-4"
-              placeholder="No. Telp"
-            />
-
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setModalOpen(false)}
-                className="px-4 py-2 bg-gray-100 rounded-lg"
-              >
-                Batal
-              </button>
-
-              <button
-                onClick={saveUser}
-                disabled={saving}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg"
-              >
-                {saving ? "Menyimpan..." : "Simpan"}
-              </button>
-            </div>
-          </div>
-        </div>
+      {/* SUCCESS TOAST */}
+      {successMsg && (
+        <Alert className="fixed top-4 right-4 bg-green-600 text-white border-green-700 shadow-lg z-50 w-auto">
+          <CheckCircle2 className="h-4 w-4" />
+          <AlertDescription>{successMsg}</AlertDescription>
+        </Alert>
       )}
 
-      {/* MODAL DELETE */}
-      {confirmDeleteOpen && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-2xl shadow-xl w-96">
-            <h3 className="text-lg font-semibold mb-2">Konfirmasi</h3>
-            <p className="text-sm text-gray-600 mb-6">
-              Yakin ingin menghapus pengguna ini?
-            </p>
-
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setConfirmDeleteOpen(false)}
-                className="px-4 py-2 bg-gray-100 rounded-lg"
-              >
-                Batal
-              </button>
-
-              <button
-                onClick={deleteUser}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg"
-              >
-                Ya, Hapus
-              </button>
-            </div>
-          </div>
-        </div>
+      {/* ERROR TOAST */}
+      {errorMsg && (
+        <Alert className="fixed top-4 right-4 bg-red-600 text-white border-red-700 shadow-lg z-50 w-auto">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{errorMsg}</AlertDescription>
+        </Alert>
       )}
+
+      <Card className="rounded-2xl shadow-sm">
+        <CardHeader className="border-b">
+          <div>
+            <CardTitle className="text-gray-800">Daftar Pengguna</CardTitle>
+            <CardDescription className="mt-1">
+              Total {users.length} pengguna terdaftar
+            </CardDescription>
+          </div>
+        </CardHeader>
+
+        <CardContent className="p-0">
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-6 w-6 animate-spin text-blue-600 mr-2" />
+              <p className="text-gray-500">Memuat data...</p>
+            </div>
+          ) : users.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <p className="text-gray-500 text-sm">Tidak ada data pengguna.</p>
+            </div>
+          ) : (
+            <UsersTable
+              users={users}
+              deletingId={deletingId}
+              onEdit={openEditModal}
+              onDelete={openDeleteConfirm}
+            />
+          )}
+        </CardContent>
+      </Card>
+
+      <UserEditModal
+        open={modalOpen}
+        nameInput={nameInput}
+        emailInput={emailInput}
+        notelpInput={notelpInput}
+        saving={saving}
+        onClose={() => setModalOpen(false)}
+        onSave={saveUser}
+        onNameChange={setNameInput}
+        onNotelpChange={setNotelpInput}
+      />
+
+      <UserDeleteModal
+        open={confirmDeleteOpen}
+        onCancel={() => setConfirmDeleteOpen(false)}
+        onConfirm={deleteUser}
+      />
     </div>
   );
 }
