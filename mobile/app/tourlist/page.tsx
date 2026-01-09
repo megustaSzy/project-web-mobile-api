@@ -191,15 +191,16 @@ export default function KabupatenDetail() {
 
         {/* DESTINATION */}
         <Text style={styles.sectionTitle}>Populer Destination</Text>
-
         <View style={styles.popularGrid}>
           {filteredDestinations.length === 0 ? (
-          <View style={styles.emptyContainer}>
-            <Ionicons name="image-outline" size={60} color="#bbb" />
-            <Text style={styles.emptyTitle}>Destinasi belum tersedia</Text>
-            <Text style={styles.emptySubtitle}>
-              Belum ada destinasi untuk kategori ini
-            </Text>
+          <View style={styles.emptyWrapper}>
+            <View style={styles.emptyContainer}>
+              <Ionicons name="image-outline" size={64} color="#bbb" />
+              <Text style={styles.emptyTitle}>Destinasi belum tersedia</Text>
+              <Text style={styles.emptySubtitle}>
+                Belum ada destinasi untuk kategori ini
+              </Text>
+            </View>
           </View>
         ) : (
           <View style={styles.popularGrid}>
@@ -326,7 +327,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   popularItem: {
-    width: "48%",
+    width: 180,
     height: 210,
     borderRadius: 15,
     overflow: "hidden",
@@ -367,26 +368,30 @@ const styles = StyleSheet.create({
     marginLeft: 4,
     fontSize: 13,
   },
-  emptyContainer: {
-  marginTop: 40,
-  alignItems: "center",
+
+  emptyWrapper: {
+  height: 260,          // tinggi area destinasi
   justifyContent: "center",
-  paddingVertical: 40,
-},
+  alignItems: "center",
+    },
 
-emptyTitle: {
-  marginTop: 12,
-  fontSize: 16,
-  fontWeight: "600",
-  color: "#555",
-},
+    emptyContainer: {
+      alignItems: "center",
+    },
 
-emptySubtitle: {
-  marginTop: 4,
-  fontSize: 13,
-  color: "#999",
-  textAlign: "center",
-},
+    emptyTitle: {
+      marginTop: 12,
+      fontSize: 16,
+      fontWeight: "600",
+      color: "#555",
+    },
+
+    emptySubtitle: {
+      marginTop: 4,
+      fontSize: 13,
+      color: "#999",
+      textAlign: "center",
+    },
 
 });
 
