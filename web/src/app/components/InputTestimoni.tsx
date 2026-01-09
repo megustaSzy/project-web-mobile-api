@@ -70,9 +70,9 @@ export default function TestimoniForm() {
 
   return (
     <section className="relative flex flex-col items-center justify-center min-h-screen overflow-hidden pb-32">
-      <div className="absolute inset-0 bg-linear-to-br from-blue-100 via-blue-200 to-blue-300"></div>
+      <div className="absolute inset-0 bg-linear-to-b from-blue-100 via-blue-100 to-blue-200"></div>
 
-      <div className="absolute inset-0 opacity-20">
+      <div className="absolute inset-0 opacity-5">
         <Image
           src="/images/tekturgaris.svg"
           alt="Tekstur garis"

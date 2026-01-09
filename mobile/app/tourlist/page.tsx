@@ -322,15 +322,17 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 0,
     marginTop: 10,
+    marginRight: -20,
   },
   popularItem: {
-    width: 185,
+    width: 173,
     height: 220,
     borderRadius: 15,
     overflow: "hidden",
     marginBottom: 15,
     position: "relative",
     backgroundColor: "#000",
+    marginRight: 10,
   },
   popularBG: {
     width: "100%",
