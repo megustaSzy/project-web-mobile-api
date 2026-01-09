@@ -11,7 +11,6 @@ import {
   Alert,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Picker } from "@react-native-picker/picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -20,6 +19,9 @@ type PickupItem = {
   id: number;
   name: string;
 };
+
+const JAM_BERANGKAT = ["07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00" , "14.00"];
+const JAM_PULANG = ["13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00"];
 
 export default function PesanPage() {
   const router = useRouter();
@@ -36,7 +38,6 @@ export default function PesanPage() {
   /* ================= STATE ================= */
   const [pickupList, setPickupList] = useState<PickupItem[]>([]);
   const [pickupId, setPickupId] = useState<number | null>(null);
-  const [loadingPickup, setLoadingPickup] = useState(false);
 
   const [tanggal, setTanggal] = useState(new Date());
   const [jamBerangkat, setJamBerangkat] = useState("07:00");
@@ -50,14 +51,11 @@ export default function PesanPage() {
   useEffect(() => {
     async function fetchPickup() {
       try {
-        setLoadingPickup(true);
         const res = await fetch(`${BASE_URL}/api/pickup-locations`);
         const json = await res.json();
         setPickupList(Array.isArray(json.data) ? json.data : []);
       } catch {
         setPickupList([]);
-      } finally {
-        setLoadingPickup(false);
       }
     }
     fetchPickup();
@@ -75,14 +73,9 @@ export default function PesanPage() {
 
   /* ================= HANDLER ================= */
   function openConfirm() {
-    if (!pickupId) {
-      Alert.alert("Validasi", "Pilih lokasi penjemputan");
-      return;
-    }
-    if (Number(jumlahTiket) < 1) {
-      Alert.alert("Validasi", "Jumlah tiket minimal 1");
-      return;
-    }
+    if (!pickupId) return Alert.alert("Validasi", "Pilih lokasi penjemputan");
+    if (Number(jumlahTiket) < 1)
+      return Alert.alert("Validasi", "Jumlah tiket minimal 1");
     setShowConfirm(true);
   }
 
@@ -124,24 +117,8 @@ export default function PesanPage() {
         <View style={styles.card}>
           <Text style={styles.title}>{title}</Text>
 
-          {category && (
-            <View style={styles.categoryBadge}>
-              <Text style={styles.categoryText}>{category}</Text>
-            </View>
-          )}
-
-          {/* PICKUP */}
-          <Text style={styles.label}>Lokasi Penjemputan</Text>
-          <View style={styles.pickerBox}>
-            <Picker
-              selectedValue={pickupId}
-              onValueChange={(v) => setPickupId(v)}
-            >
-              <Picker.Item label="Pilih lokasi penjemputan" value={null} />
-              {pickupList.map((p) => (
-                <Picker.Item key={p.id} label={p.name} value={p.id} />
-              ))}
-            </Picker>
+          <View style={styles.categoryBadge}>
+            <Text style={styles.categoryText}>{category}</Text>
           </View>
 
           {/* DATE */}
@@ -167,39 +144,50 @@ export default function PesanPage() {
 
           {/* JAM BERANGKAT */}
           <Text style={styles.label}>Jam Berangkat</Text>
-          <View style={styles.pickerBox}>
-            <Ionicons
-              name="time-outline"
-              size={18}
-              style={styles.pickerIcon}
-            />
-            <Picker
-              selectedValue={jamBerangkat}
-              onValueChange={setJamBerangkat}
-            >
-              {["07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00"].map(
-                (j) => (
-                  <Picker.Item key={j} label={j} value={j} />
-                )
-              )}
-            </Picker>
+          <View style={styles.timeGrid}>
+            {JAM_BERANGKAT.map((j) => (
+              <TouchableOpacity
+                key={j}
+                style={[
+                  styles.timeItem,
+                  jamBerangkat === j && styles.timeActive,
+                ]}
+                onPress={() => setJamBerangkat(j)}
+              >
+                <Text
+                  style={[
+                    styles.timeText,
+                    jamBerangkat === j && styles.timeTextActive,
+                  ]}
+                >
+                  {j}
+                </Text>
+              </TouchableOpacity>
+            ))}
           </View>
 
           {/* JAM PULANG */}
           <Text style={styles.label}>Jam Pulang</Text>
-          <View style={styles.pickerBox}>
-            <Ionicons
-              name="time-outline"
-              size={18}
-              style={styles.pickerIcon}
-            />
-            <Picker selectedValue={jamPulang} onValueChange={setJamPulang}>
-              {["13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00"].map(
-                (j) => (
-                  <Picker.Item key={j} label={j} value={j} />
-                )
-              )}
-            </Picker>
+          <View style={styles.timeGrid}>
+            {JAM_PULANG.map((j) => (
+              <TouchableOpacity
+                key={j}
+                style={[
+                  styles.timeItem,
+                  jamPulang === j && styles.timeActive,
+                ]}
+                onPress={() => setJamPulang(j)}
+              >
+                <Text
+                  style={[
+                    styles.timeText,
+                    jamPulang === j && styles.timeTextActive,
+                  ]}
+                >
+                  {j}
+                </Text>
+              </TouchableOpacity>
+            ))}
           </View>
 
           {/* JUMLAH */}
@@ -232,9 +220,6 @@ export default function PesanPage() {
           <View style={popup.box}>
             <Text style={popup.title}>Konfirmasi Pesanan</Text>
             <Text>🏞 {title}</Text>
-            <Text>
-              📍 {pickupList.find((p) => p.id === pickupId)?.name}
-            </Text>
             <Text>🗓 {fmtDate(tanggal)}</Text>
             <Text>⏰ {jamBerangkat} - {jamPulang}</Text>
             <Text>👥 {jumlahTiket} Orang</Text>
@@ -281,11 +266,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
 
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#111",
-  },
+  title: { fontSize: 20, fontWeight: "bold", color: "#111" },
 
   categoryBadge: {
     backgroundColor: "#E8F1FF",
@@ -293,22 +274,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 20,
-    marginTop: 6,
-    marginBottom: 14,
+    marginVertical: 10,
   },
 
-  categoryText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#2F80ED",
-  },
+  categoryText: { fontSize: 12, fontWeight: "600", color: "#2F80ED" },
 
-  label: {
-    marginTop: 14,
-    marginBottom: 6,
-    color: "#555",
-    fontSize: 13,
-  },
+  label: { marginTop: 16, marginBottom: 8, color: "#555" },
 
   inputBox: {
     height: 50,
@@ -319,23 +290,32 @@ const styles = StyleSheet.create({
     borderRadius: 25,
   },
 
-  pickerBox: {
-    height: 50,
-    backgroundColor: "#F6F6F6",
-    borderRadius: 25,
-    justifyContent: "center",
-    paddingHorizontal: 10,
-    marginBottom: 4,
-  },
-
-  pickerIcon: {
-    position: "absolute",
-    left: 16,
-    zIndex: 1,
-  },
-
   inputText: { marginLeft: 10 },
   input: { marginLeft: 10, flex: 1 },
+
+  timeGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+  },
+
+  timeItem: {
+    width: "22%",
+    height: 42,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  timeActive: {
+    backgroundColor: "#2F80ED",
+    borderColor: "#2F80ED",
+  },
+
+  timeText: { color: "#333", fontWeight: "500" },
+  timeTextActive: { color: "#fff", fontWeight: "bold" },
 
   bottom: {
     position: "absolute",
@@ -369,17 +349,8 @@ const popup = StyleSheet.create({
     borderRadius: 20,
     padding: 20,
   },
-  title: {
-    fontWeight: "bold",
-    fontSize: 18,
-    textAlign: "center",
-    marginBottom: 10,
-  },
-  total: {
-    marginTop: 10,
-    fontWeight: "bold",
-    color: "#2F80ED",
-  },
+  title: { fontWeight: "bold", fontSize: 18, textAlign: "center" },
+  total: { marginTop: 10, fontWeight: "bold", color: "#2F80ED" },
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
