@@ -151,11 +151,10 @@ export default function KabupatenDetail() {
       {/* CONTENT */}
       <View style={styles.content}>
         <Text style={styles.title}>{currentRegion.name}</Text>
-
-        <Text style={styles.description}>
-          {currentRegion.description || "Deskripsi belum tersedia"}
+        {/* DESTINATION */}
+        <Text style={styles.sectionDesc}>
+          Temukan berbagai destinasi wisata di {currentRegion.name}
         </Text>
-
         {/* CATEGORY LIST */}
         <ScrollView
           horizontal
@@ -194,13 +193,11 @@ export default function KabupatenDetail() {
         <View style={styles.popularGrid}>
           {filteredDestinations.length === 0 ? (
           <View style={styles.emptyWrapper}>
-            <View style={styles.emptyContainer}>
-              <Ionicons name="image-outline" size={64} color="#bbb" />
-              <Text style={styles.emptyTitle}>Destinasi belum tersedia</Text>
-              <Text style={styles.emptySubtitle}>
-                Belum ada destinasi untuk kategori ini
-              </Text>
-            </View>
+            <Ionicons name="map-outline" size={64} color="#bbb" />
+            <Text style={styles.emptyTitle}>Destinasi belum tersedia</Text>
+            <Text style={styles.emptySubtitle}>
+              Belum ada destinasi wisata di {currentRegion.name}
+            </Text>
           </View>
         ) : (
           <View style={styles.popularGrid}>
@@ -370,28 +367,32 @@ const styles = StyleSheet.create({
   },
 
   emptyWrapper: {
-  height: 260,          // tinggi area destinasi
-  justifyContent: "center",
-  alignItems: "center",
-    },
+    width: "100%",
+    height: 300,
+    justifyContent: "center",
+    alignItems: "center",
+  },
 
-    emptyContainer: {
-      alignItems: "center",
-    },
+  emptyTitle: {
+    marginTop: 12,
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#555",
+  },
 
-    emptyTitle: {
-      marginTop: 12,
-      fontSize: 16,
-      fontWeight: "600",
-      color: "#555",
-    },
+  emptySubtitle: {
+    marginTop: 4,
+    fontSize: 13,
+    color: "#999",
+    textAlign: "center",
+    paddingHorizontal: 20,
+  },
 
-    emptySubtitle: {
-      marginTop: 4,
-      fontSize: 13,
-      color: "#999",
-      textAlign: "center",
-    },
+    sectionDesc: {
+  marginTop: 4,
+  fontSize: 13,
+  color: "#666",
+},
 
 });
 
