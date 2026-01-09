@@ -44,6 +44,9 @@ export default function PesanPage() {
   const [showDate, setShowDate] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
+  const [errorMsg, setErrorMsg] = useState("");
+  const [showError, setShowError] = useState(false);
+
   useEffect(() => {
     fetch(`${BASE_URL}/api/pickup-locations`)
       .then((res) => res.json())
@@ -63,9 +66,21 @@ export default function PesanPage() {
   const totalHarga = price * jumlahTiket;
 
   function openConfirm() {
-    if (!pickupId) return Alert.alert("Validasi", "Pilih lokasi penjemputan");
-    setShowConfirm(true);
+  if (!pickupId) {
+    setErrorMsg("Lokasi penjemputan belum dipilih");
+    setShowError(true);
+    return;
   }
+
+  if (!jamBerangkat || !jamPulang) {
+    setErrorMsg("Jam berangkat dan pulang harus dipilih");
+    setShowError(true);
+    return;
+  }
+
+  setShowConfirm(true);
+}
+
 
   function handlePay() {
     setShowConfirm(false);
@@ -254,6 +269,24 @@ export default function PesanPage() {
           </View>
         </View>
       </Modal>
+
+      <Modal visible={showError} transparent animationType="fade">
+  <View style={popup.overlay}>
+    <View style={popup.errorBox}>
+      <Ionicons name="alert-circle-outline" size={50} color="#E74C3C" />
+      <Text style={popup.errorTitle}>Data Belum Lengkap</Text>
+      <Text style={popup.errorText}>{errorMsg}</Text>
+
+      <TouchableOpacity
+        style={popup.errorBtn}
+        onPress={() => setShowError(false)}
+      >
+        <Text style={{ color: "#fff", fontWeight: "bold" }}>OK</Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+</Modal>
+
     </View>
   );
 }
@@ -393,4 +426,30 @@ const popup = StyleSheet.create({
     borderRadius: 30, 
     alignItems: "center" 
   },
+
+  errorBox: {
+  backgroundColor: "#fff",
+  width: "80%",
+  borderRadius: 20,
+  padding: 24,
+  alignItems: "center",
+},
+errorTitle: {
+  fontSize: 18,
+  fontWeight: "bold",
+  marginTop: 10,
+},
+errorText: {
+  textAlign: "center",
+  color: "#555",
+  marginVertical: 10,
+},
+errorBtn: {
+  marginTop: 10,
+  backgroundColor: "#E74C3C",
+  paddingHorizontal: 30,
+  paddingVertical: 10,
+  borderRadius: 20,
+},
+
 });
