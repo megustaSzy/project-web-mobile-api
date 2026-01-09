@@ -24,6 +24,7 @@ export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const [modalVisible, setModalVisible] = useState(false);
   const [modalStatus, setModalStatus] = useState<"success" | "error" | null>(
@@ -172,13 +173,27 @@ export default function LoginForm() {
         />
 
         <Text style={styles.label}>Password</Text>
+
+        <View style={styles.passwordContainer}>
         <TextInput
-          style={styles.input}
-          placeholder="••••••••"
-          secureTextEntry
+          style={styles.passwordInput}
+          placeholder="Masukkan password"
+          secureTextEntry={!showPassword}
           value={password}
           onChangeText={setPassword}
+          autoCapitalize="none"
         />
+
+        <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+          <Ionicons
+            name={showPassword ? "eye-off" : "eye"}
+            size={22}
+            color="#777"
+          />
+        </TouchableOpacity>
+      </View>
+
+
 
         <TouchableOpacity
           onPress={() => router.push("/auth/forgot-password/page")}
@@ -267,6 +282,21 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 20,
   },
+
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+  },
+
+  passwordInput: {
+    flex: 1,
+    paddingVertical: 10,
+  },
+
 
   card: {
     width: "100%",
