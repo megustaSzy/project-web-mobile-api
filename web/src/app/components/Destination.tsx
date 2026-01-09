@@ -6,6 +6,7 @@ import { apiFetch } from "@/helpers/api";
 import { ApiDestinationsResponse, DestinationsType } from "@/types/destination";
 import { ApiCategoryResponse, CategoryItem } from "@/types/category";
 import DestinationModal from "./DestinationModal";
+import { ArrowRight } from "lucide-react";
 
 export default function DestinasiSection() {
   const [data, setData] = useState<DestinationsType[]>([]);
@@ -114,11 +115,7 @@ export default function DestinasiSection() {
                 >
                   <div className="h-48">
                     <img
-                      src={
-                        d.imageUrl
-                          ? `${d.imageUrl}`
-                          : "/images/default.jpg"
-                      }
+                      src={d.imageUrl ? `${d.imageUrl}` : "/images/default.jpg"}
                       alt={d.name}
                       className="w-full h-full object-cover"
                     />
@@ -138,9 +135,13 @@ export default function DestinasiSection() {
                           setSelectedData(d);
                           setOpenModal(true);
                         }}
-                        className="text-blue-600 text-sm cursor-pointer font-medium hover:underline"
+                        className="group inline-flex items-center gap-1 text-blue-600 text-sm cursor-pointer font-medium hover:bg-blue-50"
                       >
-                        Lihat Detail →
+                        Lihat Detail
+                        <ArrowRight
+                          size={16}
+                          className="transition-transform duration-200 group-hover:translate-x-1"
+                        />
                       </span>
                     </div>
                   </div>
