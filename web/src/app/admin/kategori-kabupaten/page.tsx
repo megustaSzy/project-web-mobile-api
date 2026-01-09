@@ -4,6 +4,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { apiFetch } from "@/helpers/api";
 import { RegionApiResponse, RegionItem } from "@/types/region";
+
 import {
   Pagination,
   PaginationContent,
@@ -12,6 +13,22 @@ import {
   PaginationPrevious,
   PaginationNext,
 } from "@/components/ui/pagination";
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2, Plus, AlertCircle, CheckCircle2 } from "lucide-react";
+
+import KabupatenTable from "@/components/admin/kategori-kabupaten/KabupatenTable";
+import KabupatenFormModal from "@/components/admin/kategori-kabupaten/KabupatenFormModal";
+import KabupatenDeleteModal from "@/components/admin/kategori-kabupaten/KabupatenDeleteModal";
 
 export default function KategoriKabupaten() {
   const [regions, setRegions] = useState<RegionItem[]>([]);
@@ -31,17 +48,16 @@ export default function KategoriKabupaten() {
 
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
-  /* ================= PAGINATION ================= */
   const [page, setPage] = useState(1);
   const perPage = 10;
   const [totalPages, setTotalPages] = useState(1);
 
-  /* ================= LOAD DATA ================= */
+  /* ================= FETCH ================= */
   const getData = useCallback(async () => {
     try {
       setLoading(true);
       const res = await apiFetch<RegionApiResponse>(
-        `/api/region?page=${page}&per_page=${perPage}`
+        `/api/region/admin?page=${page}&per_page=${perPage}`
       );
       setRegions(res.data.items);
       setTotalPages(res.data.total_pages);
@@ -69,7 +85,7 @@ export default function KategoriKabupaten() {
 
       if (editId !== null) {
         await apiFetch(`/api/region/${editId}`, {
-          method: "PUT",
+          method: "PATCH",
           body: fd,
         });
       } else {
@@ -123,7 +139,6 @@ export default function KategoriKabupaten() {
     }
   }
 
-  /* ================= MODAL HANDLER ================= */
   function openAddModal() {
     setEditId(null);
     setNameInput("");
@@ -144,200 +159,144 @@ export default function KategoriKabupaten() {
   }
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-xl font-semibold text-blue-700">
-        Kategori Kabupaten
-      </h2>
-
-      {/* SUCCESS */}
-      {successMsg && (
-        <div className="fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg z-50">
-          {successMsg}
-        </div>
-      )}
-
-      {errorMsg && (
-        <div className="bg-red-100 text-red-700 px-4 py-2 rounded-lg">
-          {errorMsg}
-        </div>
-      )}
-
-      <div className="bg-white rounded-2xl border shadow-sm">
-        {/* HEADER */}
-        <div className="flex justify-between items-center px-6 py-4 border-b">
-          <h3 className="font-semibold text-gray-800">Daftar Kabupaten</h3>
-          <button
-            onClick={openAddModal}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm"
-          >
-            + Tambah
-          </button>
-        </div>
-
-        {/* CONTENT */}
-        {loading ? (
-          <p className="p-6 text-gray-500">Memuat data...</p>
-        ) : regions.length === 0 ? (
-          <p className="p-6 text-gray-500">Belum ada kabupaten.</p>
-        ) : (
-          <>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-gray-50 border-b">
-                  <tr>
-                    <th className="w-16 px-4 py-3 text-center">No</th>
-                    <th className="w-24 px-4 py-3 text-center">Foto</th>
-                    <th className="px-4 py-3 text-left">Nama Kabupaten</th>
-                    <th className="w-40 px-4 py-3 text-center">Aksi</th>
-                  </tr>
-                </thead>
-
-                <tbody className="divide-y">
-                  {regions.map((r, i) => (
-                    <tr key={r.id}>
-                      <td className="text-center text-gray-400">
-                        {(page - 1) * perPage + i + 1}
-                      </td>
-
-                      <td className="text-center">
-                        {r.imageUrl ? (
-                          // eslint-disable-next-line jsx-a11y/alt-text
-                          <img
-                            src={r.imageUrl}
-                            className="w-12 h-12 mx-auto rounded-lg object-cover"
-                          />
-                        ) : (
-                          "-"
-                        )}
-                      </td>
-
-                      <td className="px-4 py-3 font-medium">{r.name}</td>
-
-                      <td className="px-4 py-3">
-                        <div className="flex justify-center gap-2">
-                          <button
-                            onClick={() => openEditModal(r)}
-                            className="px-3 py-1.5 bg-yellow-500 text-white rounded-full text-xs"
-                          >
-                            Edit
-                          </button>
-
-                          <button
-                            onClick={() => openDeleteConfirm(r.id)}
-                            disabled={deletingId === r.id}
-                            className="px-3 py-1.5 bg-red-600 text-white rounded-full text-xs"
-                          >
-                            {deletingId === r.id ? "Menghapus..." : "Hapus"}
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* PAGINATION */}
-            {totalPages > 1 && (
-              <Pagination className="py-4">
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      onClick={() => page > 1 && setPage(page - 1)}
-                    />
-                  </PaginationItem>
-
-                  {Array.from({ length: totalPages }).map((_, i) => (
-                    <PaginationItem key={i}>
-                      <PaginationLink
-                        isActive={page === i + 1}
-                        onClick={() => setPage(i + 1)}
-                      >
-                        {i + 1}
-                      </PaginationLink>
-                    </PaginationItem>
-                  ))}
-
-                  <PaginationItem>
-                    <PaginationNext
-                      onClick={() => page < totalPages && setPage(page + 1)}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
-            )}
-          </>
-        )}
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-semibold text-blue-700 tracking-tight">
+          Kategori Kabupaten
+        </h2>
+        <p className="text-sm text-muted-foreground mt-1">
+          Kelola data kabupaten dan wilayah
+        </p>
       </div>
 
-      {/* MODAL ADD / EDIT */}
-      {modalOpen && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-2xl shadow-xl w-96">
-            <h3 className="text-lg font-semibold mb-4">
-              {editId ? "Edit Kabupaten" : "Tambah Kabupaten"}
-            </h3>
-
-            <input
-              value={nameInput}
-              onChange={(e) => setNameInput(e.target.value)}
-              className="w-full border rounded-lg px-3 py-2 mb-3"
-              placeholder="Nama kabupaten"
-            />
-
-            <input
-              type="file"
-              onChange={(e) => setImage(e.target.files?.[0] ?? null)}
-              className="w-full border rounded-lg px-3 py-2 mb-4"
-            />
-
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setModalOpen(false)}
-                className="px-4 py-2 bg-gray-100 rounded-lg"
-              >
-                Batal
-              </button>
-
-              <button
-                onClick={saveRegion}
-                disabled={saving}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg"
-              >
-                {saving ? "Menyimpan..." : "Simpan"}
-              </button>
-            </div>
-          </div>
-        </div>
+      {/* SUCCESS TOAST */}
+      {successMsg && (
+        <Alert className="fixed top-4 right-4 bg-green-600 text-white border-green-700 shadow-lg z-50 w-auto">
+          <CheckCircle2 className="h-4 w-4" />
+          <AlertDescription>{successMsg}</AlertDescription>
+        </Alert>
       )}
 
-      {/* MODAL DELETE */}
-      {confirmDeleteOpen && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-2xl shadow-xl w-96">
-            <h3 className="text-lg font-semibold mb-2">Konfirmasi</h3>
-            <p className="text-sm text-gray-600 mb-6">
-              Yakin ingin menghapus kabupaten ini?
-            </p>
-
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setConfirmDeleteOpen(false)}
-                className="px-4 py-2 bg-gray-100 rounded-lg"
-              >
-                Batal
-              </button>
-
-              <button
-                onClick={deleteRegion}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg"
-              >
-                Ya, Hapus
-              </button>
-            </div>
-          </div>
-        </div>
+      {/* ERROR ALERT */}
+      {errorMsg && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{errorMsg}</AlertDescription>
+        </Alert>
       )}
+
+      <Card className="rounded-2xl shadow-sm">
+        <CardHeader className="border-b">
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-gray-800">Daftar Kabupaten</CardTitle>
+              <CardDescription className="mt-1">
+                Total {regions.length} kabupaten
+              </CardDescription>
+            </div>
+            <Button
+              onClick={openAddModal}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Tambah
+            </Button>
+          </div>
+        </CardHeader>
+
+        <CardContent className="p-0">
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-6 w-6 animate-spin text-blue-600 mr-2" />
+              <p className="text-gray-500">Memuat data...</p>
+            </div>
+          ) : regions.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <p className="text-gray-500 text-sm">Belum ada kabupaten.</p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={openAddModal}
+                className="mt-4"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Tambah Kabupaten Pertama
+              </Button>
+            </div>
+          ) : (
+            <>
+              <KabupatenTable
+                regions={regions}
+                page={page}
+                perPage={perPage}
+                deletingId={deletingId}
+                onEdit={openEditModal}
+                onDelete={openDeleteConfirm}
+              />
+
+              {totalPages > 1 && (
+                <div className="border-t py-4">
+                  <Pagination>
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious
+                          onClick={() => page > 1 && setPage(page - 1)}
+                          className={
+                            page === 1
+                              ? "pointer-events-none opacity-50"
+                              : "cursor-pointer"
+                          }
+                        />
+                      </PaginationItem>
+
+                      {Array.from({ length: totalPages }).map((_, i) => (
+                        <PaginationItem key={i}>
+                          <PaginationLink
+                            isActive={page === i + 1}
+                            onClick={() => setPage(i + 1)}
+                            className="cursor-pointer"
+                          >
+                            {i + 1}
+                          </PaginationLink>
+                        </PaginationItem>
+                      ))}
+
+                      <PaginationItem>
+                        <PaginationNext
+                          onClick={() => page < totalPages && setPage(page + 1)}
+                          className={
+                            page === totalPages
+                              ? "pointer-events-none opacity-50"
+                              : "cursor-pointer"
+                          }
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                </div>
+              )}
+            </>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* MODALS */}
+      <KabupatenFormModal
+        open={modalOpen}
+        editId={editId}
+        nameInput={nameInput}
+        saving={saving}
+        onClose={() => setModalOpen(false)}
+        onSave={saveRegion}
+        onNameChange={setNameInput}
+        onImageChange={setImage}
+      />
+
+      <KabupatenDeleteModal
+        open={confirmDeleteOpen}
+        onCancel={() => setConfirmDeleteOpen(false)}
+        onConfirm={deleteRegion}
+      />
     </div>
   );
 }
