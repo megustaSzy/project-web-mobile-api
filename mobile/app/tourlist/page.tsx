@@ -123,7 +123,7 @@ export default function KabupatenDetail() {
             setIndex((prev) => (prev - 1 + regions.length) % regions.length)
           }
         >
-          <Ionicons name="chevron-back" size={32} color="#fff" />
+          <Ionicons name="chevron-back" size={32} color="#007bff" />
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -132,7 +132,7 @@ export default function KabupatenDetail() {
             setIndex((prev) => (prev + 1) % regions.length)
           }
         >
-          <Ionicons name="chevron-forward" size={32} color="#fff" />
+          <Ionicons name="chevron-forward" size={32} color="#007bff" />
         </TouchableOpacity>
 
         <View style={styles.logoWrapper}>
@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
     paddingBottom: 30,
   },
   overlay: {
-    backgroundColor: "rgba(0, 27, 56, 0.72)",
+    backgroundColor: "rgba(255, 255, 255, 100)",
     position: "absolute",
     width: "100%",
     height: 400,
@@ -253,16 +253,16 @@ const styles = StyleSheet.create({
   logo: {
     width: 300,
     height: 300,
-    marginTop : 40,
+    marginTop : 60,
   },
 
   content: {
     backgroundColor: "#fff",
-    borderTopLeftRadius: 35,
-    borderTopRightRadius: 35,
+    borderTopLeftRadius: 25,
+    borderTopRightRadius: 25,
     padding: 20,
     paddingTop: 10,
-    marginTop: -20,
+    marginTop: -10,
   },
   title: {
     fontSize: 22,
