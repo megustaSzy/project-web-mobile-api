@@ -12,6 +12,7 @@ import {
 import { useLocalSearchParams, useRouter } from "expo-router";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 /* ================= TYPES ================= */
 type PickupItem = {
@@ -49,6 +50,7 @@ export default function PesanPage() {
 
   const userName = String(params.userName ?? "User");
   const userEmail = String(params.userEmail ?? "user@email.com");
+  const [loadingUser, setLoadingUser] = useState(true);
 
   useEffect(() => {
     fetch(`${BASE_URL}/api/pickup-locations`)
@@ -58,6 +60,60 @@ export default function PesanPage() {
       )
       .catch(() => setPickupList([]));
   }, []);
+
+
+  type UserProfile = {
+  name: string;
+  email: string;
+  };
+
+  const [user, setUser] = useState<UserProfile | null>(null);
+
+
+ useEffect(() => {
+  async function fetchUserProfile() {
+    try {
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        setLoadingUser(false);
+        return;
+      }
+
+      const res = await fetch(`${BASE_URL}/api/users/profile`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    });
+
+
+      // 🔥 CEK RESPONSE DULU
+      const text = await res.text();
+
+      // kalau response HTML → stop
+      if (!text.startsWith("{")) {
+        console.log("Response bukan JSON:", text);
+        setLoadingUser(false);
+        return;
+      }
+
+      const json = JSON.parse(text);
+
+      setUser({
+        name: json.data.name,
+        email: json.data.email,
+      });
+    } catch (err) {
+      console.log("Gagal ambil profile user", err);
+    } finally {
+      setLoadingUser(false);
+    }
+  }
+
+  fetchUserProfile();
+}, []);
+
 
   const fmtDate = (d: Date) =>
     d.toLocaleDateString("id-ID", {
@@ -258,8 +314,15 @@ export default function PesanPage() {
           {/* USER */}
           <View style={popup.section}>
             <Text style={popup.sectionTitle}>Data Pemesan</Text>
-            <Text style={popup.text}>👤 {userName}</Text>
-            <Text style={popup.text}>📧 {userEmail}</Text>
+
+            {loadingUser ? (
+              <Text style={popup.text}>Memuat data user...</Text>
+            ) : (
+              <>
+                <Text style={popup.text}>👤 {user?.name ?? "-"}</Text>
+                <Text style={popup.text}>📧 {user?.email ?? "-"}</Text>
+              </>
+            )}
           </View>
 
           <View style={popup.divider} />
@@ -295,13 +358,12 @@ export default function PesanPage() {
 
           {/* ACTION */}
           <View style={popup.row}>
-          <TouchableOpacity
-            style={popup.cancel}
-            onPress={() => setShowConfirm(false)}
-          >
-            <Text style={{ fontWeight: "bold" }}>Batal</Text>
-          </TouchableOpacity>
-
+            <TouchableOpacity
+              style={popup.cancel}
+              onPress={() => setShowConfirm(false)}
+            >
+              <Text style={{ fontWeight: "bold" }}>Batal</Text>
+            </TouchableOpacity>
 
             <TouchableOpacity style={popup.pay} onPress={handlePay}>
               <Text style={{ color: "#fff", fontWeight: "bold" }}>Bayar</Text>
@@ -311,6 +373,7 @@ export default function PesanPage() {
         </View>
       </View>
     </Modal>
+
 
 
       <Modal visible={showError} transparent animationType="fade">
@@ -559,3 +622,7 @@ total: {
 },
 
 });
+function setUser(arg0: { name: any; email: any; }) {
+  throw new Error("Function not implemented.");
+}
+
