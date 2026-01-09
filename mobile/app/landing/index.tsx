@@ -215,6 +215,11 @@ const handleCategoryPress = (name: string) => {
     router.push(`../deskripsi/${d.id}`);
   };
 
+  const getRegionName = (regionId?: number) => {
+  const region = apiAreas.find((r) => r.id === regionId);
+  return region?.nama || "Daerah tidak diketahui";
+};
+
   const normalizeText = (text: string) =>
     text
       .toLowerCase()
@@ -381,16 +386,13 @@ const handleSearch = () => {
             }}
             style={styles.popularBG}
           />
-
-
             <View style={styles.popularOverlay} />
-
             <View style={styles.popularContent}>
               <Text style={styles.popularTitle}>{d.name}</Text>
               <View style={styles.popularLocationRow}>
                 <Ionicons name="location-sharp" size={14} color="#fff" />
                 <Text style={styles.popularLocationText}>
-                  {d.category?.name}
+                  {getRegionName(d.regionId)}
                 </Text>
               </View>
             </View>
