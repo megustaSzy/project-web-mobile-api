@@ -53,7 +53,7 @@ export default function NavBar() {
   const translationSource = {
     home: "Beranda",
     about: "Tentang Kami",
-    tour: "Daftar Wisata",
+    tour: "Daftar Kabupaten",
     ticket: "Tiket Saya",
     contact: "Kontak",
     login: "Masuk",
@@ -215,9 +215,13 @@ export default function NavBar() {
     <header
       className={`${poppins.className} fixed top-0 left-0 w-full z-50
   text-sm
-  transition-all duration-300 ${
-    scrolled ? "bg-white shadow-md border-b border-gray-200" : "bg-transparent"
-  }`}
+  transition-all duration-300
+  ${
+    scrolled
+      ? "bg-white shadow-md border-b border-gray-200"
+      : "bg-white/2 backdrop-blur-[1px] border-b border-white/2"
+  } 
+  `}
     >
       <div className="max-w-7xl mx-auto px-4 flex items-center h-16">
         {/* LOGO */}
@@ -239,7 +243,7 @@ export default function NavBar() {
           <Link
             href="/"
             onClick={() => setActiveMenu("home")}
-            className={`transition-colors duration-200 ${
+            className={`transition-colors duration-200 font-medium ${
               activeMenu === "home" ? "text-blue-600" : textColor
             }`}
           >
@@ -248,7 +252,7 @@ export default function NavBar() {
           <Link
             href="/about"
             onClick={() => setActiveMenu("about")}
-            className={`transition-colors duration-200 ${
+            className={`transition-colors duration-200 font-medium ${
               activeMenu === "about" ? "text-blue-600" : textColor
             }`}
           >
@@ -257,7 +261,7 @@ export default function NavBar() {
           <Link
             href="/tourlist"
             onClick={() => setActiveMenu("tour")}
-            className={`transition-colors duration-200 ${
+            className={`transition-colors duration-200 font-medium ${
               activeMenu === "tour" ? "text-blue-600" : textColor
             }`}
           >
@@ -266,7 +270,7 @@ export default function NavBar() {
           <Link
             href="/tiket"
             onClick={() => setActiveMenu("ticket")}
-            className={`transition-colors duration-200 ${
+            className={`transition-colors duration-200 font-medium ${
               activeMenu === "ticket" ? "text-blue-600" : textColor
             }`}
           >
@@ -280,7 +284,7 @@ export default function NavBar() {
                 behavior: "smooth",
               });
             }}
-            className={`transition-colors duration-200 cursor-pointer ${
+            className={`transition-colors duration-200 cursor-pointer font-medium ${
               activeMenu === "contact" ? "text-blue-600" : textColor
             }`}
           >
