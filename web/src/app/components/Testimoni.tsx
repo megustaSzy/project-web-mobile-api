@@ -48,7 +48,9 @@ export default function TestimoniSection() {
           Testimoni
         </h2>
 
-        {loading && <p className="text-center text-gray-600">Memuat testimoni...</p>}
+        {loading && (
+          <p className="text-center text-gray-600">Memuat testimoni...</p>
+        )}
 
         {!loading && testimonials.length === 0 && (
           <p className="text-center text-gray-500">Belum ada testimoni.</p>
@@ -88,21 +90,20 @@ export default function TestimoniSection() {
           ))}
         </div>
 
-        {/* Pagination */}
+        {/* Pagination dots kecil dan transparan */}
         {totalPages > 1 && (
           <div className="flex justify-center mt-10 gap-2">
-            {Array.from({ length: totalPages }, (_, i) => (
-              <button
+            {Array.from({ length: totalPages }).map((_, i) => (
+              <span
                 key={i}
-                className={`px-3 py-1 rounded-md border ${
-                  currentPage === i + 1
-                    ? "bg-blue-600 text-white border-blue-600"
-                    : "bg-white text-gray-700 border-gray-300"
-                }`}
                 onClick={() => setCurrentPage(i + 1)}
-              >
-                {i + 1}
-              </button>
+                className={`w-2 h-2 rounded-full cursor-pointer transition-all duration-300
+          ${
+            currentPage === i + 1
+              ? "bg-blue-600 opacity-100 scale-125"
+              : "bg-gray-400 opacity-50"
+          }`}
+              ></span>
             ))}
           </div>
         )}
