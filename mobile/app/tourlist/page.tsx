@@ -193,30 +193,42 @@ export default function KabupatenDetail() {
         <Text style={styles.sectionTitle}>Populer Destination</Text>
 
         <View style={styles.popularGrid}>
-          {filteredDestinations.map((d) => (
-            <TouchableOpacity
-              key={d.id}
-              style={styles.popularItem}
-              onPress={() => router.push(`../deskripsi/${d.id}`)}
-            >
-              <Image
-                source={d.imageUrl ? { uri: d.imageUrl } : PLACEHOLDER_IMAGE}
-                style={styles.popularBG}
-              />
-              <View style={styles.popularOverlay} />
-              <View style={styles.popularContent}>
-                <Text style={styles.popularTitle}>{d.name}</Text>
-                <View style={styles.popularLocationRow}>
-                  <Ionicons name="location-sharp" size={14} color="#fff" />
-                  <Text style={styles.popularLocationText}>
-                    {d.region.name}
-                  </Text>
+          {filteredDestinations.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Ionicons name="image-outline" size={60} color="#bbb" />
+            <Text style={styles.emptyTitle}>Destinasi belum tersedia</Text>
+            <Text style={styles.emptySubtitle}>
+              Belum ada destinasi untuk kategori ini
+            </Text>
+          </View>
+        ) : (
+          <View style={styles.popularGrid}>
+            {filteredDestinations.map((d) => (
+              <TouchableOpacity
+                key={d.id}
+                style={styles.popularItem}
+                onPress={() => router.push(`../deskripsi/${d.id}`)}
+              >
+                <Image
+                  source={d.imageUrl ? { uri: d.imageUrl } : PLACEHOLDER_IMAGE}
+                  style={styles.popularBG}
+                />
+                <View style={styles.popularOverlay} />
+                <View style={styles.popularContent}>
+                  <Text style={styles.popularTitle}>{d.name}</Text>
+                  <View style={styles.popularLocationRow}>
+                    <Ionicons name="location-sharp" size={14} color="#fff" />
+                    <Text style={styles.popularLocationText}>
+                      {d.region.name}
+                    </Text>
+                  </View>
                 </View>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
       </View>
+    </View>
     </ScrollView>
   );
 }
@@ -355,5 +367,26 @@ const styles = StyleSheet.create({
     marginLeft: 4,
     fontSize: 13,
   },
+  emptyContainer: {
+  marginTop: 40,
+  alignItems: "center",
+  justifyContent: "center",
+  paddingVertical: 40,
+},
+
+emptyTitle: {
+  marginTop: 12,
+  fontSize: 16,
+  fontWeight: "600",
+  color: "#555",
+},
+
+emptySubtitle: {
+  marginTop: 4,
+  fontSize: 13,
+  color: "#999",
+  textAlign: "center",
+},
+
 });
 
