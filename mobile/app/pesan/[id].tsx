@@ -5,15 +5,14 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  TextInput,
   Image,
   Modal,
   Alert,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Picker } from "@react-native-picker/picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 /* ================= TYPES ================= */
 type PickupItem = {
@@ -21,54 +20,101 @@ type PickupItem = {
   name: string;
 };
 
+const JAM_BERANGKAT = ["07:00","08:00","09:00","10:00","11:00","12:00","13:00","14:00"];
+const JAM_PULANG = ["13:00","14:00","15:00","16:00","17:00","18:00","19:00"];
+
 export default function PesanPage() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? "";
 
-  /* ================= PARAM ================= */
   const id = String(params.id ?? "");
   const title = String(params.title ?? "Nama Wisata");
   const category = String(params.category ?? "Kategori");
   const price = Number(params.price ?? 0);
   const imageUrl = String(params.imageUrl ?? "");
 
-  /* ================= STATE ================= */
   const [pickupList, setPickupList] = useState<PickupItem[]>([]);
   const [pickupId, setPickupId] = useState<number | null>(null);
-  const [loadingPickup, setLoadingPickup] = useState(false);
 
   const [tanggal, setTanggal] = useState(new Date());
-  const [jamBerangkat, setJamBerangkat] = useState(new Date());
-  const [jamPulang, setJamPulang] = useState(new Date());
+  const [jamBerangkat, setJamBerangkat] = useState("07:00");
+  const [jamPulang, setJamPulang] = useState("13:00");
 
-  const [jumlahTiket, setJumlahTiket] = useState("1");
-
+  const [jumlahTiket, setJumlahTiket] = useState(1);
   const [showDate, setShowDate] = useState(false);
-  const [showTimeStart, setShowTimeStart] = useState(false);
-  const [showTimeEnd, setShowTimeEnd] = useState(false);
-
   const [showConfirm, setShowConfirm] = useState(false);
 
-  /* ================= FETCH PICKUP ================= */
-  useEffect(() => {
-    async function fetchPickup() {
-      try {
-        setLoadingPickup(true);
-        const res = await fetch(`${BASE_URL}/api/pickup-locations`);
-        const json = await res.json();
-        setPickupList(Array.isArray(json.data) ? json.data : []);
-      } catch {
-        setPickupList([]);
-      } finally {
-        setLoadingPickup(false);
-      }
-    }
+  const [errorMsg, setErrorMsg] = useState("");
+  const [showError, setShowError] = useState(false);
 
-    fetchPickup();
+  const userName = String(params.userName ?? "User");
+  const userEmail = String(params.userEmail ?? "user@email.com");
+  const [loadingUser, setLoadingUser] = useState(true);
+
+  useEffect(() => {
+    fetch(`${BASE_URL}/api/pickup-locations`)
+      .then((res) => res.json())
+      .then((json) =>
+        setPickupList(Array.isArray(json.data) ? json.data : [])
+      )
+      .catch(() => setPickupList([]));
   }, []);
 
-  /* ================= FORMAT ================= */
+
+  type UserProfile = {
+  name: string;
+  email: string;
+  };
+
+  const [user, setUser] = useState<UserProfile | null>(null);
+
+
+ useEffect(() => {
+  async function fetchUserProfile() {
+    try {
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        setLoadingUser(false);
+        return;
+      }
+
+      const res = await fetch(`${BASE_URL}/api/users/profile`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    });
+
+
+      // 🔥 CEK RESPONSE DULU
+      const text = await res.text();
+
+      // kalau response HTML → stop
+      if (!text.startsWith("{")) {
+        console.log("Response bukan JSON:", text);
+        setLoadingUser(false);
+        return;
+      }
+
+      const json = JSON.parse(text);
+
+      setUser({
+        name: json.data.name,
+        email: json.data.email,
+      });
+    } catch (err) {
+      console.log("Gagal ambil profile user", err);
+    } finally {
+      setLoadingUser(false);
+    }
+  }
+
+  fetchUserProfile();
+}, []);
+
+
   const fmtDate = (d: Date) =>
     d.toLocaleDateString("id-ID", {
       day: "2-digit",
@@ -76,26 +122,24 @@ export default function PesanPage() {
       year: "numeric",
     });
 
-  const fmtTime = (d: Date) =>
-    d.toLocaleTimeString("id-ID", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+  const totalHarga = price * jumlahTiket;
 
-  const totalHarga = price * Number(jumlahTiket || 0);
-
-  /* ================= HANDLER ================= */
   function openConfirm() {
-    if (!pickupId) {
-      Alert.alert("Validasi", "Pilih lokasi penjemputan");
-      return;
-    }
-    if (Number(jumlahTiket) < 1) {
-      Alert.alert("Validasi", "Jumlah tiket minimal 1");
-      return;
-    }
-    setShowConfirm(true);
+  if (!pickupId) {
+    setErrorMsg("Lokasi penjemputan belum dipilih");
+    setShowError(true);
+    return;
   }
+
+  if (!jamBerangkat || !jamPulang) {
+    setErrorMsg("Jam berangkat dan pulang harus dipilih");
+    setShowError(true);
+    return;
+  }
+
+  setShowConfirm(true);
+}
+
 
   function handlePay() {
     setShowConfirm(false);
@@ -105,18 +149,17 @@ export default function PesanPage() {
         wisata_id: id,
         pickup_id: pickupId,
         tanggal: tanggal.toISOString(),
-        jam_berangkat: jamBerangkat.toISOString(),
-        jam_pulang: jamPulang.toISOString(),
+        jam_berangkat: jamBerangkat,
+        jam_pulang: jamPulang,
         jumlah_tiket: jumlahTiket,
       },
     });
   }
 
-  /* ================= UI ================= */
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={{ paddingBottom: 180 }}>
-        {/* HEADER IMAGE */}
+      <ScrollView contentContainerStyle={{ paddingBottom: 220 }}>
+        {/* HEADER */}
         <View style={styles.header}>
           <Image
             source={{
@@ -131,51 +174,46 @@ export default function PesanPage() {
           <View style={styles.overlay} />
         </View>
 
-
-       {/* CARD */}
+        {/* CARD */}
         <View style={styles.card}>
-          {/* TITLE */}
           <Text style={styles.title}>{title}</Text>
-
-          {/* CATEGORY BADGE */}
-          {category && category !== "Kategori" && (
-            <View style={styles.categoryBadge}>
-              <Text style={styles.categoryText}>
-                {category.toLowerCase()}
-              </Text>
-            </View>
-          )}
+          <View style={styles.categoryBadge}>
+            <Text style={styles.categoryText}>{category}</Text>
+          </View>
 
           {/* PICKUP */}
           <Text style={styles.label}>Lokasi Penjemputan</Text>
-          <View style={styles.pickerBox}>
-            <Picker
-              selectedValue={pickupId}
-              onValueChange={(v) => setPickupId(v)}
-              enabled={!loadingPickup}
-            >
-              <Picker.Item
-                label={
-                  loadingPickup
-                    ? "Memuat lokasi..."
-                    : "-- Pilih lokasi penjemputan --"
-                }
-                value={null}
-              />
-              {pickupList.map((p) => (
-                <Picker.Item key={p.id} label={p.name} value={p.id} />
-              ))}
-            </Picker>
-          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            {pickupList.map((p) => (
+              <TouchableOpacity
+                key={p.id}
+                style={[
+                  styles.pickupItem,
+                  pickupId === p.id && styles.pickupActive,
+                ]}
+                onPress={() => setPickupId(p.id)}
+              >
+                <Ionicons name="location-outline" size={16} />
+                <Text
+                  style={[
+                    styles.pickupText,
+                    pickupId === p.id && { color: "#fff" },
+                  ]}
+                >
+                  {p.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
 
-          {/* DATE */}
+          {/* TANGGAL */}
           <Text style={styles.label}>Tanggal</Text>
           <TouchableOpacity
-            style={styles.inputBox}
+            style={styles.selectBox}
             onPress={() => setShowDate(true)}
           >
             <Ionicons name="calendar-outline" size={18} />
-            <Text style={styles.inputText}>{fmtDate(tanggal)}</Text>
+            <Text style={styles.selectText}>{fmtDate(tanggal)}</Text>
           </TouchableOpacity>
 
           {showDate && (
@@ -189,68 +227,65 @@ export default function PesanPage() {
             />
           )}
 
-          {/* TIME START */}
+          {/* JAM */}
           <Text style={styles.label}>Jam Berangkat</Text>
-          <TouchableOpacity
-            style={styles.inputBox}
-            onPress={() => setShowTimeStart(true)}
-          >
-            <Ionicons name="time-outline" size={18} />
-            <Text style={styles.inputText}>{fmtTime(jamBerangkat)}</Text>
-          </TouchableOpacity>
+          <View style={styles.timeGrid}>
+            {JAM_BERANGKAT.map((j) => (
+              <TouchableOpacity
+                key={j}
+                style={[
+                  styles.timeItem,
+                  jamBerangkat === j && styles.timeActive,
+                ]}
+                onPress={() => setJamBerangkat(j)}
+              >
+                <Text
+                  style={[
+                    styles.timeText,
+                    jamBerangkat === j && styles.timeTextActive,
+                  ]}
+                >
+                  {j}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
 
-          {showTimeStart && (
-            <DateTimePicker
-              value={jamBerangkat}
-              mode="time"
-              onChange={(_, d) => {
-                setShowTimeStart(false);
-                if (!d) return;
-                if (d.getHours() < 7 || d.getHours() > 13) {
-                  Alert.alert("Jam tidak valid", "07.00 - 13.00");
-                  return;
-                }
-                setJamBerangkat(d);
-              }}
-            />
-          )}
-
-          {/* TIME END */}
           <Text style={styles.label}>Jam Pulang</Text>
-          <TouchableOpacity
-            style={styles.inputBox}
-            onPress={() => setShowTimeEnd(true)}
-          >
-            <Ionicons name="time-outline" size={18} />
-            <Text style={styles.inputText}>{fmtTime(jamPulang)}</Text>
-          </TouchableOpacity>
-
-          {showTimeEnd && (
-            <DateTimePicker
-              value={jamPulang}
-              mode="time"
-              onChange={(_, d) => {
-                setShowTimeEnd(false);
-                if (!d) return;
-                if (d.getHours() < 13 || d.getHours() > 19) {
-                  Alert.alert("Jam tidak valid", "13.00 - 19.00");
-                  return;
-                }
-                setJamPulang(d);
-              }}
-            />
-          )}
+          <View style={styles.timeGrid}>
+            {JAM_PULANG.map((j) => (
+              <TouchableOpacity
+                key={j}
+                style={[
+                  styles.timeItem,
+                  jamPulang === j && styles.timeActive,
+                ]}
+                onPress={() => setJamPulang(j)}
+              >
+                <Text
+                  style={[
+                    styles.timeText,
+                    jamPulang === j && styles.timeTextActive,
+                  ]}
+                >
+                  {j}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
 
           {/* JUMLAH */}
           <Text style={styles.label}>Jumlah Tiket</Text>
-          <View style={styles.inputBox}>
-            <Ionicons name="people-outline" size={18} />
-            <TextInput
-              value={jumlahTiket}
-              keyboardType="numeric"
-              onChangeText={(t) => setJumlahTiket(t.replace(/[^0-9]/g, ""))}
-              style={styles.input}
-            />
+          <View style={styles.counter}>
+            <TouchableOpacity
+              onPress={() => setJumlahTiket(Math.max(1, jumlahTiket - 1))}
+            >
+              <Ionicons name="remove-circle-outline" size={32} />
+            </TouchableOpacity>
+            <Text style={styles.counterText}>{jumlahTiket}</Text>
+            <TouchableOpacity onPress={() => setJumlahTiket(jumlahTiket + 1)}>
+              <Ionicons name="add-circle-outline" size={32} />
+            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
@@ -266,38 +301,98 @@ export default function PesanPage() {
       </View>
 
       {/* CONFIRM */}
-      <Modal visible={showConfirm} transparent animationType="fade">
-        <View style={popup.overlay}>
-          <View style={popup.box}>
-            <Text style={popup.title}>Konfirmasi Pesanan</Text>
-            <Text>🏞 {title}</Text>
-            <Text>
-              📍 {pickupList.find((p) => p.id === pickupId)?.name}
-            </Text>
-            <Text>🗓 {fmtDate(tanggal)}</Text>
-            <Text>
-              ⏰ {fmtTime(jamBerangkat)} - {fmtTime(jamPulang)}
-            </Text>
-            <Text>👥 {jumlahTiket} Orang</Text>
+      <Modal visible={showConfirm} transparent animationType="slide">
+      <View style={popup.overlay}>
+        <View style={popup.ticketBox}>
 
-            <Text style={popup.total}>
-              Total IDR {totalHarga.toLocaleString("id-ID")}
-            </Text>
-
-            <View style={popup.row}>
-              <TouchableOpacity
-                style={popup.cancel}
-                onPress={() => setShowConfirm(false)}
-              >
-                <Text>Batal</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={popup.pay} onPress={handlePay}>
-                <Text style={{ color: "#fff" }}>Bayar</Text>
-              </TouchableOpacity>
-            </View>
+          {/* HEADER */}
+          <View style={popup.ticketHeader}>
+            <Ionicons name="ticket-outline" size={26} color="#2F80ED" />
+            <Text style={popup.ticketTitle}>Konfirmasi Pesanan</Text>
           </View>
+
+          {/* USER */}
+          <View style={popup.section}>
+            <Text style={popup.sectionTitle}>Data Pemesan</Text>
+
+            {loadingUser ? (
+              <Text style={popup.text}>Memuat data user...</Text>
+            ) : (
+              <>
+                <Text style={popup.text}>👤 {user?.name ?? "-"}</Text>
+                <Text style={popup.text}>📧 {user?.email ?? "-"}</Text>
+              </>
+            )}
+          </View>
+
+          <View style={popup.divider} />
+
+          {/* DETAIL */}
+          <View style={popup.section}>
+            <Text style={popup.sectionTitle}>Detail Perjalanan</Text>
+            <Text style={popup.text}>🏞 {title}</Text>
+            <Text style={popup.text}>
+              📍 {pickupList.find(p => p.id === pickupId)?.name}
+            </Text>
+            <Text style={popup.text}>🗓 {fmtDate(tanggal)}</Text>
+            <Text style={popup.text}>⏰ {jamBerangkat} - {jamPulang}</Text>
+            <Text style={popup.text}>🎟 {jumlahTiket} Tiket</Text>
+          </View>
+
+          <View style={popup.divider} />
+
+          {/* HARGA */}
+          <View style={popup.priceRow}>
+            <Text style={popup.priceLabel}>Harga Tiket</Text>
+            <Text style={popup.priceValue}>
+              IDR {price.toLocaleString("id-ID")}
+            </Text>
+          </View>
+
+          <View style={popup.priceRow}>
+            <Text style={popup.priceLabel}>Total</Text>
+            <Text style={popup.total}>
+              IDR {totalHarga.toLocaleString("id-ID")}
+            </Text>
+          </View>
+
+          {/* ACTION */}
+          <View style={popup.row}>
+            <TouchableOpacity
+              style={popup.cancel}
+              onPress={() => setShowConfirm(false)}
+            >
+              <Text style={{ fontWeight: "bold" }}>Batal</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={popup.pay} onPress={handlePay}>
+              <Text style={{ color: "#fff", fontWeight: "bold" }}>Bayar</Text>
+            </TouchableOpacity>
+          </View>
+
         </View>
-      </Modal>
+      </View>
+    </Modal>
+
+
+
+      <Modal visible={showError} transparent animationType="fade">
+  <View style={popup.overlay}>
+    <View style={popup.errorBox}>
+      <Ionicons name="alert-circle-outline" size={50} color="#E74C3C" />
+      <Text style={popup.errorTitle}>Data Belum Lengkap</Text>
+      <Text style={popup.errorText}>{errorMsg}</Text>
+
+      <TouchableOpacity
+        style={popup.errorBtn}
+        onPress={() => setShowError(false)}
+      >
+        <Text style={{ color: "#fff", fontWeight: "bold" }}>OK</Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+</Modal>
+
     </View>
   );
 }
@@ -305,58 +400,9 @@ export default function PesanPage() {
 /* ================= STYLE ================= */
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
-
-  title: {
-  fontSize: 20,
-  fontWeight: "bold",
-  color: "#111",
-},
-
-category: {
-  marginTop: 4,
-  marginBottom: 16,
-  color: "#2F80ED",
-  fontSize: 14,
-  textTransform: "capitalize",
-},
-
-  categoryText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#2F80ED",
-    textTransform: "capitalize",
-  },
-
-categoryBadge: {
-  alignSelf: "flex-start",
-  backgroundColor: "#E8F1FF",
-  paddingHorizontal: 12,
-  paddingVertical: 4,
-  borderRadius: 20,
-  marginTop: 6,
-  marginBottom: 10,
-},
-
-
   header: { height: 260 },
   headerImage: { width: "100%", height: "100%" },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "#001B38",
-    opacity: 0.72,
-  },
-  headerText: {
-    position: "absolute",
-    bottom: 24,
-    left: 20,
-    right: 20,
-  },
-  headerTitle: { color: "#fff", fontSize: 22, fontWeight: "bold" },
-  headerCategory: {
-    color: "#E0E0E0",
-    marginTop: 4,
-    textTransform: "capitalize",
-  },
+  overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: "#001B38", opacity: 0.7 },
 
   card: {
     marginTop: -30,
@@ -366,26 +412,62 @@ categoryBadge: {
     padding: 20,
   },
 
-  label: { marginTop: 14, marginBottom: 6, color: "#555" },
+  title: { fontSize: 20, fontWeight: "bold" },
+  categoryBadge: {
+    backgroundColor: "#E8F1FF",
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 20,
+    marginVertical: 10,
+    alignSelf: "flex-start",
+  },
+  categoryText: { color: "#2F80ED", fontWeight: "600" },
 
-  inputBox: {
+  label: { marginTop: 18, marginBottom: 8, color: "#555" },
+
+  selectBox: {
     height: 50,
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#F6F6F6",
+    borderRadius: 25,
     paddingHorizontal: 16,
-    borderRadius: 25,
   },
-  pickerBox: {
-    height: 50,
-    backgroundColor: "#F6F6F6",
-    borderRadius: 25,
-    justifyContent: "center",
-    paddingHorizontal: 6,
-  },
+  selectText: { marginLeft: 10 },
 
-  inputText: { marginLeft: 10 },
-  input: { marginLeft: 10, flex: 1 },
+  pickupItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F6F6F6",
+    padding: 10,
+    borderRadius: 20,
+    marginRight: 10,
+  },
+  pickupActive: { backgroundColor: "#2F80ED" },
+  pickupText: { marginLeft: 6 },
+
+  timeGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
+  timeItem: {
+    width: "22%",
+    height: 42,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  timeActive: { backgroundColor: "#2F80ED", borderColor: "#2F80ED" },
+  timeText: { color: "#333" },
+  timeTextActive: { color: "#fff", fontWeight: "bold" },
+
+  counter: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: 140,
+    marginTop: 6,
+  },
+  counterText: { fontSize: 18, fontWeight: "bold" },
 
   bottom: {
     position: "absolute",
@@ -405,46 +487,142 @@ categoryBadge: {
 
 /* ================= POPUP ================= */
 const popup = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center",
-    alignItems: "center",
+  overlay: { 
+    flex: 1, 
+    backgroundColor: "rgba(0,0,0,0.5)", 
+    justifyContent: "center", 
+    alignItems: "center" 
   },
-  box: {
-    backgroundColor: "#fff",
-    width: "85%",
-    borderRadius: 20,
-    padding: 20,
+
+  box: { 
+    backgroundColor: "#fff", 
+    width: "85%", 
+    borderRadius: 20, 
+    padding: 20 
   },
-  title: {
-    fontWeight: "bold",
-    fontSize: 18,
-    textAlign: "center",
-    marginBottom: 10,
+
+  title: { 
+    fontWeight: "bold", 
+    fontSize: 18, 
+    textAlign: "center" 
   },
-  total: {
-    marginTop: 10,
-    fontWeight: "bold",
-    color: "#2F80ED",
+
+  // total: { 
+  //   marginTop: 10, 
+  //   fontWeight: "bold", 
+  //   color: "#2F80ED" 
+  // },
+
+  row: { 
+    flexDirection: "row", 
+    justifyContent: "space-between", 
+    marginTop: 20 
   },
-  row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 20,
+  cancel: { 
+    width: "45%", 
+    backgroundColor: "#ddd", 
+    padding: 12, 
+    borderRadius: 30, 
+    alignItems: "center" 
   },
-  cancel: {
-    width: "45%",
-    backgroundColor: "#ddd",
-    padding: 12,
-    borderRadius: 30,
-    alignItems: "center",
+  pay: { 
+    width: "45%", 
+    backgroundColor: "#2F80ED", 
+    padding: 12, 
+    borderRadius: 30, 
+    alignItems: "center" 
   },
-  pay: {
-    width: "45%",
-    backgroundColor: "#2F80ED",
-    padding: 12,
-    borderRadius: 30,
-    alignItems: "center",
-  },
+
+  errorBox: {
+  backgroundColor: "#fff",
+  width: "80%",
+  borderRadius: 20,
+  padding: 24,
+  alignItems: "center",
+},
+errorTitle: {
+  fontSize: 18,
+  fontWeight: "bold",
+  marginTop: 10,
+},
+errorText: {
+  textAlign: "center",
+  color: "#555",
+  marginVertical: 10,
+},
+errorBtn: {
+  marginTop: 10,
+  backgroundColor: "#E74C3C",
+  paddingHorizontal: 30,
+  paddingVertical: 10,
+  borderRadius: 20,
+},
+
+
+ticketBox: {
+  backgroundColor: "#fff",
+  width: "90%",
+  borderRadius: 24,
+  padding: 20,
+  elevation: 10,
+},
+
+ticketHeader: {
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "center",
+  marginBottom: 12,
+  gap: 8,
+},
+
+ticketTitle: {
+  fontSize: 18,
+  fontWeight: "bold",
+},
+
+section: {
+  marginVertical: 6,
+},
+
+sectionTitle: {
+  fontWeight: "bold",
+  color: "#2F80ED",
+  marginBottom: 4,
+},
+
+text: {
+  color: "#333",
+  marginVertical: 1,
+},
+
+divider: {
+  height: 1,
+  backgroundColor: "#E0E0E0",
+  marginVertical: 12,
+},
+
+priceRow: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  marginVertical: 4,
+},
+
+priceLabel: {
+  color: "#555",
+},
+
+priceValue: {
+  fontWeight: "600",
+},
+
+total: {
+  fontWeight: "bold",
+  fontSize: 16,
+  color: "#2F80ED",
+},
+
 });
+function setUser(arg0: { name: any; email: any; }) {
+  throw new Error("Function not implemented.");
+}
+

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -7,9 +7,13 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { apiFetch } from "@/helpers/api";
+
+const PLACEHOLDER_IMAGE = require("../../assets/images/placeholder.png");
 
 type CategoryType = {
   id: number;
@@ -17,134 +21,150 @@ type CategoryType = {
   icon: any;
 };
 
-type KabupatenType = {
+type RegionType = {
   id: number;
   name: string;
-  description: string;
-  logo: any;
-  hero: any;
+  description?: string;
+  imageUrl?: string;
 };
 
 type DestinationType = {
   id: number;
   name: string;
-  location: string;
-  image: any;
+  imageUrl?: string;
+  category: { id: number; name: string };
+  region: { id: number; name: string };
 };
 
 export default function KabupatenDetail() {
   const router = useRouter();
 
-  const [activeCategory, setActiveCategory] = useState<string>("semua");
+  const [regions, setRegions] = useState<RegionType[]>([]);
+  const [destinations, setDestinations] = useState<DestinationType[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [index, setIndex] = useState(0);
+
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   const CATEGORY_DATA: CategoryType[] = [
-    { id: 1, name: "Pantai", icon: require("../../assets/images/kategori1.png") },
-    { id: 2, name: "Gunung", icon: require("../../assets/images/kategori2.png") },
-    { id: 3, name: "Bukit", icon: require("../../assets/images/kategori3.png") },
-    { id: 4, name: "Pulau", icon: require("../../assets/images/kategori4.png") },
-    { id: 5, name: "Air Terjun", icon: require("../../assets/images/kategori5.png") },
+    { id: 0, name: "semua", icon: PLACEHOLDER_IMAGE },
+    { id: 1, name: "Pantai", icon: PLACEHOLDER_IMAGE },
+    { id: 2, name: "Gunung", icon: PLACEHOLDER_IMAGE },
+    { id: 3, name: "Bukit", icon: PLACEHOLDER_IMAGE },
+    { id: 4, name: "Pulau", icon: PLACEHOLDER_IMAGE },
+    { id: 5, name: "Air Terjun", icon: PLACEHOLDER_IMAGE },
   ];
 
-  const kabupatenList: KabupatenType[] = [
-    {
-      id: 1,
-      name: "Kabupaten Tanggamus",
-      description:
-        "Kabupaten Tanggamus menawarkan pesona wisata alam beragam, mulai dari Teluk Kiluan hingga air terjun yang eksotis.",
-      logo: require("../../assets/images/favorite/24.png"),
-      hero: require("../../assets/images/hero3.jpg"),
-    },
-    {
-      id: 2,
-      name: "Kabupaten Lampung Selatan",
-      description:
-        "Lampung Selatan terkenal dengan wisata pantainya yang indah dan akses mudah ke Pulau Sebesi serta Krakatau.",
-      logo: require("../../assets/images/favorite/20.png"),
-      hero: require("../../assets/images/hero3.jpg"),
-    },
-  ];
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const regionRes = await apiFetch<any>("/api/region");
+        setRegions(regionRes.data.items);
 
-  const [index, setIndex] = useState<number>(0);
-  const data = kabupatenList[index];
+        const destRes = await apiFetch<any>("/api/destinations");
+        setDestinations(destRes.data.items);
+      } catch (err) {
+        console.log("Gagal ambil data:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
 
-  const next = () =>
-    setIndex((prev) => (prev + 1) % kabupatenList.length);
+    fetchData();
+  }, []);
 
-  const prev = () =>
-    setIndex((prev) => (prev - 1 + kabupatenList.length) % kabupatenList.length);
+  const currentRegion = regions[index];
 
+  /** ✅ FILTER YANG BENAR */
+  const filteredDestinations = destinations.filter((d) => {
+    const matchRegion = currentRegion
+      ? d.region.id === currentRegion.id
+      : true;
+
+    const matchCategory =
+      activeCategory === null
+        ? true
+        : d.category?.name === activeCategory;
+
+    return matchRegion && matchCategory;
+  });
+
+  /** ✅ HANDLER TANPA TOGGLE (WAJIB) */
   const handleCategoryPress = (name: string) => {
-    setActiveCategory(name);
+    if (name === "semua") {
+      setActiveCategory(null);
+    } else {
+      setActiveCategory(name);
+    }
   };
 
-  const destinations: DestinationType[] = [
-    {
-      id: 1,
-      name: "Green Elty",
-      location: "Kalianda, Lampung Selatan",
-      image: require("../../assets/images/hero3.jpg"),
-    },
-    {
-      id: 2,
-      name: "Senaya Beach",
-      location: "Kalianda, Lampung Selatan",
-      image: require("../../assets/images/hero3.jpg"),
-    },
-    {
-      id: 3,
-      name: "Teluk Kiluan",
-      location: "Tanggamus, Lampung",
-      image: require("../../assets/images/hero3.jpg"),
-    },
-    {
-      id: 4,
-      name: "Air Terjun Way Lalaan",
-      location: "Tanggamus, Lampung",
-      image: require("../../assets/images/hero3.jpg"),
-    },
-  ];
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center" }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
 
-  const handleDestinationPress = (destination: DestinationType) => {
-    console.log("Destination pressed:", destination.name);
-
-    // contoh navigasi (jika dibutuhkan)
-    // router.push(`/destination/${destination.id}`);
-  };
+  if (!currentRegion) return null;
 
   return (
     <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 120 }}>
-      {/* HERO SECTION */}
-      <View>
-        <ImageBackground source={data.hero} style={styles.heroImage}>
-          <View style={styles.overlay} />
+      {/* HERO */}
+      <ImageBackground
+        source={require("../../assets/images/hero3.jpg")}
+        style={styles.heroImage}
+      >
+        <View style={styles.overlay} />
 
-          <TouchableOpacity style={styles.arrowLeft} onPress={prev}>
-            <Ionicons name="chevron-back" size={30} color="#fff" />
-          </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.arrowLeft}
+          onPress={() =>
+            setIndex((prev) => (prev - 1 + regions.length) % regions.length)
+          }
+        >
+          <Ionicons name="chevron-back" size={32} color="#007bff" />
+        </TouchableOpacity>
 
-          <TouchableOpacity style={styles.arrowRight} onPress={next}>
-            <Ionicons name="chevron-forward" size={30} color="#fff" />
-          </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.arrowRight}
+          onPress={() =>
+            setIndex((prev) => (prev + 1) % regions.length)
+          }
+        >
+          <Ionicons name="chevron-forward" size={32} color="#007bff" />
+        </TouchableOpacity>
 
-          <View style={styles.logoWrapper}>
-            <Image source={data.logo} style={styles.logo} resizeMode="contain" />
-          </View>
-        </ImageBackground>
-      </View>
+        <View style={styles.logoWrapper}>
+          <Image
+            source={
+              currentRegion.imageUrl
+                ? { uri: currentRegion.imageUrl }
+                : PLACEHOLDER_IMAGE
+            }
+            style={styles.logo}
+            resizeMode="contain"
+          />
+        </View>
+      </ImageBackground>
 
       {/* CONTENT */}
       <View style={styles.content}>
-        <Text style={styles.title}>{data.name}</Text>
-        <Text style={styles.description}>{data.description}</Text>
-
-        {/* CATEGORY */}
+        <Text style={styles.title}>{currentRegion.name}</Text>
+        {/* DESTINATION */}
+        <Text style={styles.sectionDesc}>
+          Temukan berbagai destinasi wisata di {currentRegion.name}
+        </Text>
+        {/* CATEGORY LIST */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
           style={{ marginTop: 15, paddingLeft: 12 }}
         >
           {CATEGORY_DATA.map((cat) => {
-            const isActive = activeCategory === cat.name;
+            const isActive =
+              (cat.name === "semua" && activeCategory === null) ||
+              activeCategory === cat.name;
 
             return (
               <TouchableOpacity
@@ -152,20 +172,13 @@ export default function KabupatenDetail() {
                 onPress={() => handleCategoryPress(cat.name)}
                 style={[
                   styles.categoryChip,
-                  isActive
-                    ? {
-                        backgroundColor: "#007BFF20",
-                        borderColor: "#007BFF",
-                        borderWidth: 2,
-                      }
-                    : { backgroundColor: "#fff" },
+                  isActive && styles.categoryChipActive,
                 ]}
               >
-                <Image source={cat.icon} style={styles.categoryIcon} />
                 <Text
                   style={[
                     styles.categoryChipText,
-                    isActive ? { color: "#007BFF" } : { color: "#333" },
+                    isActive && styles.categoryChipTextActive,
                   ]}
                 >
                   {cat.name}
@@ -175,29 +188,45 @@ export default function KabupatenDetail() {
           })}
         </ScrollView>
 
-        {/* POPULER DESTINATION */}
+        {/* DESTINATION */}
         <Text style={styles.sectionTitle}>Populer Destination</Text>
-
         <View style={styles.popularGrid}>
-          {destinations.map((d) => (
-            <TouchableOpacity
-              key={d.id}
-              onPress={() => handleDestinationPress(d)}
-              style={styles.popularItem}
-            >
-              <Image source={d.image} style={styles.popularBG} />
-              <View style={styles.popularOverlay} />
-              <View style={styles.popularContent}>
-                <Text style={styles.popularTitle}>{d.name}</Text>
-                <View style={styles.popularLocationRow}>
-                  <Ionicons name="location-sharp" size={14} color="#fff" />
-                  <Text style={styles.popularLocationText}>{d.location}</Text>
+          {filteredDestinations.length === 0 ? (
+          <View style={styles.emptyWrapper}>
+            <Ionicons name="map-outline" size={64} color="#bbb" />
+            <Text style={styles.emptyTitle}>Destinasi belum tersedia</Text>
+            <Text style={styles.emptySubtitle}>
+              Belum ada destinasi wisata di {currentRegion.name}
+            </Text>
+          </View>
+        ) : (
+          <View style={styles.popularGrid}>
+            {filteredDestinations.map((d) => (
+              <TouchableOpacity
+                key={d.id}
+                style={styles.popularItem}
+                onPress={() => router.push(`../deskripsi/${d.id}`)}
+              >
+                <Image
+                  source={d.imageUrl ? { uri: d.imageUrl } : PLACEHOLDER_IMAGE}
+                  style={styles.popularBG}
+                />
+                <View style={styles.popularOverlay} />
+                <View style={styles.popularContent}>
+                  <Text style={styles.popularTitle}>{d.name}</Text>
+                  <View style={styles.popularLocationRow}>
+                    <Ionicons name="location-sharp" size={14} color="#fff" />
+                    <Text style={styles.popularLocationText}>
+                      {d.region.name}
+                    </Text>
+                  </View>
                 </View>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
       </View>
+    </View>
     </ScrollView>
   );
 }
@@ -210,7 +239,7 @@ const styles = StyleSheet.create({
     paddingBottom: 30,
   },
   overlay: {
-    backgroundColor: "rgba(0, 27, 56, 0.72)",
+    backgroundColor: "rgba(255, 255, 255, 100)",
     position: "absolute",
     width: "100%",
     height: 400,
@@ -234,16 +263,16 @@ const styles = StyleSheet.create({
   logo: {
     width: 300,
     height: 300,
-    marginTop : 40,
+    marginTop : 60,
   },
 
   content: {
     backgroundColor: "#fff",
-    borderTopLeftRadius: 35,
-    borderTopRightRadius: 35,
+    borderTopLeftRadius: 25,
+    borderTopRightRadius: 25,
     padding: 20,
     paddingTop: 10,
-    marginTop: -40,
+    marginTop: -10,
   },
   title: {
     fontSize: 22,
@@ -268,18 +297,25 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     marginRight: 12,
     borderWidth: 1,
-    borderColor: "#eee",
+    borderColor: "#007BFF", // outline biru
+    backgroundColor: "#fff", // putih saat tidak aktif
   },
-  categoryIcon: {
-    width: 26,
-    height: 26,
-    resizeMode: "contain",
-    marginRight: 8,
-  },
+
   categoryChipText: {
     fontSize: 14,
     fontWeight: "600",
+    color: "#007BFF", // teks biru
   },
+
+  categoryChipActive: {
+    backgroundColor: "#007BFF",
+    borderColor: "#007BFF",
+  },
+
+  categoryChipTextActive: {
+    color: "#fff",
+  },
+
   popularGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -288,8 +324,8 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   popularItem: {
-    width: "48%",
-    height: 210,
+    width: 185,
+    height: 220,
     borderRadius: 15,
     overflow: "hidden",
     marginBottom: 15,
@@ -329,5 +365,34 @@ const styles = StyleSheet.create({
     marginLeft: 4,
     fontSize: 13,
   },
+
+  emptyWrapper: {
+    width: "100%",
+    height: 300,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  emptyTitle: {
+    marginTop: 12,
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#555",
+  },
+
+  emptySubtitle: {
+    marginTop: 4,
+    fontSize: 13,
+    color: "#999",
+    textAlign: "center",
+    paddingHorizontal: 20,
+  },
+
+    sectionDesc: {
+  marginTop: 4,
+  fontSize: 13,
+  color: "#666",
+},
+
 });
 
