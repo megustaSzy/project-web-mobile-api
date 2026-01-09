@@ -39,15 +39,11 @@ export default function PesanPage() {
   const [loadingPickup, setLoadingPickup] = useState(false);
 
   const [tanggal, setTanggal] = useState(new Date());
-  const [jamBerangkat, setJamBerangkat] = useState(new Date());
-  const [jamPulang, setJamPulang] = useState(new Date());
+  const [jamBerangkat, setJamBerangkat] = useState("07:00");
+  const [jamPulang, setJamPulang] = useState("13:00");
 
   const [jumlahTiket, setJumlahTiket] = useState("1");
-
   const [showDate, setShowDate] = useState(false);
-  const [showTimeStart, setShowTimeStart] = useState(false);
-  const [showTimeEnd, setShowTimeEnd] = useState(false);
-
   const [showConfirm, setShowConfirm] = useState(false);
 
   /* ================= FETCH PICKUP ================= */
@@ -64,7 +60,6 @@ export default function PesanPage() {
         setLoadingPickup(false);
       }
     }
-
     fetchPickup();
   }, []);
 
@@ -74,12 +69,6 @@ export default function PesanPage() {
       day: "2-digit",
       month: "short",
       year: "numeric",
-    });
-
-  const fmtTime = (d: Date) =>
-    d.toLocaleTimeString("id-ID", {
-      hour: "2-digit",
-      minute: "2-digit",
     });
 
   const totalHarga = price * Number(jumlahTiket || 0);
@@ -105,8 +94,8 @@ export default function PesanPage() {
         wisata_id: id,
         pickup_id: pickupId,
         tanggal: tanggal.toISOString(),
-        jam_berangkat: jamBerangkat.toISOString(),
-        jam_pulang: jamPulang.toISOString(),
+        jam_berangkat: jamBerangkat,
+        jam_pulang: jamPulang,
         jumlah_tiket: jumlahTiket,
       },
     });
@@ -115,8 +104,8 @@ export default function PesanPage() {
   /* ================= UI ================= */
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={{ paddingBottom: 180 }}>
-        {/* HEADER IMAGE */}
+      <ScrollView contentContainerStyle={{ paddingBottom: 200 }}>
+        {/* HEADER */}
         <View style={styles.header}>
           <Image
             source={{
@@ -131,18 +120,13 @@ export default function PesanPage() {
           <View style={styles.overlay} />
         </View>
 
-
-       {/* CARD */}
+        {/* CARD */}
         <View style={styles.card}>
-          {/* TITLE */}
           <Text style={styles.title}>{title}</Text>
 
-          {/* CATEGORY BADGE */}
-          {category && category !== "Kategori" && (
+          {category && (
             <View style={styles.categoryBadge}>
-              <Text style={styles.categoryText}>
-                {category.toLowerCase()}
-              </Text>
+              <Text style={styles.categoryText}>{category}</Text>
             </View>
           )}
 
@@ -152,16 +136,8 @@ export default function PesanPage() {
             <Picker
               selectedValue={pickupId}
               onValueChange={(v) => setPickupId(v)}
-              enabled={!loadingPickup}
             >
-              <Picker.Item
-                label={
-                  loadingPickup
-                    ? "Memuat lokasi..."
-                    : "-- Pilih lokasi penjemputan --"
-                }
-                value={null}
-              />
+              <Picker.Item label="Pilih lokasi penjemputan" value={null} />
               {pickupList.map((p) => (
                 <Picker.Item key={p.id} label={p.name} value={p.id} />
               ))}
@@ -189,57 +165,42 @@ export default function PesanPage() {
             />
           )}
 
-          {/* TIME START */}
+          {/* JAM BERANGKAT */}
           <Text style={styles.label}>Jam Berangkat</Text>
-          <TouchableOpacity
-            style={styles.inputBox}
-            onPress={() => setShowTimeStart(true)}
-          >
-            <Ionicons name="time-outline" size={18} />
-            <Text style={styles.inputText}>{fmtTime(jamBerangkat)}</Text>
-          </TouchableOpacity>
-
-          {showTimeStart && (
-            <DateTimePicker
-              value={jamBerangkat}
-              mode="time"
-              onChange={(_, d) => {
-                setShowTimeStart(false);
-                if (!d) return;
-                if (d.getHours() < 7 || d.getHours() > 13) {
-                  Alert.alert("Jam tidak valid", "07.00 - 13.00");
-                  return;
-                }
-                setJamBerangkat(d);
-              }}
+          <View style={styles.pickerBox}>
+            <Ionicons
+              name="time-outline"
+              size={18}
+              style={styles.pickerIcon}
             />
-          )}
+            <Picker
+              selectedValue={jamBerangkat}
+              onValueChange={setJamBerangkat}
+            >
+              {["07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00"].map(
+                (j) => (
+                  <Picker.Item key={j} label={j} value={j} />
+                )
+              )}
+            </Picker>
+          </View>
 
-          {/* TIME END */}
+          {/* JAM PULANG */}
           <Text style={styles.label}>Jam Pulang</Text>
-          <TouchableOpacity
-            style={styles.inputBox}
-            onPress={() => setShowTimeEnd(true)}
-          >
-            <Ionicons name="time-outline" size={18} />
-            <Text style={styles.inputText}>{fmtTime(jamPulang)}</Text>
-          </TouchableOpacity>
-
-          {showTimeEnd && (
-            <DateTimePicker
-              value={jamPulang}
-              mode="time"
-              onChange={(_, d) => {
-                setShowTimeEnd(false);
-                if (!d) return;
-                if (d.getHours() < 13 || d.getHours() > 19) {
-                  Alert.alert("Jam tidak valid", "13.00 - 19.00");
-                  return;
-                }
-                setJamPulang(d);
-              }}
+          <View style={styles.pickerBox}>
+            <Ionicons
+              name="time-outline"
+              size={18}
+              style={styles.pickerIcon}
             />
-          )}
+            <Picker selectedValue={jamPulang} onValueChange={setJamPulang}>
+              {["13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00"].map(
+                (j) => (
+                  <Picker.Item key={j} label={j} value={j} />
+                )
+              )}
+            </Picker>
+          </View>
 
           {/* JUMLAH */}
           <Text style={styles.label}>Jumlah Tiket</Text>
@@ -275,9 +236,7 @@ export default function PesanPage() {
               📍 {pickupList.find((p) => p.id === pickupId)?.name}
             </Text>
             <Text>🗓 {fmtDate(tanggal)}</Text>
-            <Text>
-              ⏰ {fmtTime(jamBerangkat)} - {fmtTime(jamPulang)}
-            </Text>
+            <Text>⏰ {jamBerangkat} - {jamPulang}</Text>
             <Text>👥 {jumlahTiket} Orang</Text>
 
             <Text style={popup.total}>
@@ -306,56 +265,12 @@ export default function PesanPage() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
 
-  title: {
-  fontSize: 20,
-  fontWeight: "bold",
-  color: "#111",
-},
-
-category: {
-  marginTop: 4,
-  marginBottom: 16,
-  color: "#2F80ED",
-  fontSize: 14,
-  textTransform: "capitalize",
-},
-
-  categoryText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#2F80ED",
-    textTransform: "capitalize",
-  },
-
-categoryBadge: {
-  alignSelf: "flex-start",
-  backgroundColor: "#E8F1FF",
-  paddingHorizontal: 12,
-  paddingVertical: 4,
-  borderRadius: 20,
-  marginTop: 6,
-  marginBottom: 10,
-},
-
-
   header: { height: 260 },
   headerImage: { width: "100%", height: "100%" },
   overlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "#001B38",
-    opacity: 0.72,
-  },
-  headerText: {
-    position: "absolute",
-    bottom: 24,
-    left: 20,
-    right: 20,
-  },
-  headerTitle: { color: "#fff", fontSize: 22, fontWeight: "bold" },
-  headerCategory: {
-    color: "#E0E0E0",
-    marginTop: 4,
-    textTransform: "capitalize",
+    opacity: 0.7,
   },
 
   card: {
@@ -366,7 +281,34 @@ categoryBadge: {
     padding: 20,
   },
 
-  label: { marginTop: 14, marginBottom: 6, color: "#555" },
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#111",
+  },
+
+  categoryBadge: {
+    backgroundColor: "#E8F1FF",
+    alignSelf: "flex-start",
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 20,
+    marginTop: 6,
+    marginBottom: 14,
+  },
+
+  categoryText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#2F80ED",
+  },
+
+  label: {
+    marginTop: 14,
+    marginBottom: 6,
+    color: "#555",
+    fontSize: 13,
+  },
 
   inputBox: {
     height: 50,
@@ -376,12 +318,20 @@ categoryBadge: {
     paddingHorizontal: 16,
     borderRadius: 25,
   },
+
   pickerBox: {
     height: 50,
     backgroundColor: "#F6F6F6",
     borderRadius: 25,
     justifyContent: "center",
-    paddingHorizontal: 6,
+    paddingHorizontal: 10,
+    marginBottom: 4,
+  },
+
+  pickerIcon: {
+    position: "absolute",
+    left: 16,
+    zIndex: 1,
   },
 
   inputText: { marginLeft: 10 },
@@ -393,6 +343,7 @@ categoryBadge: {
     width: "100%",
     paddingHorizontal: 20,
   },
+
   btn: {
     backgroundColor: "#2F80ED",
     padding: 16,
@@ -400,6 +351,7 @@ categoryBadge: {
     flexDirection: "row",
     justifyContent: "space-between",
   },
+
   btnText: { color: "#fff", fontWeight: "bold" },
 });
 
