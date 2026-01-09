@@ -37,7 +37,7 @@ export const testimoniService = {
       skip: pagination.offset,
       take: pagination.limit,
       orderBy: {
-        createdAt: "desc",
+        createdAt: "asc",
       },
     });
 
