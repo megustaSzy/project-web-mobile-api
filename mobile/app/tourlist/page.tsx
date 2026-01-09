@@ -107,33 +107,46 @@ export default function KabupatenDetail() {
     <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 120 }}>
       {/* HERO */}
       <ImageBackground
-        source={
-          currentRegion.imageUrl
-            ? { uri: currentRegion.imageUrl }
-            : PLACEHOLDER_IMAGE
-        }
-        style={styles.heroImage}
-      >
-        <View style={styles.overlay} />
-
-        <TouchableOpacity
-          style={styles.arrowLeft}
-          onPress={() =>
-            setIndex((prev) => (prev - 1 + regions.length) % regions.length)
-          }
+          source={require("../../assets/images/hero3.jpg")}
+          style={styles.heroImage}
         >
-          <Ionicons name="chevron-back" size={30} color="#fff" />
-        </TouchableOpacity>
+          {/* OVERLAY */}
+          <View style={styles.overlay} />
 
-        <TouchableOpacity
-          style={styles.arrowRight}
-          onPress={() =>
-            setIndex((prev) => (prev + 1) % regions.length)
-          }
-        >
-          <Ionicons name="chevron-forward" size={30} color="#fff" />
-        </TouchableOpacity>
-      </ImageBackground>
+          {/* ARROW LEFT */}
+          <TouchableOpacity
+            style={styles.arrowLeft}
+            onPress={() =>
+              setIndex((prev) => (prev - 1 + regions.length) % regions.length)
+            }
+          >
+            <Ionicons name="chevron-back" size={32} color="#fff" />
+          </TouchableOpacity>
+
+          {/* ARROW RIGHT */}
+          <TouchableOpacity
+            style={styles.arrowRight}
+            onPress={() =>
+              setIndex((prev) => (prev + 1) % regions.length)
+            }
+          >
+            <Ionicons name="chevron-forward" size={32} color="#fff" />
+          </TouchableOpacity>
+
+          {/* LOGO REGION (GESER) */}
+          <View style={styles.logoWrapper}>
+            <Image
+              source={
+                currentRegion.imageUrl
+                  ? { uri: currentRegion.imageUrl }
+                  : PLACEHOLDER_IMAGE
+              }
+              style={styles.logo}
+              resizeMode="contain"
+            />
+          </View>
+        </ImageBackground>
+
 
       {/* CONTENT */}
       <View style={styles.content}>
