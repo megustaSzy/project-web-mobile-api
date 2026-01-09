@@ -42,9 +42,10 @@ export default function KabupatenDetail() {
 
   const [regions, setRegions] = useState<RegionType[]>([]);
   const [destinations, setDestinations] = useState<DestinationType[]>([]);
-  const [activeCategory, setActiveCategory] = useState<string>("semua");
   const [loading, setLoading] = useState(true);
   const [index, setIndex] = useState(0);
+
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   const CATEGORY_DATA: CategoryType[] = [
     { id: 0, name: "semua", icon: PLACEHOLDER_IMAGE },
@@ -76,17 +77,21 @@ export default function KabupatenDetail() {
   const currentRegion = regions[index];
 
   const filteredDestinations = destinations.filter((d) => {
-    const matchRegion = currentRegion
-      ? d.region.id === currentRegion.id
-      : true;
+  const matchRegion = currentRegion
+    ? d.region.id === currentRegion.id
+    : true;
 
-    const matchCategory =
-      activeCategory === "semua"
-        ? true
-        : d.category?.name === activeCategory;
+  const matchCategory = activeCategory
+    ? d.category?.name === activeCategory
+    : true;
 
-    return matchRegion && matchCategory;
+  return matchRegion && matchCategory;
   });
+
+  const handleCategoryPress = (name: string) => {
+  setActiveCategory((prev) => (prev === name ? null : name));
+};
+
 
   if (loading) {
     return (
@@ -138,28 +143,28 @@ export default function KabupatenDetail() {
           {currentRegion.description || "Deskripsi belum tersedia"}
         </Text>
 
-        {/* CATEGORY */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 15 }}>
+        {/* CATEGORY LIST */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={{ marginTop: 15, paddingLeft: 12 }}
+        >
           {CATEGORY_DATA.map((cat) => {
             const isActive = activeCategory === cat.name;
+
             return (
               <TouchableOpacity
                 key={cat.id}
-                onPress={() => setActiveCategory(cat.name)}
+                onPress={() => handleCategoryPress(cat.name)}
                 style={[
                   styles.categoryChip,
-                  isActive && {
-                    backgroundColor: "#007BFF20",
-                    borderColor: "#007BFF",
-                    borderWidth: 2,
-                  },
+                  isActive && styles.categoryChipActive,
                 ]}
               >
-                <Image source={cat.icon} style={styles.categoryIcon} />
                 <Text
                   style={[
                     styles.categoryChipText,
-                    isActive && { color: "#007BFF" },
+                    isActive && styles.categoryChipTextActive,
                   ]}
                 >
                   {cat.name}
@@ -168,6 +173,7 @@ export default function KabupatenDetail() {
             );
           })}
         </ScrollView>
+
 
         {/* DESTINATION */}
         <Text style={styles.sectionTitle}>Populer Destination</Text>
@@ -278,6 +284,15 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
   },
+  categoryChipActive: {
+  backgroundColor: "#007BFF",
+  borderColor: "#007BFF",
+  },
+
+  categoryChipTextActive: {
+    color: "#fff",
+  },
+
   popularGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
