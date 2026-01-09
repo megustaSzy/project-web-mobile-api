@@ -54,7 +54,17 @@ export const regionController = {
         return ResponseData.badRequest(res, "nama region wajib diisi");
       }
 
-      const region = await regionService.createRegion(req.body);
+      if (!req.file) {
+        return ResponseData.badRequest(res, "file gambar wajib diupload");
+      }
+
+      const result: any = await uploadToCloudinary(req.file.buffer);
+
+      const region = await regionService.createRegion(
+        req.body.name,
+        result.secure_url,
+        result.public_id
+      );
 
       return ResponseData.ok(res, region);
     } catch (error) {
