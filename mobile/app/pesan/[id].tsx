@@ -350,11 +350,47 @@ const styles = StyleSheet.create({
 const popup = StyleSheet.create({
   overlay: { 
     flex: 1, 
-    backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center" },
-  box: { backgroundColor: "#fff", width: "85%", borderRadius: 20, padding: 20 },
-  title: { fontWeight: "bold", fontSize: 18, textAlign: "center" },
-  total: { marginTop: 10, fontWeight: "bold", color: "#2F80ED" },
-  row: { flexDirection: "row", justifyContent: "space-between", marginTop: 20 },
-  cancel: { width: "45%", backgroundColor: "#ddd", padding: 12, borderRadius: 30, alignItems: "center" },
-  pay: { width: "45%", backgroundColor: "#2F80ED", padding: 12, borderRadius: 30, alignItems: "center" },
+    backgroundColor: "rgba(0,0,0,0.5)", 
+    justifyContent: "center", 
+    alignItems: "center" 
+  },
+
+  box: { 
+    backgroundColor: "#fff", 
+    width: "85%", 
+    borderRadius: 20, 
+    padding: 20 
+  },
+
+  title: { 
+    fontWeight: "bold", 
+    fontSize: 18, 
+    textAlign: "center" 
+  },
+
+  total: { 
+    marginTop: 10, 
+    fontWeight: "bold", 
+    color: "#2F80ED" 
+  },
+
+  row: { 
+    flexDirection: "row", 
+    justifyContent: "space-between", 
+    marginTop: 20 
+  },
+  cancel: { 
+    width: "45%", 
+    backgroundColor: "#ddd", 
+    padding: 12, 
+    borderRadius: 30, 
+    alignItems: "center" 
+  },
+  pay: { 
+    width: "45%", 
+    backgroundColor: "#2F80ED", 
+    padding: 12, 
+    borderRadius: 30, 
+    alignItems: "center" 
+  },
 });
