@@ -287,21 +287,19 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     marginRight: 12,
     borderWidth: 1,
-    borderColor: "#eee",
+    borderColor: "#007BFF", // outline biru
+    backgroundColor: "#fff", // putih saat tidak aktif
   },
-  categoryIcon: {
-    width: 26,
-    height: 26,
-    resizeMode: "contain",
-    marginRight: 8,
-  },
+
   categoryChipText: {
     fontSize: 14,
     fontWeight: "600",
+    color: "#007BFF", // teks biru
   },
+
   categoryChipActive: {
-  backgroundColor: "#007BFF",
-  borderColor: "#007BFF",
+    backgroundColor: "#007BFF",
+    borderColor: "#007BFF",
   },
 
   categoryChipTextActive: {
