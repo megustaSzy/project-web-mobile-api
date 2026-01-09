@@ -47,6 +47,9 @@ export default function PesanPage() {
   const [errorMsg, setErrorMsg] = useState("");
   const [showError, setShowError] = useState(false);
 
+  const userName = String(params.userName ?? "User");
+  const userEmail = String(params.userEmail ?? "user@email.com");
+
   useEffect(() => {
     fetch(`${BASE_URL}/api/pickup-locations`)
       .then((res) => res.json())
@@ -242,33 +245,73 @@ export default function PesanPage() {
       </View>
 
       {/* CONFIRM */}
-      <Modal visible={showConfirm} transparent animationType="fade">
-        <View style={popup.overlay}>
-          <View style={popup.box}>
-            <Text style={popup.title}>Konfirmasi Pesanan</Text>
-            <Text>🏞 {title}</Text>
-            <Text>🗓 {fmtDate(tanggal)}</Text>
-            <Text>⏰ {jamBerangkat} - {jamPulang}</Text>
-            <Text>👥 {jumlahTiket} Orang</Text>
+      <Modal visible={showConfirm} transparent animationType="slide">
+      <View style={popup.overlay}>
+        <View style={popup.ticketBox}>
 
-            <Text style={popup.total}>
-              Total IDR {totalHarga.toLocaleString("id-ID")}
-            </Text>
-
-            <View style={popup.row}>
-              <TouchableOpacity
-                style={popup.cancel}
-                onPress={() => setShowConfirm(false)}
-              >
-                <Text>Batal</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={popup.pay} onPress={handlePay}>
-                <Text style={{ color: "#fff" }}>Bayar</Text>
-              </TouchableOpacity>
-            </View>
+          {/* HEADER */}
+          <View style={popup.ticketHeader}>
+            <Ionicons name="ticket-outline" size={26} color="#2F80ED" />
+            <Text style={popup.ticketTitle}>Konfirmasi Pesanan</Text>
           </View>
+
+          {/* USER */}
+          <View style={popup.section}>
+            <Text style={popup.sectionTitle}>Data Pemesan</Text>
+            <Text style={popup.text}>👤 {userName}</Text>
+            <Text style={popup.text}>📧 {userEmail}</Text>
+          </View>
+
+          <View style={popup.divider} />
+
+          {/* DETAIL */}
+          <View style={popup.section}>
+            <Text style={popup.sectionTitle}>Detail Perjalanan</Text>
+            <Text style={popup.text}>🏞 {title}</Text>
+            <Text style={popup.text}>
+              📍 {pickupList.find(p => p.id === pickupId)?.name}
+            </Text>
+            <Text style={popup.text}>🗓 {fmtDate(tanggal)}</Text>
+            <Text style={popup.text}>⏰ {jamBerangkat} - {jamPulang}</Text>
+            <Text style={popup.text}>🎟 {jumlahTiket} Tiket</Text>
+          </View>
+
+          <View style={popup.divider} />
+
+          {/* HARGA */}
+          <View style={popup.priceRow}>
+            <Text style={popup.priceLabel}>Harga Tiket</Text>
+            <Text style={popup.priceValue}>
+              IDR {price.toLocaleString("id-ID")}
+            </Text>
+          </View>
+
+          <View style={popup.priceRow}>
+            <Text style={popup.priceLabel}>Total</Text>
+            <Text style={popup.total}>
+              IDR {totalHarga.toLocaleString("id-ID")}
+            </Text>
+          </View>
+
+          {/* ACTION */}
+          <View style={popup.row}>
+          <TouchableOpacity
+            style={popup.cancel}
+            onPress={() => setShowConfirm(false)}
+          >
+            <Text style={{ fontWeight: "bold" }}>Batal</Text>
+          </TouchableOpacity>
+
+
+            <TouchableOpacity style={popup.pay} onPress={handlePay}>
+              <Text style={{ color: "#fff", fontWeight: "bold" }}>Bayar</Text>
+            </TouchableOpacity>
+          </View>
+
         </View>
-      </Modal>
+      </View>
+    </Modal>
+
 
       <Modal visible={showError} transparent animationType="fade">
   <View style={popup.overlay}>
@@ -401,11 +444,11 @@ const popup = StyleSheet.create({
     textAlign: "center" 
   },
 
-  total: { 
-    marginTop: 10, 
-    fontWeight: "bold", 
-    color: "#2F80ED" 
-  },
+  // total: { 
+  //   marginTop: 10, 
+  //   fontWeight: "bold", 
+  //   color: "#2F80ED" 
+  // },
 
   row: { 
     flexDirection: "row", 
@@ -450,6 +493,69 @@ errorBtn: {
   paddingHorizontal: 30,
   paddingVertical: 10,
   borderRadius: 20,
+},
+
+
+ticketBox: {
+  backgroundColor: "#fff",
+  width: "90%",
+  borderRadius: 24,
+  padding: 20,
+  elevation: 10,
+},
+
+ticketHeader: {
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "center",
+  marginBottom: 12,
+  gap: 8,
+},
+
+ticketTitle: {
+  fontSize: 18,
+  fontWeight: "bold",
+},
+
+section: {
+  marginVertical: 6,
+},
+
+sectionTitle: {
+  fontWeight: "bold",
+  color: "#2F80ED",
+  marginBottom: 4,
+},
+
+text: {
+  color: "#333",
+  marginVertical: 1,
+},
+
+divider: {
+  height: 1,
+  backgroundColor: "#E0E0E0",
+  marginVertical: 12,
+},
+
+priceRow: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  marginVertical: 4,
+},
+
+priceLabel: {
+  color: "#555",
+},
+
+priceValue: {
+  fontWeight: "600",
+},
+
+total: {
+  fontWeight: "bold",
+  fontSize: 16,
+  color: "#2F80ED",
 },
 
 });
