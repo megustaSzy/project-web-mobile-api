@@ -53,10 +53,10 @@ export default function Footer() {
             </li>
             <li>
               <a
-                href="./wisata"
+                href="./tourlist"
                 className="hover:text-blue-500 transition-colors"
               >
-                Daftar Wisata
+                Daftar Kabupaten
               </a>
             </li>
             <li>
@@ -69,7 +69,7 @@ export default function Footer() {
             </li>
             <li>
               <a
-                href="./contact"
+                href="#kontak"
                 className="hover:text-blue-500 transition-colors"
               >
                 Kontak
@@ -79,7 +79,7 @@ export default function Footer() {
         </div>
 
         {/* Kontak */}
-        <div>
+        <div id="kontak">
           <h3 className="font-semibold mb-4 text-white">Kontak</h3>
           <ul className="space-y-3 text-slate-300 text-sm">
             <li className="flex items-center gap-3">
