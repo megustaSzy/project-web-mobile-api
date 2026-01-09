@@ -449,13 +449,25 @@ const handleSearch = () => {
       </View>
     </Modal>
 
-    {/* 🔍 MODAL HASIL PENCARIAN */}
-      <Modal visible={resultModal} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalBox, { maxHeight: "80%" }]}>
-            <Text style={styles.modalTitle}>Hasil Pencarian</Text>
 
-            <ScrollView>
+      {/* 🔍 MODAL HASIL PENCARIAN */}
+      <Modal visible={resultModal} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalBox}>
+            
+            {/* HEADER */}
+            <Text style={styles.modalTitle}>Hasil Pencarian</Text>
+            <Text style={styles.modalSubtitle}>
+              Ketuk untuk memesan destinasi di{" "}
+              <Text style={{ fontWeight: "700" }}>
+                {searchResults[0]
+                  ? getRegionName(searchResults[0].regionId)
+                  : "daerah pilihan"}
+              </Text>
+            </Text>
+
+            {/* LIST */}
+            <ScrollView showsVerticalScrollIndicator={false}>
               {searchResults.map((d) => (
                 <TouchableOpacity
                   key={d.id}
@@ -463,49 +475,41 @@ const handleSearch = () => {
                     setResultModal(false);
                     handleDestinationPress(d);
                   }}
-                  style={{
-                    flexDirection: "row",
-                    marginBottom: 12,
-                    borderBottomWidth: 1,
-                    borderColor: "#EEE",
-                    paddingBottom: 10,
-                  }}
+                  style={styles.searchCard}
+                  activeOpacity={0.85}
                 >
                   <Image
                     source={{
-                      uri: d.imageUrl.startsWith("http")
+                      uri: d.imageUrl?.startsWith("http")
                         ? d.imageUrl
                         : `${BASE_URL}${d.imageUrl}`,
                     }}
-                    style={{
-                      width: 70,
-                      height: 70,
-                      borderRadius: 10,
-                      marginRight: 10,
-                    }}
+                    style={styles.searchImage}
                   />
 
                   <View style={{ flex: 1 }}>
-                    <Text style={{ fontSize: 15, fontWeight: "700" }}>
-                      {d.name}
+                    <Text style={styles.searchTitle}>{d.name}</Text>
+
+                    <Text style={styles.searchMeta}>
+                      {d.category?.name} • {getRegionName(d.regionId)}
                     </Text>
-                    <Text style={{ fontSize: 13, color: "#6B7280" }}>
-                      {d.category?.name}
-                    </Text>
-                    <Text style={{ fontSize: 13, color: "#6B7280" }}>
-                      {d.location}
+
+                    <Text style={styles.searchHint}>
+                      Ketuk untuk melihat detail
                     </Text>
                   </View>
                 </TouchableOpacity>
               ))}
             </ScrollView>
 
+            {/* CLOSE */}
             <TouchableOpacity
               style={styles.closeBtn}
               onPress={() => setResultModal(false)}
             >
-              <Text style={{ color: "#fff", fontWeight: "700" }}>Tutup</Text>
+              <Text style={styles.closeText}>Tutup</Text>
             </TouchableOpacity>
+
           </View>
         </View>
       </Modal>
@@ -746,23 +750,77 @@ categoryChipTextActive: {
   },
 
   // MODAL
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.3)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalBox: {
-    width: "85%",
-    backgroundColor: "#fff",
-    padding: 20,
-    borderRadius: 15,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    marginBottom: 10,
-  },
+ modalOverlay: {
+  flex: 1,
+  backgroundColor: "rgba(0,0,0,0.4)",
+  justifyContent: "center",
+  padding: 20,
+},
+
+modalBox: {
+  backgroundColor: "#fff",
+  borderRadius: 20,
+  padding: 18,
+  maxHeight: "80%",
+},
+
+modalTitle: {
+  fontSize: 18,
+  fontWeight: "800",
+  marginBottom: 4,
+},
+
+modalSubtitle: {
+  fontSize: 13,
+  color: "#6B7280",
+  marginBottom: 16,
+},
+
+searchCard: {
+  flexDirection: "row",
+  paddingVertical: 12,
+  borderBottomWidth: 1,
+  borderColor: "#F1F1F1",
+},
+
+searchImage: {
+  width: 70,
+  height: 70,
+  borderRadius: 12,
+  marginRight: 12,
+  backgroundColor: "#EEE",
+},
+
+searchTitle: {
+  fontSize: 15,
+  fontWeight: "700",
+  marginBottom: 2,
+},
+
+searchMeta: {
+  fontSize: 13,
+  color: "#6B7280",
+},
+
+searchHint: {
+  fontSize: 12,
+  color: "#007BFF",
+  marginTop: 4,
+},
+
+closeBtn: {
+  marginTop: 16,
+  backgroundColor: "#007BFF",
+  paddingVertical: 12,
+  borderRadius: 12,
+  alignItems: "center",
+},
+
+closeText: {
+  color: "#fff",
+  fontWeight: "700",
+},
+
 
   historyItem: {
     paddingVertical: 10,
@@ -775,14 +833,6 @@ categoryChipTextActive: {
   historyDate: {
     fontSize: 12,
     color: "#6C757D",
-  },
-
-  closeBtn: {
-    marginTop: 15,
-    backgroundColor: "#007BFF",
-    padding: 12,
-    borderRadius: 10,
-    alignItems: "center",
   },
 });
 
