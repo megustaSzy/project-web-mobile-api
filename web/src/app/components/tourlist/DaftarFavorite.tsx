@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { apiFetch } from "@/helpers/api";
 import { RegionApiResponse, RegionItem } from "@/types/region";
 import { DestinationsType, ApiDestinationsResponse } from "@/types/destination";
+import { ArrowRight } from "lucide-react";
 
 export default function DaftarFavorite() {
   const [regions, setRegions] = useState<RegionItem[]>([]);
@@ -100,12 +101,20 @@ export default function DaftarFavorite() {
               </p>
 
               {/* Link */}
-              <Link
-                href={`/detailtour?kabupaten=${encodeURIComponent(item.name)}`}
-                className="text-blue-500 font-medium text-sm hover:underline mt-1"
-              >
-                Lihat Wisata →
-              </Link>
+              <div className="flex justify-end mt-1">
+                <Link
+                  href={`/detailtour?kabupaten=${encodeURIComponent(
+                    item.name
+                  )}`}
+                  className="group inline-flex items-center gap-1 text-blue-500 font-medium text-sm hover:underline"
+                >
+                  Lihat Wisata
+                  <ArrowRight
+                    size={16}
+                    className="transition-transform duration-200 group-hover:translate-x-1 hover:bg-blue-50"
+                  />
+                </Link>
+              </div>
             </div>
           ))}
         </div>
