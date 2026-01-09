@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -7,9 +7,13 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import { apiFetch } from "@/helpers/api";
+
+const PLACEHOLDER_IMAGE = require("../../assets/images/placeholder.png");
 
 type CategoryType = {
   id: number;
@@ -17,155 +21,145 @@ type CategoryType = {
   icon: any;
 };
 
-type KabupatenType = {
+type RegionType = {
   id: number;
   name: string;
-  description: string;
-  logo: any;
-  hero: any;
+  description?: string;
+  imageUrl?: string;
 };
 
 type DestinationType = {
   id: number;
   name: string;
-  location: string;
-  image: any;
+  imageUrl?: string;
+  category: { id: number; name: string };
+  region: { id: number; name: string };
 };
 
 export default function KabupatenDetail() {
   const router = useRouter();
+  const { regionId } = useLocalSearchParams<{ regionId: string }>();
 
+  const [regions, setRegions] = useState<RegionType[]>([]);
+  const [destinations, setDestinations] = useState<DestinationType[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>("semua");
+  const [loading, setLoading] = useState(true);
+  const [index, setIndex] = useState(0);
 
   const CATEGORY_DATA: CategoryType[] = [
-    { id: 1, name: "Pantai", icon: require("../../assets/images/kategori1.png") },
-    { id: 2, name: "Gunung", icon: require("../../assets/images/kategori2.png") },
-    { id: 3, name: "Bukit", icon: require("../../assets/images/kategori3.png") },
-    { id: 4, name: "Pulau", icon: require("../../assets/images/kategori4.png") },
-    { id: 5, name: "Air Terjun", icon: require("../../assets/images/kategori5.png") },
+    { id: 0, name: "semua", icon: PLACEHOLDER_IMAGE },
+    { id: 1, name: "Pantai", icon: PLACEHOLDER_IMAGE },
+    { id: 2, name: "Gunung", icon: PLACEHOLDER_IMAGE },
+    { id: 3, name: "Bukit", icon: PLACEHOLDER_IMAGE },
+    { id: 4, name: "Pulau", icon: PLACEHOLDER_IMAGE },
+    { id: 5, name: "Air Terjun", icon: PLACEHOLDER_IMAGE },
   ];
 
-  const kabupatenList: KabupatenType[] = [
-    {
-      id: 1,
-      name: "Kabupaten Tanggamus",
-      description:
-        "Kabupaten Tanggamus menawarkan pesona wisata alam beragam, mulai dari Teluk Kiluan hingga air terjun yang eksotis.",
-      logo: require("../../assets/images/favorite/24.png"),
-      hero: require("../../assets/images/hero3.jpg"),
-    },
-    {
-      id: 2,
-      name: "Kabupaten Lampung Selatan",
-      description:
-        "Lampung Selatan terkenal dengan wisata pantainya yang indah dan akses mudah ke Pulau Sebesi serta Krakatau.",
-      logo: require("../../assets/images/favorite/20.png"),
-      hero: require("../../assets/images/hero3.jpg"),
-    },
-  ];
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const regionRes = await apiFetch<any>("/api/region");
+        setRegions(regionRes.data.items);
 
-  const [index, setIndex] = useState<number>(0);
-  const data = kabupatenList[index];
+        const destRes = await apiFetch<any>("/api/destinations");
+        setDestinations(destRes.data.items);
+      } catch (err) {
+        console.log("Gagal ambil data:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
 
-  const next = () =>
-    setIndex((prev) => (prev + 1) % kabupatenList.length);
+    fetchData();
+  }, []);
 
-  const prev = () =>
-    setIndex((prev) => (prev - 1 + kabupatenList.length) % kabupatenList.length);
+  const currentRegion = regions[index];
 
-  const handleCategoryPress = (name: string) => {
-    setActiveCategory(name);
-  };
+  const filteredDestinations = destinations.filter((d) => {
+    const matchRegion = currentRegion
+      ? d.region.id === currentRegion.id
+      : true;
 
-  const destinations: DestinationType[] = [
-    {
-      id: 1,
-      name: "Green Elty",
-      location: "Kalianda, Lampung Selatan",
-      image: require("../../assets/images/hero3.jpg"),
-    },
-    {
-      id: 2,
-      name: "Senaya Beach",
-      location: "Kalianda, Lampung Selatan",
-      image: require("../../assets/images/hero3.jpg"),
-    },
-    {
-      id: 3,
-      name: "Teluk Kiluan",
-      location: "Tanggamus, Lampung",
-      image: require("../../assets/images/hero3.jpg"),
-    },
-    {
-      id: 4,
-      name: "Air Terjun Way Lalaan",
-      location: "Tanggamus, Lampung",
-      image: require("../../assets/images/hero3.jpg"),
-    },
-  ];
+    const matchCategory =
+      activeCategory === "semua"
+        ? true
+        : d.category?.name === activeCategory;
 
-  const handleDestinationPress = (destination: DestinationType) => {
-    console.log("Destination pressed:", destination.name);
+    return matchRegion && matchCategory;
+  });
 
-    // contoh navigasi (jika dibutuhkan)
-    // router.push(`/destination/${destination.id}`);
-  };
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center" }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  if (!currentRegion) return null;
 
   return (
     <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 120 }}>
-      {/* HERO SECTION */}
-      <View>
-        <ImageBackground source={data.hero} style={styles.heroImage}>
-          <View style={styles.overlay} />
+      {/* HERO */}
+      <ImageBackground
+        source={
+          currentRegion.imageUrl
+            ? { uri: currentRegion.imageUrl }
+            : PLACEHOLDER_IMAGE
+        }
+        style={styles.heroImage}
+      >
+        <View style={styles.overlay} />
 
-          <TouchableOpacity style={styles.arrowLeft} onPress={prev}>
-            <Ionicons name="chevron-back" size={30} color="#fff" />
-          </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.arrowLeft}
+          onPress={() =>
+            setIndex((prev) => (prev - 1 + regions.length) % regions.length)
+          }
+        >
+          <Ionicons name="chevron-back" size={30} color="#fff" />
+        </TouchableOpacity>
 
-          <TouchableOpacity style={styles.arrowRight} onPress={next}>
-            <Ionicons name="chevron-forward" size={30} color="#fff" />
-          </TouchableOpacity>
-
-          <View style={styles.logoWrapper}>
-            <Image source={data.logo} style={styles.logo} resizeMode="contain" />
-          </View>
-        </ImageBackground>
-      </View>
+        <TouchableOpacity
+          style={styles.arrowRight}
+          onPress={() =>
+            setIndex((prev) => (prev + 1) % regions.length)
+          }
+        >
+          <Ionicons name="chevron-forward" size={30} color="#fff" />
+        </TouchableOpacity>
+      </ImageBackground>
 
       {/* CONTENT */}
       <View style={styles.content}>
-        <Text style={styles.title}>{data.name}</Text>
-        <Text style={styles.description}>{data.description}</Text>
+        <Text style={styles.title}>{currentRegion.name}</Text>
+
+        <Text style={styles.description}>
+          {currentRegion.description || "Deskripsi belum tersedia"}
+        </Text>
 
         {/* CATEGORY */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={{ marginTop: 15, paddingLeft: 12 }}
-        >
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 15 }}>
           {CATEGORY_DATA.map((cat) => {
             const isActive = activeCategory === cat.name;
-
             return (
               <TouchableOpacity
                 key={cat.id}
-                onPress={() => handleCategoryPress(cat.name)}
+                onPress={() => setActiveCategory(cat.name)}
                 style={[
                   styles.categoryChip,
-                  isActive
-                    ? {
-                        backgroundColor: "#007BFF20",
-                        borderColor: "#007BFF",
-                        borderWidth: 2,
-                      }
-                    : { backgroundColor: "#fff" },
+                  isActive && {
+                    backgroundColor: "#007BFF20",
+                    borderColor: "#007BFF",
+                    borderWidth: 2,
+                  },
                 ]}
               >
                 <Image source={cat.icon} style={styles.categoryIcon} />
                 <Text
                   style={[
                     styles.categoryChipText,
-                    isActive ? { color: "#007BFF" } : { color: "#333" },
+                    isActive && { color: "#007BFF" },
                   ]}
                 >
                   {cat.name}
@@ -175,23 +169,28 @@ export default function KabupatenDetail() {
           })}
         </ScrollView>
 
-        {/* POPULER DESTINATION */}
+        {/* DESTINATION */}
         <Text style={styles.sectionTitle}>Populer Destination</Text>
 
         <View style={styles.popularGrid}>
-          {destinations.map((d) => (
+          {filteredDestinations.map((d) => (
             <TouchableOpacity
               key={d.id}
-              onPress={() => handleDestinationPress(d)}
               style={styles.popularItem}
+              onPress={() => router.push(`../deskripsi/${d.id}`)}
             >
-              <Image source={d.image} style={styles.popularBG} />
+              <Image
+                source={d.imageUrl ? { uri: d.imageUrl } : PLACEHOLDER_IMAGE}
+                style={styles.popularBG}
+              />
               <View style={styles.popularOverlay} />
               <View style={styles.popularContent}>
                 <Text style={styles.popularTitle}>{d.name}</Text>
                 <View style={styles.popularLocationRow}>
                   <Ionicons name="location-sharp" size={14} color="#fff" />
-                  <Text style={styles.popularLocationText}>{d.location}</Text>
+                  <Text style={styles.popularLocationText}>
+                    {d.region.name}
+                  </Text>
                 </View>
               </View>
             </TouchableOpacity>
@@ -201,7 +200,6 @@ export default function KabupatenDetail() {
     </ScrollView>
   );
 }
-
 
 const styles = StyleSheet.create({
   heroImage: {
