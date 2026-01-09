@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useRouter } from "expo-router";
 import { apiFetch } from "@/helpers/api";
 
 const PLACEHOLDER_IMAGE = require("../../assets/images/placeholder.png");
@@ -38,7 +38,6 @@ type DestinationType = {
 
 export default function KabupatenDetail() {
   const router = useRouter();
-  const { regionId } = useLocalSearchParams<{ regionId: string }>();
 
   const [regions, setRegions] = useState<RegionType[]>([]);
   const [destinations, setDestinations] = useState<DestinationType[]>([]);
@@ -76,22 +75,28 @@ export default function KabupatenDetail() {
 
   const currentRegion = regions[index];
 
+  /** ✅ FILTER YANG BENAR */
   const filteredDestinations = destinations.filter((d) => {
-  const matchRegion = currentRegion
-    ? d.region.id === currentRegion.id
-    : true;
+    const matchRegion = currentRegion
+      ? d.region.id === currentRegion.id
+      : true;
 
-  const matchCategory = activeCategory
-    ? d.category?.name === activeCategory
-    : true;
+    const matchCategory =
+      activeCategory === null
+        ? true
+        : d.category?.name === activeCategory;
 
-  return matchRegion && matchCategory;
+    return matchRegion && matchCategory;
   });
 
+  /** ✅ HANDLER TANPA TOGGLE (WAJIB) */
   const handleCategoryPress = (name: string) => {
-  setActiveCategory((prev) => (prev === name ? null : name));
-};
-
+    if (name === "semua") {
+      setActiveCategory(null);
+    } else {
+      setActiveCategory(name);
+    }
+  };
 
   if (loading) {
     return (
@@ -107,46 +112,41 @@ export default function KabupatenDetail() {
     <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 120 }}>
       {/* HERO */}
       <ImageBackground
-          source={require("../../assets/images/hero3.jpg")}
-          style={styles.heroImage}
+        source={require("../../assets/images/hero3.jpg")}
+        style={styles.heroImage}
+      >
+        <View style={styles.overlay} />
+
+        <TouchableOpacity
+          style={styles.arrowLeft}
+          onPress={() =>
+            setIndex((prev) => (prev - 1 + regions.length) % regions.length)
+          }
         >
-          {/* OVERLAY */}
-          <View style={styles.overlay} />
+          <Ionicons name="chevron-back" size={32} color="#fff" />
+        </TouchableOpacity>
 
-          {/* ARROW LEFT */}
-          <TouchableOpacity
-            style={styles.arrowLeft}
-            onPress={() =>
-              setIndex((prev) => (prev - 1 + regions.length) % regions.length)
+        <TouchableOpacity
+          style={styles.arrowRight}
+          onPress={() =>
+            setIndex((prev) => (prev + 1) % regions.length)
+          }
+        >
+          <Ionicons name="chevron-forward" size={32} color="#fff" />
+        </TouchableOpacity>
+
+        <View style={styles.logoWrapper}>
+          <Image
+            source={
+              currentRegion.imageUrl
+                ? { uri: currentRegion.imageUrl }
+                : PLACEHOLDER_IMAGE
             }
-          >
-            <Ionicons name="chevron-back" size={32} color="#fff" />
-          </TouchableOpacity>
-
-          {/* ARROW RIGHT */}
-          <TouchableOpacity
-            style={styles.arrowRight}
-            onPress={() =>
-              setIndex((prev) => (prev + 1) % regions.length)
-            }
-          >
-            <Ionicons name="chevron-forward" size={32} color="#fff" />
-          </TouchableOpacity>
-
-          {/* LOGO REGION (GESER) */}
-          <View style={styles.logoWrapper}>
-            <Image
-              source={
-                currentRegion.imageUrl
-                  ? { uri: currentRegion.imageUrl }
-                  : PLACEHOLDER_IMAGE
-              }
-              style={styles.logo}
-              resizeMode="contain"
-            />
-          </View>
-        </ImageBackground>
-
+            style={styles.logo}
+            resizeMode="contain"
+          />
+        </View>
+      </ImageBackground>
 
       {/* CONTENT */}
       <View style={styles.content}>
@@ -163,7 +163,9 @@ export default function KabupatenDetail() {
           style={{ marginTop: 15, paddingLeft: 12 }}
         >
           {CATEGORY_DATA.map((cat) => {
-            const isActive = activeCategory === cat.name;
+            const isActive =
+              (cat.name === "semua" && activeCategory === null) ||
+              activeCategory === cat.name;
 
             return (
               <TouchableOpacity
@@ -186,7 +188,6 @@ export default function KabupatenDetail() {
             );
           })}
         </ScrollView>
-
 
         {/* DESTINATION */}
         <Text style={styles.sectionTitle}>Populer Destination</Text>
@@ -219,6 +220,7 @@ export default function KabupatenDetail() {
     </ScrollView>
   );
 }
+
 
 const styles = StyleSheet.create({
   heroImage: {
