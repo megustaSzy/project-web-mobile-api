@@ -18,7 +18,7 @@ export default function HeroTourSection() {
         </h1>
 
         <p className="max-w-xl text-sm opacity-90 leading-relaxed font-sans ">
-          Jelajahi daftar wisata di kabupaten dan kota di provinsi Lampung,
+          Jelajahi berbagai wisata di kabupaten dan kota provinsi Lampung.
           <br />
           setiap daerah memiliki keunikan dan pesona wisata yang berbeda-beda.
         </p>

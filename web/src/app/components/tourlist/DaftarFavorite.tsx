@@ -55,7 +55,7 @@ export default function DaftarFavorite() {
 
   return (
     <section className="w-full min-h-screen bg-linear-to-b from-[#a7c8e7] to-white px-6 py-20">
-      <h1 className="text-center text-3xl font-semibold mb-10 font-poppins">
+      <h1 className="text-center text-3xl font-bold mb-10 font-poppins">
         Tujuan Wisata Favorit
       </h1>
 
@@ -82,10 +82,10 @@ export default function DaftarFavorite() {
 
                 {/* Jumlah destinasi */}
                 <div className="text-right">
-                  <span className="text-lg font-bold text-yellow-500">
+                  <span className="relative right-3 text-lg font-bold text-yellow-500">
                     {regionCounts[item.id] ?? 0}
                   </span>
-                  <div className="text-[10px] text-gray-400">Destinasi</div>
+                  <div className="text-[10px] text-gray-400 font-medium">Destinasi</div>
                 </div>
               </div>
 
