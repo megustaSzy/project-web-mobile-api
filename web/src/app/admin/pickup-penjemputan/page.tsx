@@ -8,10 +8,25 @@ import {
   PickupType,
 } from "@/types/pickupLocation";
 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2, Plus, CheckCircle2 } from "lucide-react";
+
+import PickupTable from "@/components/admin/pickup-penjemputan/PickupTable";
+import PickupFormModal from "@/components/admin/pickup-penjemputan/PickupFormModal";
+import PickupDeleteModal from "@/components/admin/pickup-penjemputan/PickupDeleteModal";
+
 export default function PickupPage() {
   const [items, setItems] = useState<PickupType[]>([]);
   const [loading, setLoading] = useState(true);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
@@ -22,11 +37,9 @@ export default function PickupPage() {
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
-  // 🔴 CONFIRM DELETE
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
 
-  // ==================================================
   type PickupListResponse = {
     status: number;
     message: string;
@@ -38,9 +51,7 @@ export default function PickupPage() {
       setLoading(true);
       setErrorMsg(null);
 
-      const res = await apiFetch<PickupListResponse>(
-        "/api/pickup-locations"
-      );
+      const res = await apiFetch<PickupListResponse>("/api/pickup-locations");
 
       const rawItems = Array.isArray(res.data) ? res.data : [];
       const mapped: PickupType[] = rawItems.map((i) => ({
@@ -57,8 +68,6 @@ export default function PickupPage() {
     }
   }
 
-  // ==================================================
-  // SAVE
   async function savePickup(): Promise<void> {
     if (!nameInput.trim()) return;
 
@@ -95,18 +104,15 @@ export default function PickupPage() {
     }
   }
 
-  // ==================================================
-  // DELETE
   async function deletePickup(): Promise<void> {
     if (!pendingDeleteId) return;
 
     setDeletingId(pendingDeleteId);
 
     try {
-      await apiFetch(
-        `/api/pickup-locations/${pendingDeleteId}`,
-        { method: "DELETE" }
-      );
+      await apiFetch(`/api/pickup-locations/${pendingDeleteId}`, {
+        method: "DELETE",
+      });
 
       setSuccessMsg("Lokasi pickup berhasil dihapus");
       setTimeout(() => setSuccessMsg(null), 2000);
@@ -140,178 +146,93 @@ export default function PickupPage() {
 
   useEffect(() => {
     getData();
-  }, [ ]);// eslint-disable-line react-hooks/exhaustive-deps
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ==================================================
   return (
-    <div className="space-y-4">
-      <h2 className="text-xl font-semibold text-blue-700">
-        Pickup Penjemputan
-      </h2>
-
-      {/* SUCCESS POPUP */}
-      {successMsg && (
-        <div className="fixed top-6 right-6 bg-green-600 text-white px-5 py-3 rounded-xl shadow-lg z-50">
-          {successMsg}
-        </div>
-      )}
-
-      <div className="bg-white rounded-2xl border shadow-sm">
-        <div className="flex justify-between items-center px-6 py-4 border-b">
-          <h3 className="font-semibold text-gray-800">
-            Daftar Lokasi Pickup
-          </h3>
-
-          <button
-            onClick={openAddModal}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm"
-          >
-            + Tambah
-          </button>
-        </div>
-
-        {loading ? (
-          <p className="p-6 text-gray-500">Memuat data...</p>
-        ) : items.length === 0 ? (
-          <p className="p-6 text-gray-500">
-            Belum ada lokasi pickup.
-          </p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <colgroup>
-                <col style={{ width: "60px" }} />
-                <col />
-                <col style={{ width: "160px" }} />
-              </colgroup>
-
-              <thead className="bg-gray-50 border-b">
-                <tr className="text-gray-600">
-                  <th className="px-4 py-3 text-center">
-                    No
-                  </th>
-                  <th className="px-4 py-3 text-left">
-                    Nama Lokasi
-                  </th>
-                  <th className="px-4 py-3 text-center">
-                    Aksi
-                  </th>
-                </tr>
-              </thead>
-
-              <tbody className="divide-y">
-                {items.map((item, i) => (
-                  <tr key={item.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-center text-gray-400">
-                      {i + 1}
-                    </td>
-
-                    <td className="px-4 py-3 font-medium">
-                      {item.name}
-                    </td>
-
-                    <td className="px-4 py-3">
-                      <div className="flex justify-center gap-2">
-                        <button
-                          onClick={() =>
-                            openEditModal(item)
-                          }
-                          className="px-3 py-1.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded-full text-xs"
-                        >
-                          Edit
-                        </button>
-
-                        <button
-                          onClick={() =>
-                            openDeleteConfirm(item.id)
-                          }
-                          disabled={
-                            deletingId === item.id
-                          }
-                          className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-full text-xs"
-                        >
-                          Hapus
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-semibold text-blue-700 tracking-tight">
+          Pickup Penjemputan
+        </h2>
+        <p className="text-sm text-muted-foreground mt-1">
+          Kelola lokasi pickup untuk penjemputan wisatawan
+        </p>
       </div>
 
-      {/* MODAL ADD / EDIT */}
-      {modalOpen && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl shadow-xl w-96 p-6">
-            <h3 className="text-lg font-semibold mb-4">
-              {editId
-                ? "Edit Lokasi Pickup"
-                : "Tambah Lokasi Pickup"}
-            </h3>
+      {/* SUCCESS TOAST */}
+      {successMsg && (
+        <Alert className="fixed top-4 right-4 bg-green-600 text-white border-green-700 shadow-lg z-50 w-auto">
+          <CheckCircle2 className="h-4 w-4" />
+          <AlertDescription>{successMsg}</AlertDescription>
+        </Alert>
+      )}
 
-            <input
-              value={nameInput}
-              onChange={(e) =>
-                setNameInput(e.target.value)
-              }
-              className="w-full border rounded-lg px-3 py-2 mb-4 focus:ring-2 focus:ring-blue-500 outline-none"
-              placeholder="Nama lokasi pickup"
+      <Card className="rounded-2xl shadow-sm">
+        <CardHeader className="border-b">
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-gray-800">
+                Daftar Lokasi Pickup
+              </CardTitle>
+              <CardDescription className="mt-1">
+                Total {items.length} lokasi
+              </CardDescription>
+            </div>
+            <Button
+              onClick={openAddModal}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Tambah
+            </Button>
+          </div>
+        </CardHeader>
+
+        <CardContent className="p-0">
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-6 w-6 animate-spin text-blue-600 mr-2" />
+              <p className="text-gray-500">Memuat data...</p>
+            </div>
+          ) : items.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <p className="text-gray-500 text-sm">Belum ada lokasi pickup.</p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={openAddModal}
+                className="mt-4"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Tambah Lokasi Pertama
+              </Button>
+            </div>
+          ) : (
+            <PickupTable
+              items={items}
+              deletingId={deletingId}
+              onEdit={openEditModal}
+              onDelete={openDeleteConfirm}
             />
+          )}
+        </CardContent>
+      </Card>
 
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setModalOpen(false)}
-                className="px-4 py-2 bg-gray-100 rounded-lg"
-              >
-                Batal
-              </button>
+      <PickupFormModal
+        open={modalOpen}
+        editId={editId}
+        nameInput={nameInput}
+        saving={saving}
+        onClose={() => setModalOpen(false)}
+        onSave={savePickup}
+        onNameChange={setNameInput}
+      />
 
-              <button
-                onClick={savePickup}
-                disabled={saving}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg"
-              >
-                {saving ? "Menyimpan..." : "Simpan"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL CONFIRM DELETE */}
-      {confirmDeleteOpen && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl shadow-xl w-96 p-6">
-            <h3 className="text-lg font-semibold mb-2">
-              Konfirmasi
-            </h3>
-            <p className="text-sm text-gray-600 mb-6">
-              Yakin ingin menghapus lokasi pickup ini?
-            </p>
-
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() =>
-                  setConfirmDeleteOpen(false)
-                }
-                className="px-4 py-2 bg-gray-100 rounded-lg"
-              >
-                Batal
-              </button>
-
-              <button
-                onClick={deletePickup}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg"
-              >
-                Ya, Hapus
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <PickupDeleteModal
+        open={confirmDeleteOpen}
+        onCancel={() => setConfirmDeleteOpen(false)}
+        onConfirm={deletePickup}
+      />
     </div>
   );
 }
