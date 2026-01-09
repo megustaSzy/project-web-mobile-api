@@ -1,5 +1,5 @@
 import prisma from "../lib/prisma";
-import { CreateRegionDTO, UpdateRegionDTO } from "../types/region";
+import { UpdateRegionDTO } from "../types/region";
 import { createError } from "../utilities/createError";
 import { Pagination } from "../utilities/Pagination";
 
@@ -62,18 +62,21 @@ export const regionService = {
     if (!region) throw createError("id tidak ditemukan", 404);
     return region;
   },
-  async createRegion(data: CreateRegionDTO) {
-    const region = await prisma.tb_regions.findFirst({
-      where: { name: data.name },
+  async createRegion(name: string, imageUrl: string, imagePublicId: string) {
+    const exist = await prisma.tb_regions.findFirst({
+      where: { name },
     });
 
-    if (region) throw createError("nama sudah digunakan", 400);
+    if (exist) throw createError("nama sudah digunakan", 400);
 
     return prisma.tb_regions.create({
-      data,
+      data: {
+        name,
+        imageUrl,
+        imagePublicId,
+      },
     });
   },
-
   async editRegion(id: number, data: UpdateRegionDTO) {
     const region = await prisma.tb_regions.findUnique({ where: { id } });
 
