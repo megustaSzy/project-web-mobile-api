@@ -5,7 +5,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  TextInput,
   Image,
   Modal,
   Alert,
@@ -20,22 +19,20 @@ type PickupItem = {
   name: string;
 };
 
-const JAM_BERANGKAT = ["07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00" , "14.00"];
-const JAM_PULANG = ["13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00"];
+const JAM_BERANGKAT = ["07:00","08:00","09:00","10:00","11:00","12:00","13:00","14:00"];
+const JAM_PULANG = ["13:00","14:00","15:00","16:00","17:00","18:00","19:00"];
 
 export default function PesanPage() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? "";
 
-  /* ================= PARAM ================= */
   const id = String(params.id ?? "");
   const title = String(params.title ?? "Nama Wisata");
   const category = String(params.category ?? "Kategori");
   const price = Number(params.price ?? 0);
   const imageUrl = String(params.imageUrl ?? "");
 
-  /* ================= STATE ================= */
   const [pickupList, setPickupList] = useState<PickupItem[]>([]);
   const [pickupId, setPickupId] = useState<number | null>(null);
 
@@ -43,25 +40,19 @@ export default function PesanPage() {
   const [jamBerangkat, setJamBerangkat] = useState("07:00");
   const [jamPulang, setJamPulang] = useState("13:00");
 
-  const [jumlahTiket, setJumlahTiket] = useState("1");
+  const [jumlahTiket, setJumlahTiket] = useState(1);
   const [showDate, setShowDate] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  /* ================= FETCH PICKUP ================= */
   useEffect(() => {
-    async function fetchPickup() {
-      try {
-        const res = await fetch(`${BASE_URL}/api/pickup-locations`);
-        const json = await res.json();
-        setPickupList(Array.isArray(json.data) ? json.data : []);
-      } catch {
-        setPickupList([]);
-      }
-    }
-    fetchPickup();
+    fetch(`${BASE_URL}/api/pickup-locations`)
+      .then((res) => res.json())
+      .then((json) =>
+        setPickupList(Array.isArray(json.data) ? json.data : [])
+      )
+      .catch(() => setPickupList([]));
   }, []);
 
-  /* ================= FORMAT ================= */
   const fmtDate = (d: Date) =>
     d.toLocaleDateString("id-ID", {
       day: "2-digit",
@@ -69,13 +60,10 @@ export default function PesanPage() {
       year: "numeric",
     });
 
-  const totalHarga = price * Number(jumlahTiket || 0);
+  const totalHarga = price * jumlahTiket;
 
-  /* ================= HANDLER ================= */
   function openConfirm() {
     if (!pickupId) return Alert.alert("Validasi", "Pilih lokasi penjemputan");
-    if (Number(jumlahTiket) < 1)
-      return Alert.alert("Validasi", "Jumlah tiket minimal 1");
     setShowConfirm(true);
   }
 
@@ -94,10 +82,9 @@ export default function PesanPage() {
     });
   }
 
-  /* ================= UI ================= */
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={{ paddingBottom: 200 }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 220 }}>
         {/* HEADER */}
         <View style={styles.header}>
           <Image
@@ -116,19 +103,43 @@ export default function PesanPage() {
         {/* CARD */}
         <View style={styles.card}>
           <Text style={styles.title}>{title}</Text>
-
           <View style={styles.categoryBadge}>
             <Text style={styles.categoryText}>{category}</Text>
           </View>
 
-          {/* DATE */}
+          {/* PICKUP */}
+          <Text style={styles.label}>Lokasi Penjemputan</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            {pickupList.map((p) => (
+              <TouchableOpacity
+                key={p.id}
+                style={[
+                  styles.pickupItem,
+                  pickupId === p.id && styles.pickupActive,
+                ]}
+                onPress={() => setPickupId(p.id)}
+              >
+                <Ionicons name="location-outline" size={16} />
+                <Text
+                  style={[
+                    styles.pickupText,
+                    pickupId === p.id && { color: "#fff" },
+                  ]}
+                >
+                  {p.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+          {/* TANGGAL */}
           <Text style={styles.label}>Tanggal</Text>
           <TouchableOpacity
-            style={styles.inputBox}
+            style={styles.selectBox}
             onPress={() => setShowDate(true)}
           >
             <Ionicons name="calendar-outline" size={18} />
-            <Text style={styles.inputText}>{fmtDate(tanggal)}</Text>
+            <Text style={styles.selectText}>{fmtDate(tanggal)}</Text>
           </TouchableOpacity>
 
           {showDate && (
@@ -142,7 +153,7 @@ export default function PesanPage() {
             />
           )}
 
-          {/* JAM BERANGKAT */}
+          {/* JAM */}
           <Text style={styles.label}>Jam Berangkat</Text>
           <View style={styles.timeGrid}>
             {JAM_BERANGKAT.map((j) => (
@@ -166,7 +177,6 @@ export default function PesanPage() {
             ))}
           </View>
 
-          {/* JAM PULANG */}
           <Text style={styles.label}>Jam Pulang</Text>
           <View style={styles.timeGrid}>
             {JAM_PULANG.map((j) => (
@@ -192,14 +202,16 @@ export default function PesanPage() {
 
           {/* JUMLAH */}
           <Text style={styles.label}>Jumlah Tiket</Text>
-          <View style={styles.inputBox}>
-            <Ionicons name="people-outline" size={18} />
-            <TextInput
-              value={jumlahTiket}
-              keyboardType="numeric"
-              onChangeText={(t) => setJumlahTiket(t.replace(/[^0-9]/g, ""))}
-              style={styles.input}
-            />
+          <View style={styles.counter}>
+            <TouchableOpacity
+              onPress={() => setJumlahTiket(Math.max(1, jumlahTiket - 1))}
+            >
+              <Ionicons name="remove-circle-outline" size={32} />
+            </TouchableOpacity>
+            <Text style={styles.counterText}>{jumlahTiket}</Text>
+            <TouchableOpacity onPress={() => setJumlahTiket(jumlahTiket + 1)}>
+              <Ionicons name="add-circle-outline" size={32} />
+            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
@@ -249,14 +261,9 @@ export default function PesanPage() {
 /* ================= STYLE ================= */
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
-
   header: { height: 260 },
   headerImage: { width: "100%", height: "100%" },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "#001B38",
-    opacity: 0.7,
-  },
+  overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: "#001B38", opacity: 0.7 },
 
   card: {
     marginTop: -30,
@@ -266,39 +273,41 @@ const styles = StyleSheet.create({
     padding: 20,
   },
 
-  title: { fontSize: 20, fontWeight: "bold", color: "#111" },
-
+  title: { fontSize: 20, fontWeight: "bold" },
   categoryBadge: {
     backgroundColor: "#E8F1FF",
-    alignSelf: "flex-start",
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 20,
     marginVertical: 10,
+    alignSelf: "flex-start",
   },
+  categoryText: { color: "#2F80ED", fontWeight: "600" },
 
-  categoryText: { fontSize: 12, fontWeight: "600", color: "#2F80ED" },
+  label: { marginTop: 18, marginBottom: 8, color: "#555" },
 
-  label: { marginTop: 16, marginBottom: 8, color: "#555" },
-
-  inputBox: {
+  selectBox: {
     height: 50,
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#F6F6F6",
-    paddingHorizontal: 16,
     borderRadius: 25,
+    paddingHorizontal: 16,
   },
+  selectText: { marginLeft: 10 },
 
-  inputText: { marginLeft: 10 },
-  input: { marginLeft: 10, flex: 1 },
-
-  timeGrid: {
+  pickupItem: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10,
+    alignItems: "center",
+    backgroundColor: "#F6F6F6",
+    padding: 10,
+    borderRadius: 20,
+    marginRight: 10,
   },
+  pickupActive: { backgroundColor: "#2F80ED" },
+  pickupText: { marginLeft: 6 },
 
+  timeGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
   timeItem: {
     width: "22%",
     height: 42,
@@ -308,14 +317,18 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-
-  timeActive: {
-    backgroundColor: "#2F80ED",
-    borderColor: "#2F80ED",
-  },
-
-  timeText: { color: "#333", fontWeight: "500" },
+  timeActive: { backgroundColor: "#2F80ED", borderColor: "#2F80ED" },
+  timeText: { color: "#333" },
   timeTextActive: { color: "#fff", fontWeight: "bold" },
+
+  counter: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: 140,
+    marginTop: 6,
+  },
+  counterText: { fontSize: 18, fontWeight: "bold" },
 
   bottom: {
     position: "absolute",
@@ -323,7 +336,6 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingHorizontal: 20,
   },
-
   btn: {
     backgroundColor: "#2F80ED",
     padding: 16,
@@ -331,43 +343,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
   },
-
   btnText: { color: "#fff", fontWeight: "bold" },
 });
 
 /* ================= POPUP ================= */
 const popup = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  box: {
-    backgroundColor: "#fff",
-    width: "85%",
-    borderRadius: 20,
-    padding: 20,
-  },
+  overlay: { 
+    flex: 1, 
+    backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center" },
+  box: { backgroundColor: "#fff", width: "85%", borderRadius: 20, padding: 20 },
   title: { fontWeight: "bold", fontSize: 18, textAlign: "center" },
   total: { marginTop: 10, fontWeight: "bold", color: "#2F80ED" },
-  row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 20,
-  },
-  cancel: {
-    width: "45%",
-    backgroundColor: "#ddd",
-    padding: 12,
-    borderRadius: 30,
-    alignItems: "center",
-  },
-  pay: {
-    width: "45%",
-    backgroundColor: "#2F80ED",
-    padding: 12,
-    borderRadius: 30,
-    alignItems: "center",
-  },
+  row: { flexDirection: "row", justifyContent: "space-between", marginTop: 20 },
+  cancel: { width: "45%", backgroundColor: "#ddd", padding: 12, borderRadius: 30, alignItems: "center" },
+  pay: { width: "45%", backgroundColor: "#2F80ED", padding: 12, borderRadius: 30, alignItems: "center" },
 });
