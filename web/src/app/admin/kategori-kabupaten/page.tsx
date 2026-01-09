@@ -72,7 +72,6 @@ export default function KategoriKabupaten() {
     getData();
   }, [getData]);
 
-  /* ================= SAVE ================= */
   async function saveRegion() {
     if (!nameInput.trim()) return;
 
@@ -115,7 +114,6 @@ export default function KategoriKabupaten() {
     }
   }
 
-  /* ================= DELETE ================= */
   async function deleteRegion() {
     if (!pendingDeleteId) return;
 
