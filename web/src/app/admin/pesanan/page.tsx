@@ -1,52 +1,71 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { apiFetch } from "@/helpers/api";
-import type { OrdersResponse, Order } from "@/types/order";
+import type {
+  AdminOrdersResponse,
+  AdminOrderItem,
+} from "@/types/admin/admin-orders";
+
+import OrdersTable from "@/components/admin/orders/OrdersTable";
+
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Loader2 } from "lucide-react";
 
 export default function PesananPage() {
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<AdminOrderItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  async function getData() {
+    try {
+      setLoading(true);
+      const res = await apiFetch<AdminOrdersResponse>("/api/admin/orders");
+      setOrders(res.data.items ?? []);
+    } catch {
+      setOrders([]);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    apiFetch<OrdersResponse>("/orders")
-      .then((res) => {
-        setOrders(res.data.items ?? []);
-      })
-      .catch(() => setOrders([]));
+    getData();
   }, []);
 
   return (
-    <div>
-      <h2 className="text-xl font-semibold text-blue-700 mb-4">
-        Manajemen Pesanan
-      </h2>
-
-      <div className="bg-white p-4 rounded shadow">
-        {orders.length === 0 ? (
-          <p>Tidak ada pesanan</p>
-        ) : (
-          <table className="w-full text-sm">
-            <thead className="text-gray-500">
-              <tr>
-                <th>ID</th>
-                <th>User</th>
-                <th>Total</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {orders.map((o) => (
-                <tr key={o.id} className="border-t">
-                  <td>{o.id}</td>
-                  <td>{o.user.name}</td>
-                  <td>Rp {o.total.toLocaleString("id-ID")}</td>
-                  <td>{o.status}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-semibold text-blue-700 tracking-tight">
+          Manajemen Pesanan
+        </h2>
+        <p className="text-sm text-muted-foreground mt-1">
+          Daftar pesanan tiket wisata
+        </p>
       </div>
+
+      <Card className="rounded-2xl shadow-sm">
+        <CardHeader className="border-b">
+          <CardTitle className="text-gray-800">Daftar Pesanan</CardTitle>
+          <CardDescription>Total {orders.length} pesanan</CardDescription>
+        </CardHeader>
+
+        <CardContent className="p-0">
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-6 w-6 animate-spin text-blue-600 mr-2" />
+              <p className="text-gray-500">Memuat data...</p>
+            </div>
+          ) : (
+            <OrdersTable orders={orders} />
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

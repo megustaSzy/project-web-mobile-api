@@ -5,14 +5,7 @@ import { useEffect, useState, useCallback } from "react";
 import { apiFetch } from "@/helpers/api";
 import { RegionApiResponse, RegionItem } from "@/types/region";
 
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationPrevious,
-  PaginationNext,
-} from "@/components/ui/pagination";
+import Pagination from "@/components/Pagination";
 
 import {
   Card,
@@ -52,12 +45,11 @@ export default function KategoriKabupaten() {
   const perPage = 10;
   const [totalPages, setTotalPages] = useState(1);
 
-  /* ================= FETCH ================= */
   const getData = useCallback(async () => {
     try {
       setLoading(true);
       const res = await apiFetch<RegionApiResponse>(
-        `/api/region/admin?page=${page}&per_page=${perPage}`
+        `/api/region/admin?page=${page}&limit=${perPage}`
       );
       setRegions(res.data.items);
       setTotalPages(res.data.total_pages);
@@ -232,47 +224,11 @@ export default function KategoriKabupaten() {
                 onDelete={openDeleteConfirm}
               />
 
-              {totalPages > 1 && (
-                <div className="border-t py-4">
-                  <Pagination>
-                    <PaginationContent>
-                      <PaginationItem>
-                        <PaginationPrevious
-                          onClick={() => page > 1 && setPage(page - 1)}
-                          className={
-                            page === 1
-                              ? "pointer-events-none opacity-50"
-                              : "cursor-pointer"
-                          }
-                        />
-                      </PaginationItem>
-
-                      {Array.from({ length: totalPages }).map((_, i) => (
-                        <PaginationItem key={i}>
-                          <PaginationLink
-                            isActive={page === i + 1}
-                            onClick={() => setPage(i + 1)}
-                            className="cursor-pointer"
-                          >
-                            {i + 1}
-                          </PaginationLink>
-                        </PaginationItem>
-                      ))}
-
-                      <PaginationItem>
-                        <PaginationNext
-                          onClick={() => page < totalPages && setPage(page + 1)}
-                          className={
-                            page === totalPages
-                              ? "pointer-events-none opacity-50"
-                              : "cursor-pointer"
-                          }
-                        />
-                      </PaginationItem>
-                    </PaginationContent>
-                  </Pagination>
-                </div>
-              )}
+              <Pagination
+                page={page}
+                totalPages={totalPages}
+                onPageChange={setPage}
+              />
             </>
           )}
         </CardContent>

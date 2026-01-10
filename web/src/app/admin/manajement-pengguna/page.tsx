@@ -20,6 +20,8 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 
+import Pagination from "@/components/Pagination";
+
 import UsersTable from "@/components/admin/manajemen-pengguna/UsersTable";
 import UserEditModal from "@/components/admin/manajemen-pengguna/UserEditModal";
 import UserDeleteModal from "@/components/admin/manajemen-pengguna/UserDeleteModal";
@@ -43,11 +45,19 @@ export default function UsersPage() {
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
 
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+
   async function getData() {
     try {
       setLoading(true);
-      const res = await apiFetch<ApiUsersResponse>("/api/users");
+      const res = await apiFetch<ApiUsersResponse>(
+        `/api/users?page=${page}&limit=${limit}`
+      );
+
       setUsers(res.data.items);
+      setTotalPages(res.data.total_pages);
     } catch {
       setErrorMsg("Gagal memuat data pengguna");
     } finally {
@@ -123,7 +133,7 @@ export default function UsersPage() {
 
   useEffect(() => {
     getData();
-  }, []);
+  }, [page]);
 
   return (
     <div className="space-y-6">
@@ -173,12 +183,20 @@ export default function UsersPage() {
               <p className="text-gray-500 text-sm">Tidak ada data pengguna.</p>
             </div>
           ) : (
-            <UsersTable
-              users={users}
-              deletingId={deletingId}
-              onEdit={openEditModal}
-              onDelete={openDeleteConfirm}
-            />
+            <>
+              <UsersTable
+                users={users}
+                deletingId={deletingId}
+                onEdit={openEditModal}
+                onDelete={openDeleteConfirm}
+              />
+
+              <Pagination
+                page={page}
+                totalPages={totalPages}
+                onPageChange={setPage}
+              />
+            </>
           )}
         </CardContent>
       </Card>
