@@ -1,10 +1,9 @@
-// ========================
-// Tipe data
-// ========================
 export type Counts = {
   totalUsers: number;
   totalDestinations: number;
   totalCategories: number;
+  totalRegions: number;
+  totalOrders: number;
 };
 
 export type ChartItem = {
