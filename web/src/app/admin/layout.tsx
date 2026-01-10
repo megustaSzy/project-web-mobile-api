@@ -1,14 +1,17 @@
 "use client";
 import { useState } from "react";
-import Sidebar from "./components/Sidebar";
-import TopBar from "./components/TopBar";
+import Sidebar from "@/components/admin/Sidebar";
+import TopBar from "@/components/admin/TopBar";
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [open, setOpen] = useState(true);
 
   return (
     <div className="flex">
-
       {/* SIDEBAR */}
       <Sidebar isOpen={open} />
 
