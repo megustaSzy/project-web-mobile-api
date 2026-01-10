@@ -246,7 +246,7 @@ export function LoginForm({
 
         setTimeout(() => {
           setModalOpen(false);
-          router.push(role === "admin" ? "/admin/dashboard" : "/");
+          router.push(role === "admin" ? "/admin" : "/");
         }, 1200);
       } else {
         setModalStatus("error");

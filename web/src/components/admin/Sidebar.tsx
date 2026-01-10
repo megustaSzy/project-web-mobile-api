@@ -30,7 +30,7 @@ export default function Sidebar({ isOpen }: { isOpen: boolean }) {
   const [logoutOpen, setLogoutOpen] = useState(false);
 
   const menu = [
-    { title: "Dashboard", href: "/admin", icon: <LayoutDashboard size={16} /> },
+    { title: "Dashboard", href: "/admin/dashboard", icon: <LayoutDashboard size={16} /> },
     {
       title: "Destinasi",
       href: "/admin/destinasi",
@@ -58,7 +58,7 @@ export default function Sidebar({ isOpen }: { isOpen: boolean }) {
     },
     {
       title: "Pengguna",
-      href: "/admin/manajement-pengguna",
+      href: "/admin/manajemen-pengguna",
       icon: <Users size={16} />,
     },
     {

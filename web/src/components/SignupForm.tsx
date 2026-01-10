@@ -22,9 +22,6 @@ import { useRouter } from "next/navigation";
 
 import { registerSchema } from "@/schema/registerSchema";
 
-/* =========================
-   TYPE KHUSUS FORM (INPUT)
-========================= */
 type RegisterFormInput = z.input<typeof registerSchema>;
 
 export default function SignupForm(props: React.ComponentProps<typeof Card>) {
