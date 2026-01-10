@@ -1,106 +1,103 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
-import StatsCard from "@/components/admin/StatsCard";
+import { Loader2 } from "lucide-react";
+
+import DashboardHeader from "@/components/admin/dashboard/DashboardHeader";
+import StatsCards from "@/components/admin/dashboard/StatsCards";
+import ChartsSection from "@/components/admin/dashboard/ChartsSection";
+import QuickStats from "@/components/admin/dashboard/QuickStats";
+
 import { Counts, ChartItem, StatsResponse } from "@/types/count";
 
-// URL API
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
+/* ===== API ===== */
 async function fetchStats(): Promise<StatsResponse> {
-  if (!API_URL) throw new Error("NEXT_PUBLIC_API_URL not defined");
+  if (!API_URL) {
+    throw new Error("NEXT_PUBLIC_API_URL tidak ditemukan");
+  }
 
-  const res = await fetch(`${API_URL}/api/count`);
-  if (!res.ok) throw new Error("Failed to fetch stats");
+  const res = await fetch(`${API_URL}/api/count`, {
+    cache: "no-store",
+  });
 
-  const json: StatsResponse = await res.json();
-  return json;
+  if (!res.ok) {
+    throw new Error("Gagal mengambil data dashboard");
+  }
+
+  return res.json();
 }
 
-export default function AdminDashboard() {
+export default function AdminDashboardPage() {
   const [stats, setStats] = useState<Counts>({
     totalUsers: 0,
     totalDestinations: 0,
     totalCategories: 0,
+    totalRegions: 0,
+    totalOrders: 0,
   });
 
   const [chartData, setChartData] = useState<ChartItem[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  /* ===== EFFECT ===== */
   useEffect(() => {
-    const getStats = async () => {
+    const loadDashboard = async () => {
       try {
         setLoading(true);
-        const json = await fetchStats();
+        setError(null);
 
-        if (json.status === 200) {
-          setStats(json.data.counts);
-          setChartData(json.data.chartData);
-        } else {
-          setError("Gagal memuat data dari server");
+        const res = await fetchStats();
+
+        if (res.status !== 200) {
+          throw new Error("Response server tidak valid");
         }
-      } catch (err: unknown) {
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError("Terjadi kesalahan tidak diketahui");
-        }
+
+        setStats(res.data.counts);
+        setChartData(res.data.chartData);
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Terjadi kesalahan tidak diketahui"
+        );
       } finally {
         setLoading(false);
       }
     };
 
-    getStats();
+    loadDashboard();
   }, []);
 
-  if (loading) {
-    return <div className="p-8 text-gray-500">Memuat data dashboard…</div>;
-  }
-
-  if (error) {
-    return <div className="p-8 text-red-500">Error: {error}</div>;
-  }
-
   return (
-    <div className="p-8 bg-[#fafafa] min-h-screen">
-      {/* HEADER */}
-      <h1 className="text-2xl font-semibold text-gray-800 mb-6">Dashboard</h1>
+    <div className="space-y-6">
+      <DashboardHeader />
 
-      {/* STATS */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <StatsCard title="Total Destinasi" value={stats.totalDestinations} />
-        <StatsCard title="Kategori Wisata" value={stats.totalCategories} />
-        <StatsCard title="Total Pengguna" value={stats.totalUsers} />
-      </div>
+      {loading && (
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="w-6 h-6 animate-spin text-blue-600 mr-2" />
+          <span className="text-gray-500">Memuat dashboard...</span>
+        </div>
+      )}
 
-      {/* CHART */}
-      <div className="mt-8 bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-        <h2 className="text-lg font-medium text-gray-800 mb-4">
-          Statistik Wisata
-        </h2>
+      {error && !loading && (
+        <div className="bg-white rounded-2xl shadow p-6 max-w-md mx-auto text-center">
+          <h3 className="text-lg font-semibold text-red-600 mb-2">
+            Terjadi Kesalahan
+          </h3>
+          <p className="text-gray-600">{error}</p>
+        </div>
+      )}
 
-        {chartData.length > 0 ? (
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={chartData}>
-              <XAxis dataKey="name" stroke="#9ca3af" />
-              <YAxis stroke="#9ca3af" />
-              <Tooltip />
-              <Bar dataKey="value" fill="#4f46e5" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        ) : (
-          <p className="text-gray-500">Tidak ada data untuk ditampilkan</p>
-        )}
-      </div>
+      {!loading && !error && (
+        <>
+          <StatsCards stats={stats} />
+          <ChartsSection chartData={chartData} />
+          <QuickStats stats={stats} />
+        </>
+      )}
     </div>
   );
 }
