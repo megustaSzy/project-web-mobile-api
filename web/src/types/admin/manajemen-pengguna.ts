@@ -1,4 +1,3 @@
-
 export interface UserItem {
   id: number;
   name: string;
@@ -9,6 +8,7 @@ export interface UserItem {
 export interface ApiUsersResponse {
   data: {
     items: UserItem[];
+    total_pages: number;
   };
 }
 

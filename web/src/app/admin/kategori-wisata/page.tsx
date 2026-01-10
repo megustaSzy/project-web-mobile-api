@@ -95,7 +95,6 @@ export default function KategoriWisataPage() {
     }
   }
 
-  /* ================= DELETE ================= */
   async function deleteCategory() {
     if (!pendingDeleteId) return;
 
@@ -119,7 +118,6 @@ export default function KategoriWisataPage() {
     }
   }
 
-  /* ================= HANDLER ================= */
   function openAddModal() {
     setEditId(null);
     setNameInput("");
