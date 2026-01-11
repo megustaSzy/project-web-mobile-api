@@ -66,7 +66,7 @@ app.use("/api/team", teamRoute);
 app.use("/api/destinations", destinationRoute);
 app.use("/api/banner", bannerRoute);
 app.use("/api/testimoni", testimoniRoute);
-app.use("/api/admin", reportRoute);
+app.use("/api/reports", reportRoute);
 
 app.use(errorHandler);
 
