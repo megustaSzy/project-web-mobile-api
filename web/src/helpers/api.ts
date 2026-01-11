@@ -6,17 +6,11 @@ export async function apiFetch<T>(
 ): Promise<T> {
   const baseUrl = process.env.NEXT_PUBLIC_API_URL;
   if (!baseUrl) {
-    throw new Error("❌ Environment NEXT_PUBLIC_API_URL tidak ditemukan.");
+    throw new Error("Environment NEXT_PUBLIC_API_URL tidak ditemukan.");
   }
 
   const fullUrl = `${baseUrl.replace(/\/+$/, "")}${endpoint}`;
   const token = Cookies.get("accessToken");
-
-  // 🔍 DEBUG TOKEN
-  // console.log("🔑 ACCESS TOKEN:", token);
-  // console.log("🌐 API URL:", fullUrl);
-
-  // ⬇️ JANGAN SET CONTENT-TYPE JIKA FormData
   const isFormData = options.body instanceof FormData;
 
   const headers: HeadersInit = {
@@ -33,7 +27,6 @@ export async function apiFetch<T>(
 
   const text = await response.text();
 
-  // ❌ HANDLE ERROR
   if (!response.ok) {
     console.error("❌ API ERROR:", {
       url: fullUrl,
@@ -41,7 +34,6 @@ export async function apiFetch<T>(
       response: text,
     });
 
-    // 🔐 KHUSUS 401
     if (response.status === 401) {
       console.warn("⚠️ TOKEN TIDAK VALID / EXPIRED");
       // optional: Cookies.remove("accessToken");

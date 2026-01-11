@@ -1,8 +1,39 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { Menu, Sun, Moon, ChevronDown } from "lucide-react";
+import {
+  Menu,
+  Sun,
+  Moon,
+  ChevronDown,
+  Search,
+  User,
+  LogOut,
+  AlertTriangle,
+} from "lucide-react";
 import { apiFetch } from "@/helpers/api";
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export type ApiProfileResponse = {
   status: number;
@@ -21,29 +52,13 @@ export default function TopBar({
 }: {
   toggleSidebar: () => void;
 }) {
-  const [profile, setProfile] = useState<{
-    id: number;
-    name: string;
-    email: string;
-    role: string;
-    avatar?: string | null;
-  } | null>(null);
-
+  const [profile, setProfile] = useState<ApiProfileResponse["data"] | null>(
+    null
+  );
   const [dark, setDark] = useState(false);
-  const [open, setOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement | null>(null);
+  const [logoutOpen, setLogoutOpen] = useState(false);
 
-  // tutup dropdown ketika klik luar
-  useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (!menuRef.current) return;
-      if (!menuRef.current.contains(e.target as Node)) setOpen(false);
-    }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
-
-  // ambil profil
+  // fetch profile
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -53,83 +68,172 @@ export default function TopBar({
         console.error("Gagal memuat profile:", err);
       }
     };
-
     fetchProfile();
   }, []);
 
+  // logout logic (SAMA PERSIS)
+  const handleLogout = async () => {
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch (err) {
+      console.error("Logout error:", err);
+    } finally {
+      document.cookie = "accessToken=; path=/; max-age=0";
+      document.cookie = "refreshToken=; path=/; max-age=0";
+      document.cookie = "role=; path=/; max-age=0";
+
+      localStorage.clear();
+      sessionStorage.clear();
+
+      window.location.href = "/login";
+    }
+  };
+
   return (
-    <header className="w-full bg-white dark:bg-[#0b0f19] shadow-sm px-6 py-4 flex justify-between items-center border-b dark:border-neutral-800">
-      {/* LEFT */}
-      <div className="flex items-center gap-3">
-        <button
-          onClick={toggleSidebar}
-          className="text-gray-700 dark:text-gray-300"
-        >
-          <Menu size={22} />
-        </button>
+    <>
+      <header className="sticky top-0 z-30 w-full bg-white dark:bg-[#0b0f19] shadow-sm border-b dark:border-neutral-800">
+        <div className="flex h-16 items-center justify-between px-6">
+          {/* LEFT */}
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleSidebar}
+              className="lg:hidden text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-800"
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
 
-        <input
-          type="search"
-          placeholder="Search..."
-          className="border dark:border-neutral-700 dark:bg-neutral-900 dark:text-gray-200 rounded-lg px-3 py-2 text-sm w-64"
-        />
-      </div>
-
-      {/* RIGHT */}
-      <div className="flex items-center gap-5">
-        {/* THEME BUTTON */}
-        <button
-          onClick={() => {
-            const newMode = !dark;
-            setDark(newMode);
-            document.documentElement.classList.toggle("dark", newMode);
-            localStorage.setItem("theme", newMode ? "dark" : "light");
-          }}
-          className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-800 transition text-gray-700 dark:text-gray-300"
-        >
-          {dark ? <Sun size={18} /> : <Moon size={18} />}
-        </button>
-
-        {/* PROFILE DROPDOWN */}
-        <div className="relative" ref={menuRef}>
-          <button
-            onClick={() => setOpen(!open)}
-            className="flex items-center gap-3"
-          >
-            <div className="w-9 h-9 rounded-full bg-indigo-100 dark:bg-neutral-800 text-indigo-700 dark:text-indigo-300 flex items-center justify-center font-bold border dark:border-neutral-700">
-              {profile ? profile.name[0].toUpperCase() : "U"}
+            <div className="relative hidden md:flex items-center">
+              <Search className="absolute left-3 h-4 w-4 text-gray-400 dark:text-gray-500" />
+              <Input
+                type="search"
+                placeholder="Search..."
+                className="pl-10 w-64 lg:w-80 bg-gray-50 dark:bg-neutral-900 border-gray-200 dark:border-neutral-700 focus-visible:ring-blue-500"
+              />
             </div>
+          </div>
 
-            <div className="hidden sm:flex flex-col items-start">
-              <span className="text-sm font-semibold dark:text-gray-200">
-                {profile?.name ?? "Loading..."}
-              </span>
-              <span className="text-xs text-gray-500 dark:text-gray-400">
-                {profile?.role ?? ""}
-              </span>
-            </div>
+          {/* RIGHT */}
+          <div className="flex items-center gap-3">
+            {/* THEME TOGGLE */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                const newMode = !dark;
+                setDark(newMode);
+                document.documentElement.classList.toggle("dark", newMode);
+                localStorage.setItem("theme", newMode ? "dark" : "light");
+              }}
+              className="text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-800"
+            >
+              {dark ? (
+                <Sun className="h-5 w-5" />
+              ) : (
+                <Moon className="h-5 w-5" />
+              )}
+            </Button>
 
-            <ChevronDown
-              size={16}
-              className="text-gray-600 dark:text-gray-300"
-            />
-          </button>
+            {/* PROFILE DROPDOWN */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-neutral-800"
+                >
+                  <Avatar className="h-9 w-9 border-2 border-blue-100 dark:border-neutral-700">
+                    <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white font-semibold text-sm">
+                      {profile ? profile.name[0].toUpperCase() : "U"}
+                    </AvatarFallback>
+                  </Avatar>
 
-          {/* DROPDOWN MENU */}
-          {open && (
-            <div className="absolute right-0 mt-3 w-56 bg-white dark:bg-neutral-900 shadow-lg rounded-lg border dark:border-neutral-700 py-2 z-50">
-              <div className="px-4 py-3 border-b dark:border-neutral-800">
-                <p className="text-sm font-medium dark:text-gray-200">
-                  {profile?.name}
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {profile?.role}
-                </p>
-              </div>
-            </div>
-          )}
+                  <div className="hidden sm:flex flex-col items-start">
+                    <span className="text-sm font-semibold dark:text-gray-200">
+                      {profile?.name ?? "Loading..."}
+                    </span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 capitalize">
+                      {profile?.role ?? ""}
+                    </span>
+                  </div>
+
+                  <ChevronDown className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                </Button>
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent
+                align="end"
+                className="w-56 bg-white dark:bg-neutral-900 border-gray-200 dark:border-neutral-700"
+              >
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none dark:text-gray-200">
+                      {profile?.name}
+                    </p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {profile?.email}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+
+                <DropdownMenuSeparator className="dark:bg-neutral-800" />
+
+                <DropdownMenuItem
+                  onClick={() => {
+                    window.location.href = "/admin/profile";
+                  }}
+                  className="cursor-pointer dark:hover:bg-neutral-800 dark:focus:bg-neutral-800"
+                >
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Profile</span>
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator className="dark:bg-neutral-800" />
+
+                <DropdownMenuItem
+                  onClick={() => setLogoutOpen(true)}
+                  className="cursor-pointer text-red-600 dark:text-red-400 dark:hover:bg-neutral-800 dark:focus:bg-neutral-800 focus:text-red-600 dark:focus:text-red-400"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Logout</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+
+      {/* ALERT LOGOUT */}
+      <AlertDialog open={logoutOpen} onOpenChange={setLogoutOpen}>
+        <AlertDialogContent className="rounded-2xl">
+          <AlertDialogHeader>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20">
+                <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
+              </div>
+              <AlertDialogTitle className="text-xl">
+                Konfirmasi Logout
+              </AlertDialogTitle>
+            </div>
+            <AlertDialogDescription className="text-base">
+              Apakah kamu yakin ingin keluar dari akun admin? Kamu harus login
+              kembali untuk mengakses dashboard.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2 sm:gap-0">
+            <AlertDialogCancel className="rounded-lg">Batal</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-700 rounded-lg"
+              onClick={handleLogout}
+            >
+              Ya, Logout
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
