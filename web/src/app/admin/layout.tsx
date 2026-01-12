@@ -1,7 +1,11 @@
 "use client";
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import Sidebar from "@/components/admin/Sidebar";
-import TopBar from "@/components/admin/TopBar";
+
+const TopBar = dynamic(() => import("@/components/admin/TopBar"), {
+  ssr: false,
+});
 
 export default function AdminLayout({
   children,
