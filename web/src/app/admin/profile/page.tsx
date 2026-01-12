@@ -10,7 +10,6 @@ import { useAdminProfile } from "@/hooks/admin/useAdminProfile";
 import { useMounted } from "@/hooks/useMounted";
 
 export default function ProfileAdminPage() {
-  // ✅ SEMUA HOOK DIPANGGIL DI ATAS
   const mounted = useMounted();
   const {
     profile,
@@ -24,7 +23,6 @@ export default function ProfileAdminPage() {
     submit,
   } = useAdminProfile();
 
-  // ✅ baru boleh conditional return
   if (!mounted) return null;
 
   if (loading)
