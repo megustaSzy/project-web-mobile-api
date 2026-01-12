@@ -12,10 +12,6 @@ export async function apiFetch<T>(
   const fullUrl = `${baseUrl.replace(/\/+$/, "")}${endpoint}`;
   const token = Cookies.get("accessToken");
 
-  // 🔍 DEBUG TOKEN
-  // console.log("🔑 ACCESS TOKEN:", token);
-  // console.log("🌐 API URL:", fullUrl);
-
   // ⬇️ JANGAN SET CONTENT-TYPE JIKA FormData
   const isFormData = options.body instanceof FormData;
 
@@ -29,11 +25,12 @@ export async function apiFetch<T>(
     ...options,
     method: options.method ?? "GET",
     headers,
+    credentials: "include", // ✅ TAMBAHAN WAJIB (LOGIN GOOGLE)
   });
 
   const text = await response.text();
 
-  // ❌ HANDLE ERROR
+  // ❌ HANDLE ERROR (TETAP SAMA)
   if (!response.ok) {
     console.error("❌ API ERROR:", {
       url: fullUrl,
@@ -41,10 +38,8 @@ export async function apiFetch<T>(
       response: text,
     });
 
-    // 🔐 KHUSUS 401
     if (response.status === 401) {
       console.warn("⚠️ TOKEN TIDAK VALID / EXPIRED");
-      // optional: Cookies.remove("accessToken");
     }
 
     throw new Error(text || `HTTP ${response.status}`);
