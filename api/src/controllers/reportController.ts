@@ -13,11 +13,21 @@ export const reportController = {
         return ResponseData.badRequest(res, "start & end required");
       }
 
-      const report = await reportService.getSalesReport(
-        new Date(start as string),
-        new Date(end as string)
-      );
+      const startDate = new Date(start as string);
+      const endDate = new Date(end as string);
 
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        return ResponseData.badRequest(res, "invalid date format");
+      }
+
+      if (startDate > endDate) {
+        return ResponseData.badRequest(
+          res,
+          "start date must be before end date"
+        );
+      }
+
+      const report = await reportService.getSalesReport(startDate, endDate);
       return ResponseData.ok(res, report);
     } catch (error) {
       next(error);
@@ -32,11 +42,21 @@ export const reportController = {
         return ResponseData.badRequest(res, "start & end required");
       }
 
-      const report = await reportService.getSalesReport(
-        new Date(start as string),
-        new Date(end as string)
-      );
+      const startDate = new Date(start as string);
+      const endDate = new Date(end as string);
 
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        return ResponseData.badRequest(res, "invalid date format");
+      }
+
+      if (startDate > endDate) {
+        return ResponseData.badRequest(
+          res,
+          "start date must be before end date"
+        );
+      }
+
+      const report = await reportService.getSalesReport(startDate, endDate);
       const wb = await generateReportExcel(report);
 
       res.setHeader(
@@ -63,10 +83,21 @@ export const reportController = {
         return ResponseData.badRequest(res, "start & end required");
       }
 
-      const report = await reportService.getSalesReport(
-        new Date(start as string),
-        new Date(end as string)
-      );
+      const startDate = new Date(start as string);
+      const endDate = new Date(end as string);
+
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        return ResponseData.badRequest(res, "invalid date format");
+      }
+
+      if (startDate > endDate) {
+        return ResponseData.badRequest(
+          res,
+          "start date must be before end date"
+        );
+      }
+
+      const report = await reportService.getSalesReport(startDate, endDate);
 
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader(
