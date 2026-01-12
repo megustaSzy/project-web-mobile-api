@@ -31,6 +31,5 @@ export function generateReportPdf(report: any) {
       );
   });
 
-  doc.end();
-  return doc;
+  return doc; 
 }
