@@ -3,12 +3,13 @@ import { Request, Response } from "express";
 import { reportService } from "../services/reportService";
 import { generateReportExcel } from "../utilities/reportExcel";
 import { generateReportPdf } from "../utilities/reportPdf";
+import { ResponseData } from "../utilities/Response";
 
 export const reportController = {
   async sales(req: Request, res: Response) {
     const { start, end } = req.query;
     if (!start || !end) {
-      return res.status(400).json({ message: "start & end required" });
+      return ResponseData.badRequest(res, "start & end required");
     }
 
     const report = await reportService.getSalesReport(
