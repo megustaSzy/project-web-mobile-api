@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { reportService } from "../services/reportService";
 import { generateReportExcel } from "../utilities/reportExcel";
-import { generateReportPdf } from "../utilities/reportPdf";
+import { generateReportPdfText } from "../utilities/reportPdf";
 import { ResponseData } from "../utilities/Response";
 
 export const reportController = {
@@ -105,7 +105,7 @@ export const reportController = {
         "attachment; filename=laporan-penjualan.pdf"
       );
 
-      const doc = generateReportPdf(report);
+      const doc = generateReportPdfText(report);
       doc.pipe(res);
       doc.end();
     } catch (error) {
