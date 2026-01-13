@@ -18,7 +18,8 @@ export const orderService = {
       where: {
         id: userId,
       },
-      select: { // add select
+      select: {
+        // add select
         id: true,
         name: true,
         email: true,
@@ -29,6 +30,12 @@ export const orderService = {
 
     const destination = await prisma.tb_destinations.findUnique({
       where: { id: destinationId },
+      select: {
+        // add select destination
+        id: true,
+        name: true,
+        price: true,
+      },
     });
     if (!destination) throw createError("Destinasi tidak ditemukan", 404);
 
