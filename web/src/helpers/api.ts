@@ -37,7 +37,7 @@ export async function apiFetch<T>(
     });
 
     if (response.status === 401) {
-      console.warn("⚠️ TOKEN TIDAK VALID / EXPIRED");
+      console.warn("TOKEN TIDAK VALID / EXPIRED");
       // optional: Cookies.remove("accessToken");
     }
 
