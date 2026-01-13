@@ -141,7 +141,8 @@ export default function TiketPage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="p-3 rounded-xl border border-gray-300 bg-white"
+              className="p-3 rounded-xl border border-gray-300 bg-white cursor-pointer
+                   focus:ring-2 focus:ring-blue-300"
             >
               <option value="all">Semua Status</option>
               <option value="Sudah Dibayar">Sudah Dibayar</option>

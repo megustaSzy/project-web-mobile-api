@@ -280,7 +280,7 @@ export default function NavBar() {
               {language.toUpperCase()}
               <ChevronDown
                 size={16}
-                className={`transition-transform duration-200 ${
+                className={`transition-transform duration-200 cursor-pointer ${
                   langOpen ? "rotate-180" : ""
                 }`}
               />
