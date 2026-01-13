@@ -124,7 +124,7 @@ export default function DestinasiFormModal({
           body: fd,
         });
       } else {
-        await apiFetch(`/api/destination/${data!.id}`, {
+        await apiFetch(`/api/destinations/${data!.id}`, {
           method: "PATCH",
           body: JSON.stringify({
             name,
