@@ -1,9 +1,9 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { apiFetch } from "@/helpers/api";
-import { RegionApiResponse, RegionItem } from "@/types/region";
+import { useState } from "react";
+import { RegionItem } from "@/types/region";
+import { useRegion } from "@/hooks/admin/useRegion";
 
 import Pagination from "@/components/Pagination";
 
@@ -24,10 +24,6 @@ import KabupatenFormModal from "@/components/admin/kategori-kabupaten/KabupatenF
 import KabupatenDeleteModal from "@/components/admin/kategori-kabupaten/KabupatenDeleteModal";
 
 export default function KategoriKabupaten() {
-  const [regions, setRegions] = useState<RegionItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-
   const [modalOpen, setModalOpen] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
   const [nameInput, setNameInput] = useState("");
@@ -43,26 +39,19 @@ export default function KategoriKabupaten() {
 
   const [page, setPage] = useState(1);
   const perPage = 10;
-  const [totalPages, setTotalPages] = useState(1);
 
-  const getData = useCallback(async () => {
-    try {
-      setLoading(true);
-      const res = await apiFetch<RegionApiResponse>(
-        `/api/region/admin?page=${page}&limit=${perPage}`
-      );
-      setRegions(res.data.items);
-      setTotalPages(res.data.total_pages);
-    } catch {
-      setErrorMsg("Gagal memuat data");
-    } finally {
-      setLoading(false);
-    }
-  }, [page]);
-
-  useEffect(() => {
-    getData();
-  }, [getData]);
+  const {
+    regions,
+    loading,
+    error,
+    totalPages,
+    createRegion,
+    updateRegion,
+    deleteRegion,
+  } = useRegion({
+    page,
+    limit: perPage,
+  });
 
   async function saveRegion() {
     if (!nameInput.trim()) return;
@@ -75,15 +64,11 @@ export default function KategoriKabupaten() {
       if (image) fd.append("image", image);
 
       if (editId !== null) {
-        await apiFetch(`/api/region/${editId}`, {
-          method: "PATCH",
-          body: fd,
-        });
+        await updateRegion(editId, fd);
+        setSuccessMsg("Kabupaten berhasil diperbarui");
       } else {
-        await apiFetch(`/api/region`, {
-          method: "POST",
-          body: fd,
-        });
+        await createRegion(fd);
+        setSuccessMsg("Kabupaten berhasil ditambahkan");
       }
 
       setModalOpen(false);
@@ -91,37 +76,21 @@ export default function KategoriKabupaten() {
       setImage(null);
       setEditId(null);
 
-      setSuccessMsg(
-        editId
-          ? "Kabupaten berhasil diperbarui"
-          : "Kabupaten berhasil ditambahkan"
-      );
       setTimeout(() => setSuccessMsg(null), 2000);
-
-      await getData();
-    } catch {
-      setErrorMsg("Gagal menyimpan data");
     } finally {
       setSaving(false);
     }
   }
 
-  async function deleteRegion() {
+  async function handleDeleteRegion() {
     if (!pendingDeleteId) return;
 
     setDeletingId(pendingDeleteId);
 
     try {
-      await apiFetch(`/api/region/${pendingDeleteId}`, {
-        method: "DELETE",
-      });
-
+      await deleteRegion(pendingDeleteId);
       setSuccessMsg("Kabupaten berhasil dihapus");
       setTimeout(() => setSuccessMsg(null), 2000);
-
-      await getData();
-    } catch {
-      setErrorMsg("Gagal menghapus data");
     } finally {
       setDeletingId(null);
       setPendingDeleteId(null);
@@ -168,10 +137,10 @@ export default function KategoriKabupaten() {
       )}
 
       {/* ERROR ALERT */}
-      {errorMsg && (
+      {error && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{errorMsg}</AlertDescription>
+          <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
 
@@ -249,7 +218,7 @@ export default function KategoriKabupaten() {
       <KabupatenDeleteModal
         open={confirmDeleteOpen}
         onCancel={() => setConfirmDeleteOpen(false)}
-        onConfirm={deleteRegion}
+        onConfirm={handleDeleteRegion}
       />
     </div>
   );
