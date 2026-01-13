@@ -24,11 +24,10 @@ export async function apiFetch<T>(
     ...options,
     method: options.method ?? "GET",
     headers,
-    credentials: "include", // ✅ TAMBAHAN WAJIB (LOGIN GOOGLE)
+    credentials: "include",
   });
 
   const text = await response.text();
-
 
   if (!response.ok) {
     console.error("API ERROR:", {
@@ -38,11 +37,8 @@ export async function apiFetch<T>(
     });
 
     if (response.status === 401) {
-
-      console.warn("TOKEN TIDAK VALID / EXPIRED");
-      // optional: Cookies.remove("accessToken");
       console.warn("⚠️ TOKEN TIDAK VALID / EXPIRED");
-
+      // optional: Cookies.remove("accessToken");
     }
 
     throw new Error(text || `HTTP ${response.status}`);
