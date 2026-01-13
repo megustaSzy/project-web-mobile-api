@@ -31,14 +31,18 @@ export async function apiFetch<T>(
 
 
   if (!response.ok) {
-    console.error("❌ API ERROR:", {
+    console.error("API ERROR:", {
       url: fullUrl,
       status: response.status,
       response: text,
     });
 
     if (response.status === 401) {
+
+      console.warn("TOKEN TIDAK VALID / EXPIRED");
+      // optional: Cookies.remove("accessToken");
       console.warn("⚠️ TOKEN TIDAK VALID / EXPIRED");
+
     }
 
     throw new Error(text || `HTTP ${response.status}`);
