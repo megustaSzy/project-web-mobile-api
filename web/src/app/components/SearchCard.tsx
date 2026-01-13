@@ -160,7 +160,7 @@ export default function SearchCard() {
               <Button
                 variant="outline"
                 role="combobox"
-                className="w-full h-11 justify-between rounded-full"
+                className="w-full h-11 justify-between rounded-full cursor-pointer"
               >
                 <div className="flex items-center gap-2 text-sm font-normal text-gray-600">
                   <MapPin className="w-4 h-4 text-gray-400" />
@@ -180,6 +180,7 @@ export default function SearchCard() {
                     <CommandItem
                       key={cat.id}
                       value={cat.name}
+                      className="cursor-pointer"
                       onSelect={() => {
                         setSelectedCategory(cat);
                         setOpenCategory(false);
@@ -203,7 +204,7 @@ export default function SearchCard() {
 
         {/* DAERAH */}
         <div className="md:col-span-2">
-          <label className="text-xs font-medium text-gray-500 mb-1 block pl-2">
+          <label className="text-xs font-medium text-gray-500 mb-1 block pl-2 ">
             Daerah
           </label>
           <Popover open={openArea} onOpenChange={setOpenArea}>
@@ -211,7 +212,7 @@ export default function SearchCard() {
               <Button
                 variant="outline"
                 role="combobox"
-                className="w-full h-11 justify-between rounded-full"
+                className="w-full h-11 justify-between rounded-full cursor-pointer"
               >
                 <div className="flex items-center gap-2 text-sm font-normal text-gray-600">
                   <MapPin className="w-4 h-4 text-gray-400" />
@@ -230,6 +231,7 @@ export default function SearchCard() {
                     <CommandItem
                       key={area.id}
                       value={area.nama}
+                      className="cursor-pointer"
                       onSelect={() => {
                         setSelectedArea(area);
                         setOpenArea(false);
@@ -254,7 +256,7 @@ export default function SearchCard() {
         {/* BUTTON */}
         <Button
           onClick={handleSearch}
-          className="h-11 rounded-full bg-blue-500 hover:bg-blue-600"
+          className="h-11 rounded-full bg-blue-500 hover:bg-blue-600 cursor-pointer"
         >
           Search
         </Button>

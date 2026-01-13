@@ -9,10 +9,11 @@ import {
   Modal,
   Alert,
 } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as WebBrowser from "expo-web-browser";
 
 /* ================= TYPES ================= */
 type PickupItem = {
@@ -20,38 +21,56 @@ type PickupItem = {
   name: string;
 };
 
+type UserProfile = {
+  name: string;
+  email: string;
+};
+
 const JAM_BERANGKAT = ["07:00","08:00","09:00","10:00","11:00","12:00","13:00","14:00"];
 const JAM_PULANG = ["13:00","14:00","15:00","16:00","17:00","18:00","19:00"];
 
 export default function PesanPage() {
-  const router = useRouter();
   const params = useLocalSearchParams();
   const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? "";
 
-  const id = String(params.id ?? "");
+  /* ================= PARAMS ================= */
+  const destinationId =
+    typeof params.id === "string" ? Number(params.id) : NaN;
+
   const title = String(params.title ?? "Nama Wisata");
   const category = String(params.category ?? "Kategori");
   const price = Number(params.price ?? 0);
   const imageUrl = String(params.imageUrl ?? "");
 
+  /* ================= STATE ================= */
   const [pickupList, setPickupList] = useState<PickupItem[]>([]);
   const [pickupId, setPickupId] = useState<number | null>(null);
 
   const [tanggal, setTanggal] = useState(new Date());
   const [jamBerangkat, setJamBerangkat] = useState("07:00");
   const [jamPulang, setJamPulang] = useState("13:00");
-
   const [jumlahTiket, setJumlahTiket] = useState(1);
+
   const [showDate, setShowDate] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
   const [errorMsg, setErrorMsg] = useState("");
   const [showError, setShowError] = useState(false);
 
-  const userName = String(params.userName ?? "User");
-  const userEmail = String(params.userEmail ?? "user@email.com");
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [loadingUser, setLoadingUser] = useState(true);
 
+  /* ================= VALIDASI DESTINATION ================= */
+  useEffect(() => {
+    if (!destinationId || isNaN(destinationId)) {
+      Alert.alert(
+        "Error",
+        "ID destinasi tidak ditemukan. Silakan kembali dan pilih destinasi ulang."
+      );
+    }
+  }, [destinationId]);
+
+  /* ================= FETCH PICKUP ================= */
   useEffect(() => {
     fetch(`${BASE_URL}/api/pickup-locations`)
       .then((res) => res.json())
@@ -59,101 +78,130 @@ export default function PesanPage() {
         setPickupList(Array.isArray(json.data) ? json.data : [])
       )
       .catch(() => setPickupList([]));
-  }, []);
-
-
-  type UserProfile = {
-  name: string;
-  email: string;
-  };
-
-  const [user, setUser] = useState<UserProfile | null>(null);
-
-
- useEffect(() => {
-  async function fetchUserProfile() {
-    try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setLoadingUser(false);
-        return;
-      }
-
-      const res = await fetch(`${BASE_URL}/api/users/profile`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/json",
-      },
-    });
-
-
-      // 🔥 CEK RESPONSE DULU
-      const text = await res.text();
-
-      // kalau response HTML → stop
-      if (!text.startsWith("{")) {
-        console.log("Response bukan JSON:", text);
-        setLoadingUser(false);
-        return;
-      }
-
-      const json = JSON.parse(text);
-
-      setUser({
-        name: json.data.name,
-        email: json.data.email,
-      });
-    } catch (err) {
-      console.log("Gagal ambil profile user", err);
-    } finally {
-      setLoadingUser(false);
-    }
-  }
-
-  fetchUserProfile();
-}, []);
-
-
-  const fmtDate = (d: Date) =>
+  }, [BASE_URL]);
+   const fmtDate = (d: Date) =>
     d.toLocaleDateString("id-ID", {
       day: "2-digit",
       month: "short",
       year: "numeric",
     });
 
+  // const totalHarga = price * jumlahTiket;
+
+  /* ================= FETCH USER ================= */
+  useEffect(() => {
+    async function fetchUser() {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        if (!token) return;
+
+        const res = await fetch(`${BASE_URL}/api/users/profile`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+          },
+        });
+
+        const json = await res.json();
+        setUser({
+          name: json.data.name,
+          email: json.data.email,
+        });
+      } catch (err) {
+        console.log("Fetch user error", err);
+      } finally {
+        setLoadingUser(false);
+      }
+    }
+
+    fetchUser();
+  }, [BASE_URL]);
+
   const totalHarga = price * jumlahTiket;
 
   function openConfirm() {
-  if (!pickupId) {
-    setErrorMsg("Lokasi penjemputan belum dipilih");
-    setShowError(true);
-    return;
+    if (!pickupId) {
+      setErrorMsg("Lokasi penjemputan belum dipilih");
+      setShowError(true);
+      return;
+    }
+    setShowConfirm(true);
   }
 
-  if (!jamBerangkat || !jamPulang) {
-    setErrorMsg("Jam berangkat dan pulang harus dipilih");
-    setShowError(true);
-    return;
-  }
+  /* ================= PAY ================= */
+  async function handlePay() {
+    try {
+      setShowConfirm(false);
 
-  setShowConfirm(true);
-}
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        Alert.alert("Error", "User belum login");
+        return;
+      }
 
-
-  function handlePay() {
-    setShowConfirm(false);
-    router.push({
-      pathname: `../pesan/${id}`,
-      params: {
-        wisata_id: id,
+      const payload = {
+        destination_id: destinationId, 
         pickup_id: pickupId,
-        tanggal: tanggal.toISOString(),
+        tanggal: tanggal.toISOString().split("T")[0],
         jam_berangkat: jamBerangkat,
         jam_pulang: jamPulang,
         jumlah_tiket: jumlahTiket,
-      },
-    });
+      };
+
+      console.log("CREATE ORDER PAYLOAD:", payload);
+
+      /* ===== CREATE ORDER ===== */
+      const createRes = await fetch(`${BASE_URL}/api/orders`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const createJson = await createRes.json();
+      if (!createRes.ok) {
+        Alert.alert("Gagal", createJson.message);
+        return;
+      }
+
+      const orderId = createJson.data.id;
+
+      /* ===== PAY ORDER ===== */
+      const payRes = await fetch(
+        `${BASE_URL}/api/orders/${orderId}/pay`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+          },
+        }
+      );
+
+      const payJson = await payRes.json();
+      if (!payRes.ok) {
+        Alert.alert("Gagal", payJson.message);
+        return;
+      }
+
+      const redirectUrl =
+        payJson.redirect_url ||
+        payJson.data?.redirect_url ||
+        payJson.data?.payment_url;
+
+      if (!redirectUrl) {
+        Alert.alert("Error", "Redirect URL tidak ditemukan");
+        return;
+      }
+
+      await WebBrowser.openBrowserAsync(redirectUrl);
+    } catch (err) {
+      console.log("PAY ERROR", err);
+      Alert.alert("Error", "Terjadi kesalahan pembayaran");
+    }
   }
 
   return (
@@ -622,7 +670,4 @@ total: {
 },
 
 });
-function setUser(arg0: { name: any; email: any; }) {
-  throw new Error("Function not implemented.");
-}
 

@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
 import { Menu, X, ChevronDown } from "lucide-react";
 import Cookies from "js-cookie";
-import { jwtDecode } from "jwt-decode";
+// import { jwtDecode } from "jwt-decode";
 import { apiFetch } from "@/helpers/api";
 import { usePathname } from "next/navigation";
 import { Poppins } from "next/font/google";
@@ -64,14 +64,13 @@ export default function NavBar() {
 
   const [translations] = useState(translationSource);
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+  // const API_URL = process.env.NEXT_PUBLIC_API_URL;
   const pathname = usePathname();
 
   const buildAvatarUrl = (avatar?: string | null) => {
     if (!avatar) return "/images/profile.jpg";
-    return avatar.startsWith("http") ? avatar : `${avatar}`;
+    return avatar;
   };
-
   const langRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
 
@@ -87,59 +86,37 @@ export default function NavBar() {
   // ==========================
   // INIT TOKEN + PROFILE
   // ==========================
-  type JwtPayload = {
-    exp: number;
-  };
+  // ==========================
+  // INIT PROFILE (LOGIN MANUAL & GOOGLE)
+  // ==========================
   useEffect(() => {
-    const token = Cookies.get("accessToken");
-    const role = Cookies.get("role") || localStorage.getItem("role");
-
-    if (!token || !role) {
-      setIsLoggedIn(false);
-      return;
-    }
-
-    try {
-      const decoded = jwtDecode<JwtPayload>(token);
-
-      if (decoded.exp * 1000 < Date.now()) {
-        Cookies.remove("accessToken", { path: "/" });
-        setIsLoggedIn(false);
-        return;
-      }
-
-      setIsLoggedIn(true);
-    } catch {
-      Cookies.remove("accessToken", { path: "/" });
-      setIsLoggedIn(false);
-      return;
-    }
-
     const loadProfile = async () => {
       try {
         const res = await apiFetch<ApiProfileResponse>("/api/users/profile");
 
         if (res?.data) {
+          setIsLoggedIn(true);
           setUserData({
             name: res.data.name || "User",
             avatar: buildAvatarUrl(res.data.avatar),
           });
+
           localStorage.setItem(
             "profile",
             JSON.stringify({
               name: res.data.name,
-              avatar: res.data.avatar ?? "/images/profile.jpg",
+              avatar: res.data.avatar,
             })
           );
         }
-      } catch (err) {
-        console.error("Gagal fetch profile:", err);
+      } catch {
         setIsLoggedIn(false);
+        setUserData({ name: "User", avatar: "/images/profile.jpg" });
       }
     };
 
     loadProfile();
-  }, []);
+  }, [pathname]);
 
   // ==========================
   // INIT LANGUAGE
@@ -303,7 +280,7 @@ export default function NavBar() {
               {language.toUpperCase()}
               <ChevronDown
                 size={16}
-                className={`transition-transform duration-200 ${
+                className={`transition-transform duration-200 cursor-pointer ${
                   langOpen ? "rotate-180" : ""
                 }`}
               />
@@ -361,10 +338,9 @@ export default function NavBar() {
                   height={32}
                   alt="Profile"
                   className="rounded-full"
-                  loader={({ src }) =>
-                    src.startsWith("http") ? src : `${API_URL}${src}`
-                  }
+                  unoptimized
                 />
+
                 <span className="text-sm">{userData.name}</span>
                 <ChevronDown
                   size={14}
