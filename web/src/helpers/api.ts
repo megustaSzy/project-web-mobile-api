@@ -11,6 +11,7 @@ export async function apiFetch<T>(
 
   const fullUrl = `${baseUrl.replace(/\/+$/, "")}${endpoint}`;
   const token = Cookies.get("accessToken");
+
   const isFormData = options.body instanceof FormData;
 
   const headers: HeadersInit = {
@@ -23,6 +24,7 @@ export async function apiFetch<T>(
     ...options,
     method: options.method ?? "GET",
     headers,
+    credentials: "include",
   });
 
   const text = await response.text();

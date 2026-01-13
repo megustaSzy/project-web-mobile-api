@@ -17,7 +17,7 @@ export const categoryService = {
         take: pagination.limit,
         orderBy: {
           // id: "asc",
-          name: "asc",
+          id: "asc",
         },
         include: {
           destinations: true,

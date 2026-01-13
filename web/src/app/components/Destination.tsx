@@ -89,7 +89,7 @@ export default function DestinasiSection() {
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.name)}
-                className={`px-6 py-2 rounded-full border text-sm font-medium transition ${
+                className={`px-6 py-2 rounded-full border text-sm font-medium transition cursor-pointer ${
                   active
                     ? "bg-blue-600 text-white border-blue-600"
                     : "bg-white text-gray-700 border-gray-300 hover:bg-blue-50"
@@ -111,7 +111,7 @@ export default function DestinasiSection() {
               .map((d) => (
                 <div
                   key={d.id}
-                  className="bg-white rounded-2xl shadow-md hover:shadow-xl transition overflow-hidden"
+                  className="bg-white rounded-2xl shadow-md hover:shadow-xl transition overflow-hidden cursor-pointer"
                 >
                   <div className="h-48">
                     <img
