@@ -43,6 +43,10 @@ export const orderService = {
     if (pickupLocationId) {
       const pickup = await prisma.tb_pickup_locations.findUnique({
         where: { id: pickupLocationId },
+        select: {
+          id: true,
+          name: true,
+        },
       });
       if (!pickup) throw createError("Lokasi penjemputan tidak ditemukan", 404);
       pickupName = pickup.name;
@@ -98,6 +102,18 @@ export const orderService = {
   async getOrderByPaymentOrderId(paymentOrderId: string) {
     return await prisma.tb_orders.findUnique({
       where: { paymentOrderId },
+      select: {
+        id: true,
+        userId: true,
+        totalPrice: true,
+        paymentStatus: true,
+        paymentMethod: true,
+        isPaid: true,
+        paidAt: true,
+        snapToken: true,
+        snapRedirectUrl: true,
+        transactionId: true,
+      },
     });
   },
   async getOrdersByUser(userId: number) {
@@ -133,6 +149,44 @@ export const orderService = {
       },
     });
 
+    //     const order = await prisma.tb_orders.findFirst({
+    //   where: {
+    //     id,
+    //     userId,
+    //   },
+    //   select: {
+    //     id: true,
+    //     destinationName: true,
+    //     destinationPrice: true,
+    //     pickupLocationName: true,
+    //     date: true,
+    //     departureTime: true,
+    //     returnTime: true,
+    //     quantity: true,
+    //     totalPrice: true,
+    //     paymentStatus: true,
+    //     paymentMethod: true,
+    //     isPaid: true,
+    //     paidAt: true,
+    //     ticketCode: true,
+    //     createdAt: true,
+
+    //     destination: {
+    //       select: {
+    //         id: true,
+    //         name: true,
+    //         price: true,
+    //       },
+    //     },
+    //     pickupLocation: {
+    //       select: {
+    //         id: true,
+    //         name: true,
+    //       },
+    //     },
+    //   },
+    // });
+
     if (!order) {
       throw createError("Order tidak ditemukan", 404);
     }
@@ -156,6 +210,9 @@ export const orderService = {
     return await prisma.tb_orders.update({
       where: { id: orderId },
       data,
+      select: {
+        id: true,
+      },
     });
   },
 };
