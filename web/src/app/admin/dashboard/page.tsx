@@ -12,7 +12,6 @@ import { Counts, ChartItem, StatsResponse } from "@/types/count";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-/* ===== API ===== */
 async function fetchStats(): Promise<StatsResponse> {
   if (!API_URL) {
     throw new Error("NEXT_PUBLIC_API_URL tidak ditemukan");
@@ -42,7 +41,6 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  /* ===== EFFECT ===== */
   useEffect(() => {
     const loadDashboard = async () => {
       try {
