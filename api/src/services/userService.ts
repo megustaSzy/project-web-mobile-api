@@ -47,14 +47,17 @@ export const userService = {
       },
     });
 
-    if (!user) createError("id tidak ditemukan", 404);
+    if (!user) throw createError("id tidak ditemukan", 404);
 
     return user;
   },
 
   // UPDATE user by ID
   async updateUserById(id: number, data: UpdateUserData) {
-    const existingUser = await prisma.tb_user.findUnique({ where: { id } });
+    const existingUser = await prisma.tb_user.findUnique({
+      where: { id },
+      select: { id: true },
+    });
     if (!existingUser) {
       throw createError("id tidak ditemukan", 404);
     }
@@ -86,9 +89,12 @@ export const userService = {
   async deleteUserById(id: number) {
     const user = await prisma.tb_user.findUnique({
       where: { id },
+      select: {
+        id: true,
+      },
     });
 
-    if (!user) createError("id tidak ditemukan", 404);
+    if (!user) throw createError("id tidak ditemukan", 404);
 
     return prisma.tb_user.delete({
       where: { id },
