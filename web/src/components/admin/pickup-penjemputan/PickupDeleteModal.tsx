@@ -41,7 +41,7 @@ export default function PickupDeleteModal({
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        <AlertDialogFooter className="gap-2 sm:gap-0">
+        <AlertDialogFooter className="gap-2 sm:gap-2">
           <AlertDialogCancel className="rounded-lg">Batal</AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}

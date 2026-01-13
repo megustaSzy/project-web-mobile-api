@@ -32,8 +32,6 @@ export interface ApiDestinationsResponse {
   };
 }
 
-// ─────────────────────────────────────────────────────────────
-// Tipe yang dipakai UI (hasil mapping)
 export interface DestinationsType {
   id: number; 
   name: string;

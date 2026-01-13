@@ -4,7 +4,7 @@ export type Profile = {
   email: string;
   notelp?: string | null;
   role: string;
-  avatar?: string | null;
+  avatar?: string | undefined;
   avatarPublicId?: string | null;
 };
 

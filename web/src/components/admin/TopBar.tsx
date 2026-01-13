@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,27 +34,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-export type ApiProfileResponse = {
-  status: number;
-  message: string;
-  data: {
-    id: number;
-    name: string;
-    email: string;
-    role: string;
-    avatar?: string | null;
-  };
-};
+import { AvatarImage } from "@radix-ui/react-avatar";
+import { Profile } from "@/types/admin/profile";
 
 export default function TopBar({
   toggleSidebar,
 }: {
   toggleSidebar: () => void;
 }) {
-  const [profile, setProfile] = useState<ApiProfileResponse["data"] | null>(
-    null
-  );
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [dark, setDark] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
 
@@ -62,7 +50,7 @@ export default function TopBar({
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await apiFetch<ApiProfileResponse>("/api/users/profile");
+        const res = await apiFetch<{ data: Profile }>("/api/users/profile");
         setProfile(res.data);
       } catch (err) {
         console.error("Gagal memuat profile:", err);
@@ -146,9 +134,10 @@ export default function TopBar({
                   className="flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-neutral-800"
                 >
                   <Avatar className="h-9 w-9 border-2 border-blue-100 dark:border-neutral-700">
-                    <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white font-semibold text-sm">
-                      {profile ? profile.name[0].toUpperCase() : "U"}
-                    </AvatarFallback>
+                    <AvatarImage
+                      src={profile?.avatar}
+                      className="object-cover"
+                    />
                   </Avatar>
 
                   <div className="hidden sm:flex flex-col items-start">
