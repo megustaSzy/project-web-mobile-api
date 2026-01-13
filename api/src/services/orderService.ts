@@ -14,7 +14,17 @@ export const orderService = {
     departureTime,
     returnTime,
   }: CreateOrderInput & { userId: number }) {
-    const user = await prisma.tb_user.findUnique({ where: { id: userId } });
+    const user = await prisma.tb_user.findUnique({
+      where: {
+        id: userId,
+      },
+      select: { // add select
+        id: true,
+        name: true,
+        email: true,
+        notelp: true,
+      },
+    });
     if (!user) throw createError("User tidak ditemukan", 404);
 
     const destination = await prisma.tb_destinations.findUnique({
