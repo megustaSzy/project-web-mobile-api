@@ -172,11 +172,20 @@ const styles = StyleSheet.create({
     flex: 1, 
     backgroundColor: "#fff" 
   },
-  
-  center: { flex: 1, justifyContent: "center", alignItems: "center" },
 
-  imageWrapper: { height: 270 },
-  headerImage: { width: "100%", height: "100%" },
+  center: { flex: 1, 
+    justifyContent: "center", 
+    alignItems: "center" 
+  },
+
+  imageWrapper: { 
+    height: 270 
+  },
+  headerImage: { 
+    width: "100%", 
+    height: "100%" 
+  },
+  
   overlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "#001B38",
