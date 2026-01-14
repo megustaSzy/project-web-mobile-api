@@ -58,6 +58,11 @@ export default function Sidebar({ isOpen }: { isOpen: boolean }) {
       href: "/admin/testimoni",
       icon: <MessageSquareQuote size={16} />,
     },
+    {
+      title: "Pengelola Konten",
+      href: "/admin/konten",
+      icon: <MessageSquareQuote size={16} />,
+    },
   ];
 
   return (
