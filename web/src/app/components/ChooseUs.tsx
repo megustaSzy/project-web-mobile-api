@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { apiFetch } from "@/helpers/api";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export type ChooseUsItem = {
   id: number;
@@ -19,6 +20,35 @@ type ApiResponse<T> = {
   data: T;
 };
 
+const MAX_ITEMS = 4;
+
+// placeholder supaya tinggi tetap konsisten
+const placeholderItems: ChooseUsItem[] = Array.from(
+  { length: MAX_ITEMS },
+  (_, i) => ({
+    id: -(i + 1),
+    number: "",
+    header: "",
+    name: "",
+    imageUrl: "/images/placeholder.svg",
+  })
+);
+
+// skeleton card (UKURAN SAMA PERSIS)
+function ChooseUsSkeleton() {
+  return (
+    <div className="flex items-center bg-white rounded-2xl shadow-sm p-4 border border-gray-100">
+      <Skeleton className="w-12 h-12 mr-4 rounded-md" />
+
+      <div className="flex-1 space-y-2">
+        <Skeleton className="h-5 w-12" />
+        <Skeleton className="h-4 w-3/4" />
+        <Skeleton className="h-4 w-2/3" />
+      </div>
+    </div>
+  );
+}
+
 export default function ChooseUs() {
   const [items, setItems] = useState<ChooseUsItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,7 +60,6 @@ export default function ChooseUs() {
           ChooseUsItem[] | ApiResponse<ChooseUsItem[]>
         >("/api/banner");
 
-        //  Normalisasi response (aman untuk semua bentuk)
         const normalizedData: ChooseUsItem[] = Array.isArray(res)
           ? res
           : res.data;
@@ -46,6 +75,12 @@ export default function ChooseUs() {
 
     fetchBanner();
   }, []);
+
+  // selalu 4 item agar layout stabil
+  const displayedItems: ChooseUsItem[] =
+    items.length >= MAX_ITEMS
+      ? items.slice(0, MAX_ITEMS)
+      : [...items, ...placeholderItems.slice(items.length)];
 
   return (
     <section className="relative bg-gray-100 bg-[url('/images/peta.svg')] bg-linear-to-b from-[#f8fafc] to-white py-20 overflow-hidden bg-no-repeat bg-center bg-cover">
@@ -73,14 +108,13 @@ export default function ChooseUs() {
           </div>
 
           <div className="space-y-4">
-            {loading && <p className="text-gray-500 text-sm">Memuat data...</p>}
-
-            {!loading && items.length === 0 && (
-              <p className="text-gray-400 text-sm">Data belum tersedia</p>
-            )}
+            {loading &&
+              Array.from({ length: MAX_ITEMS }).map((_, i) => (
+                <ChooseUsSkeleton key={i} />
+              ))}
 
             {!loading &&
-              items.map((item) => (
+              displayedItems.map((item) => (
                 <div
                   key={item.id}
                   className="flex items-center bg-white rounded-2xl shadow-sm p-4 border border-gray-100 hover:shadow-md transition"

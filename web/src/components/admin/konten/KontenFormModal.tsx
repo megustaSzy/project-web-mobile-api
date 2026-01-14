@@ -67,7 +67,7 @@ export default function KontenFormModal({
 
       fd.append("name", name);
       fd.append("header", header);
-      fd.append("price", number);
+      fd.append("number", number);
       if (image) {
         fd.append("image", image);
       }
@@ -111,14 +111,14 @@ export default function KontenFormModal({
             {/* NAME */}
             <div className="space-y-2">
               <Label htmlFor="name" className="text-sm font-medium">
-                Judul Konten
+                Nama
               </Label>
               <div className="relative">
                 <Input
                   id="name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Contoh: Pengalaman Pengguna"
+                  placeholder="Contoh: Isi Konten"
                   className="rounded-lg pl-10"
                   disabled={loading}
                   required
