@@ -1,8 +1,8 @@
-
 export interface ApiDestinationItem {
   id: number;
   name: string;
   imageUrl: string | null;
+  imagePublicId: string | null;
   description: string | null;
   price: number;
   include: string[];
@@ -33,20 +33,20 @@ export interface ApiDestinationsResponse {
 }
 
 export interface DestinationsType {
-  id: number; 
+  id: number;
   name: string;
-  imageUrl: string | null; 
+  imageUrl: string | null;
   description: string;
   price: number;
-   include: string[];
+  include: string[];
   ketentuan: string[];
   perhatian: string[];
   category: {
     id: number;
     name: string;
   };
-   region: {
+  region: {
     id: number;
     name: string;
   };
-};
+}

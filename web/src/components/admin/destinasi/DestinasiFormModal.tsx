@@ -88,13 +88,18 @@ export default function DestinasiFormModal({
   }, [open]);
 
   useEffect(() => {
+    if (!open) return;
+
     if (data) {
+      // edit
       setName(data.name);
       setDesc(data.description ?? "");
       setPrice(String(data.price));
       setCategoryId(data.category.id);
       setRegionId(data.region.id);
+      setImage(null); // reset image
     } else {
+      // add
       setName("");
       setDesc("");
       setPrice("");
@@ -109,35 +114,33 @@ export default function DestinasiFormModal({
     setLoading(true);
 
     try {
-      if (mode === "add") {
-        const fd = new FormData();
-        fd.append("name", name);
-        fd.append("description", desc);
-        fd.append("price", price);
-        fd.append("categoryId", String(categoryId));
-        fd.append("regionId", String(regionId));
-        if (image) fd.append("image", image);
+      const fd = new FormData();
 
-        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/destinations`, {
-          method: "POST",
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-          body: fd,
-        });
-      } else {
-        await apiFetch(`/api/destinations/${data!.id}`, {
-          method: "PATCH",
-          body: JSON.stringify({
-            name,
-            description: desc,
-            price: Number(price),
-            categoryId,
-            regionId,
-          }),
-        });
+      fd.append("name", name);
+      fd.append("description", desc);
+      fd.append("price", price);
+      fd.append("categoryId", String(categoryId));
+      fd.append("regionId", String(regionId));
+
+      if (image) {
+        fd.append("image", image);
       }
+
+      const url =
+        mode === "add"
+          ? `${process.env.NEXT_PUBLIC_API_URL}/api/destinations`
+          : `${process.env.NEXT_PUBLIC_API_URL}/api/destinations/${data!.id}`;
+
+      await fetch(url, {
+        method: mode === "add" ? "POST" : "PATCH",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: fd,
+      });
 
       onClose();
       onSuccess();
+    } catch (err) {
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -282,39 +285,38 @@ export default function DestinasiFormModal({
             </div>
 
             {/* IMAGE */}
-            {mode === "add" && (
-              <div className="space-y-2">
-                <Label htmlFor="image" className="text-sm font-medium">
-                  Foto Destinasi
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="image"
-                    type="file"
-                    onChange={(e) => setImage(e.target.files?.[0] ?? null)}
-                    className="rounded-lg file:mr-4 file:px-4 file:py-2 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
-                    accept="image/*"
-                    disabled={loading}
-                  />
-                  <Upload className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-                </div>
+            <div className="space-y-2">
+              <Label htmlFor="image" className="text-sm font-medium">
+                Foto Destinasi {mode === "edit" && "(Opsional)"}
+              </Label>
+
+              <div className="relative">
+                <Input
+                  id="image"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setImage(e.target.files?.[0] ?? null)}
+                  disabled={loading}
+                  className="rounded-lg file:mr-4 file:px-4 file:py-2
+        file:rounded-lg file:border-0 file:text-sm
+        file:font-medium file:bg-blue-50 file:text-blue-700
+        hover:file:bg-blue-100 cursor-pointer"
+                />
+                <Upload className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+              </div>
+
+              {mode === "add" && (
                 <p className="text-xs text-muted-foreground">
                   Format: JPG, PNG, atau WEBP. Maksimal 2MB
                 </p>
-              </div>
-            )}
+              )}
 
-            {mode === "edit" && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                <p className="text-sm text-blue-800 flex items-start gap-2">
-                  <span className="text-lg">💡</span>
-                  <span>
-                    Untuk mengubah foto, silakan hapus destinasi ini dan
-                    tambahkan kembali dengan foto baru
-                  </span>
+              {mode === "edit" && (
+                <p className="text-xs text-muted-foreground">
+                  Kosongkan jika tidak ingin mengubah foto
                 </p>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
           <DialogFooter className="gap-2 sm:gap-2">

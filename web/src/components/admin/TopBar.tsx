@@ -217,7 +217,7 @@ export default function TopBar({
               kembali untuk mengakses dashboard.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="gap-2 sm:gap-0">
+          <AlertDialogFooter className="gap-2 sm:gap-2">
             <AlertDialogCancel className="rounded-lg">Batal</AlertDialogCancel>
             <AlertDialogAction
               className="bg-red-600 hover:bg-red-700 rounded-lg"
