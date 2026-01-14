@@ -8,6 +8,13 @@ export const bannerService = {
       orderBy: {
         id: "asc",
       },
+      select: {
+        id: true,
+        name: true,
+        header: true,
+        number: true,
+        imageUrl: true,
+      },
     });
   },
 
