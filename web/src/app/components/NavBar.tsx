@@ -83,13 +83,15 @@ export default function NavBar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // ==========================
-  // INIT TOKEN + PROFILE
-  // ==========================
-  // ==========================
-  // INIT PROFILE (LOGIN MANUAL & GOOGLE)
-  // ==========================
   useEffect(() => {
+    const token = Cookies.get("accessToken");
+
+    if (!token) {
+      setIsLoggedIn(false);
+      setUserData({ name: "User", avatar: "/images/profile.jpg" });
+      return;
+    }
+
     const loadProfile = async () => {
       try {
         const res = await apiFetch<ApiProfileResponse>("/api/users/profile");
@@ -110,6 +112,7 @@ export default function NavBar() {
           );
         }
       } catch {
+        // token invalid / expired
         setIsLoggedIn(false);
         setUserData({ name: "User", avatar: "/images/profile.jpg" });
       }
@@ -118,17 +121,11 @@ export default function NavBar() {
     loadProfile();
   }, [pathname]);
 
-  // ==========================
-  // INIT LANGUAGE
-  // ==========================
   useEffect(() => {
     const savedLang = localStorage.getItem("language") || "id";
     setLanguage(savedLang);
   }, []);
 
-  // ==========================
-  // HIGHLIGHT MENU OTOMATIS BERDASARKAN ROUTE
-  // ==========================
   useEffect(() => {
     if (pathname === "/") setActiveMenu("home");
     else if (pathname.startsWith("/about")) setActiveMenu("about");
@@ -138,9 +135,6 @@ export default function NavBar() {
     else setActiveMenu(""); // default
   }, [pathname]);
 
-  // ==========================
-  // CLOSE DROPDOWN ON OUTSIDE CLICK
-  // ==========================
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (langRef.current && !langRef.current.contains(e.target as Node)) {
@@ -156,10 +150,6 @@ export default function NavBar() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
-  // ==========================
-  // LOGOUT
-  // ==========================
   const handleLogout = async () => {
     try {
       await fetch(`${process.env.NEXT_PUBLIC_API_URL}/logout`, {
