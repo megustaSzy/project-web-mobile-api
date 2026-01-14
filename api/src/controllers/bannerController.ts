@@ -71,10 +71,10 @@ export const bannerController = {
       const updateBanner = await bannerService.editBanner(id, {
         ...req.body,
         ...(imageUrl && { imageUrl }),
-        ...(imagePublicId && { imagePublicId })
+        ...(imagePublicId && { imagePublicId }),
       });
 
-      return ResponseData.ok(res, banner);
+      return ResponseData.ok(res, updateBanner);
     } catch (error) {
       next(error);
     }
