@@ -105,6 +105,11 @@ export const orderService = {
       select: {
         id: true,
         userId: true,
+
+        userEmail: true,
+        userName: true,
+        ticketCode: true,
+
         totalPrice: true,
         paymentStatus: true,
         paymentMethod: true,
