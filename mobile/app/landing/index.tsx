@@ -665,24 +665,7 @@ categoryChipTextActive: {
     fontWeight: "700",
   },
 
-  // // CATEGORY
-  // categoryChip: {
-  //   flexDirection: "row",
-  //   alignItems: "center",
-  //   paddingHorizontal: 15,
-  //   paddingVertical: 8,
-  //   backgroundColor: "#fff",
-  //   borderRadius: 20,
-  //   marginRight: 10,
-  //   elevation: 2,
-  //   shadowColor: "#000",
-  //   shadowOpacity: 0.05,
-  //   shadowRadius: 3,
-  // },
-  // categoryChipText: {
-  //   fontSize: 14,
-  //   marginLeft: 6,
-  // },
+  
   categoryIcon: {
     width: 24,
     height: 24,
