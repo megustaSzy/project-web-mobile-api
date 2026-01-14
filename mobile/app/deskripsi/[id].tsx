@@ -168,7 +168,11 @@ export default function DestinationDetail() {
 
 /* ================= STYLE ================= */
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
+  container: { 
+    flex: 1, 
+    backgroundColor: "#fff" 
+  },
+  
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
 
   imageWrapper: { height: 270 },
