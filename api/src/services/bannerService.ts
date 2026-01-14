@@ -16,6 +16,14 @@ export const bannerService = {
       where: {
         id,
       },
+      select: {
+        id: true,
+        name: true,
+        header: true,
+        number: true,
+        imageUrl: true,
+        imagePublicId: true,
+      },
     });
 
     if (!banner) throw createError("id tidak ditemukan", 404);
@@ -52,6 +60,9 @@ export const bannerService = {
     const banner = await prisma.tb_banner.findUnique({
       where: {
         id,
+      },
+      select: {
+        id: true,
       },
     });
 
