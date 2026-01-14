@@ -28,6 +28,7 @@ export default function SignupForm(props: React.ComponentProps<typeof Card>) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const {
     register,
@@ -56,14 +57,17 @@ export default function SignupForm(props: React.ComponentProps<typeof Card>) {
       );
 
       const result: { message?: string } = await response.json();
-
       if (!response.ok) {
         setMessage(result.message ?? "Pendaftaran gagal. Coba lagi.");
         return;
       }
 
-      setMessage("Pendaftaran berhasil! Mengarahkan ke login...");
-      setTimeout(() => router.push("/login"), 1200);
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        setShowSuccess(false);
+        router.push("/login");
+      }, 3000);
     } catch (error) {
       console.error(error);
       setMessage("Tidak dapat terhubung ke server.");
@@ -197,6 +201,38 @@ export default function SignupForm(props: React.ComponentProps<typeof Card>) {
           </form>
         </CardContent>
       </Card>
+      {showSuccess && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+          <div className="w-[90%] max-w-sm rounded-xl bg-white px-6 py-7 shadow-xl text-center">
+            {/* ICON */}
+            <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-green-50">
+              <svg
+                className="h-5 w-5 text-green-600"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            </div>
+
+            {/* TITLE */}
+            <h2 className="text-base font-semibold text-gray-900">
+              Registrasi Berhasil
+            </h2>
+
+            {/* DESCRIPTION */}
+            <p className="mt-1.5 text-sm text-gray-500 leading-relaxed">
+              Akun Anda berhasil dibuat. Anda akan diarahkan ke halaman login.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
