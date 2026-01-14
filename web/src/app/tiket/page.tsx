@@ -7,9 +7,6 @@ import Footer from "../components/Footer";
 import { apiFetch } from "@/helpers/api";
 import { TicketX } from "lucide-react";
 
-/* =======================
-   TYPES
-======================= */
 export type Ticket = {
   id: number;
   ticketCode: string;
@@ -29,9 +26,6 @@ type OrdersMeResponse = {
   data: Ticket[];
 };
 
-/* =======================
-   STATUS MAP (UI → BE)
-======================= */
 const statusMap: Record<string, Ticket["paymentStatus"]> = {
   "Sudah Dibayar": "paid",
   "Menunggu Konfirmasi": "pending",
@@ -39,18 +33,12 @@ const statusMap: Record<string, Ticket["paymentStatus"]> = {
   Kedaluwarsa: "expired",
 };
 
-/* =======================
-   PAGE
-======================= */
 export default function TiketPage() {
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
 
-  /* =======================
-     FETCH DATA
-  ======================= */
   useEffect(() => {
     const fetchTickets = async () => {
       try {
@@ -58,7 +46,7 @@ export default function TiketPage() {
         const res = await apiFetch<OrdersMeResponse>("/api/orders/me");
         setTickets(res.data);
       } catch (error) {
-        console.error("❌ Gagal mengambil tiket:", error);
+        console.error("Gagal mengambil tiket:", error);
         setTickets([]);
       } finally {
         setLoading(false);
@@ -68,9 +56,6 @@ export default function TiketPage() {
     fetchTickets();
   }, []);
 
-  /* =======================
-     FILTER + SEARCH
-  ======================= */
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
 
@@ -90,9 +75,6 @@ export default function TiketPage() {
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }, [tickets, query, statusFilter]);
 
-  /* =======================
-     HELPERS
-  ======================= */
   const formatDate = (iso: string) =>
     new Date(iso).toLocaleDateString("id-ID", {
       weekday: "short",
@@ -115,9 +97,6 @@ export default function TiketPage() {
     return "Kedaluwarsa";
   };
 
-  /* =======================
-     RENDER
-  ======================= */
   return (
     <>
       <NavBar />

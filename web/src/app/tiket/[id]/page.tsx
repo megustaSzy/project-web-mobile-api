@@ -5,7 +5,6 @@ import { QRCodeSVG } from "qrcode.react";
 export default function DetailTiket({ params }: { params: { id: string } }) {
   const tiketId = params.id;
 
-  // --- Dummy data, nanti diganti dengan fetch dari database ---
   const tiket = {
     id: tiketId,
     destinasi: "Pantai Sari Ringgung",
