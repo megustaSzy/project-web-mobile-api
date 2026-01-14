@@ -12,6 +12,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { apiFetch } from "@/helpers/api";
+import Cookies from "js-cookie";
 
 import {
   AlertDialog,
@@ -48,18 +49,22 @@ export default function TopBar({
 
   // fetch profile
   useEffect(() => {
+    const token = Cookies.get("accessToken");
+    if (!token) return;
+
     const fetchProfile = async () => {
       try {
         const res = await apiFetch<{ data: Profile }>("/api/users/profile");
         setProfile(res.data);
-      } catch (err) {
-        console.error("Gagal memuat profile:", err);
+      } catch {
+        // silent
       }
     };
+
     fetchProfile();
   }, []);
 
-  // logout logic (SAMA PERSIS)
+  // logout logic
   const handleLogout = async () => {
     try {
       await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout`, {
@@ -212,7 +217,7 @@ export default function TopBar({
               kembali untuk mengakses dashboard.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="gap-2 sm:gap-0">
+          <AlertDialogFooter className="gap-2 sm:gap-2">
             <AlertDialogCancel className="rounded-lg">Batal</AlertDialogCancel>
             <AlertDialogAction
               className="bg-red-600 hover:bg-red-700 rounded-lg"

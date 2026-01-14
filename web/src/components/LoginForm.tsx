@@ -16,14 +16,11 @@ import {
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle, XCircle, Eye, EyeOff } from "lucide-react";
+import { CheckCircle, XCircle, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 import { loginSchema } from "@/schema/loginSchema";
 
-/* ============================================================
-   MODAL STATUS
-============================================================= */
 function AuthModal({
   open,
   status,
@@ -74,9 +71,6 @@ function AuthModal({
   );
 }
 
-/* ============================================================
-    LOGIN FORM
-============================================================= */
 export function LoginForm({
   className,
   ...props
@@ -99,7 +93,6 @@ export function LoginForm({
     document.cookie = `${name}=${value}; path=/; expires=${expires}`;
   }
 
-  /* ================= VALIDASI (ZOD) ================= */
   const validateEmail = (email: string) => {
     const result = loginSchema.safeParse({ email, password: "dummy" });
 
@@ -133,7 +126,6 @@ export function LoginForm({
     return true;
   };
 
-  /* ================= GOOGLE CALLBACK ================= */
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -198,7 +190,6 @@ export function LoginForm({
     }
   }, [router]);
 
-  /* ================= LOGIN HANDLER ================= */
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -279,6 +270,19 @@ export function LoginForm({
       >
         <Card className="w-full max-w-md shadow-lg border border-gray-100 rounded-2xl bg-white/80 backdrop-blur">
           <CardHeader className="text-center pb-2 flex flex-col items-center">
+            <Link
+              href="/"
+              aria-label="Kembali ke beranda"
+              className="absolute left-6 top-6 flex items-center gap-1 text-blue-600
+             hover:text-blue-700 transition-all duration-200
+             hover:-translate-x-0.5"
+            >
+              <ArrowLeft size={22} />
+              <span className="text-sm font-medium hidden sm:inline">
+                Home
+              </span>
+            </Link>
+
             <Image
               src="/images/logo.png"
               alt="Logo"

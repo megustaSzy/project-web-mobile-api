@@ -86,7 +86,7 @@ export default function ChooseUs() {
                   className="flex items-center bg-white rounded-2xl shadow-sm p-4 border border-gray-100 hover:shadow-md transition"
                 >
                   <img
-                    src={`${process.env.NEXT_PUBLIC_API_URL}${item.imageUrl}`}
+                    src={item.imageUrl}
                     alt={item.header}
                     className="w-12 h-12 mr-4 object-contain"
                   />

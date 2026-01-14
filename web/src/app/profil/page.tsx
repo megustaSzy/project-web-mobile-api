@@ -4,12 +4,7 @@ import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { CheckCircle2 } from "lucide-react";
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -25,9 +20,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-/* ========================
-   TIPE DATA
-======================== */
 type ApiProfileResponse = {
   status: number;
   message: string;
@@ -49,8 +41,7 @@ type UserProfile = {
 };
 
 export default function ProfilePage() {
-  const API_URL =
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   const [user, setUser] = useState<UserProfile>({
     id: 0,
@@ -70,14 +61,8 @@ export default function ProfilePage() {
 
   const buildAvatarUrl = (avatar?: string | null) => {
     if (!avatar) return "/images/default-avatar.png";
-    return avatar.startsWith("http")
-      ? avatar
-      : `${API_URL}${avatar}`;
+    return avatar.startsWith("http") ? avatar : `${API_URL}${avatar}`;
   };
-
-  /* =============================
-     FETCH PROFILE
-  ============================= */
   const fetchProfile = async () => {
     const token = Cookies.get("accessToken");
     if (!token) {
@@ -114,9 +99,6 @@ export default function ProfilePage() {
     }
   };
 
-  /* =============================
-     UPDATE PROFILE
-  ============================= */
   const updateProfile = async () => {
     if (!user.name.trim()) {
       alert("Nama tidak boleh kosong");
@@ -139,16 +121,13 @@ export default function ProfilePage() {
         formData.append("avatar", file);
       }
 
-      const res = await fetch(
-        `${API_URL}/api/users/${user.id}`,
-        {
-          method: "PATCH",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: formData,
-        }
-      );
+      const res = await fetch(`${API_URL}/api/users/${user.id}`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
 
       const text = await res.text();
 
@@ -182,9 +161,6 @@ export default function ProfilePage() {
     }
   };
 
-  /* =============================
-     LOGOUT
-  ============================= */
   const handleLogout = async () => {
     try {
       await fetch(`${API_URL}/api/users/logout`, {
@@ -224,9 +200,7 @@ export default function ProfilePage() {
             <div className="flex flex-col items-center gap-4">
               <Avatar className="h-28 w-28">
                 <AvatarImage src={preview ?? user.avatar} />
-                <AvatarFallback>
-                  {user.name?.[0] || "U"}
-                </AvatarFallback>
+                <AvatarFallback>{user.name?.[0] || "U"}</AvatarFallback>
               </Avatar>
 
               <Label className="cursor-pointer text-primary">
@@ -252,9 +226,7 @@ export default function ProfilePage() {
               <Label>Nama</Label>
               <Input
                 value={user.name}
-                onChange={(e) =>
-                  setUser({ ...user, name: e.target.value })
-                }
+                onChange={(e) => setUser({ ...user, name: e.target.value })}
               />
             </div>
 
@@ -282,21 +254,13 @@ export default function ProfilePage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Konfirmasi Logout</DialogTitle>
-            <DialogDescription>
-              Kamu yakin ingin keluar?
-            </DialogDescription>
+            <DialogDescription>Kamu yakin ingin keluar?</DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setOpenLogout(false)}
-            >
+            <Button variant="outline" onClick={() => setOpenLogout(false)}>
               Batal
             </Button>
-            <Button
-              variant="destructive"
-              onClick={handleLogout}
-            >
+            <Button variant="destructive" onClick={handleLogout}>
               Ya, Logout
             </Button>
           </DialogFooter>
