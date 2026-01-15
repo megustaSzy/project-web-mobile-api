@@ -10,6 +10,11 @@ import Cookies from "js-cookie";
 import { apiFetch } from "@/helpers/api";
 import { usePathname } from "next/navigation";
 import { Poppins } from "next/font/google";
+import {
+  User as LucideUser,
+  LogOut as LucideLogOut,
+  LogIn as LucideLogIn,
+} from "lucide-react";
 
 // ========================
 // TIPE API
@@ -265,7 +270,7 @@ export default function NavBar() {
           <div className="relative" ref={langRef}>
             <button
               onClick={() => setLangOpen((prev) => !prev)}
-              className={`flex items-center gap-1 px-3 py-1 border rounded-md text-sm ${textColor}`}
+              className={`flex items-center gap-1 px-3 py-1 border rounded-md text-sm ${textColor} cursor-pointer`}
             >
               {language.toUpperCase()}
               <ChevronDown
@@ -314,61 +319,64 @@ export default function NavBar() {
               </div>
             )}
           </div>
-
           {/* PROFILE */}
-          {isLoggedIn ? (
-            <div className="relative" ref={profileRef}>
-              <button
-                onClick={() => setProfileOpen((prev) => !prev)}
-                className={`flex items-center gap-2 px-2 py-1 rounded-md text-sm-gray-100 transition ${textColor}`}
+          <div className="relative" ref={profileRef}>
+            {isLoggedIn ? (
+              <>
+                <button
+                  onClick={() => setProfileOpen((prev) => !prev)}
+                  className={`flex items-center gap-2 px-2 py-1 rounded-md text-sm-gray-100 transition ${textColor} cursor-pointer`}
+                >
+                  <Image
+                    src={userData.avatar}
+                    width={32}
+                    height={32}
+                    alt="Profile"
+                    className="rounded-full"
+                    unoptimized
+                  />
+                  <span className="text-sm">{userData.name}</span>
+                  <ChevronDown
+                    size={14}
+                    className={`transition-transform duration-200 ${
+                      profileOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+
+                {profileOpen && (
+                  <div className="absolute right-0 mt-1 w-44 bg-white shadow rounded-md overflow-hidden z-50">
+                    <Link
+                      href="/profil"
+                      className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 text-sm text-gray-800"
+                      onClick={() => setProfileOpen(false)}
+                    >
+                      <LucideUser size={16} />
+                      {translations.editProfile}
+                    </Link>
+                    <button
+                      onClick={() => {
+                        setLogoutConfirm(true);
+                        setProfileOpen(false);
+                      }}
+                      className="flex items-center gap-2 w-full text-left px-4 py-2 hover:bg-red-100 text-red-600 text-sm"
+                    >
+                      <LucideLogOut size={16} />
+                      {translations.logout}
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <Link
+                href="/login"
+                className={`flex items-center gap-2 px-4 py-1 rounded-full border ${textColor} ${borderColor}`}
               >
-                <Image
-                  src={userData.avatar}
-                  width={32}
-                  height={32}
-                  alt="Profile"
-                  className="rounded-full"
-                  unoptimized
-                />
-
-                <span className="text-sm">{userData.name}</span>
-                <ChevronDown
-                  size={14}
-                  className={`transition-transform duration-200 ${
-                    profileOpen ? "rotate-180" : ""
-                  }`}
-                />
-              </button>
-
-              {profileOpen && (
-                <div className="absolute right-0 mt-1 w-40 bg-white shadow rounded-md overflow-hidden z-50">
-                  <Link
-                    href="/profil"
-                    className="block px-4 py-2 hover:bg-gray-100 text-sm text-gray-800"
-                    onClick={() => setProfileOpen(false)}
-                  >
-                    {translations.editProfile}
-                  </Link>
-                  <button
-                    onClick={() => {
-                      setLogoutConfirm(true);
-                      setProfileOpen(false);
-                    }}
-                    className="w-full text-left px-4 py-2 hover:bg-red-100 text-red-600 text-sm"
-                  >
-                    {translations.logout}
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <Link
-              href="/login"
-              className={`px-4 py-1 rounded-full border ${textColor} ${borderColor}`}
-            >
-              {translations.login}
-            </Link>
-          )}
+                <LucideLogIn size={16} />
+                {translations.login}
+              </Link>
+            )}
+          </div>
         </div>
 
         {/* BURGER MENU */}
@@ -490,7 +498,7 @@ export default function NavBar() {
       {/* LOGOUT CONFIRM MODAL */}
       {/* ===================== */}
       {logoutConfirm && (
-        <div className="fixed inset-0 z-999 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+        <div className="fixed inset-0 h-screen z-9999 flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl w-[90%] max-w-sm p-6 shadow-2xl animate-scaleIn">
             <div className="flex flex-col items-center text-center">
               <div className="w-14 h-14 flex items-center justify-center rounded-full bg-red-100 text-red-600 mb-4">
@@ -507,7 +515,7 @@ export default function NavBar() {
               <div className="flex gap-3 mt-6 w-full">
                 <button
                   onClick={() => setLogoutConfirm(false)}
-                  className="flex-1 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
+                  className="flex-1 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition cursor-pointer"
                 >
                   Batal
                 </button>
@@ -517,7 +525,7 @@ export default function NavBar() {
                     setLogoutConfirm(false);
                     handleLogout();
                   }}
-                  className="flex-1 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition"
+                  className="flex-1 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition cursor-pointer"
                 >
                   Ya, Logout
                 </button>

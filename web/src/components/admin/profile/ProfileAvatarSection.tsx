@@ -18,10 +18,10 @@ export default function ProfileAvatarSection({
   onAvatarChange,
 }: Props) {
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 p-6 bg-linear-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
       <Avatar className="w-24 h-24 border-4 border-white shadow-lg">
         <AvatarImage src={preview || undefined} className="object-cover" />
-        <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white text-2xl font-bold">
+        <AvatarFallback className="bg-linear-to-br from-blue-500 to-blue-600 text-white text-2xl font-bold">
           {profile.name?.[0]?.toUpperCase() || "A"}
         </AvatarFallback>
       </Avatar>

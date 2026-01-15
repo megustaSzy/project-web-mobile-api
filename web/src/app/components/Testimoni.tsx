@@ -33,21 +33,26 @@ export default function TestimoniSection() {
   const [testimonials, setTestimonials] = useState<TestimoniItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Pagination state
+  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6; // jumlah testimoni per halaman
+  const [totalPages, setTotalPages] = useState(1);
+  const itemsPerPage = 6;
 
   useEffect(() => {
     const loadTestimonials = async () => {
       try {
-        const res: ApiResponse = await apiFetch("/api/testimoni");
+        setLoading(true);
 
-        if (res?.data?.items) {
-          const approved = res.data.items.filter(
-            (item) => item.approvalStatus === "APPROVED"
-          );
-          setTestimonials(approved);
-        }
+        const res: ApiResponse = await apiFetch(
+          `/api/testimoni?page=${currentPage}&limit=${itemsPerPage}`
+        );
+
+        const approved = res.data.items.filter(
+          (item) => item.approvalStatus === "APPROVED"
+        );
+
+        setTestimonials(approved);
+        setTotalPages(res.data.total_pages);
       } catch (err) {
         console.error("Gagal mengambil testimoni:", err);
       } finally {
@@ -56,14 +61,7 @@ export default function TestimoniSection() {
     };
 
     loadTestimonials();
-  }, []);
-
-  // Hitung data yang akan ditampilkan di halaman sekarang
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = testimonials.slice(indexOfFirstItem, indexOfLastItem);
-
-  const totalPages = Math.ceil(testimonials.length / itemsPerPage);
+  }, [currentPage]);
 
   return (
     <section className="relative py-20 bg-linear-to-b from-[#ffffff] to-[#dbe7f9]">
@@ -84,54 +82,56 @@ export default function TestimoniSection() {
           <p className="text-center text-gray-500">Belum ada testimoni.</p>
         )}
 
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {currentItems.map((item) => (
-            <div
-              key={item.id}
-              className="bg-white/90 shadow-md rounded-2xl p-6 text-left border border-gray-100 hover:shadow-lg transition-all backdrop-blur-sm"
-            >
-              <Quote className="text-gray-300 mb-2" size={28} />
+        {!loading && (
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {testimonials.map((item) => (
+              <div
+                key={item.id}
+                className="bg-white/90 shadow-md rounded-2xl p-6 text-left border border-gray-100 hover:shadow-lg transition-all backdrop-blur-sm"
+              >
+                <Quote className="text-gray-300 mb-2" size={28} />
 
-              <p className="text-gray-700 text-sm mb-4 leading-relaxed wrap-break-word">
-                {item.comment}
-              </p>
-
-              <div className="flex gap-1 mb-4">
-                {Array.from({ length: item.rating }).map((_, i) => (
-                  <Star
-                    key={i}
-                    className="text-yellow-400 fill-yellow-400"
-                    size={18}
-                  />
-                ))}
-              </div>
-
-              <div className="flex flex-col items-start gap-1">
-                <h4 className="font-semibold text-blue-600">
-                  {item.name || "Anonymous"}
-                </h4>
-                <p className="text-gray-500 text-xs">
-                  {item.profession || "Pengguna"}
+                <p className="text-gray-700 text-sm mb-4 leading-relaxed wrap-break-word">
+                  {item.comment}
                 </p>
-              </div>
-            </div>
-          ))}
-        </div>
 
-        {/* Pagination dots kecil dan transparan */}
-        {totalPages > 1 && (
+                <div className="flex gap-1 mb-4">
+                  {Array.from({ length: item.rating }).map((_, i) => (
+                    <Star
+                      key={i}
+                      className="text-yellow-400 fill-yellow-400"
+                      size={18}
+                    />
+                  ))}
+                </div>
+
+                <div className="flex flex-col items-start gap-1">
+                  <h4 className="font-semibold text-blue-600">
+                    {item.name || "Anonymous"}
+                  </h4>
+                  <p className="text-gray-500 text-xs">
+                    {item.profession || "Pengguna"}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Pagination dots */}
+        {!loading && totalPages > 1 && (
           <div className="flex justify-center mt-10 gap-2">
             {Array.from({ length: totalPages }).map((_, i) => (
               <span
                 key={i}
                 onClick={() => setCurrentPage(i + 1)}
                 className={`w-2 h-2 rounded-full cursor-pointer transition-all duration-300
-          ${
-            currentPage === i + 1
-              ? "bg-blue-600 opacity-100 scale-125"
-              : "bg-gray-400 opacity-50"
-          }`}
-              ></span>
+                  ${
+                    currentPage === i + 1
+                      ? "bg-blue-600 opacity-100 scale-125"
+                      : "bg-gray-400 opacity-50"
+                  }`}
+              />
             ))}
           </div>
         )}
