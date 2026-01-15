@@ -4,6 +4,30 @@ import { useEffect, useState } from "react";
 import { Star, Quote } from "lucide-react";
 import { apiFetch } from "@/helpers/api";
 import { TestimoniItem, ApiResponse } from "@/types/testimoni";
+import { Skeleton } from "@/components/ui/skeleton";
+
+function TestimoniSkeleton() {
+  return (
+    <div className="bg-white/90 shadow-md rounded-2xl p-6 text-left border border-gray-100 backdrop-blur-sm">
+      <Skeleton className="h-6 w-6 mb-3 rounded-full" />
+
+      <div className="space-y-2 mb-4">
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-11/12" />
+        <Skeleton className="h-4 w-10/12" />
+      </div>
+
+      <div className="flex gap-1 mb-4">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Skeleton key={i} className="h-4 w-4 rounded-full" />
+        ))}
+      </div>
+
+      <Skeleton className="h-4 w-32 mb-1" />
+      <Skeleton className="h-3 w-24" />
+    </div>
+  );
+}
 
 export default function TestimoniSection() {
   const [testimonials, setTestimonials] = useState<TestimoniItem[]>([]);
@@ -49,7 +73,11 @@ export default function TestimoniSection() {
         </h2>
 
         {loading && (
-          <p className="text-center text-gray-600">Memuat testimoni...</p>
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: itemsPerPage }).map((_, i) => (
+              <TestimoniSkeleton key={i} />
+            ))}
+          </div>
         )}
 
         {!loading && testimonials.length === 0 && (
