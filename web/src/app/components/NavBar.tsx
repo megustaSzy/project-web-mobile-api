@@ -6,7 +6,6 @@ import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
 import { Menu, X, ChevronDown } from "lucide-react";
 import Cookies from "js-cookie";
-// import { jwtDecode } from "jwt-decode";
 import { apiFetch } from "@/helpers/api";
 import { usePathname } from "next/navigation";
 import { Poppins } from "next/font/google";
@@ -63,8 +62,8 @@ export default function NavBar() {
     contact: "Kontak",
     login: "Masuk",
     signup: "Daftar",
-    editProfile: "Edit Profil",
-    logout: "Keluar",
+    editProfile: "Profil",
+    logout: "Logout",
   };
 
   const [translations] = useState(translationSource);
@@ -359,7 +358,7 @@ export default function NavBar() {
                         setLogoutConfirm(true);
                         setProfileOpen(false);
                       }}
-                      className="flex items-center gap-2 w-full text-left px-4 py-2 hover:bg-red-100 text-red-600 text-sm"
+                      className="flex items-center gap-2 w-full text-left px-4 py-2 hover:bg-red-100 text-red-600 text-sm cursor-pointer"
                     >
                       <LucideLogOut size={16} />
                       {translations.logout}
