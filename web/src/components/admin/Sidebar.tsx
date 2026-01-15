@@ -12,6 +12,8 @@ import {
   ShoppingCart,
   MessageSquareQuote,
   Image,
+  CalendarHeart,
+  FunnelPlus,
 } from "lucide-react";
 
 export default function Sidebar({ isOpen }: { isOpen: boolean }) {
@@ -67,12 +69,12 @@ export default function Sidebar({ isOpen }: { isOpen: boolean }) {
     {
       title: "Pengelola About",
       href: "/admin/about",
-      icon: <Image size={16} />,
+      icon: <FunnelPlus size={16} />,
     },
     {
       title: "Pengelola Value",
       href: "/admin/value",
-      icon: <Image size={16} />,
+      icon: <CalendarHeart size={16} />,
     },
   ];
 
@@ -91,7 +93,7 @@ export default function Sidebar({ isOpen }: { isOpen: boolean }) {
         <p className="text-xs opacity-80">LamiGo</p>
       </div>
 
-      <nav className="flex-1 flex flex-col gap-2">
+      <nav className="flex-1 flex flex-col gap-2 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-blue-800">
         {menu.map((m) => (
           <Link
             key={m.href}

@@ -53,7 +53,9 @@ export default function ValueTable({
               Foto
             </TableHead>
             <TableHead className="text-left font-semibold">Header</TableHead>
-            <TableHead className="text-left font-semibold">Name</TableHead>
+            <TableHead className="text-left font-semibold text-center">
+              Name
+            </TableHead>
             <TableHead className="w-40 text-center font-semibold">
               Aksi
             </TableHead>
@@ -87,7 +89,9 @@ export default function ValueTable({
                 {it.header}
               </TableCell>
 
-              <TableCell className="text-gray-600">{it.name}</TableCell>
+              <TableCell className="text-gray-600 max-w-xs whitespace-normal break-words">
+                {it.name}
+              </TableCell>
 
               <TableCell>
                 <div className="flex justify-center gap-2">

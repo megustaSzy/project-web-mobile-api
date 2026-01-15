@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { apiFetch } from "@/helpers/api";
 import { KontenItem, KontenResponse } from "@/types/admin/konten";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 import {
   Card,
@@ -13,7 +14,7 @@ import {
 } from "@/components/ui/card";
 
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, CheckCircle2 } from "lucide-react";
 
 import KontenTable from "@/components/admin/konten/KontenTable";
 import KontenFormModal from "@/components/admin/konten/KontenFormModal";
@@ -28,6 +29,7 @@ export default function KontenPage() {
   const [mode, setMode] = useState<"add" | "edit">("add");
   const [selected, setSelected] = useState<KontenItem | null>(null);
   const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -54,6 +56,14 @@ export default function KontenPage() {
             Kelola konten dan informasinya
           </p>
         </div>
+
+        {/* SUCCESS TOAST */}
+        {successMsg && (
+          <Alert className="fixed top-4 right-4 bg-green-600 text-white border-green-700 shadow-lg z-50 w-auto">
+            <CheckCircle2 className="h-4 w-4" />
+            <AlertDescription>{successMsg}</AlertDescription>
+          </Alert>
+        )}
 
         <Button
           onClick={() => {
@@ -97,13 +107,28 @@ export default function KontenPage() {
         mode={mode}
         data={selected}
         onClose={() => setOpenForm(false)}
-        onSuccess={load}
+        onSuccess={() => {
+          load();
+
+          setSuccessMsg(
+            mode === "add"
+              ? "Konten berhasil ditambahkan"
+              : "Konten berhasil diperbarui"
+          );
+
+          setTimeout(() => setSuccessMsg(null), 2000);
+        }}
       />
 
       <KontenDeleteModal
         id={deleteId}
         onClose={() => setDeleteId(null)}
-        onSuccess={load}
+        onSuccess={() => {
+          load();
+
+          setSuccessMsg("Value berhasil dihapus");
+          setTimeout(() => setSuccessMsg(null), 2000);
+        }}
       />
     </div>
   );

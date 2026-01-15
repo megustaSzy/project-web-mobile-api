@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { apiFetch } from "@/helpers/api";
 import { TitleItem, TitleResponse } from "@/types/admin/admin-about";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 import {
   Card,
@@ -13,7 +14,7 @@ import {
 } from "@/components/ui/card";
 
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, CheckCircle2 } from "lucide-react";
 
 import AboutTable from "@/components/admin/about/AboutTable";
 import AboutFormModal from "@/components/admin/about/AboutFormModal";
@@ -28,6 +29,7 @@ export default function AboutPage() {
   const [mode, setMode] = useState<"add" | "edit">("add");
   const [selected, setSelected] = useState<TitleItem | null>(null);
   const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -56,6 +58,14 @@ export default function AboutPage() {
             Kelola about dan informasinya
           </p>
         </div>
+
+        {/* SUCCESS TOAST */}
+        {successMsg && (
+          <Alert className="fixed top-4 right-4 bg-green-600 text-white border-green-700 shadow-lg z-50 w-auto">
+            <CheckCircle2 className="h-4 w-4" />
+            <AlertDescription>{successMsg}</AlertDescription>
+          </Alert>
+        )}
 
         <Button
           onClick={() => {
@@ -99,13 +109,28 @@ export default function AboutPage() {
         mode={mode}
         data={selected}
         onClose={() => setOpenForm(false)}
-        onSuccess={load}
+        onSuccess={() => {
+          load();
+
+          setSuccessMsg(
+            mode === "add"
+              ? "About berhasil ditambahkan"
+              : "About berhasil diperbarui"
+          );
+
+          setTimeout(() => setSuccessMsg(null), 2000);
+        }}
       />
 
       <AboutDeleteModal
         id={deleteId}
         onClose={() => setDeleteId(null)}
-        onSuccess={load}
+        onSuccess={() => {
+          load();
+
+          setSuccessMsg("About berhasil dihapus");
+          setTimeout(() => setSuccessMsg(null), 2000);
+        }}
       />
     </div>
   );
