@@ -42,11 +42,11 @@ export default function HeroSection() {
     <div className="relative w-full h-105 overflow-hidden shadow-lg rounded-b-none">
       {/* Background Image default dari frontend */}
       <Image
-        src="/images/boute.jpg"
+        src="/images/favorite/img.jpg"
         alt="Hero Image"
         fill
         priority
-        className="object-cover"
+        className="object-fill"
       />
 
       {/* Overlay */}
