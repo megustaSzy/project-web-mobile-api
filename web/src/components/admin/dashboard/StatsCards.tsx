@@ -61,7 +61,6 @@ export default function StatsCards({ stats }: Props) {
   );
 }
 
-/* 🔹 Card kecil reusable */
 function StatCard({ title, value, icon: Icon, gradient, footer }: any) {
   return (
     <div className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all border border-gray-100 overflow-hidden">
@@ -73,8 +72,6 @@ function StatCard({ title, value, icon: Icon, gradient, footer }: any) {
             <Icon className="w-7 h-7 text-white" />
           </div>
           <div className="flex items-center text-green-600 text-sm font-medium">
-            <TrendingUp className="w-4 h-4 mr-1" />
-            +12%
           </div>
         </div>
         <h3 className="text-gray-600 text-sm mb-1">{title}</h3>

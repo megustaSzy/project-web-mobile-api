@@ -11,6 +11,7 @@ import {
   FileText,
   ShoppingCart,
   MessageSquareQuote,
+  Image,
 } from "lucide-react";
 
 export default function Sidebar({ isOpen }: { isOpen: boolean }) {
@@ -61,7 +62,17 @@ export default function Sidebar({ isOpen }: { isOpen: boolean }) {
     {
       title: "Pengelola Konten",
       href: "/admin/konten",
-      icon: <MessageSquareQuote size={16} />,
+      icon: <Image size={16} />,
+    },
+    {
+      title: "Pengelola About",
+      href: "/admin/about",
+      icon: <Image size={16} />,
+    },
+    {
+      title: "Pengelola Value",
+      href: "/admin/value",
+      icon: <Image size={16} />,
     },
   ];
 
