@@ -1,25 +1,42 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
-
 import { useState, useEffect, useCallback } from "react";
 import { apiFetch } from "@/helpers/api";
 import { ApiDestinationsResponse, DestinationsType } from "@/types/destination";
 import { ApiCategoryResponse, CategoryItem } from "@/types/category";
 import DestinationModal from "./DestinationModal";
 import { ArrowRight } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+
+/* SKELETON CARD — ukuran sama persis */
+function DestinationSkeleton() {
+  return (
+    <div className="bg-white rounded-2xl shadow-md overflow-hidden">
+      <Skeleton className="h-48 w-full" />
+
+      <div className="p-5 space-y-3 text-left">
+        <Skeleton className="h-5 w-3/4" />
+        <Skeleton className="h-4 w-1/2" />
+
+        <div className="flex justify-end">
+          <Skeleton className="h-4 w-24" />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function DestinasiSection() {
   const [data, setData] = useState<DestinationsType[]>([]);
   const [categories, setCategories] = useState<CategoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<string>("");
+  const [loadingCategory, setLoadingCategory] = useState(true);
 
   const [openModal, setOpenModal] = useState(false);
   const [selectedData, setSelectedData] = useState<DestinationsType | null>(
     null
   );
-
-  // const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   /* LOAD CATEGORY */
   const loadCategories = useCallback(async () => {
@@ -33,6 +50,8 @@ export default function DestinasiSection() {
       }
     } catch {
       setCategories([]);
+    } finally {
+      setLoadingCategory(false);
     }
   }, []);
 
@@ -41,6 +60,8 @@ export default function DestinasiSection() {
     setLoading(true);
     try {
       const res = await apiFetch<ApiDestinationsResponse>("/api/destinations");
+
+      await new Promise((r) => setTimeout(r, 400)); // ⬅️ INI
 
       const mapped: DestinationsType[] = res.data.items.map((it) => ({
         id: it.id,
@@ -52,7 +73,7 @@ export default function DestinasiSection() {
         ketentuan: it.ketentuan ?? [],
         perhatian: it.perhatian ?? [],
         category: it.category!,
-        region: it.region!, // ✅ BIARKAN DARI API
+        region: it.region!,
       }));
 
       setData(mapped);
@@ -83,71 +104,81 @@ export default function DestinasiSection() {
 
         {/* CATEGORY */}
         <div className="flex justify-center flex-wrap gap-4 mb-12">
-          {categories.map((cat) => {
-            const active = activeCategory === cat.name;
-            return (
-              <button
-                key={cat.id}
-                onClick={() => setActiveCategory(cat.name)}
-                className={`px-6 py-2 rounded-full border text-sm font-medium transition cursor-pointer ${
-                  active
-                    ? "bg-blue-600 text-white border-blue-600"
-                    : "bg-white text-gray-700 border-gray-300 hover:bg-blue-50"
-                }`}
-              >
-                {cat.name}
-              </button>
-            );
-          })}
+          {loadingCategory
+            ? Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-9 w-24 rounded-full" />
+              ))
+            : categories.map((cat) => {
+                const active = activeCategory === cat.name;
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => setActiveCategory(cat.name)}
+                    className={`px-6 py-2 rounded-full border text-sm font-medium transition cursor-pointer ${
+                      active
+                        ? "bg-blue-600 text-white border-blue-600"
+                        : "bg-white text-gray-700 border-gray-300 hover:bg-blue-50"
+                    }`}
+                  >
+                    {cat.name}
+                  </button>
+                );
+              })}
         </div>
 
         {/* GRID */}
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {loading ? (
-            <p className="col-span-3 text-gray-500">Loading...</p>
-          ) : (
-            data
-              .filter((d) => d.category && d.category?.name === activeCategory)
-              .map((d) => (
-                <div
-                  key={d.id}
-                  className="bg-white rounded-2xl shadow-md hover:shadow-xl transition overflow-hidden cursor-pointer"
-                >
-                  <div className="h-48">
-                    <img
-                      src={d.imageUrl ? `${d.imageUrl}` : "/images/default.jpg"}
-                      alt={d.name}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
+          {loading
+            ? Array.from({
+                length:
+                  data.filter((d) => d.category?.name === activeCategory)
+                    .length || 1,
+              }).map((_, i) => <DestinationSkeleton key={i} />)
+            : data
 
-                  <div className="p-5 text-left">
-                    <h3 className="font-semibold text-lg mb-1">{d.name}</h3>
+                .filter(
+                  (d) => d.category && d.category?.name === activeCategory
+                )
+                .map((d) => (
+                  <div
+                    key={d.id}
+                    className="bg-white rounded-2xl shadow-md hover:shadow-xl transition overflow-hidden cursor-pointer"
+                  >
+                    <div className="h-48">
+                      <img
+                        src={
+                          d.imageUrl ? `${d.imageUrl}` : "/images/default.jpg"
+                        }
+                        alt={d.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
 
-                    {/* REGION TERBACA */}
-                    <p className="text-sm text-gray-500 mb-4">
-                      {d.region?.name ?? "Lokasi tidak diketahui"}
-                    </p>
+                    <div className="p-5 text-left">
+                      <h3 className="font-semibold text-lg mb-1">{d.name}</h3>
 
-                    <div className="flex justify-end">
-                      <span
-                        onClick={() => {
-                          setSelectedData(d);
-                          setOpenModal(true);
-                        }}
-                        className="group inline-flex items-center gap-1 text-blue-600 text-sm cursor-pointer font-medium hover:bg-blue-50"
-                      >
-                        Lihat Detail
-                        <ArrowRight
-                          size={16}
-                          className="transition-transform duration-200 group-hover:translate-x-1"
-                        />
-                      </span>
+                      <p className="text-sm text-gray-500 mb-4">
+                        {d.region?.name ?? "Lokasi tidak diketahui"}
+                      </p>
+
+                      <div className="flex justify-end">
+                        <span
+                          onClick={() => {
+                            setSelectedData(d);
+                            setOpenModal(true);
+                          }}
+                          className="group inline-flex items-center gap-1 text-blue-600 text-sm cursor-pointer font-medium hover:bg-blue-50"
+                        >
+                          Lihat Detail
+                          <ArrowRight
+                            size={16}
+                            className="transition-transform duration-200 group-hover:translate-x-1"
+                          />
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))
-          )}
+                ))}
         </div>
       </div>
 
