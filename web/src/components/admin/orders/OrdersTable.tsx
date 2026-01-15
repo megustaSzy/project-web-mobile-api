@@ -83,34 +83,34 @@ export default function OrdersTable({ orders }: Props) {
             <TableHead className="w-16 px-4 py-3 text-center font-semibold">
               No
             </TableHead>
-            <TableHead className="px-4 py-3 font-semibold min-w-[140px]">
+            <TableHead className="px-4 py-3 text-center font-semibold min-w-[140px]">
               Ticket
             </TableHead>
-            <TableHead className="px-4 py-3 font-semibold min-w-[220px]">
+            <TableHead className="px-4 py-3 text-center font-semibold min-w-[220px]">
               Email
             </TableHead>
-            <TableHead className="px-4 py-3 font-semibold min-w-[150px]">
+            <TableHead className="px-4 py-3 text-center font-semibold min-w-[150px]">
               No HP
             </TableHead>
-            <TableHead className="px-4 py-3 font-semibold min-w-[180px]">
+            <TableHead className="px-4 py-3 text-center font-semibold min-w-[180px]">
               Tujuan
             </TableHead>
-            <TableHead className="px-4 py-3 font-semibold min-w-[180px]">
+            <TableHead className="px-4 py-3 text-center font-semibold min-w-[180px]">
               Pickup
             </TableHead>
-            <TableHead className="px-4 py-3 font-semibold min-w-[140px]">
+            <TableHead className="px-4 py-3 text-center font-semibold min-w-[140px]">
               Tanggal
             </TableHead>
-            <TableHead className="px-4 py-3 font-semibold min-w-[160px]">
+            <TableHead className="px-4 py-3 text-center font-semibold min-w-[160px]">
               Jam
             </TableHead>
             <TableHead className="w-20 px-4 py-3 text-center font-semibold">
               Qty
             </TableHead>
-            <TableHead className="px-4 py-3 text-right font-semibold min-w-[160px]">
+            <TableHead className="px-4 py-3 text-center font-semibold min-w-[160px]">
               Total
             </TableHead>
-            <TableHead className="px-4 py-3 font-semibold min-w-[160px]">
+            <TableHead className="px-4 py-3 text-center font-semibold min-w-[160px]">
               Metode
             </TableHead>
             <TableHead className="w-32 px-4 py-3 text-center font-semibold">
@@ -131,15 +131,15 @@ export default function OrdersTable({ orders }: Props) {
                 </Badge>
               </TableCell>
 
-              <TableCell className="px-4 py-3 font-medium text-gray-900">
-                <div className="flex items-center gap-2">
+              <TableCell className="px-4 py-3 text-center font-medium text-gray-900">
+                <div className="flex items-center justify-center gap-2">
                   <Ticket className="h-4 w-4 text-blue-600 shrink-0" />
                   {o.ticketCode}
                 </div>
               </TableCell>
 
-              <TableCell className="px-4 py-3 text-gray-600">
-                <div className="flex items-center gap-2 max-w-[220px]">
+              <TableCell className="px-4 py-3 text-center text-gray-600">
+                <div className="flex items-center justify-center gap-2 max-w-[220px] mx-auto">
                   <Mail className="h-4 w-4 text-gray-400 shrink-0" />
                   <span className="truncate" title={o.userEmail}>
                     {o.userEmail}
@@ -147,36 +147,36 @@ export default function OrdersTable({ orders }: Props) {
                 </div>
               </TableCell>
 
-              <TableCell className="px-4 py-3 text-gray-600 whitespace-nowrap">
-                <div className="flex items-center gap-2">
+              <TableCell className="px-4 py-3 text-center text-gray-600 whitespace-nowrap">
+                <div className="flex items-center justify-center gap-2">
                   <Phone className="h-4 w-4 text-gray-400 shrink-0" />
                   {o.userPhone}
                 </div>
               </TableCell>
 
-              <TableCell className="px-4 py-3 font-medium text-gray-900">
-                <div className="flex items-center gap-2">
+              <TableCell className="px-4 py-3 text-center font-medium text-gray-900">
+                <div className="flex items-center justify-center gap-2">
                   <MapPin className="h-4 w-4 text-red-600 shrink-0" />
                   {o.destinationName}
                 </div>
               </TableCell>
 
-              <TableCell className="px-4 py-3 text-gray-600">
-                <div className="flex items-center gap-2">
+              <TableCell className="px-4 py-3 text-center text-gray-600">
+                <div className="flex items-center justify-center gap-2">
                   <MapPin className="h-4 w-4 text-gray-400 shrink-0" />
                   {o.pickupLocationName}
                 </div>
               </TableCell>
 
-              <TableCell className="px-4 py-3 text-gray-600 whitespace-nowrap">
-                <div className="flex items-center gap-2">
+              <TableCell className="px-4 py-3 text-center text-gray-600 whitespace-nowrap">
+                <div className="flex items-center justify-center gap-2">
                   <Calendar className="h-4 w-4 text-gray-400 shrink-0" />
                   {new Date(o.date).toLocaleDateString("id-ID")}
                 </div>
               </TableCell>
 
-              <TableCell className="px-4 py-3 text-gray-600">
-                <div className="flex items-center gap-2 whitespace-nowrap">
+              <TableCell className="px-4 py-3 text-center text-gray-600">
+                <div className="flex items-center justify-center gap-2 whitespace-nowrap">
                   <Clock className="h-4 w-4 text-gray-400 shrink-0" />
                   {o.departureTime} - {o.returnTime}
                 </div>
@@ -189,8 +189,8 @@ export default function OrdersTable({ orders }: Props) {
                 </Badge>
               </TableCell>
 
-              <TableCell className="px-4 py-3 text-right">
-                <div className="flex items-center justify-end gap-2">
+              <TableCell className="px-4 py-3 text-center">
+                <div className="flex items-center justify-center gap-2">
                   <Banknote className="h-4 w-4 text-green-600" />
                   <span className="font-medium text-gray-900">
                     Rp {o.totalPrice.toLocaleString("id-ID")}
@@ -198,8 +198,8 @@ export default function OrdersTable({ orders }: Props) {
                 </div>
               </TableCell>
 
-              <TableCell className="px-4 py-3 text-gray-600">
-                <div className="flex items-center gap-2">
+              <TableCell className="px-4 py-3 text-center text-gray-600">
+                <div className="flex items-center justify-center gap-2">
                   <CreditCard className="h-4 w-4 text-gray-400 shrink-0" />
                   {getPaymentMethodLabel(o.paymentMethod)}
                 </div>

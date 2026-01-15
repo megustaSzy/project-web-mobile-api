@@ -25,7 +25,7 @@ export default function WisataTable({
         <TableHeader>
           <TableRow className="bg-gray-50 hover:bg-gray-50">
             <TableHead className="w-16 text-center font-semibold">No</TableHead>
-            <TableHead className="text-left font-semibold">
+            <TableHead className="text-center font-semibold">
               Nama Kategori
             </TableHead>
             <TableHead className="w-40 text-center font-semibold">
@@ -49,7 +49,7 @@ export default function WisataTable({
                 </Badge>
               </TableCell>
 
-              <TableCell className="font-medium text-gray-900">
+              <TableCell className="text-center font-medium text-gray-900">
                 {c.name}
               </TableCell>
 

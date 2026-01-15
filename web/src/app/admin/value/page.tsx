@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { apiFetch } from "@/helpers/api";
 import { ValueType, ValueItem } from "@/types/value";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { CheckCircle2 } from "lucide-react";
 
 import {
   Card,
@@ -28,6 +30,7 @@ export default function ValuePage() {
   const [mode, setMode] = useState<"add" | "edit">("add");
   const [selected, setSelected] = useState<ValueItem | null>(null);
   const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -54,6 +57,14 @@ export default function ValuePage() {
             Kelola konten dan informasinya
           </p>
         </div>
+
+        {/* SUCCESS TOAST */}
+        {successMsg && (
+          <Alert className="fixed top-4 right-4 bg-green-600 text-white border-green-700 shadow-lg z-50 w-auto">
+            <CheckCircle2 className="h-4 w-4" />
+            <AlertDescription>{successMsg}</AlertDescription>
+          </Alert>
+        )}
 
         <Button
           onClick={() => {
@@ -97,13 +108,28 @@ export default function ValuePage() {
         mode={mode}
         data={selected}
         onClose={() => setOpenForm(false)}
-        onSuccess={load}
+        onSuccess={() => {
+          load();
+
+          setSuccessMsg(
+            mode === "add"
+              ? "Value berhasil ditambahkan"
+              : "Value berhasil diperbarui"
+          );
+
+          setTimeout(() => setSuccessMsg(null), 2000);
+        }}
       />
 
       <ValueDeleteModal
         id={deleteId}
         onClose={() => setDeleteId(null)}
-        onSuccess={load}
+        onSuccess={() => {
+          load();
+
+          setSuccessMsg("Value berhasil dihapus");
+          setTimeout(() => setSuccessMsg(null), 2000);
+        }}
       />
     </div>
   );

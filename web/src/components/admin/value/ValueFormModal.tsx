@@ -74,7 +74,7 @@ export default function ValueFormModal({
           : `${process.env.NEXT_PUBLIC_API_URL}/api/about/value/${data!.id}`;
 
       await fetch(url, {
-        method: mode === "add" ? "POST" : "PUT",
+        method: mode === "add" ? "POST" : "PATCH",
         headers: token ? { Authorization: `Bearer ${token}` } : {},
         body: fd,
       });
