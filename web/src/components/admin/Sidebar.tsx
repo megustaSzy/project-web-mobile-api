@@ -69,6 +69,11 @@ export default function Sidebar({ isOpen }: { isOpen: boolean }) {
       href: "/admin/about",
       icon: <Image size={16} />,
     },
+    {
+      title: "Pengelola Value",
+      href: "/admin/value",
+      icon: <Image size={16} />,
+    },
   ];
 
   return (
