@@ -3,6 +3,24 @@
 
 import React, { useEffect, useState } from "react";
 import { apiFetch } from "@/helpers/api";
+import { Skeleton } from "@/components/ui/skeleton";
+
+function TeamSkeleton() {
+  return (
+    <div className="flex flex-col items-center">
+      {/* FOTO */}
+      <div className="w-48 h-48 rounded-3xl overflow-hidden shadow-md">
+        <Skeleton className="w-full h-full" />
+      </div>
+
+      {/* NAMA */}
+      <Skeleton className="h-5 w-32 mt-4" />
+
+      {/* ROLE */}
+      <Skeleton className="h-4 w-24 mt-2" />
+    </div>
+  );
+}
 
 type TeamMember = {
   name: string;
@@ -28,6 +46,7 @@ export default function TeamSection() {
   const [team, setTeam] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const skeletonCount = team.length > 0 ? team.length : 3;
 
   const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
 
@@ -74,10 +93,10 @@ export default function TeamSection() {
       <div className="max-w-6xl mx-auto px-6 md:px-10 text-center">
         <h2 className="text-4xl font-bold mb-12 text-black">Our Team</h2>
 
-        {/* Loading */}
+        {/* Loading
         {loading && (
           <p className="text-white text-lg">Loading team members...</p>
-        )}
+        )} */}
 
         {/* Error */}
         {!loading && errorMsg && (
@@ -85,32 +104,35 @@ export default function TeamSection() {
         )}
 
         {/* Team Cards */}
-        {!loading && !errorMsg && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 justify-center">
-            {team.map((member, i) => {
-              const photoURL = member.photo.startsWith("http")
-                ? member.photo
-                : `${BASE_URL}${member.photo}`;
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 justify-center">
+          {loading
+            ? Array.from({ length: skeletonCount }).map((_, i) => (
+                <TeamSkeleton key={i} />
+              ))
+            : !errorMsg &&
+              team.map((member, i) => {
+                const photoURL = member.photo.startsWith("http")
+                  ? member.photo
+                  : `${BASE_URL}${member.photo}`;
 
-              return (
-                <div key={i} className="flex flex-col items-center">
-                  <div className="w-48 h-48 rounded-3xl overflow-hidden bg-yellow-400 flex justify-center items-center shadow-md">
-                    <img
-                      src={photoURL}
-                      alt={member.name}
-                      className="w-full h-full object-cover"
-                    />
+                return (
+                  <div key={i} className="flex flex-col items-center">
+                    <div className="w-48 h-48 rounded-3xl overflow-hidden bg-yellow-400 flex justify-center items-center shadow-md">
+                      <img
+                        src={photoURL}
+                        alt={member.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+
+                    <h3 className="mt-4 text-xl font-semibold text-white">
+                      {member.name}
+                    </h3>
+                    <p className="text-gray-300 text-sm">{member.role}</p>
                   </div>
-
-                  <h3 className="mt-4 text-xl font-semibold text-white">
-                    {member.name}
-                  </h3>
-                  <p className="text-gray-300 text-sm">{member.role}</p>
-                </div>
-              );
-            })}
-          </div>
-        )}
+                );
+              })}
+        </div>
       </div>
 
       {/* Maps */}
