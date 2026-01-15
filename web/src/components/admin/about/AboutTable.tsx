@@ -41,81 +41,93 @@ export default function AboutTable(props: Props) {
   return (
     <>
       <div className="overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-gray-50 hover:bg-gray-50">
-              <TableHead className="w-16 text-center font-semibold">
-                No
-              </TableHead>
-              <TableHead className="text-center font-semibold">Title</TableHead>
-              <TableHead className="text-center font-semibold">
-                History
-              </TableHead>
-              <TableHead className="text-center font-semibold">
-                Vision
-              </TableHead>
-              <TableHead className="text-center font-semibold">
-                Mission
-              </TableHead>
-              <TableHead className="w-40 text-center font-semibold">
-                Aksi
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-
-          <TableBody>
-            {items.map((it, i) => (
-              <TableRow
-                key={it.id}
-                className="hover:bg-gray-50/50 transition-colors"
-              >
-                <TableCell className="text-center">
-                  <Badge variant="outline">{i + 1}</Badge>
-                </TableCell>
-
-                <TableCell className="text-center font-medium text-gray-900">
-                  {it.title}
-                </TableCell>
-
-                <TableCell className="text-center text-gray-600">
-                  {it.history}
-                </TableCell>
-
-                <TableCell className="text-center text-gray-900 font-medium">
-                  {it.vision}
-                </TableCell>
-
-                <TableCell className="text-center text-gray-600">
-                  {it.mission}
-                </TableCell>
-
-                <TableCell>
-                  <div className="flex justify-center gap-2">
-                    <Button
-                      onClick={() => onEdit(it)}
-                      size="sm"
-                      variant="outline"
-                      className="bg-yellow-500 hover:bg-yellow-600 text-white border-yellow-500 hover:border-yellow-600 rounded-full h-8 px-3"
-                    >
-                      <Pencil className="h-3.5 w-3.5 mr-1.5" />
-                      Edit
-                    </Button>
-
-                    <Button
-                      onClick={() => onDelete(it.id)}
-                      size="sm"
-                      variant="outline"
-                      className="bg-red-600 hover:bg-red-700 text-white border-red-600 hover:border-red-700 rounded-full h-8 px-3"
-                    >
-                      <Trash2 className="h-3.5 w-3.5 mr-1.5" />
-                      Hapus
-                    </Button>
-                  </div>
-                </TableCell>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-gray-50 hover:bg-gray-50">
+                <TableHead className="w-12 text-center font-semibold">
+                  No
+                </TableHead>
+                <TableHead className="font-semibold min-w-[180px] text-center">
+                  Title
+                </TableHead>
+                <TableHead className="font-semibold min-w-[250px] text-center">
+                  History
+                </TableHead>
+                <TableHead className="font-semibold min-w-[250px] text-center">
+                  Vision
+                </TableHead>
+                <TableHead className="font-semibold min-w-[250px] text-center">
+                  Mission
+                </TableHead>
+                <TableHead className="w-44 text-center font-semibold sticky right-0 bg-gray-50">
+                  Aksi
+                </TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+
+            <TableBody>
+              {items.map((it, i) => (
+                <TableRow
+                  key={it.id}
+                  className="hover:bg-gray-50/50 transition-colors"
+                >
+                  <TableCell className="text-center align-top">
+                    <Badge variant="outline">{i + 1}</Badge>
+                  </TableCell>
+
+                  <TableCell className="font-medium text-gray-900 align-top">
+                    <div className="max-w-[180px] break-words whitespace-pre-wrap leading-relaxed">
+                      {it.title}
+                    </div>
+                  </TableCell>
+
+                  <TableCell className="text-gray-600 align-top">
+                    <div className="max-w-[300px] break-words whitespace-pre-wrap leading-relaxed">
+                      {it.history}
+                    </div>
+                  </TableCell>
+
+                  <TableCell className="text-gray-900 font-medium align-top">
+                    <div className="max-w-[300px] break-words whitespace-pre-wrap leading-relaxed">
+                      {it.vision}
+                    </div>
+                  </TableCell>
+
+                  <TableCell className="text-gray-600 align-top">
+                    <div className="max-w-[300px] break-words whitespace-pre-wrap leading-relaxed">
+                      {it.mission}
+                    </div>
+                  </TableCell>
+
+                  <TableCell className="align-top sticky right-0 bg-white">
+                    <div className="flex justify-center gap-2">
+                      <Button
+                        onClick={() => onEdit(it)}
+                        size="sm"
+                        variant="outline"
+                        className="bg-yellow-500 hover:bg-yellow-600 text-white border-yellow-500 hover:border-yellow-600 rounded-full h-8 px-3"
+                      >
+                        <Pencil className="h-3.5 w-3.5 mr-1.5" />
+                        Edit
+                      </Button>
+
+                      <Button
+                        onClick={() => onDelete(it.id)}
+                        size="sm"
+                        variant="outline"
+                        className="bg-red-600 hover:bg-red-700 text-white border-red-600 hover:border-red-700 rounded-full h-8 px-3"
+                      >
+                        <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+                        Hapus
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     </>
   );
