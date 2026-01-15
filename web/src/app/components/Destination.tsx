@@ -61,7 +61,7 @@ export default function DestinasiSection() {
     try {
       const res = await apiFetch<ApiDestinationsResponse>("/api/destinations");
 
-      await new Promise((r) => setTimeout(r, 400)); // ⬅️ INI
+      await new Promise((r) => setTimeout(r, 300)); 
 
       const mapped: DestinationsType[] = res.data.items.map((it) => ({
         id: it.id,
@@ -132,7 +132,7 @@ export default function DestinasiSection() {
             ? Array.from({
                 length:
                   data.filter((d) => d.category?.name === activeCategory)
-                    .length || 1,
+                    .length || 3,
               }).map((_, i) => <DestinationSkeleton key={i} />)
             : data
 
