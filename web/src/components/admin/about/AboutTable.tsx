@@ -9,11 +9,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Pencil,
-  Trash2,
-  Loader2,
-} from "lucide-react";
+import { Pencil, Trash2, Loader2 } from "lucide-react";
 
 type Props = {
   items: TitleItem[];
@@ -51,10 +47,16 @@ export default function AboutTable(props: Props) {
               <TableHead className="w-16 text-center font-semibold">
                 No
               </TableHead>
-              <TableHead className="text-left font-semibold">Title</TableHead>
-              <TableHead className="text-left font-semibold">History</TableHead>
-              <TableHead className="text-left font-semibold">Vision</TableHead>
-              <TableHead className="text-left font-semibold">Mission</TableHead>
+              <TableHead className="text-center font-semibold">Title</TableHead>
+              <TableHead className="text-center font-semibold">
+                History
+              </TableHead>
+              <TableHead className="text-center font-semibold">
+                Vision
+              </TableHead>
+              <TableHead className="text-center font-semibold">
+                Mission
+              </TableHead>
               <TableHead className="w-40 text-center font-semibold">
                 Aksi
               </TableHead>
@@ -71,16 +73,21 @@ export default function AboutTable(props: Props) {
                   <Badge variant="outline">{i + 1}</Badge>
                 </TableCell>
 
-                <TableCell className="font-medium text-gray-900">
+                <TableCell className="text-center font-medium text-gray-900">
                   {it.title}
                 </TableCell>
 
-                <TableCell className="text-gray-600">{it.history}</TableCell>
+                <TableCell className="text-center text-gray-600">
+                  {it.history}
+                </TableCell>
 
-                <TableCell className="text-gray-900 font-medium">
+                <TableCell className="text-center text-gray-900 font-medium">
                   {it.vision}
                 </TableCell>
-                <TableCell className="text-gray-600">{it.mission}</TableCell>
+
+                <TableCell className="text-center text-gray-600">
+                  {it.mission}
+                </TableCell>
 
                 <TableCell>
                   <div className="flex justify-center gap-2">

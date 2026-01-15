@@ -32,7 +32,7 @@ export default function KabupatenTable({
             <TableHead className="w-24 text-center font-semibold">
               Foto
             </TableHead>
-            <TableHead className="text-left font-semibold">
+            <TableHead className="text-center font-semibold">
               Nama Kabupaten
             </TableHead>
             <TableHead className="w-40 text-center font-semibold">
@@ -68,7 +68,7 @@ export default function KabupatenTable({
                 </div>
               </TableCell>
 
-              <TableCell className="font-medium text-gray-900">
+              <TableCell className="text-center font-medium text-gray-900">
                 {r.name}
               </TableCell>
 

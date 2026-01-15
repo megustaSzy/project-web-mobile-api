@@ -52,10 +52,8 @@ export default function ValueTable({
             <TableHead className="w-24 text-center font-semibold">
               Foto
             </TableHead>
-            <TableHead className="text-left font-semibold">Header</TableHead>
-            <TableHead className="text-left font-semibold text-center">
-              Name
-            </TableHead>
+            <TableHead className="text-center font-semibold">Header</TableHead>
+            <TableHead className="text-center font-semibold">Name</TableHead>
             <TableHead className="w-40 text-center font-semibold">
               Aksi
             </TableHead>
@@ -73,23 +71,25 @@ export default function ValueTable({
               </TableCell>
 
               <TableCell className="text-center">
-                <Avatar className="h-12 w-12 rounded-lg">
-                  <AvatarImage
-                    src={it.imageUrl ?? undefined}
-                    alt={it.name}
-                    className="object-cover"
-                  />
-                  <AvatarFallback className="rounded-lg bg-gray-100">
-                    <ImageIcon className="h-5 w-5 text-gray-400" />
-                  </AvatarFallback>
-                </Avatar>
+                <div className="flex justify-center">
+                  <Avatar className="h-12 w-12 rounded-lg">
+                    <AvatarImage
+                      src={it.imageUrl ?? undefined}
+                      alt={it.name}
+                      className="object-cover"
+                    />
+                    <AvatarFallback className="rounded-lg bg-gray-100">
+                      <ImageIcon className="h-5 w-5 text-gray-400" />
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
               </TableCell>
 
-              <TableCell className="font-medium text-gray-900">
+              <TableCell className="text-center font-medium text-gray-900">
                 {it.header}
               </TableCell>
 
-              <TableCell className="text-gray-600 max-w-xs whitespace-normal break-words">
+              <TableCell className="text-center text-gray-600 max-w-xs whitespace-normal break-words">
                 {it.name}
               </TableCell>
 

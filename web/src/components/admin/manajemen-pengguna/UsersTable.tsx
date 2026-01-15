@@ -32,9 +32,11 @@ export default function UsersTable({
         <TableHeader>
           <TableRow className="bg-gray-50 hover:bg-gray-50">
             <TableHead className="w-16 text-center font-semibold">No</TableHead>
-            <TableHead className="text-left font-semibold">Nama</TableHead>
-            <TableHead className="text-left font-semibold">Email</TableHead>
-            <TableHead className="text-left font-semibold">No. Telp</TableHead>
+            <TableHead className="text-center font-semibold">Nama</TableHead>
+            <TableHead className="text-center font-semibold">Email</TableHead>
+            <TableHead className="text-center font-semibold">
+              No. Telp
+            </TableHead>
             <TableHead className="w-40 text-center font-semibold">
               Aksi
             </TableHead>
@@ -53,12 +55,12 @@ export default function UsersTable({
                 </Badge>
               </TableCell>
 
-              <TableCell className="font-medium text-gray-900">
+              <TableCell className="text-center font-medium text-gray-900">
                 {u.name}
               </TableCell>
 
-              <TableCell className="text-gray-600">
-                <div className="flex items-center gap-2 max-w-xs">
+              <TableCell className="text-center text-gray-600">
+                <div className="flex items-center justify-center gap-2 max-w-xs mx-auto">
                   <Mail className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
                   <span className="truncate" title={u.email}>
                     {u.email}
@@ -66,9 +68,9 @@ export default function UsersTable({
                 </div>
               </TableCell>
 
-              <TableCell className="text-gray-600">
+              <TableCell className="text-center text-gray-600">
                 {u.notelp ? (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-center gap-2">
                     <Phone className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
                     <span className="whitespace-nowrap">{u.notelp}</span>
                   </div>
