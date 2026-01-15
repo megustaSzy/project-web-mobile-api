@@ -119,7 +119,7 @@ export default function VisionSection() {
           <h2 className="text-4xl font-bold text-gray-900 font-poppins">
             Nilai Utama <span className="text-blue-600">LamiGo</span>
           </h2>
-          <p className="text-gray-600 mt-2 text-lg">
+          <p className="text-gray-500 mt-2 text-base font-poppins">
             Prinsip yang kami pegang dalam setiap langkah
           </p>
         </div>
