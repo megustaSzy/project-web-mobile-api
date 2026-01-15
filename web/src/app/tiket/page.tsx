@@ -6,7 +6,23 @@ import NavBar from "../components/NavBar";
 import Footer from "../components/Footer";
 import { apiFetch } from "@/helpers/api";
 import { TicketX } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
+function TicketSkeleton() {
+  return (
+    <div className="bg-white rounded-2xl p-6 border border-gray-200 flex justify-between items-center shadow-sm">
+      <div className="space-y-2">
+        <Skeleton className="h-5 w-48" />
+        <Skeleton className="h-4 w-64" />
+      </div>
+
+      <div className="flex items-center gap-3">
+        <Skeleton className="h-6 w-24 rounded-full" />
+        <Skeleton className="h-4 w-10" />
+      </div>
+    </div>
+  );
+}
 export type Ticket = {
   id: number;
   ticketCode: string;
@@ -134,8 +150,10 @@ export default function TiketPage() {
           {/* LIST */}
           <div className="space-y-20">
             {loading && (
-              <div className="p-6 bg-white rounded-2xl text-center text-gray-500 shadow-sm">
-                Memuat tiket...
+              <div className="space-y-4">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <TicketSkeleton key={i} />
+                ))}
               </div>
             )}
 
