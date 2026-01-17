@@ -442,10 +442,10 @@ export default function NavBar() {
             <button
               onClick={() => {
                 setActiveMenu("contact");
-                setOpen(false);
-                document
-                  .getElementById("contact")
-                  ?.scrollIntoView({ behavior: "smooth" });
+                window.scrollTo({
+                  top: document.body.scrollHeight,
+                  behavior: "smooth",
+                });
               }}
               className={`${activeMenu === "contact" ? "text-blue-600" : ""}`}
             >
