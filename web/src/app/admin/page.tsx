@@ -1,5 +1,7 @@
 "use client";
 
+import React from "react";
+
 export default function AdminDashboard() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 px-4">
