@@ -3,6 +3,7 @@ import { CreateOrderInput } from "../schemas/createOrderSchema";
 import { createError } from "../utilities/createError";
 import { v4 as uuidv4 } from "uuid";
 import { PaymentStatus, PaymentMethod } from "@prisma/client";
+import { Pagination } from "../utilities/Pagination";
 
 export const orderService = {
   async createOrder({
@@ -121,25 +122,36 @@ export const orderService = {
       },
     });
   },
-  async getOrdersByUser(userId: number) {
-    return await prisma.tb_orders.findMany({
-      where: { userId },
-      orderBy: { createdAt: "desc" }, // Lebih baik urutkan berdasarkan waktu buat
-      select: {
-        id: true,
-        destinationName: true,
-        pickupLocationName: true,
-        date: true,
-        departureTime: true, // Sesuai schema (sebelumnya 'time')
-        returnTime: true,
-        quantity: true,
-        totalPrice: true,
-        paymentStatus: true,
-        isPaid: true,
-        ticketCode: true, // Berguna untuk ditampilkan di UI
-        createdAt: true,
-      },
-    });
+  async getOrdersByUser(userId: number, page: number, limit: number) {
+    const pagination = new Pagination(page, limit);
+
+    const [count, rows] = await Promise.all([
+      prisma.tb_orders.count(),
+      prisma.tb_orders.findMany({
+        where: {
+          userId,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        select: {
+          id: true,
+          destinationName: true,
+          pickupLocationName: true,
+          date: true,
+          departureTime: true,
+          returnTime: true,
+          quantity: true,
+          totalPrice: true,
+          paymentStatus: true,
+          isPaid: true,
+          ticketCode: true,
+          createdAt: true,
+        },
+      }),
+    ]);
+
+    return pagination.paginate({ count, rows });
   },
 
   async getOrderById(id: number, userId: number) {
@@ -210,7 +222,7 @@ export const orderService = {
       paymentMethod?: PaymentMethod;
       isPaid?: boolean;
       paidAt?: Date;
-    }
+    },
   ) {
     return await prisma.tb_orders.update({
       where: { id: orderId },
