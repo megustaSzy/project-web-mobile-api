@@ -136,7 +136,7 @@ export const orderService = {
         orderBy: {
           createdAt: "desc",
         },
-        skip: pagination.skip, 
+        skip: pagination.offset, 
         take: pagination.limit,
         select: {
           id: true,
