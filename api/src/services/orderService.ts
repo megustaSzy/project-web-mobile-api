@@ -125,15 +125,19 @@ export const orderService = {
   async getOrdersByUser(userId: number, page: number, limit: number) {
     const pagination = new Pagination(page, limit);
 
+    const where = { userId };
+
     const [count, rows] = await Promise.all([
-      prisma.tb_orders.count(),
+      prisma.tb_orders.count({
+        where,
+      }),
       prisma.tb_orders.findMany({
-        where: {
-          userId,
-        },
+        where, 
         orderBy: {
           createdAt: "desc",
         },
+        skip: pagination.skip, 
+        take: pagination.limit,
         select: {
           id: true,
           destinationName: true,
@@ -153,7 +157,6 @@ export const orderService = {
 
     return pagination.paginate({ count, rows });
   },
-
   async getOrderById(id: number, userId: number) {
     const order = await prisma.tb_orders.findFirst({
       where: {
