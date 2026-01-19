@@ -22,9 +22,12 @@ export const orderController = {
 
   async getMyOrders(req: Request, res: Response, next: NextFunction) {
     try {
+      const page = Number(req.query.page) || 1;
+      const limit = Number(req.query.limit) || 5;
+
       const userId = (req as any).user.id;
 
-      const orders = await orderService.getOrdersByUser(userId);
+      const orders = await orderService.getOrdersByUser(userId, page, limit);
       return ResponseData.ok(res, orders);
     } catch (error) {
       next(error);
@@ -100,7 +103,7 @@ export const orderController = {
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader(
         "Content-Disposition",
-        `inline; filename="ticket-${order.ticketCode}.pdf"`
+        `inline; filename="ticket-${order.ticketCode}.pdf"`,
       );
       res.setHeader("Content-Length", pdfBuffer.length);
 
