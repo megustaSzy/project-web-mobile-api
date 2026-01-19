@@ -132,9 +132,11 @@ export const orderService = {
         where,
       }),
       prisma.tb_orders.findMany({
-        where,
-        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-        skip: pagination.offset,
+        where, 
+        orderBy: {
+          createdAt: "desc",
+        },
+        skip: pagination.offset, 
         take: pagination.limit,
         select: {
           id: true,
