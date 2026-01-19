@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import React from "react";
 
 export default function AdminDashboard() {
@@ -15,12 +16,17 @@ export default function AdminDashboard() {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <button className="px-6 py-3 rounded-xl bg-indigo-600 text-white font-semibold shadow-lg hover:bg-indigo-700 transition">
-            Kelola Data
-          </button>
-          <button className="px-6 py-3 rounded-xl bg-gray-900 text-white font-semibold shadow-lg hover:bg-gray-800 transition">
-            Lihat Laporan
-          </button>
+          <Link href="/admin/manajemen-pengguna">
+            <button className="px-6 py-3 rounded-xl bg-indigo-600 text-white font-semibold shadow-lg hover:bg-indigo-700 transition">
+              Kelola Data Pengguna
+            </button>
+          </Link>
+
+          <Link href="/admin/laporan">
+            <button className="px-6 py-3 rounded-xl bg-gray-900 text-white font-semibold shadow-lg hover:bg-gray-800 transition">
+              Lihat Laporan
+            </button>
+          </Link>
         </div>
       </div>
     </div>
