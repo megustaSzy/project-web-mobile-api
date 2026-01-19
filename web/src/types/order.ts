@@ -1,4 +1,4 @@
-// /types/order.ts
+import { Ticket } from "@/types/ticket";
 
 export interface OrderUser {
   id: number;
@@ -33,3 +33,9 @@ export interface OrdersResponse {
     limit: number;
   };
 }
+
+export type OrdersMeResponse = {
+  status: number;
+  message: string;
+  data: Ticket[];
+};

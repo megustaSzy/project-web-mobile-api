@@ -8,6 +8,9 @@ import { apiFetch } from "@/helpers/api";
 import { TicketX } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
+import { Ticket } from "@/types/ticket";
+import { OrdersMeResponse } from "@/types/order";
+
 function TicketSkeleton() {
   return (
     <div className="bg-white rounded-2xl p-6 border border-gray-200 flex justify-between items-center shadow-sm">
@@ -23,24 +26,6 @@ function TicketSkeleton() {
     </div>
   );
 }
-export type Ticket = {
-  id: number;
-  ticketCode: string;
-  destinationName: string;
-  date: string;
-  departureTime: string;
-  returnTime: string;
-  quantity: number;
-  totalPrice: number;
-  paymentStatus: "paid" | "pending" | "failed" | "expired";
-  isPaid: boolean;
-};
-
-type OrdersMeResponse = {
-  status: number;
-  message: string;
-  data: Ticket[];
-};
 
 const statusMap: Record<string, Ticket["paymentStatus"]> = {
   "Sudah Dibayar": "paid",
@@ -79,14 +64,14 @@ export default function TiketPage() {
       .filter((t) =>
         statusFilter === "all"
           ? true
-          : t.paymentStatus === statusMap[statusFilter]
+          : t.paymentStatus === statusMap[statusFilter],
       )
       .filter(
         (t) =>
           !q ||
           t.destinationName.toLowerCase().includes(q) ||
           t.ticketCode.toLowerCase().includes(q) ||
-          t.date.includes(q)
+          t.date.includes(q),
       )
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }, [tickets, query, statusFilter]);
@@ -130,14 +115,14 @@ export default function TiketPage() {
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Cari destinasi, kode, atau tanggal..."
               className="flex-1 p-3 rounded-xl border border-gray-300 bg-white
-                   focus:ring-2 focus:ring-blue-300"
+                focus:ring-2 focus:ring-blue-300"
             />
 
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               className="p-3 rounded-xl border border-gray-300 bg-white cursor-pointer
-                   focus:ring-2 focus:ring-blue-300"
+                focus:ring-2 focus:ring-blue-300"
             >
               <option value="all">Semua Status</option>
               <option value="Sudah Dibayar">Sudah Dibayar</option>
@@ -172,11 +157,12 @@ export default function TiketPage() {
                     berhasil.
                   </p>
                 </div>
+
                 <Link
                   href="/destinasi"
                   className="mt-2 inline-flex items-center px-5 py-2 rounded-xl
-                 bg-blue-600 text-white text-sm font-medium
-                 hover:bg-blue-700 transition"
+                    bg-blue-600 text-white text-sm font-medium
+                    hover:bg-blue-700 transition"
                 >
                   Cari Destinasi
                 </Link>
@@ -192,10 +178,10 @@ export default function TiketPage() {
                 >
                   <article
                     className="bg-white rounded-2xl p-6
-             border border-gray-200
-             flex justify-between items-center
-             transition-all duration-200
-             hover:border-blue-400 hover:shadow-md"
+                      border border-gray-200
+                      flex justify-between items-center
+                      transition-all duration-200
+                      hover:border-blue-400 hover:shadow-md"
                   >
                     <div className="space-y-1">
                       <h2 className="text-lg font-semibold text-gray-900">
@@ -212,7 +198,7 @@ export default function TiketPage() {
                     <div className="flex items-center gap-3">
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-medium ${statusBadge(
-                          t.paymentStatus
+                          t.paymentStatus,
                         )}`}
                       >
                         {statusLabel(t.paymentStatus)}
