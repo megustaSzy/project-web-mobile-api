@@ -65,6 +65,7 @@ export const orderController = {
         isPaid: order.isPaid,
         userName: order.userName,
         userPhone: order.userPhone,
+        pickupLocationName: order.pickupLocationName,
         destinationName: order.destinationName,
         destinationPrice: order.destinationPrice,
         quantity: order.quantity,
