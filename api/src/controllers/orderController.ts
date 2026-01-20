@@ -72,6 +72,7 @@ export const orderController = {
         totalPrice: order.totalPrice,
         date: order.date,
         departureTime: order.departureTime,
+        returnTime: order.returnTime,
         createdAt: order.createdAt,
       };
 
