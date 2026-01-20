@@ -37,5 +37,15 @@ export interface OrdersResponse {
 export type OrdersMeResponse = {
   status: number;
   message: string;
-  data: Ticket[];
+  data: {
+    total_items: number;
+    total_pages: number;
+    current_page: number;
+    limit: number;
+    items: Ticket[];
+    links: {
+      prev: string | null;
+      next: string | null;
+    };
+  };
 };

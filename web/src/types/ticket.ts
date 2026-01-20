@@ -1,7 +1,9 @@
 export type Ticket = {
+  no: number;
   id: number;
   ticketCode: string;
   destinationName: string;
+  pickupLocationName: string;
   date: string;
   departureTime: string;
   returnTime: string;
@@ -9,4 +11,5 @@ export type Ticket = {
   totalPrice: number;
   paymentStatus: "paid" | "pending" | "failed" | "expired";
   isPaid: boolean;
+  createdAt: string;
 };
