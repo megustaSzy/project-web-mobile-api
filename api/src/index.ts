@@ -34,11 +34,15 @@ app.use(requestLogger);
 
 app.use(
   cors({
-    origin: ["http://localhost:3000", "https://lamigo.vercel.app"],
+    origin: [
+      "http://localhost:3000",
+      "https://lamigo.vercel.app",
+      "https://lamigo-umber.vercel.app",
+    ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-  })
+  }),
 );
 
 app.use(cookieParser());
