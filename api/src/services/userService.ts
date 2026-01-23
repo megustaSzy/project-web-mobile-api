@@ -1,25 +1,29 @@
 import prisma from "../lib/prisma";
-import bcrypt from "bcryptjs";
 import { createError } from "../utilities/createError";
 import { Pagination } from "../utilities/Pagination";
 import { UpdateUserData } from "../schemas/updateSchema";
 import { hashPassword } from "../lib/hash";
+import { Role } from "@prisma/client";
 
 export const userService = {
   // GET all users
   async getAllUsers(page: number, limit: number) {
     const pagination = new Pagination(page, limit);
 
+    const whereClause = {
+      role: Role.User,
+    };
+
     const [count, rows] = await Promise.all([
-      prisma.tb_user.count(),
+      prisma.tb_user.count({
+        where: whereClause, 
+      }),
       prisma.tb_user.findMany({
         skip: pagination.offset,
         take: pagination.limit,
-        where: {
-          role: "User",
-        },
+        where: whereClause, 
         orderBy: {
-          createdAt: "asc",
+          createdAt: "desc", 
         },
         select: {
           id: true,
@@ -34,7 +38,6 @@ export const userService = {
 
     return pagination.paginate({ count, rows });
   },
-
   // GET user by ID
   async getUserById(id: number) {
     const user = await prisma.tb_user.findUnique({
