@@ -27,6 +27,7 @@ export const userService = {
           email: true,
           notelp: true,
           avatar: true,
+          role: true,
         },
       }),
     ]);
