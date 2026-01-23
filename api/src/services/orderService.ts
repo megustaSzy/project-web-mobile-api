@@ -62,6 +62,10 @@ export const orderService = {
     if (orderDate < today)
       throw createError("Tanggal keberangkatan tidak boleh di masa lalu", 400);
 
+    if (quantity > 16) {
+      throw createError("Jumlah tiket maksimal 16", 400);
+    }
+
     const totalPrice = destination.price * quantity;
 
     const ticketCode = `TICKET-${Date.now()}-${uuidv4()
@@ -132,11 +136,11 @@ export const orderService = {
         where,
       }),
       prisma.tb_orders.findMany({
-        where, 
+        where,
         orderBy: {
           createdAt: "desc",
         },
-        skip: pagination.offset, 
+        skip: pagination.offset,
         take: pagination.limit,
         select: {
           id: true,
