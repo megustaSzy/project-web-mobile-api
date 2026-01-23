@@ -2,7 +2,11 @@ import { z } from "zod";
 
 export const updateSchema = z
   .object({
-    name: z.string().min(1, "nama tidak boleh kosong").optional(),
+    name: z
+      .string()
+      .min(1, "nama tidak boleh kosong")
+      .regex(/^[A-Za-z\s]+$/, "nama tidak boleh mengandung angka atau simbol")
+      .optional(),
     email: z.string().email("format email tidak valid").optional(),
     notelp: z.string().length(12, "nomor telepon harus 12 digit").optional(),
     password: z
@@ -10,7 +14,7 @@ export const updateSchema = z
       .min(6, "password minimal 6 karakter")
       .regex(
         /^(?=.*[a-zA-Z])(?=.*\d).+$/,
-        "password harus mengandung huruf dan angka"
+        "password harus mengandung huruf dan angka",
       )
       .optional(),
   })
