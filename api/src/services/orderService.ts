@@ -62,8 +62,11 @@ export const orderService = {
     if (orderDate < today)
       throw createError("Tanggal keberangkatan tidak boleh di masa lalu", 400);
 
-    if (quantity > 16) {
-      throw createError("Jumlah tiket maksimal 16", 400);
+    if (returnTime && returnTime <= departureTime) {
+      throw createError(
+        "Waktu pulang harus lebih besar dari waktu berangkat",
+        400,
+      );
     }
 
     const totalPrice = destination.price * quantity;
