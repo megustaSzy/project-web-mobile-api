@@ -3,7 +3,7 @@ import { z } from "zod";
 export const createOrderSchema = z.object({
   destinationId: z.number().int().positive(),
 
-  pickupLocationId: z.number().int().positive("pickup location wajib"),
+  pickupLocationId: z.number().int().positive().optional(),
 
   quantity: z
     .number()
