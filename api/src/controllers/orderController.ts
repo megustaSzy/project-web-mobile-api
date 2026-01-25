@@ -114,6 +114,37 @@ export const orderController = {
       next(error);
     }
   },
+  // async payOrder(req: Request, res: Response, next: NextFunction) {
+  //   try {
+  //     const id = Number(req.params.id);
+  //     if (isNaN(id)) {
+  //       return ResponseData.badRequest(res, "id tidak valid");
+  //     }
+
+  //     const userId = (req as any).user.id;
+  //     const order = await orderService.getOrderById(id, userId);
+
+  //     if (order.isPaid) {
+  //       return ResponseData.badRequest(res, "order sudah dibayar");
+  //     }
+
+  //     if (order.paymentStatus === "expired") {
+  //       return ResponseData.badRequest(res, "order sudah kedaluwarsa");
+  //     }
+
+  //     if (order.snapToken) {
+  //       return ResponseData.ok(res, {
+  //         snapToken: order.snapToken,
+  //         redirectUrl: order.snapRedirectUrl,
+  //       });
+  //     }
+
+  //     const payment = await paymentService.createTransaction(order);
+  //     return ResponseData.ok(res, payment);
+  //   } catch (error) {
+  //     next(error);
+  //   }
+  // },
   async payOrder(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
@@ -132,7 +163,7 @@ export const orderController = {
         return ResponseData.badRequest(res, "order sudah kedaluwarsa");
       }
 
-      if (order.snapToken) {
+      if (order.snapToken && order.snapRedirectUrl) {
         return ResponseData.ok(res, {
           snapToken: order.snapToken,
           redirectUrl: order.snapRedirectUrl,
