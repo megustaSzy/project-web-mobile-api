@@ -4,6 +4,7 @@ import passport from "../config/passport";
 import { authController } from "../controllers/authController";
 import { validate } from "../middlewares/validate";
 import { registerSchema } from "../schemas/authSchema";
+import { authMiddleware } from "../middlewares/authMiddleware";
 
 const router = Router();
 
@@ -17,7 +18,7 @@ router.get("/google/callback", passport.authenticate("google", { session: false 
 
 router.post("/refresh", authController.refreshToken);
 
-router.post("/logout", authController.logout);
+router.post("/logout", authMiddleware, authController.logout);
 
 router.post("/forgot-password", authController.forgotPassword);
 router.get("/verify-reset", authController.verifyResetSession);
