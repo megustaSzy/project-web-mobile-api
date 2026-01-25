@@ -69,14 +69,10 @@ export const authController = {
 
   async logout(req: Request, res: Response, next: NextFunction) {
     try {
+      const user = (req as any).user;
       const { refreshToken } = req.body;
 
-      if (refreshToken) {
-        await authService.logoutUser(refreshToken);
-      }
-
-      const user = (req as any).user;
-
+      // ✅ LOG AKTIVITAS DULU
       if (user) {
         await logActivity({
           userId: user.id,
@@ -85,6 +81,10 @@ export const authController = {
           description: `${user.email} logout`,
           req,
         });
+      }
+
+      if (refreshToken) {
+        await authService.logoutUser(refreshToken);
       }
 
       return ResponseData.ok(res, null, "logout berhasil");
