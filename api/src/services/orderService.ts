@@ -176,44 +176,6 @@ export const orderService = {
       },
     });
 
-    //     const order = await prisma.tb_orders.findFirst({
-    //   where: {
-    //     id,
-    //     userId,
-    //   },
-    //   select: {
-    //     id: true,
-    //     destinationName: true,
-    //     destinationPrice: true,
-    //     pickupLocationName: true,
-    //     date: true,
-    //     departureTime: true,
-    //     returnTime: true,
-    //     quantity: true,
-    //     totalPrice: true,
-    //     paymentStatus: true,
-    //     paymentMethod: true,
-    //     isPaid: true,
-    //     paidAt: true,
-    //     ticketCode: true,
-    //     createdAt: true,
-
-    //     destination: {
-    //       select: {
-    //         id: true,
-    //         name: true,
-    //         price: true,
-    //       },
-    //     },
-    //     pickupLocation: {
-    //       select: {
-    //         id: true,
-    //         name: true,
-    //       },
-    //     },
-    //   },
-    // });
-
     if (!order) {
       throw createError("Order tidak ditemukan", 404);
     }
