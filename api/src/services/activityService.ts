@@ -1,15 +1,12 @@
-// services/activityService.ts
 import prisma from "../lib/prisma";
 import { Pagination } from "../utilities/Pagination";
-import { $Enums } from "@prisma/client";
+import { Role } from "@prisma/client";
 
 export const activityService = {
   async getAdminLogs(page: number, limit: number) {
     const pagination = new Pagination(page, limit);
 
-    const where = {
-      role: $Enums.Role.Admin,
-    };
+    const where = { role: Role.Admin };
 
     const [count, rows] = await Promise.all([
       prisma.tb_activity_logs.count({ where }),
@@ -33,7 +30,7 @@ export const activityService = {
     const pagination = new Pagination(page, limit);
 
     const where = {
-      role: $Enums.Role.User,
+      role: Role.User,
       userId,
     };
 

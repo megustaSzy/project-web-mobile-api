@@ -3,8 +3,7 @@ import { authService } from "../services/authService";
 import { Request, Response, NextFunction } from "express";
 import { loginSchema, registerSchema } from "../schemas/authSchema";
 import { logActivity } from "../utilities/activityLogger";
-import { $Enums } from "@prisma/client";
-
+import { ActivityAction } from "@prisma/client";
 export const authController = {
   async register(req: Request, res: Response, next: NextFunction) {
     try {
@@ -33,7 +32,7 @@ export const authController = {
       await logActivity({
         userId: user.id,
         role: user.role,
-        action: $Enums.ActivityAction.LOGIN,
+        action: ActivityAction.LOGIN,
         description: `${user.role} ${user.email} Login`,
         req,
       });
@@ -82,7 +81,7 @@ export const authController = {
         await logActivity({
           userId: user.id,
           role: user.role,
-          action: $Enums.ActivityAction.LOGOUT,
+          action: ActivityAction.LOGOUT,
           description: `${user.email} logout`,
           req,
         });

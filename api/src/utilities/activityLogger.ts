@@ -1,7 +1,6 @@
 import prisma from "../lib/prisma";
 import { Request } from "express";
-import { $Enums } from "@prisma/client";
-
+import { ActivityAction, Role } from "@prisma/client";
 export async function logActivity({
   userId,
   role,
@@ -10,8 +9,8 @@ export async function logActivity({
   req,
 }: {
   userId: number;
-  role: $Enums.Role;
-  action: $Enums.ActivityAction;
+  role: Role;
+  action: ActivityAction;
   description: string;
   req?: Request;
 }) {
