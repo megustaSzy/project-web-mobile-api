@@ -2,6 +2,8 @@ import { ResponseData } from "../utilities/Response";
 import { authService } from "../services/authService";
 import { Request, Response, NextFunction } from "express";
 import { loginSchema, registerSchema } from "../schemas/authSchema";
+import { logActivity } from "../utilities/activityLogger";
+import { $Enums } from "@prisma/client";
 
 export const authController = {
   async register(req: Request, res: Response, next: NextFunction) {
@@ -25,13 +27,21 @@ export const authController = {
     try {
       const { user, accessToken, refreshToken } = await authService.loginUser(
         email,
-        password
+        password,
       );
+
+      await logActivity({
+        userId: user.id,
+        role: user.role,
+        action: $Enums.ActivityAction.LOGIN,
+        description: `${user.role} ${user.email} Login`,
+        req,
+      });
 
       return ResponseData.ok(
         res,
         { user, accessToken, refreshToken },
-        "login berhasil"
+        "login berhasil",
       );
     } catch (error) {
       next(error);
@@ -51,7 +61,7 @@ export const authController = {
       return ResponseData.ok(
         res,
         { accessToken: newAccessToken },
-        "token diperbarui"
+        "token diperbarui",
       );
     } catch (error) {
       next(error);
@@ -66,12 +76,23 @@ export const authController = {
         await authService.logoutUser(refreshToken);
       }
 
+      const user = (req as any).user;
+
+      if (user) {
+        await logActivity({
+          userId: user.id,
+          role: user.role,
+          action: $Enums.ActivityAction.LOGOUT,
+          description: `${user.email} logout`,
+          req,
+        });
+      }
+
       return ResponseData.ok(res, null, "logout berhasil");
     } catch (error) {
       next(error);
     }
   },
-
   async googleCallback(req: Request, res: Response, next: NextFunction) {
     try {
       const profile = (req as any).user;
