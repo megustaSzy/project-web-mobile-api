@@ -23,6 +23,7 @@ import teamRoute from "./routes/teamRoute";
 import testimoniRoute from "./routes/testimoniRoute";
 import bannerRoute from "./routes/bannerRoute";
 import reportRoute from "./routes/reportRoute";
+import activityRoute from "./routes/activityRoute";
 import { errorHandler } from "./middlewares/errorHandler";
 
 const app = express();
@@ -71,6 +72,7 @@ app.use("/api/destinations", destinationRoute);
 app.use("/api/banner", bannerRoute);
 app.use("/api/testimoni", testimoniRoute);
 app.use("/api/reports", reportRoute);
+app.use("/api/activity-logs", activityRoute);
 
 app.use(errorHandler);
 
