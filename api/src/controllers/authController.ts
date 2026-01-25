@@ -72,7 +72,6 @@ export const authController = {
       const user = (req as any).user;
       const { refreshToken } = req.body;
 
-      // ✅ LOG AKTIVITAS DULU
       if (user) {
         await logActivity({
           userId: user.id,
