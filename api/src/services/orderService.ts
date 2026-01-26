@@ -15,44 +15,32 @@ export const orderService = {
     departureTime,
     returnTime,
   }: CreateOrderInput & { userId: number }) {
+    // Ambil user
     const user = await prisma.tb_user.findUnique({
-      where: {
-        id: userId,
-      },
-      select: {
-        // add select
-        id: true,
-        name: true,
-        email: true,
-        notelp: true,
-      },
+      where: { id: userId },
+      select: { id: true, name: true, email: true, notelp: true },
     });
     if (!user) throw createError("User tidak ditemukan", 404);
 
+    // Ambil destinasi
     const destination = await prisma.tb_destinations.findUnique({
       where: { id: destinationId },
-      select: {
-        // add select destination
-        id: true,
-        name: true,
-        price: true,
-      },
+      select: { id: true, name: true, price: true },
     });
     if (!destination) throw createError("Destinasi tidak ditemukan", 404);
 
+    // Ambil lokasi penjemputan (opsional)
     let pickupName = "";
     if (pickupLocationId) {
       const pickup = await prisma.tb_pickup_locations.findUnique({
         where: { id: pickupLocationId },
-        select: {
-          id: true,
-          name: true,
-        },
+        select: { id: true, name: true },
       });
       if (!pickup) throw createError("Lokasi penjemputan tidak ditemukan", 404);
       pickupName = pickup.name;
     }
 
+    // Validasi tanggal tidak boleh di masa lalu
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -62,6 +50,32 @@ export const orderService = {
     if (orderDate < today)
       throw createError("Tanggal keberangkatan tidak boleh di masa lalu", 400);
 
+    // Validasi jam berangkat dan pulang
+    const allowedDepartTimes = [
+      "07:00",
+      "08:00",
+      "09:00",
+      "10:00",
+      "11:00",
+      "12:00",
+    ];
+    const allowedReturnTimes = ["15:00", "16:00", "17:00", "18:00"];
+
+    if (!allowedDepartTimes.includes(departureTime)) {
+      throw createError(
+        `Waktu berangkat harus salah satu dari: ${allowedDepartTimes.join(", ")}`,
+        400,
+      );
+    }
+
+    if (returnTime && !allowedReturnTimes.includes(returnTime)) {
+      throw createError(
+        `Waktu pulang harus salah satu dari: ${allowedReturnTimes.join(", ")}`,
+        400,
+      );
+    }
+
+    // Validasi waktu pulang > berangkat
     if (returnTime && returnTime <= departureTime) {
       throw createError(
         "Waktu pulang harus lebih besar dari waktu berangkat",
@@ -69,15 +83,14 @@ export const orderService = {
       );
     }
 
+    // Hitung total harga
     const totalPrice = destination.price * quantity;
 
-    const ticketCode = `TICKET-${Date.now()}-${uuidv4()
-      .slice(0, 6)
-      .toUpperCase()}`;
-    const paymentOrderId = `ORDER-${Date.now()}-${uuidv4()
-      .slice(0, 8)
-      .toUpperCase()}`;
+    // Generate kode tiket & order
+    const ticketCode = `TICKET-${Date.now()}-${uuidv4().slice(0, 6).toUpperCase()}`;
+    const paymentOrderId = `ORDER-${Date.now()}-${uuidv4().slice(0, 8).toUpperCase()}`;
 
+    // Simpan order
     const order = await prisma.tb_orders.create({
       data: {
         userId,

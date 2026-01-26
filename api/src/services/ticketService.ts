@@ -30,70 +30,83 @@ export const ticketService = {
     const qrBase64 = qrDataUrl.replace(/^data:image\/png;base64,/, "");
 
     const WIDTH = 900;
-    const HEIGHT = 420;
+    const HEIGHT = 480; // FIX: cukup untuk 1 halaman
 
     return new Promise((resolve, reject) => {
-      const doc = new PDFDocument({ size: [WIDTH, HEIGHT], margin: 0 });
-      const buffers: Buffer[] = [];
+      const doc = new PDFDocument({
+        size: [WIDTH, HEIGHT],
+        margin: 0,
+      });
 
-      doc.on("data", (chunk) => buffers.push(chunk));
+      const buffers: Buffer[] = [];
+      doc.on("data", (b) => buffers.push(b));
       doc.on("end", () => resolve(Buffer.concat(buffers)));
       doc.on("error", reject);
 
-      const orange = "#f97316";
-      const dark = "#111827";
-      const gray = "#6b7280";
+      /* ===== COLOR THEME ===== */
+      const navy = "#0f172a";
+      const navySoft = "#1e293b";
+      const blue = "#2563eb";
+      const gray = "#64748b";
+      const light = "#e5e7eb";
 
       /* ===== HEADER ===== */
-      doc.rect(0, 0, WIDTH, 90).fill(orange);
+      doc.rect(0, 0, WIDTH, 80).fill(navy);
       doc
         .fillColor("white")
         .font("Helvetica-Bold")
-        .fontSize(26)
-        .text("BOARDING PASS", 30, 30);
+        .fontSize(24)
+        .text("E - TICKET", 30, 28);
 
-      /* ===== LEFT CONTENT ===== */
-      const leftX = 30;
-      let y = 110;
+      doc
+        .fontSize(12)
+        .font("Helvetica")
+        .fillColor("#c7d2fe")
+        .text("Boarding Pass", WIDTH - 160, 32);
 
+      /* ===== HELPERS ===== */
       const label = (text: string, x: number, y: number) =>
-        doc.font("Helvetica").fontSize(11).fillColor(gray).text(text, x, y);
+        doc.font("Helvetica").fontSize(10).fillColor(gray).text(text, x, y);
 
       const value = (text: string, x: number, y: number, size = 14) =>
         doc
           .font("Helvetica-Bold")
           .fontSize(size)
-          .fillColor(dark)
+          .fillColor(navySoft)
           .text(text, x, y);
+
+      /* ===== LEFT CONTENT ===== */
+      const leftX = 30;
+      let y = 100;
 
       label("Nama Penumpang", leftX, y);
       value(order.userName, leftX, y + 14, 16);
 
-      y += 45;
+      y += 40;
       label("Email", leftX, y);
       value(order.userEmail, leftX, y + 14);
 
-      y += 40;
+      y += 36;
       label("No. Telepon", leftX, y);
       value(order.userPhone, leftX, y + 14);
 
-      y += 40;
+      y += 36;
       label("Destinasi", leftX, y);
       value(order.destinationName, leftX, y + 14, 16);
 
-      y += 50;
+      y += 44;
       label("Tanggal Perjalanan", leftX, y);
       value(formatDate(order.date), leftX, y + 14);
 
-      y += 40;
+      y += 36;
       label("Jam Berangkat", leftX, y);
       value(order.departureTime, leftX, y + 14);
 
-      y += 40;
+      y += 36;
       label("Jam Pulang", leftX, y);
       value(order.returnTime ?? "-", leftX, y + 14);
 
-      y += 40;
+      y += 36;
       label("Jumlah Tiket", leftX, y);
       value(`${order.quantity} Orang`, leftX, y + 14);
 
@@ -101,29 +114,41 @@ export const ticketService = {
       const rightX = 520;
 
       doc
-        .roundedRect(rightX - 20, 110, 360, 260, 12)
-        .strokeColor("#e5e7eb")
+        .roundedRect(rightX - 20, 100, 360, 300, 14)
+        .fill("#f8fafc")
+        .strokeColor(light)
         .lineWidth(1)
         .stroke();
 
-      label("Kode Tiket", rightX, 130);
+      label("Kode Tiket", rightX, 120);
       doc
         .font("Helvetica-Bold")
-        .fontSize(22)
-        .fillColor(orange)
-        .text(order.ticketCode, rightX, 150);
+        .fontSize(20)
+        .fillColor(blue)
+        .text(order.ticketCode, rightX, 138);
 
-      doc.image(Buffer.from(qrBase64, "base64"), rightX + 200, 150, {
+      doc.image(Buffer.from(qrBase64, "base64"), rightX + 200, 140, {
         width: 120,
         height: 120,
       });
 
-      label("Total Pembayaran", rightX, 300);
+      label("Total Pembayaran", rightX, 280);
       doc
         .font("Helvetica-Bold")
         .fontSize(18)
-        .fillColor(dark)
-        .text(formatRupiah(order.totalPrice), rightX, 320);
+        .fillColor(navy)
+        .text(formatRupiah(order.totalPrice), rightX, 298);
+
+      /* ===== FOOTER ===== */
+      doc
+        .font("Helvetica")
+        .fontSize(9)
+        .fillColor(gray)
+        .text(
+          "Tunjukkan e-ticket ini saat check-in. QR Code hanya berlaku 1 kali.",
+          30,
+          HEIGHT - 40,
+        );
 
       doc.end();
     });
