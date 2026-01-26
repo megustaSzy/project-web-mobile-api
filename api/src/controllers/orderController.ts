@@ -3,6 +3,7 @@ import { orderService } from "../services/orderService";
 import { ResponseData } from "../utilities/Response";
 import { ticketService } from "../services/ticketService";
 import { paymentService } from "../services/paymentService";
+import { PaymentStatus } from "@prisma/client";
 
 export const orderController = {
   async createOrder(req: Request, res: Response, next: NextFunction) {
@@ -60,6 +61,13 @@ export const orderController = {
       const userId = (req as any).user.id;
       const order = await orderService.getOrderById(id, userId);
 
+      if (order.paymentStatus !== PaymentStatus.paid || !order.isPaid) {
+        return ResponseData.badRequest(
+          res,
+          "tiket tidak valid atau belum dibayar",
+        );
+      }
+
       const ticketData = {
         ticketCode: order.ticketCode,
         isPaid: order.isPaid,
@@ -81,7 +89,6 @@ export const orderController = {
       next(error);
     }
   },
-
   async getTicketPDF(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
@@ -92,8 +99,11 @@ export const orderController = {
       const userId = (req as any).user.id;
       const order = await orderService.getOrderById(id, userId);
 
-      if (!order.isPaid) {
-        return ResponseData.badRequest(res, "tiket belum dibayar");
+      if (order.paymentStatus !== PaymentStatus.paid || !order.isPaid) {
+        return ResponseData.badRequest(
+          res,
+          "tiket tidak valid atau belum dibayar",
+        );
       }
 
       const pdfBuffer = await ticketService.generateTicketPDFBuffer(id);
