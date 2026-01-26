@@ -3,6 +3,8 @@ import { destinationService } from "../services/destinationService";
 import { ResponseData } from "../utilities/Response";
 import { uploadToCloudinary } from "../utilities/uploadToCloudinary";
 import cloudinary from "../config/cloudinary";
+import { logActivity } from "../utilities/activityLogger";
+import { ActivityAction } from "@prisma/client";
 
 export const destinationController = {
   async getDestinations(req: Request, res: Response, next: NextFunction) {
@@ -14,7 +16,7 @@ export const destinationController = {
       const destinations = await destinationService.getAllDestinations(
         page,
         limit,
-        category
+        category,
       );
 
       return ResponseData.ok(
@@ -22,7 +24,7 @@ export const destinationController = {
         destinations,
         category
           ? `destinasi kategori ${category} berhasil diambil`
-          : "semua destinasi berhasil diambil"
+          : "semua destinasi berhasil diambil",
       );
     } catch (error) {
       next(error);
@@ -44,6 +46,7 @@ export const destinationController = {
 
   async addDestination(req: Request, res: Response, next: NextFunction) {
     try {
+      const user = (req as any).user;
       if (!req.file) {
         return ResponseData.badRequest(res, "image wajib diupload");
       }
@@ -63,6 +66,14 @@ export const destinationController = {
 
         imageUrl: result.secure_url,
         imagePublicId: result.public_id,
+      });
+
+      await logActivity({
+        userId: user.id,
+        role: user.role,
+        action: ActivityAction.ADMIN_CREATE_DESTINATION,
+        description: `Tambah destinasi ${destination.name}`,
+        req,
       });
 
       return ResponseData.created(res, destination);

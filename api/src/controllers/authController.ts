@@ -33,7 +33,7 @@ export const authController = {
         userId: user.id,
         role: user.role,
         action: ActivityAction.LOGIN,
-        description: `${user.role} ${user.email} Login`,
+        description: `${user.role} Login`,
         req,
       });
 
@@ -77,7 +77,7 @@ export const authController = {
           userId: user.id,
           role: user.role,
           action: ActivityAction.LOGOUT,
-          description: `${user.email} logout`,
+          description: `${user.role} logout`,
           req,
         });
       }
