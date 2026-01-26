@@ -145,17 +145,16 @@ export const orderService = {
   async getOrdersByUser(userId: number, page: number, limit: number) {
     const pagination = new Pagination(page, limit);
 
-    const where = { userId };
+    const where = {
+      userId,
+      paymentStatus: PaymentStatus.paid, // hanya tiket yang sudah dibayar
+    };
 
     const [count, rows] = await Promise.all([
-      prisma.tb_orders.count({
-        where,
-      }),
+      prisma.tb_orders.count({ where }),
       prisma.tb_orders.findMany({
         where,
-        orderBy: {
-          createdAt: "desc",
-        },
+        orderBy: { createdAt: "desc" },
         skip: pagination.offset,
         take: pagination.limit,
         select: {
