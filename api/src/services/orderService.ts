@@ -147,7 +147,6 @@ export const orderService = {
 
     const where = {
       userId,
-      paymentStatus: PaymentStatus.paid, // hanya tiket yang sudah dibayar
     };
 
     const [count, rows] = await Promise.all([
