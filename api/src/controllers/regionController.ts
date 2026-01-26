@@ -141,8 +141,8 @@ export const regionController = {
       await logActivity({
         userId: user.id,
         role: user.role,
-        action: ActivityAction.ADMIN_CREATE_REGION,
-        description: `Tambah region ${region.name}`,
+        action: ActivityAction.ADMIN_DELETE_REGION,
+        description: `Hapus region ${region.name}`,
         req,
       });
 

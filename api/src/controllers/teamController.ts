@@ -3,6 +3,8 @@ import { teamService } from "../services/teamService";
 import { ResponseData } from "../utilities/Response";
 import { uploadToCloudinary } from "../utilities/uploadToCloudinary";
 import cloudinary from "../config/cloudinary";
+import { logActivity } from "../utilities/activityLogger";
+import { ActivityAction } from "@prisma/client";
 
 // testing
 export const teamController = {
@@ -32,6 +34,7 @@ export const teamController = {
 
   async createTeam(req: Request, res: Response, next: NextFunction) {
     try {
+      const user = (req as any).user;
       if (!req.file) {
         return ResponseData.badRequest(res, "image wajib diupload");
       }
@@ -45,6 +48,14 @@ export const teamController = {
         imagePublicId: result.public_id,
       });
 
+      await logActivity({
+        userId: user.id,
+        role: user.role,
+        action: ActivityAction.ADMIN_CREATE_TEAM,
+        description: `Tambah team`,
+        req,
+      });
+
       return ResponseData.created(res, team);
     } catch (error) {
       next(error);
@@ -53,6 +64,8 @@ export const teamController = {
 
   async editTeam(req: Request, res: Response, next: NextFunction) {
     try {
+      const user = (req as any).user;
+
       const id = Number(req.params.id);
       if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
 
@@ -79,6 +92,14 @@ export const teamController = {
         ...(imagePublicId && { imagePublicId }),
       });
 
+      await logActivity({
+        userId: user.id,
+        role: user.role,
+        action: ActivityAction.ADMIN_UPDATE_TEAM,
+        description: `Ubah value`,
+        req,
+      });
+
       return ResponseData.ok(res, updateTeam);
     } catch (error) {
       next(error);
@@ -87,11 +108,20 @@ export const teamController = {
 
   async deleteTeamById(req: Request, res: Response, next: NextFunction) {
     try {
+      const user = (req as any).user;
       const id = Number(req.params.id);
 
       if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
 
       const team = await teamService.deleteIdTeam(id);
+
+      await logActivity({
+        userId: user.id,
+        role: user.role,
+        action: ActivityAction.ADMIN_DELETE_TEAM,
+        description: `Hapus team`,
+        req,
+      });
 
       return ResponseData.ok(res, team);
     } catch (error) {

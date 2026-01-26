@@ -3,6 +3,8 @@ import { bannerService } from "../services/bannerService";
 import { ResponseData } from "../utilities/Response";
 import { uploadToCloudinary } from "../utilities/uploadToCloudinary";
 import cloudinary from "../config/cloudinary";
+import { ActivityAction } from "@prisma/client";
+import { logActivity } from "../utilities/activityLogger";
 
 export const bannerController = {
   async getBanner(req: Request, res: Response, next: NextFunction) {
@@ -30,6 +32,7 @@ export const bannerController = {
 
   async create(req: Request, res: Response, next: NextFunction) {
     try {
+      const user = (req as any).user;
       if (!req.file) {
         return ResponseData.badRequest(res, "image wajib diupload");
       }
@@ -41,6 +44,15 @@ export const bannerController = {
         imageUrl: result.secure_url,
         imagePublicId: result.public_id,
       });
+
+      await logActivity({
+        userId: user.id,
+        role: user.role,
+        action: ActivityAction.ADMIN_CREATE_BANNER,
+        description: `Tambah banner ${banner.name}`,
+        req,
+      });
+
       return ResponseData.created(res, banner);
     } catch (error) {
       next(error);
@@ -49,6 +61,7 @@ export const bannerController = {
 
   async edit(req: Request, res: Response, next: NextFunction) {
     try {
+      const user = (req as any).user;
       const id = Number(req.params.id);
       if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
 
@@ -74,6 +87,14 @@ export const bannerController = {
         ...(imagePublicId && { imagePublicId }),
       });
 
+      await logActivity({
+        userId: user.id,
+        role: user.role,
+        action: ActivityAction.ADMIN_UPDATE_BANNER,
+        description: `Ubah banner ${updateBanner.name}`,
+        req,
+      });
+
       return ResponseData.ok(res, updateBanner);
     } catch (error) {
       next(error);
@@ -82,11 +103,20 @@ export const bannerController = {
 
   async deleteBanner(req: Request, res: Response, next: NextFunction) {
     try {
+      const user = (req as any).user;
       const id = Number(req.params.id);
 
       if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
 
       const banner = await bannerService.deleteBanner(id);
+
+      await logActivity({
+        userId: user.id,
+        role: user.role,
+        action: ActivityAction.ADMIN_DELETE_BANNER,
+        description: `Hapus banner ${banner.name}`,
+        req,
+      });
 
       return ResponseData.ok(res, banner);
     } catch (error) {
