@@ -3,7 +3,8 @@ import { orderService } from "../services/orderService";
 import { ResponseData } from "../utilities/Response";
 import { ticketService } from "../services/ticketService";
 import { paymentService } from "../services/paymentService";
-import { PaymentStatus } from "@prisma/client";
+import { ActivityAction, PaymentStatus } from "@prisma/client";
+import { logActivity } from "../utilities/activityLogger";
 
 export const orderController = {
   async createOrder(req: Request, res: Response, next: NextFunction) {
@@ -13,6 +14,14 @@ export const orderController = {
       const order = await orderService.createOrder({
         userId,
         ...req.body,
+      });
+
+      await logActivity({
+        userId: userId.id,
+        role: userId.role,
+        action: ActivityAction.USER_CREATE_ORDER,
+        description: `Buat order ${order.destinationName}`,
+        req,
       });
 
       return ResponseData.created(res, order);

@@ -3,6 +3,8 @@ import { NextFunction, Request, Response } from "express";
 import { ResponseData } from "../utilities/Response";
 import { uploadToCloudinary } from "../utilities/uploadToCloudinary";
 import cloudinary from "../config/cloudinary";
+import { logActivity } from "../utilities/activityLogger";
+import { ActivityAction } from "@prisma/client";
 
 export const userController = {
   async getAllUsers(req: Request, res: Response, next: NextFunction) {
@@ -83,9 +85,17 @@ export const userController = {
         return ResponseData.forbidden(res, "akses ditolak");
       }
 
-      await userService.deleteUserById(id);
+      const deleted = await userService.deleteUserById(id);
 
-      return ResponseData.ok(res, null);
+      await logActivity({
+        userId: currentUser.id,
+        role: currentUser.role,
+        action: ActivityAction.ADMIN_DELETE_USER,
+        description: `Hapus user ${deleted.name}`,
+        req,
+      });
+
+      return ResponseData.ok(res, deleted);
     } catch (error) {
       next(error);
     }

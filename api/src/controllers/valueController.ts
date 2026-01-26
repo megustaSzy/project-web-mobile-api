@@ -3,6 +3,8 @@ import { valueService } from "../services/valueService";
 import { ResponseData } from "../utilities/Response";
 import { uploadToCloudinary } from "../utilities/uploadToCloudinary";
 import cloudinary from "../config/cloudinary";
+import { logActivity } from "../utilities/activityLogger";
+import { ActivityAction } from "@prisma/client";
 
 export const valueController = {
   async getAll(req: Request, res: Response, next: NextFunction) {
@@ -13,7 +15,7 @@ export const valueController = {
       const values = await valueService.getAllValue(page, limit);
       return ResponseData.ok(res, values);
     } catch (error) {
-      next(error)
+      next(error);
     }
   },
 
@@ -26,12 +28,13 @@ export const valueController = {
       const value = await valueService.valueById(id);
       return ResponseData.ok(res, value);
     } catch (error) {
-      next(error)
+      next(error);
     }
   },
 
   async createValue(req: Request, res: Response, next: NextFunction) {
     try {
+      const user = (req as any).user;
       if (!req.file) {
         return ResponseData.badRequest(res, "image wajib diupload");
       }
@@ -41,17 +44,26 @@ export const valueController = {
       const value = await valueService.createValue({
         ...req.body,
         imageUrl: result.secure_url,
-        imagePublicId: result.public_id
+        imagePublicId: result.public_id,
+      });
+
+      await logActivity({
+        userId: user.id,
+        role: user.role,
+        action: ActivityAction.ADMIN_CREATE_VALUE,
+        description: `Tambah value`,
+        req,
       });
 
       return ResponseData.created(res, value);
     } catch (error) {
-      next(error)
+      next(error);
     }
   },
 
   async editById(req: Request, res: Response, next: NextFunction) {
     try {
+      const user = (req as any).user;
       const id = Number(req.params.id);
       if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
 
@@ -77,23 +89,41 @@ export const valueController = {
         ...(imagePublicId && { imagePublicId }),
       });
 
+      await logActivity({
+        userId: user.id,
+        role: user.role,
+        action: ActivityAction.ADMIN_UPDATE_VALUE,
+        description: `Ubah value`,
+        req,
+      });
+
       return ResponseData.ok(res, updateValue);
     } catch (error) {
-      next(error)
+      next(error);
     }
   },
 
   async deleteById(req: Request, res: Response, next: NextFunction) {
     try {
+      const user = (req as any).user;
+
       const id = Number(req.params.id);
 
       if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
 
       const value = await valueService.deleteById(id);
 
+      await logActivity({
+        userId: user.id,
+        role: user.role,
+        action: ActivityAction.ADMIN_DELETE_VALUE,
+        description: `Hapus value`,
+        req,
+      });
+
       return ResponseData.ok(res, value);
     } catch (error) {
-      next(error)
+      next(error);
     }
   },
 };
