@@ -83,6 +83,7 @@ export const destinationController = {
   },
   async updateDestination(req: Request, res: Response, next: NextFunction) {
     try {
+      const user = (req as any).user;
       const id = Number(req.params.id);
       if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
 
@@ -132,6 +133,14 @@ export const destinationController = {
         ...(imagePublicId !== undefined && { imagePublicId }),
       });
 
+      await logActivity({
+        userId: user.id,
+        role: user.role,
+        action: ActivityAction.ADMIN_UPDATE_DESTINATION,
+        description: `Ubah destinasi ${destination.name}`,
+        req,
+      });
+
       return ResponseData.ok(res, updatedDestination);
     } catch (error) {
       next(error);
@@ -139,10 +148,23 @@ export const destinationController = {
   },
   async deleteDestination(req: Request, res: Response, next: NextFunction) {
     try {
+      const user = (req as any).user;
       const id = Number(req.params.id);
       if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
 
+      const destination = await destinationService.getDestinationById(id);
+      if (!destination)
+        return ResponseData.notFound(res, "destinasi tidak ditemukan");
+
       await destinationService.deleteDestinationById(id);
+
+      await logActivity({
+        userId: user.id,
+        role: user.role,
+        action: ActivityAction.ADMIN_DELETE_DESTINATION,
+        description: `Hapus destinasi ${destination.name}`,
+        req,
+      });
 
       return ResponseData.ok(res, null, "destinasi berhasil dihapus");
     } catch (error) {
