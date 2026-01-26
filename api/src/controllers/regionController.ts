@@ -4,6 +4,8 @@ import { ResponseData } from "../utilities/Response";
 import { uploadToCloudinary } from "../utilities/uploadToCloudinary";
 import cloudinary from "../config/cloudinary";
 import { UpdateRegionDTO } from "../types/region";
+import { logActivity } from "../utilities/activityLogger";
+import { ActivityAction } from "@prisma/client";
 
 export const regionController = {
   async getRegencies(req: Request, res: Response, next: NextFunction) {
@@ -48,6 +50,8 @@ export const regionController = {
 
   async create(req: Request, res: Response, next: NextFunction) {
     try {
+      const user = (req as any).user;
+
       const { name } = req.body;
 
       if (!name) {
@@ -63,8 +67,16 @@ export const regionController = {
       const region = await regionService.createRegion(
         req.body.name,
         result.secure_url,
-        result.public_id
+        result.public_id,
       );
+
+      await logActivity({
+        userId: user.id,
+        role: user.role,
+        action: ActivityAction.ADMIN_CREATE_REGION,
+        description: `Tambah region ${region.name}`,
+        req,
+      });
 
       return ResponseData.ok(res, region);
     } catch (error) {
@@ -74,6 +86,8 @@ export const regionController = {
 
   async edit(req: Request, res: Response, next: NextFunction) {
     try {
+      const user = (req as any).user;
+
       const id = Number(req.params.id);
       if (isNaN(id)) return ResponseData.badRequest(res, "ID tidak valid");
 
@@ -100,6 +114,14 @@ export const regionController = {
         ...(imagePublicId && { imagePublicId }),
       };
 
+      await logActivity({
+        userId: user.id,
+        role: user.role,
+        action: ActivityAction.ADMIN_CREATE_REGION,
+        description: `Ubah region ${region.name}`,
+        req,
+      });
+
       const updatedRegion = await regionService.editRegion(id, updateData);
 
       return ResponseData.ok(res, updatedRegion);
@@ -109,11 +131,20 @@ export const regionController = {
   },
   async deleteRegion(req: Request, res: Response, next: NextFunction) {
     try {
+      const user = (req as any).user;
+
       const id = Number(req.params.id);
 
       if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
 
       const region = await regionService.deleteRegion(id);
+      await logActivity({
+        userId: user.id,
+        role: user.role,
+        action: ActivityAction.ADMIN_CREATE_REGION,
+        description: `Tambah region ${region.name}`,
+        req,
+      });
 
       return ResponseData.ok(res, region);
     } catch (error) {
