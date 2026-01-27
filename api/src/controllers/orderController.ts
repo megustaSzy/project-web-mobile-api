@@ -9,16 +9,16 @@ import { logActivity } from "../utilities/activityLogger";
 export const orderController = {
   async createOrder(req: Request, res: Response, next: NextFunction) {
     try {
-      const userId = (req as any).user.id;
+      const user = (req as any).user;
 
       const order = await orderService.createOrder({
-        userId,
+        userId: user.id,
         ...req.body,
       });
 
       await logActivity({
-        userId: userId.id,
-        role: userId.role,
+        userId: user.id,
+        role: user.role,
         action: ActivityAction.USER_CREATE_ORDER,
         description: `Buat order ${order.destinationName}`,
         req,
