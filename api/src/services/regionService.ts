@@ -4,7 +4,7 @@ import { createError } from "../utilities/createError";
 import { Pagination } from "../utilities/Pagination";
 
 export const regionService = {
-  async getAll(page: number, limit: number) {
+  async getPagination(page: number, limit: number) {
     const pagination = new Pagination(page, limit);
 
     const [count, rows] = await Promise.all([
@@ -26,6 +26,18 @@ export const regionService = {
     ]);
 
     return pagination.paginate({ count, rows });
+  },
+
+  async getAll() {
+    return prisma.tb_regions.findMany({
+      orderBy: {
+        name: "asc",
+      },
+      select: {
+        id: true,
+        name: true,
+      },
+    });
   },
 
   async getAllAdmin(page: number, limit: number) {
