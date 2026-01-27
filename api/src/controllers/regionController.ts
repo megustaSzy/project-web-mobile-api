@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Request, response, Response } from "express";
 import { regionService } from "../services/regionService";
 import { ResponseData } from "../utilities/Response";
 import { uploadToCloudinary } from "../utilities/uploadToCloudinary";
@@ -13,7 +13,17 @@ export const regionController = {
       const page = Number(req.query.page) || 1;
       const limit = Number(req.query.limit) || 9;
 
-      const region = await regionService.getAll(page, limit);
+      const region = await regionService.getPagination(page, limit);
+
+      return ResponseData.ok(res, region);
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async getAllRegencies(req: Request, res: Response, next: NextFunction) {
+    try {
+      const region = await regionService.getAll();
 
       return ResponseData.ok(res, region);
     } catch (error) {

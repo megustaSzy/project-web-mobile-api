@@ -7,6 +7,7 @@ import { upload } from "../middlewares/uploadMiddleware";
 const router = Router();
 
 router.get("/", regionController.getRegencies);
+router.get("/all", regionController.getAllRegencies);
 router.get("/admin", authMiddleware, authorizeRoles("Admin"), regionController.getAllRegionAdmin);
 router.get("/:id", regionController.getById);
 router.post("/", authMiddleware, authorizeRoles("Admin"), upload.single("image"), regionController.create);
