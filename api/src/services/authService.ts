@@ -60,7 +60,7 @@ export const authService = {
         tokenId: accessTokenId,
       }, // add name, email
       JWT_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "1h" },
     );
 
     await prisma.tb_accessToken.create({
@@ -81,7 +81,7 @@ export const authService = {
         tokenId: refreshTokenId,
       },
       JWT_REFRESH_SECRET,
-      { expiresIn: "7d" }
+      { expiresIn: "7d" },
     );
 
     await prisma.tb_refreshToken.create({
@@ -135,7 +135,7 @@ export const authService = {
     const newAccessToken = jwt.sign(
       { id: payload.id, tokenId: newAccessTokenId },
       JWT_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "1h" },
     );
 
     await prisma.tb_accessToken.create({
@@ -230,30 +230,49 @@ export const authService = {
       email,
       "Reset Password Akun Anda",
       `
+<!DOCTYPE html>
 <html>
-<body>
-    <p>Halo,</p>
-    <p>Berikut adalah link untuk reset password Anda:</p>
-
-    <p>
-        <a href="${resetLink}" style="
-            display: inline-block;
-            padding: 10px 18px;
-            background-color: #4f46e5;
-            color: white;
-            text-decoration: none;
-            border-radius: 6px;
-        ">Reset Password</a>
-    </p>
-
-    <p style="margin-top: 24px;">
-        Link ini hanya berlaku selama <b>5 menit</b>.
-    </p>
-
-    <p>Terima kasih.</p>
+<body style="margin: 0; padding: 40px 20px; background-color: #f0f4ff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+    <div style="max-width: 500px; margin: 0 auto; background-color: #ffffff; padding: 40px; border-radius: 12px; box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);">
+        
+        <p style="margin: 0 0 20px; color: #1e293b; font-size: 16px;">
+            Halo,
+        </p>
+        
+        <p style="margin: 0 0 30px; color: #475569; font-size: 15px; line-height: 1.6;">
+            Berikut adalah link untuk reset password Anda:
+        </p>
+        
+        <div style="text-align: center; margin: 0 0 30px;">
+            <a href="${resetLink}" style="
+                display: inline-block;
+                padding: 14px 32px;
+                background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+                color: #ffffff;
+                text-decoration: none;
+                border-radius: 8px;
+                font-weight: 600;
+                font-size: 15px;
+                box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+            ">
+                Reset Password
+            </a>
+        </div>
+        
+        <div style="background-color: #eff6ff; border-left: 3px solid #3b82f6; padding: 14px 16px; border-radius: 6px; margin-bottom: 24px;">
+            <p style="margin: 0; color: #1e40af; font-size: 14px;">
+                ⏰ Link ini hanya berlaku selama <strong>5 menit</strong>.
+            </p>
+        </div>
+        
+        <p style="margin: 0; color: #475569; font-size: 15px;">
+            Terima kasih.
+        </p>
+        
+    </div>
 </body>
 </html>
-`
+`,
     );
 
     return {
