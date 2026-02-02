@@ -5,6 +5,7 @@ import { uploadToCloudinary } from "../utilities/uploadToCloudinary";
 import cloudinary from "../config/cloudinary";
 import { logActivity } from "../utilities/activityLogger";
 import { ActivityAction } from "@prisma/client";
+import { updateSchema } from "../schemas/updateSchema";
 
 export const userController = {
   async getAllUsers(req: Request, res: Response, next: NextFunction) {
@@ -40,33 +41,32 @@ export const userController = {
       if (isNaN(id)) return ResponseData.badRequest(res, "id tidak valid");
 
       const currentUser = (req as any).user;
-
-      if (currentUser.role !== "Admin" && Number(currentUser.id) !== id) {
+      if (currentUser.role !== "Admin" && currentUser.id !== id) {
         return ResponseData.forbidden(res, "akses ditolak");
       }
 
-      const user = await userService.getUserById(id); // ambil user lama
+      const user = await userService.getUserById(id);
       if (!user) return ResponseData.notFound(res, "user tidak ditemukan");
 
       let avatarUrl: string | undefined;
       let avatarPublicId: string | undefined;
 
       if (req.file) {
-        // upload avatar baru
         const result: any = await uploadToCloudinary(req.file.buffer);
         avatarUrl = result.secure_url;
         avatarPublicId = result.public_id;
 
-        // hapus avatar lama dari Cloudinary
         if (user.avatarPublicId) {
           await cloudinary.uploader.destroy(user.avatarPublicId);
         }
       }
 
-      const updatedUser = await userService.updateUserById(id, {
+      const payload = updateSchema.parse({
         ...req.body,
         ...(avatarUrl && { avatar: avatarUrl, avatarPublicId }),
       });
+
+      const updatedUser = await userService.updateUserById(id, payload);
 
       return ResponseData.ok(res, updatedUser);
     } catch (error) {
