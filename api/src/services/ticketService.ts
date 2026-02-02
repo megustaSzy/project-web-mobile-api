@@ -79,7 +79,7 @@ export const ticketService = {
       const leftX = 30;
       let y = 100;
 
-      label("Nama Penumpang", leftX, y);
+      label("Nama Pemesan", leftX, y);
       value(order.userName, leftX, y + 14, 16);
 
       y += 40;
@@ -121,15 +121,19 @@ export const ticketService = {
         .stroke();
 
       label("Kode Tiket", rightX, 120);
+
       doc
         .font("Helvetica-Bold")
         .fontSize(20)
         .fillColor(blue)
-        .text(order.ticketCode, rightX, 138);
+        .text(order.ticketCode, rightX, 138, {
+          width: 200, // ⬅️ batasi lebar teks
+          ellipsis: true, // ⬅️ kalau kepanjangan, jadi ...
+        });
 
-      doc.image(Buffer.from(qrBase64, "base64"), rightX + 200, 140, {
-        width: 120,
-        height: 120,
+      doc.image(Buffer.from(qrBase64, "base64"), rightX + 230, 140, {
+        width: 110,
+        height: 110,
       });
 
       label("Total Pembayaran", rightX, 280);
