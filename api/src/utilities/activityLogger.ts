@@ -9,7 +9,7 @@ export async function logActivity({
   req,
 }: {
   userId: number;
-  role: Role;
+  role?: Role;
   action: ActivityAction;
   description: string;
   req?: Request;

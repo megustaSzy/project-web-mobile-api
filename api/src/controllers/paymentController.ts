@@ -2,9 +2,10 @@ import { coreApi } from "../config/midtrans";
 import { NextFunction, Request, Response } from "express";
 import { ResponseData } from "../utilities/Response";
 import { orderService } from "../services/orderService";
-import { PaymentStatus, PaymentMethod } from "@prisma/client";
+import { PaymentStatus, PaymentMethod, ActivityAction } from "@prisma/client";
 import { ticketService } from "../services/ticketService";
 import { sendTicketEmail } from "../services/mailService";
+import { logActivity } from "../utilities/activityLogger";
 
 export const paymentController = {
   // async midtransNotification(req: Request, res: Response, next: NextFunction) {
@@ -123,6 +124,12 @@ export const paymentController = {
       }
 
       if (paymentStatus === PaymentStatus.paid) {
+        await logActivity({
+          userId: order.userId,
+          action: ActivityAction.USER_PAYMENT_SUCCESS,
+          description: `Pembayaran order ${order.id} berhasil`,
+          req,
+        });
         const pdf = await ticketService.generateTicketPDFBuffer(order.id);
         await sendTicketEmail(
           order.userEmail,
@@ -130,6 +137,22 @@ export const paymentController = {
           order.ticketCode,
           pdf,
         );
+      }
+
+      if (paymentStatus === PaymentStatus.failed) {
+        await logActivity({
+          userId: order.userId,
+          action: ActivityAction.USER_PAYMENT_FAILED,
+          description: `Pembayaran order ${order.id} gagal`,
+        });
+      }
+
+      if (paymentStatus === PaymentStatus.expired) {
+        await logActivity({
+          userId: order.userId,
+          action: ActivityAction.USER_PAYMENT_EXPIRED,
+          description: `Pembayaran order ${order.id} kedaluwarsa`,
+        });
       }
 
       return ResponseData.ok(res, "OK");

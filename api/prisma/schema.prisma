@@ -290,13 +290,15 @@ enum ActivityAction {
   ADMIN_UPDATE_TEAM
   ADMIN_DELETE_TEAM
 
-  ADMIN_zUPDATE_PROFILE
+  ADMIN_UPDATE_PROFILE
 
   // user
   USER_UPDATE_PROFILE
   USER_CREATE_ORDER
+  USER_PAYMENT
   USER_PAYMENT_SUCCESS
   USER_PAYMENT_FAILED
+  USER_PAYMENT_EXPIRED
 }
 
 model tb_activity_logs {
@@ -305,7 +307,7 @@ model tb_activity_logs {
   userId Int?
   user   tb_user? @relation(fields: [userId], references: [id], onDelete: SetNull)
 
-  role        Role
+  role        Role?
   action      ActivityAction
   description String
 
