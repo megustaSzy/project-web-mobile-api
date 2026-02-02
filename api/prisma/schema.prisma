@@ -298,6 +298,7 @@ enum ActivityAction {
   USER_PAYMENT
   USER_PAYMENT_SUCCESS
   USER_PAYMENT_FAILED
+  USER_PAYMENT_EXPIRED
 }
 
 model tb_activity_logs {
@@ -306,7 +307,7 @@ model tb_activity_logs {
   userId Int?
   user   tb_user? @relation(fields: [userId], references: [id], onDelete: SetNull)
 
-  role        Role
+  role        Role?
   action      ActivityAction
   description String
 
