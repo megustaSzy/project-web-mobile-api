@@ -103,6 +103,14 @@ export const authController = {
       const { user, accessToken, refreshToken } =
         await authService.loginWithGoogle(profile);
 
+      await logActivity({
+        userId: user.id,
+        role: user.role,
+        action: ActivityAction.LOGIN,
+        description: `${user.role} Login via Google`,
+        req,
+      });
+
       // Redirect ke frontend + bawa token
       const redirectUrl = `${process.env.FRONTEND_URL}/login?accessToken=${accessToken}&refreshToken=${refreshToken}`;
 
