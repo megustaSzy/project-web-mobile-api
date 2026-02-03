@@ -62,7 +62,7 @@ export const ticketService = {
         .fontSize(12)
         .font("Helvetica")
         .fillColor("#c7d2fe")
-        .text("Boarding Pass", WIDTH - 160, 32);
+        .text("Tiket Pass", WIDTH - 160, 32);
 
       /* ===== HELPERS ===== */
       const label = (text: string, x: number, y: number) =>
