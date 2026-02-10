@@ -20,6 +20,24 @@ async function main() {
 
   console.log("Admin user seeded");
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
   const category = ["Air Terjun", "Bukit", "Pantai", "Pulau", "Gunung"];
 
   for (const name of category) {
