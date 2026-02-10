@@ -17,3 +17,5 @@ router.patch("/:id", authMiddleware, authorizeRoles("Admin"), upload.single("ima
 router.delete("/:id", authMiddleware, authorizeRoles("Admin"), destinationController.deleteDestination);
 
 export default router;
+
+// 
